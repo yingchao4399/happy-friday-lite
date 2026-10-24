@@ -6,7 +6,7 @@
 
 An Electron + Vue 3 desktop personal knowledge assistant that combines an AI agent, RAG knowledge retrieval, rich-text notes, and a calendar. All data is stored locally with privacy as a priority.
 
-## 3.0.6-preview.5 performance repair
+## 3.0.6-preview.6 performance repair
 
 - Use Electron's built-in disk SQLite instead of keeping and exporting the entire database in WebAssembly. Existing SQLite files remain readable; backups use consistent online snapshots.
 - Bound capability audit summaries before serialization, omit UI payload content, and limit reads of oversized legacy audit records. Tool results and permission checks remain intact.

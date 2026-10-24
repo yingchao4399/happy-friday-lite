@@ -11,13 +11,10 @@ import { initPythonEnv } from './src-electron/python-env.js'
 import { startKnowledgeWatcher } from './src-electron/fileWatcher.js'
 import { initLogger, setLoggingEnabled } from './src-electron/logger.js'
 import { startShareServer, stopShareServer } from './src-electron/shareServer.js'
-import { startAutomationScheduler, stopAutomationScheduler } from './src-electron/automation.js'
-import { startReminderScheduler, stopReminderScheduler } from './src-electron/scheduleReminder.js'
 import { stopLazyHarness, closeLazyAgentConnections } from './src-electron/lazy-agent-commands.js'
 import { initOfficeSession, shutdownOfficeHost } from './src-electron/office/office-session.js'
 import { registerOfficeIpc } from './src-electron/office/office-ipc.js'
 import { isHeadlessExportRun, runHeadlessExportEntry } from './src-electron/office/office-headless.js'
-import { startObsidianScheduler, stopObsidianScheduler } from './src-electron/obsidian/scheduler.js'
 import { resolveDataDir, applyUserDataRedirect, migrateDataIfNeeded } from './src-electron/data-dir.js'
 import { initSession, registerSessionIpc } from './src-electron/session.js'
 import { registerClipboardCommands, startClipboardCapture, stopClipboardCapture } from './src-electron/clipboard.js'
@@ -77,6 +74,50 @@ let mainWindow = null
 let kbWatcherHandle = null
 let shutdownStarted = false
 let localMcpStarted = false
+let backgroundSchedulers = null
+let backgroundSchedulersTimer = null
+
+/**
+ * These services are useful after the shell is usable, but none of them is
+ * required to paint or interact with the first screen. Loading them while the
+ * renderer and Office host are competing for the main thread made cold start
+ * and the first interaction noticeably worse. Keep the modules lazy and start
+ * them shortly after the window is shown; the scheduler APIs themselves and
+ * their persistence semantics remain unchanged.
+ */
+function scheduleBackgroundSchedulers(window) {
+  if (backgroundSchedulersTimer || backgroundSchedulers || !window) return
+  backgroundSchedulersTimer = setTimeout(async () => {
+    backgroundSchedulersTimer = null
+    if (!mainWindow || mainWindow.isDestroyed()) return
+    try {
+      const [automation, obsidian, reminders] = await Promise.all([
+        import('./src-electron/automation.js'),
+        import('./src-electron/obsidian/scheduler.js'),
+        import('./src-electron/scheduleReminder.js'),
+      ])
+      if (!mainWindow || mainWindow.isDestroyed()) return
+      backgroundSchedulers = { automation, obsidian, reminders }
+      automation.startAutomationScheduler(mainWindow)
+      obsidian.startObsidianScheduler(mainWindow)
+      reminders.startReminderScheduler(mainWindow)
+      console.log('[Main] ✅ Deferred background schedulers initialized')
+    } catch (error) {
+      console.error('[Main] ❌ Deferred background schedulers failed:', error)
+    }
+  }, 1200)
+  backgroundSchedulersTimer.unref?.()
+}
+
+function stopBackgroundSchedulers() {
+  if (backgroundSchedulersTimer) clearTimeout(backgroundSchedulersTimer)
+  backgroundSchedulersTimer = null
+  if (!backgroundSchedulers) return
+  backgroundSchedulers.automation.stopAutomationScheduler()
+  backgroundSchedulers.obsidian.stopObsidianScheduler()
+  backgroundSchedulers.reminders.stopReminderScheduler()
+  backgroundSchedulers = null
+}
 setRestoreLifecycle({
   async beforeRestore() {
     kbWatcherHandle?.close()
@@ -204,6 +245,7 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     console.log('[Main] 主窗口 ready-to-show')
     mainWindow.show()
+    scheduleBackgroundSchedulers(mainWindow)
   })
   mainWindow.webContents.on('did-finish-load', () => console.log('[Main] 主窗口页面加载完成'))
   mainWindow.webContents.on('did-fail-load', (_event, code, description, _url, isMainFrame) => {
@@ -281,12 +323,6 @@ app.whenReady().then(async () => {
   } catch (error) {
     console.error('[Main] ❌ Failed to register IPC commands:', error)
   }
-
-  startAutomationScheduler(mainWindow)
-  startObsidianScheduler(mainWindow)
-
-  // 日程到期提醒调度器（读取数据库中 reminder 开启的日程，发系统通知）
-  startReminderScheduler(mainWindow)
 
   // Office 工作区（happyoffice 编辑器以 WebContentsView 挂载到主窗口）
   try {
@@ -377,9 +413,7 @@ app.on('window-all-closed', function () {
     kbWatcherHandle = null
   }
   stopShareServer()
-  stopAutomationScheduler()
-  stopObsidianScheduler()
-  stopReminderScheduler()
+  stopBackgroundSchedulers()
   stopClipboardCapture()
   closeDb()
   if (process.platform !== 'darwin') {
@@ -396,7 +430,7 @@ app.on('before-quit', (event) => {
       .then(({ closeAgentMcpConnections }) => closeAgentMcpConnections()) : closeLazyAgentConnections(),
     stopLazyHarness(),
     Promise.resolve(shutdownOfficeHost()),
-    Promise.resolve(stopObsidianScheduler())
+    Promise.resolve(stopBackgroundSchedulers())
   ]).finally(() => {
     shutdownStarted = true
     app.quit()
