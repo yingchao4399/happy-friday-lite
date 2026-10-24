@@ -24,6 +24,7 @@ import { createRecordingCollector, createRecordingReleaseCheck } from './clipboa
 import { clipboardHtmlImages, clipboardItemHtml, readClipboardHtmlImage, replaceClipboardItemImage } from './clipboard-html-images.js'
 import { compareClipboardOrder, reorderClipboardItems } from './clipboard-order.js'
 import { transcriptionCapability } from './model-capabilities.js'
+import { persistClipboardItems } from './clipboard-storage.js'
 
 const POLL_MS = 650
 const EXPIRY_CLEANUP_MS = 30_000
@@ -36,6 +37,8 @@ let mainWindow = null
 let lastSignature = ''
 let suppressSequence = null
 let captureRetryTimer = null
+let captureIssue = null
+let captureMode = 'stopped'
 let stopNativeWatch = null
 let nativeClipboardAdapter = null
 let analyzer = null
@@ -91,16 +94,7 @@ function readItems() {
 }
 
 function writeItems(items) {
-  queryAllRaw('BEGIN IMMEDIATE')
-  try {
-    queryAllRaw('DELETE FROM clipboard_tags')
-    queryAllRaw('DELETE FROM clipboard_items')
-    for (const item of items) {
-      queryAllRaw('INSERT INTO clipboard_items VALUES (?, ?, ?, ?)', [item.id, JSON.stringify(item), item.capturedAt, item.deletedAt || null])
-      for (const tag of item.tags || []) queryAllRaw('INSERT OR IGNORE INTO clipboard_tags VALUES (?, ?)', [item.id, tag])
-    }
-    queryAllRaw('COMMIT')
-  } catch (error) { queryAllRaw('ROLLBACK'); throw error }
+  persistClipboardItems(queryAllRaw, items)
   pins?.refresh()
 }
 
@@ -114,20 +108,21 @@ function decrypt(value) {
 }
 
 function readClipboardSnapshot({ internal = false } = {}) {
-  const sequence = internal ? undefined : nativeClipboardAdapter?.getSequenceNumber?.()
+  const sequence = nativeClipboardAdapter?.getSequenceNumber?.()
   const image = clipboard.readImage()
-  const metadata = internal ? null : nativeClipboardAdapter?.readSnapshot?.()
+  const metadata = nativeClipboardAdapter?.readSnapshot?.()
   const text = metadata ? metadata.text : clipboard.readText() || ''
   const html = metadata ? metadata.html : clipboard.readHTML() || ''
-  const filePaths = metadata ? metadata.filePaths : (internal ? [] : clipboardFilePaths())
-  if (!internal && sequence !== nativeClipboardAdapter?.getSequenceNumber?.()) throw Object.assign(new Error('CLIPBOARD_BUSY'), { code: 'CLIPBOARD_BUSY' })
+  const filePaths = metadata ? metadata.filePaths : clipboardFilePaths()
+  if (sequence !== nativeClipboardAdapter?.getSequenceNumber?.()) throw Object.assign(new Error('CLIPBOARD_BUSY'), { code: 'CLIPBOARD_BUSY' })
   if (metadata?.hasImage && image.isEmpty()) throw Object.assign(new Error('CLIPBOARD_BUSY'), { code: 'CLIPBOARD_BUSY' })
   return { text, html, image, filePaths, sequence }
 }
 
 function snapshotSignature({ text, html, image, filePaths }) {
-  const imageData = image.isEmpty() ? '' : image.toPNG().toString('base64')
-  return crypto.createHash('sha256').update(`${text}\n${html}\n${imageData}\n${filePaths.join('\n')}`).digest('hex')
+  const hash = crypto.createHash('sha256').update(text).update('\n').update(html).update('\n')
+  if (!image.isEmpty()) hash.update(image.toPNG())
+  return hash.update('\n').update(filePaths.join('\n')).digest('hex')
 }
 
 function captureSignature() { return snapshotSignature(readClipboardSnapshot()) }
@@ -196,6 +191,16 @@ function captureClipboard({ internal = false } = {}) {
   }
   queueClipboardItem(item)
   return item
+}
+
+export function captureInternalClipboard(attempt = 0) {
+  try { return captureClipboard({ internal: true }) } catch (error) {
+    if (attempt < 3 && error.code === 'CLIPBOARD_BUSY') {
+      clearTimeout(captureRetryTimer)
+      captureRetryTimer = setTimeout(() => captureInternalClipboard(attempt + 1), 50 * (attempt + 1))
+    } else emit('capability-error', { code: 'CLIPBOARD_CAPTURE_FAILED', stage: 'capture', recoverable: true, nextStep: 'retry' })
+    return null
+  }
 }
 
 function itemPart(item) {
@@ -385,7 +390,7 @@ function enforceHistoryRetention() {
 function shortcutAction() { desktop?.show().catch(() => desktop.full()) }
 
 function applyShortcut(settings) {
-  const next = settings.shortcutEnabled ? settings.shortcut : ''
+  const next = clipboardCapabilities.globalShortcut && settings.shortcutEnabled ? settings.shortcut : ''
   if (next === registeredShortcut) return
   if (next && !globalShortcut.register(next, shortcutAction)) {
     throw Object.assign(new Error('CLIPBOARD_SHORTCUT_UNAVAILABLE'), { code: 'CLIPBOARD_SHORTCUT_UNAVAILABLE' })
@@ -395,7 +400,7 @@ function applyShortcut(settings) {
 }
 
 export function getClipboardSettings() {
-  return { ...preferences, capabilities: { ...clipboardCapabilities }, recordingIssue, defaultRecordingFolders: defaultRecordingFolders(), shortcutRegistered: Boolean(registeredShortcut) }
+  return { ...preferences, capabilities: { ...clipboardCapabilities }, captureIssue, captureMode, recordingIssue, defaultRecordingFolders: defaultRecordingFolders(), shortcutRegistered: Boolean(registeredShortcut) }
 }
 
 function defaultRecordingFolders() {
@@ -405,7 +410,7 @@ function defaultRecordingFolders() {
 function startRecordingCapture() {
   recordings?.stop(); recordings = null
   recordingIssue = null
-  if (!preferences.captureEnabled || !preferences.captureRecordings || !mainWindow) return
+  if (!clipboardCapabilities.recordingCapture || !preferences.captureEnabled || !preferences.captureRecordings || !mainWindow) return
   const reported = new Set()
   const report = code => {
     if (reported.has(code)) return
@@ -659,14 +664,24 @@ export function startClipboardCapture(win) {
       else emit('capability-error', { code: 'CLIPBOARD_CAPTURE_FAILED', stage: 'capture', recoverable: true, nextStep: 'retry' })
     }
   }
-  // 外部系统监听、轮询、托盘、录屏目录监听和全局快捷键在本轮明确关闭。
-  nativeClipboardAdapter = null
-  stopNativeWatch = null
-  timer = null
-  recordings?.stop(); recordings = null
-  desktop?.stop(); desktop = null
-  try { if (registeredShortcut) globalShortcut.unregister(registeredShortcut) } catch {}
-  registeredShortcut = ''
+  captureIssue = null
+  // Windows 使用 WM_CLIPBOARDUPDATE，空闲时不轮询图片或读取历史。
+  try {
+    nativeClipboardAdapter = watchWindowsClipboard(win, () => capture())
+    if (nativeClipboardAdapter) {
+      stopNativeWatch = () => nativeClipboardAdapter?.stop()
+      captureMode = 'native'
+      return
+    }
+  } catch {
+    captureIssue = { code: 'CLIPBOARD_NATIVE_UNAVAILABLE' }
+    emit('capability-error', { code: captureIssue.code, stage: 'capture', recoverable: true, nextStep: 'restart' })
+  }
+  // 原生监听不可用时仍收录文本/图片，并明确显示文件采集的限制。
+  captureMode = 'polling'
+  try { lastSignature = captureSignature() } catch {}
+  timer = setInterval(capture, 750)
+  timer.unref?.()
 }
 
 export function stopClipboardCapture() {
@@ -682,6 +697,9 @@ export function stopClipboardCapture() {
   if (typeof stopNativeWatch === 'function') stopNativeWatch()
   stopNativeWatch = null
   nativeClipboardAdapter = null
+  captureMode = 'stopped'
+  captureIssue = null
+  lastSignature = ''
   suppressSequence = null
   timer = null
   expiryTimer = null
@@ -725,7 +743,7 @@ export function registerClipboardCommands(win) {
   ipcMain.handle('clipboard-queue-skip', externalUnavailable)
   ipcMain.handle('clipboard-queue-cancel', externalUnavailable)
   ipcMain.handle('clipboard-queue-arm', externalUnavailable)
-  ipcMain.handle('clipboard-capture-internal', () => captureClipboard({ internal: true }))
+  ipcMain.handle('clipboard-capture-internal', () => captureInternalClipboard())
   ipcMain.handle('clipboard-list', (_event, args) => listClipboardItems(args || {}))
   ipcMain.handle('clipboard-append-get', () => getClipboardAppend())
   ipcMain.handle('clipboard-append-set', (_event, args) => setClipboardAppend(args?.enabled))

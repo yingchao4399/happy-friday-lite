@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, powerSaveBlocker } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs'
@@ -13,7 +13,7 @@ import { initLogger, setLoggingEnabled } from './src-electron/logger.js'
 import { startShareServer, stopShareServer } from './src-electron/shareServer.js'
 import { startAutomationScheduler, stopAutomationScheduler } from './src-electron/automation.js'
 import { startReminderScheduler, stopReminderScheduler } from './src-electron/scheduleReminder.js'
-import { stopHarnessSidecar } from './src-electron/harness/index.js'
+import { stopLazyHarness, closeLazyAgentConnections } from './src-electron/lazy-agent-commands.js'
 import { initOfficeSession, shutdownOfficeHost } from './src-electron/office/office-session.js'
 import { registerOfficeIpc } from './src-electron/office/office-ipc.js'
 import { isHeadlessExportRun, runHeadlessExportEntry } from './src-electron/office/office-headless.js'
@@ -22,6 +22,9 @@ import { resolveDataDir, applyUserDataRedirect, migrateDataIfNeeded } from './sr
 import { initSession, registerSessionIpc } from './src-electron/session.js'
 import { registerClipboardCommands, startClipboardCapture, stopClipboardCapture } from './src-electron/clipboard.js'
 import { installIpcCapabilityGateway } from './src-electron/agent/ipcGateway.js'
+import { installEditContextMenu } from './src-electron/edit-context-menu.js'
+import { captureInternalClipboard } from './src-electron/clipboard.js'
+import { showStartupError } from './src-electron/startup-error.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -31,10 +34,11 @@ const isDev = !app.isPackaged
 // Windows 系统通知需与 appId 一致（electron-builder build.appId），否则通知不显示
 app.setAppUserModelId('com.happyfriday.lite')
 
-// 禁止渲染进程后台化，避免窗口失焦/被遮挡时被系统挂起，切回时卡顿
-app.commandLine.appendSwitch('disable-renderer-backgrounding')
-app.commandLine.appendSwitch('disable-background-timer-throttling')
-app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
+// 后台编辑器允许 Chromium 正常限流，前台重新激活时自然恢复。
+// 全局禁止限流会让所有隐藏 Office 页面持续运行计时器和布局，占满 CPU。
+app.on('web-contents-created', (_event, contents) => {
+  installEditContextMenu(contents, { captureClipboard: () => captureInternalClipboard() })
+})
 
 // macOS：禁用窗口遮挡检测，避免被遮挡窗口进入 AppNap 低功耗状态
 if (process.platform === 'darwin') {
@@ -71,8 +75,8 @@ if (hasSingleInstanceLock) {
 
 let mainWindow = null
 let kbWatcherHandle = null
-let powerBlockerId = null
 let shutdownStarted = false
+let localMcpStarted = false
 setRestoreLifecycle({
   async beforeRestore() {
     kbWatcherHandle?.close()
@@ -185,12 +189,12 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    icon: path.join(__dirname, 'build', 'icons', 'icon.png'),
+    icon: path.join(__dirname, 'build', 'icons', 'window-64.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false,
-      backgroundThrottling: false,
+      sandbox: true,
+      backgroundThrottling: true,
       preload: path.join(__dirname, 'preload.cjs')
     },
     ...(isMac ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 12, y: 12 } } : { frame: false }),
@@ -247,15 +251,18 @@ app.whenReady().then(async () => {
   // 1. 先创建窗口，让 splash 立即显示（窗口加载 index.html 与主进程初始化并行）
   createWindow()
 
-  // 阻止操作系统将应用挂起
-  // - macOS：阻止 AppNap 导致的进程冻结
-  // - Windows：阻止 Power Throttling 对后台进程的 CPU 限流
-  // - Linux：通过 D-Bus inhibit 阻止桌面环境挂起应用
-  powerBlockerId = powerSaveBlocker.start('prevent-app-suspension')
+  // 不再全程阻止系统节能；后台页面采用 Chromium 自带的限流策略。
 
-  // 2. 初始化数据目录与数据库（sql.js WASM 加载），期间 splash 持续显示
+  // 2. 初始化数据目录与按页读写的 SQLite，期间 splash 持续显示
   //    渲染进程加载 JS bundle + Vue mount 通常比此处更慢，IPC 注册会先于首次 invoke 完成
-  const dataDir = await ensureDataDir()
+  let dataDir
+  try { dataDir = await ensureDataDir() }
+  catch (error) {
+    console.error('[Main] 数据初始化失败:', error)
+    await showStartupError(error, resolvedDataDir.dataDir, mainWindow)
+    app.quit()
+    return
+  }
   // 读取持久化配置后应用日志开关，兼容升级前已存在的配置文件。
   try {
     const configPath = path.join(dataDir, 'config.json')
@@ -346,8 +353,14 @@ app.whenReady().then(async () => {
   startShareServer().catch(e => console.error('[Main] Share server failed to start:', e))
 
   // 若用户曾开启本机 MCP 服务，则自动拉起（异步，不阻塞窗口）
-  import('./src-electron/agent/mcp.js')
-    .then(({ autoStartLocalIfEnabled }) => autoStartLocalIfEnabled())
+  import('./src-electron/config.js')
+    .then(async ({ loadConfig }) => {
+      if (loadConfig().mcp?.localEnabled) {
+        const { autoStartLocalIfEnabled } = await import('./src-electron/agent/mcp.js')
+        await autoStartLocalIfEnabled()
+        localMcpStarted = true
+      }
+    })
     .then(() => console.log('[Main] ✅ MCP module initialized'))
     .catch(error => console.error('[Main] ❌ Failed to initialize MCP:', error))
 
@@ -362,10 +375,6 @@ app.on('window-all-closed', function () {
   if (kbWatcherHandle) {
     kbWatcherHandle.close()
     kbWatcherHandle = null
-  }
-  if (powerBlockerId !== null && powerSaveBlocker.isStarted(powerBlockerId)) {
-    powerSaveBlocker.stop(powerBlockerId)
-    powerBlockerId = null
   }
   stopShareServer()
   stopAutomationScheduler()
@@ -383,9 +392,9 @@ app.on('before-quit', (event) => {
   if (shutdownStarted) return
   event.preventDefault()
   Promise.allSettled([
-    import('./src-electron/agent/mcp.js')
-      .then(({ closeAgentMcpConnections }) => closeAgentMcpConnections()),
-    stopHarnessSidecar(),
+    localMcpStarted ? import('./src-electron/agent/mcp.js')
+      .then(({ closeAgentMcpConnections }) => closeAgentMcpConnections()) : closeLazyAgentConnections(),
+    stopLazyHarness(),
     Promise.resolve(shutdownOfficeHost()),
     Promise.resolve(stopObsidianScheduler())
   ]).finally(() => {

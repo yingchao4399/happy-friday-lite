@@ -4,7 +4,7 @@
     <FridayNotice v-if="error" error>{{ error }}</FridayNotice>
     <template v-if="draft">
       <h3>{{ t('clipboard.captureGroup') }}</h3>
-      <FridayNotice v-if="draft.capabilities && !draft.capabilities.externalCapture" class="deferred-notice">{{ t('clipboard.externalDeferred') }}</FridayNotice>
+      <FridayNotice v-if="captureProblem" error>{{ captureProblem }}</FridayNotice>
       <div class="behavior-panel">
         <label v-for="key in toggleKeys" :key="key" class="setting-row"><span class="setting-text"><span class="setting-label">{{ t('clipboard.' + key) }}</span><span class="setting-hint">{{ t('clipboard.' + key + 'Hint') }}</span></span><input v-model="draft[key]" class="toggle" type="checkbox" role="switch" :disabled="saving" /></label>
       </div>
@@ -57,6 +57,7 @@ const { t } = useI18n()
 const draft = ref(null), loading = ref(false), saving = ref(false), error = ref(''), notice = ref(''), confirmClear = ref(false)
 const defaultFolders = ref([]), choosingFolder = ref(false)
 const recordingProblem = ref('')
+const captureProblem = ref('')
 const toggleKeys = ['captureEnabled', 'captureImages', 'captureSensitive']
 const aiOptions = ref({ models: [], notebooks: [] })
 const modelOptions = computed(() => [{ value: '', label: t('clipboard.defaultModel') }, ...aiOptions.value.models.map(model => ({ value: model.id, label: model.name }))])
@@ -70,7 +71,7 @@ const shortcutOptions = ['CommandOrControl+Shift+V', 'CommandOrControl+Alt+V', '
 watch(() => props.visible, async visible => {
   if (!visible) { confirmClear.value = false; return }
   loading.value = true; draft.value = null; error.value = ''; notice.value = ''
-  try { const [result, options] = await Promise.all([electronService.getClipboardSettings(), electronService.getClipboardAiOptions()]); const { shortcutRegistered, defaultRecordingFolders, recordingIssue, capabilities, ...settings } = result; recordingProblem.value = recordingIssue ? t('clipboard.recordingErrors.' + recordingIssue.code, t('clipboard.recordingCaptureFailed')) : ''; defaultFolders.value = defaultRecordingFolders || []; draft.value = { ...settings, capabilities }; aiOptions.value = options; if (settings.shortcutEnabled && !shortcutRegistered) notice.value = t('clipboard.shortcutUnavailable') }
+  try { const [result, options] = await Promise.all([electronService.getClipboardSettings(), electronService.getClipboardAiOptions()]); const { shortcutRegistered, defaultRecordingFolders, recordingIssue, captureIssue, captureMode, capabilities, ...settings } = result; captureProblem.value = captureIssue ? t('clipboard.nativeCaptureUnavailable') : ''; recordingProblem.value = recordingIssue ? t('clipboard.recordingErrors.' + recordingIssue.code, t('clipboard.recordingCaptureFailed')) : ''; defaultFolders.value = defaultRecordingFolders || []; draft.value = { ...settings, capabilities }; aiOptions.value = options; if (capabilities?.globalShortcut && settings.shortcutEnabled && !shortcutRegistered) notice.value = t('clipboard.shortcutUnavailable') }
   catch { error.value = t('clipboard.settingsLoadFailed') }
   finally { loading.value = false }
 })

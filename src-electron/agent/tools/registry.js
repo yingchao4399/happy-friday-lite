@@ -22,11 +22,10 @@
  *   3. 完成，Agent 启动时自动加载
  */
 
-import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
-import { convertToOpenAIFunction } from '@langchain/core/utils/function_calling'
 import { createLogger } from '../logger.js'
 import { logToolCall } from '../memory.js'
+import { auditText } from '../audit-summary.js'
 
 const log = createLogger('Tool')
 
@@ -126,7 +125,10 @@ export function getRequiredScopes(def) {
   return def?.meta?.requiredScopes || [getCapabilityScope(def)]
 }
 
-export function describeCapability(def) {
+export async function describeCapability(def) {
+  const [{ tool }, { convertToOpenAIFunction }] = await Promise.all([
+    import('@langchain/core/tools'), import('@langchain/core/utils/function_calling')
+  ])
   const parameters = convertToOpenAIFunction(tool(async () => '', {
     name: def.name, description: def.description, schema: def.schema
   })).parameters
@@ -148,6 +150,7 @@ export async function executeCapability(name, args = {}, ctx = {}, options = {})
   // 未通过校验的输入可能包含敏感数据，不记录原始值。
   let businessArgs = '[not validated]'
   const hidden = !def || def.meta?.sensitive
+  const auditOptions = { metadataOnly: actor === 'friday-ui' }
   let status = 'success'
   let output
   const previousPolicy = ctx.capabilityPolicy
@@ -171,7 +174,7 @@ export async function executeCapability(name, args = {}, ctx = {}, options = {})
     }
     if (ctx.signal?.aborted) throw new Error('任务已取消')
     ctx.emit?.('agent-tool-call', {
-      requestId, toolCallId, toolName: name, arguments: hidden ? '[hidden]' : businessArgs,
+      requestId, toolCallId, toolName: name, arguments: hidden ? '[hidden]' : auditText(businessArgs, auditOptions),
       actor, riskAssessment, requireApproval: !!def.meta?.requireApproval
     })
     ctx.capabilityPolicy = { ...options, actor }
@@ -188,7 +191,7 @@ export async function executeCapability(name, args = {}, ctx = {}, options = {})
     ctx.capabilityPolicy = previousPolicy
     ctx.currentRiskAssessment = previousRisk
     ctx.approvedInvocation = previousApproval
-    const outputText = hidden ? '[hidden]' : typeof output === 'string' ? output : JSON.stringify(output ?? null)
+    const outputText = hidden ? '[hidden]' : auditText(output, auditOptions)
     ctx.emit?.('agent-tool-result', { requestId, toolCallId, toolName: name, actor, output: outputText, status })
     try {
       logToolCall({
@@ -196,7 +199,7 @@ export async function executeCapability(name, args = {}, ctx = {}, options = {})
         threadId: ctx.threadId || requestId,
         requestId,
         toolName: name,
-        arguments: hidden ? '[hidden]' : businessArgs,
+        arguments: hidden ? '[hidden]' : auditText(businessArgs, auditOptions),
         output: outputText,
         status,
         durationMs: Date.now() - startTime
@@ -217,7 +220,8 @@ export async function executeCapability(name, args = {}, ctx = {}, options = {})
  * @param {ToolContext} ctx 工具上下文
  * @returns {Array} LangChain tool 数组
  */
-export function buildLangChainTools(ctx) {
+export async function buildLangChainTools(ctx) {
+  const { tool } = await import('@langchain/core/tools')
   const tools = []
   for (const def of registry.values()) {
     if (def.meta?.catalogOnly) continue

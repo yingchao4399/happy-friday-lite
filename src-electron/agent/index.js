@@ -99,7 +99,7 @@ export async function createAgent(modelConfig, options = {}) {
     logger: createLogger('Tool'),
     emit: () => {} // 占位，运行时覆盖
   }
-  const builtinTools = buildLangChainTools(toolCtx)
+  const builtinTools = await buildLangChainTools(toolCtx)
   // 加载已添加的 MCP 服务器工具（外部工具，跨 invoke 复用连接）
   const mcpTools = await loadAgentMcpTools()
   const tools = [...builtinTools, ...mcpTools]

@@ -22,8 +22,7 @@
 <script setup>
 import Sidebar from '@/components/layout/Sidebar.vue';
 import TabBar from '@/components/layout/TabBar.vue';
-import DeepSeekHarness from '@/views/harness/DeepSeekHarness.vue';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAppStore, useTabStore } from '@/store';
 import { electronService } from '@/services/electron';
 import { setI18nLanguage } from '@/i18n';
@@ -37,6 +36,7 @@ import { routeHorizontalWheel } from '@/utils/tabNavigation';
 import { useKnowledgeStore } from '@/store';
 
 const appStore = useAppStore();
+const DeepSeekHarness = defineAsyncComponent(() => import('@/views/harness/DeepSeekHarness.vue'));
 const tabStore = useTabStore();
 const knowledgeStore = useKnowledgeStore();
 const route = useRoute();

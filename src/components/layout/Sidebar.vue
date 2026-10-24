@@ -73,7 +73,7 @@ const visibleSidebarMenuConfig = computed(() => sidebarMenuConfig.filter(isModul
 const visibleSidebarBottomMenuConfig = computed(() => sidebarBottomMenuConfig.filter(isModuleVisible));
 
 // Use Vite's base URL so the avatar also resolves from Electron's file:// build.
-const avatarSrc = `${import.meta.env.BASE_URL}images/icon.png`;
+const avatarSrc = `${import.meta.env.BASE_URL}images/avatar-96.png`;
 
 const tooltip = reactive({
   visible: false,
@@ -214,16 +214,25 @@ onMounted(() => {
   border-radius: 50%;
   border: 2px solid var(--bg-sidebar);
   z-index: 3;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  border-radius: 50%;
   animation: status-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes status-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    transform: scale(1);
+    opacity: 0.5;
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+    transform: scale(2);
+    opacity: 0;
   }
 }
 

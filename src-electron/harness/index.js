@@ -1,4 +1,4 @@
-import { ipcMain, session } from 'electron'
+import { ipcMain as defaultIpcMain, session } from 'electron'
 import { spawn } from 'child_process'
 import { createRequire } from 'module'
 import fs from 'fs'
@@ -641,7 +641,7 @@ export async function syncHarnessConfigurationIfRunning() {
   }
 }
 
-export function registerHarnessCommands(window) {
+export function registerHarnessCommands(window, ipcMain = defaultIpcMain) {
   mainWindow = window
   ipcMain.handle('harness-start', () => startHarnessSidecar())
   ipcMain.handle('harness-status', () => publicStatus())

@@ -53344,10 +53344,17 @@ const sendEnterOn = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAA
 const sendEnterOff = "" + new URL("send-enter-off-B0IfWMyy.png", import.meta.url).href;
 const sendStop = "data:image/png;base64,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";
 const MAX_MATCHES = 1e3;
-async function buildSearchIndex(doc) {
-  const entries = [];
-  for (let n = 1; n <= doc.numPages; n++) {
-    const page = await doc.getPage(n);
+const pageEntries = /* @__PURE__ */ new WeakMap();
+function getPageSearchEntry(doc, pageIndex2) {
+  let cache = pageEntries.get(doc);
+  if (!cache) {
+    cache = /* @__PURE__ */ new Map();
+    pageEntries.set(doc, cache);
+  }
+  const cached = cache.get(pageIndex2);
+  if (cached) return cached;
+  const pending = (async () => {
+    const page = await doc.getPage(pageIndex2 + 1);
     const content = await page.getTextContent();
     let text = "";
     const items = [];
@@ -53370,8 +53377,17 @@ async function buildSearchIndex(doc) {
       }
       if (it.hasEOL) text += "\n";
     }
-    entries.push({ text, lower: foldCase(text), items });
-  }
+    return { text, lower: foldCase(text), items };
+  })();
+  cache.set(pageIndex2, pending);
+  void pending.catch(() => {
+    if (cache?.get(pageIndex2) === pending) cache.delete(pageIndex2);
+  });
+  return pending;
+}
+async function buildSearchIndex(doc) {
+  const entries = [];
+  for (let n = 0; n < doc.numPages; n++) entries.push(await getPageSearchEntry(doc, n));
   return entries;
 }
 function searchInIndex(index, query) {
@@ -91044,6 +91060,42 @@ function StampDialog({
     }
   ) });
 }
+function createVisiblePageQueue(processPage) {
+  let disposed = false, running = false;
+  let wanted = [];
+  let requested = /* @__PURE__ */ new Set();
+  const completed = /* @__PURE__ */ new Set();
+  async function drain() {
+    if (running || disposed) return;
+    running = true;
+    try {
+      while (!disposed) {
+        const page = wanted.find((value) => !completed.has(value));
+        if (page === void 0) break;
+        wanted = wanted.filter((value) => value !== page);
+        try {
+          if (await processPage(page, () => !disposed && requested.has(page))) completed.add(page);
+        } catch {
+          completed.add(page);
+        }
+      }
+    } finally {
+      running = false;
+    }
+  }
+  return {
+    update(pages) {
+      wanted = [...new Set(pages)].filter((page) => !completed.has(page));
+      requested = new Set(pages);
+      void drain();
+    },
+    dispose() {
+      disposed = true;
+      wanted = [];
+      requested.clear();
+    }
+  };
+}
 const deCamel = (s) => s.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
 const WEIGHTS = [
   [/(heavy|black)/i, 900],
@@ -93387,6 +93439,7 @@ function App() {
     document.addEventListener("copy", copy);
     return () => document.removeEventListener("copy", copy);
   }, [allTextSelection]);
+  const ocrQueueRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     setOcrPages(/* @__PURE__ */ new Map());
     setOcrPending(/* @__PURE__ */ new Set());
@@ -93394,46 +93447,51 @@ function App() {
     setOcrUnavailable(false);
     if (!doc || sizes.length !== doc.numPages) return;
     let stale = false;
-    void (async () => {
-      const index = await buildSearchIndex(doc).catch(() => null);
-      if (!index || stale) return;
-      const scanned = index.map((entry, i) => isScannedEntry(entry) ? i : -1).filter((i) => i >= 0);
-      const from = scanned.findIndex((i) => i >= currentOrigIdxRef.current);
-      const ordered = from > 0 ? [...scanned.slice(from), ...scanned.slice(0, from)] : scanned;
-      setOcrPending(new Set(scanned));
-      for (const origIdx of ordered) {
-        if (stale) return;
-        try {
-          const geom = pageGeomRef.current(origIdx);
-          const png = await renderPageForOcr(doc, origIdx, geom);
-          if (stale) return;
-          if (!png) throw new Error("PDF_OCR_FAILED");
-          const lines = await window.pdfApi.ocrPage(png);
-          if (stale) return;
-          if (lines === null) {
-            setOcrUnavailable(true);
-            setOcrFailed(new Set(scanned));
-            setOcrPending(/* @__PURE__ */ new Set());
-            return;
-          }
-          const data = buildOcrPageData(lines, geom);
-          if (data) setOcrPages((prev) => new Map(prev).set(origIdx, data));
-          else setOcrFailed((prev) => new Set(prev).add(origIdx));
-        } catch {
-          if (!stale) setOcrFailed((prev) => new Set(prev).add(origIdx));
-        } finally {
-          if (!stale) setOcrPending((prev) => {
-            const next = new Set(prev);
-            next.delete(origIdx);
-            return next;
-          });
+    let unavailable = false;
+    const queue = createVisiblePageQueue(async (origIdx, active) => {
+      if (stale || unavailable) return true;
+      setOcrPending((prev) => new Set(prev).add(origIdx));
+      try {
+        const entry = await getPageSearchEntry(doc, origIdx);
+        if (stale || !active()) return false;
+        if (!isScannedEntry(entry)) return true;
+        const geom = pageGeomRef.current(origIdx);
+        const png = await renderPageForOcr(doc, origIdx, geom);
+        if (stale || !active()) return false;
+        if (!png) throw new Error("PDF_OCR_FAILED");
+        const lines = await window.pdfApi.ocrPage(png);
+        if (stale) return false;
+        if (lines === null) {
+          unavailable = true;
+          setOcrUnavailable(true);
+          setOcrFailed((prev) => new Set(prev).add(origIdx));
+          return true;
         }
+        const data = buildOcrPageData(lines, geom);
+        if (data) setOcrPages((prev) => new Map(prev).set(origIdx, data));
+        else setOcrFailed((prev) => new Set(prev).add(origIdx));
+      } catch {
+        if (!stale) setOcrFailed((prev) => new Set(prev).add(origIdx));
+      } finally {
+        if (!stale) setOcrPending((prev) => {
+          const next = new Set(prev);
+          next.delete(origIdx);
+          return next;
+        });
       }
-    })();
+      return true;
+    });
+    ocrQueueRef.current = queue;
     return () => {
       stale = true;
+      queue.dispose();
+      if (ocrQueueRef.current === queue) ocrQueueRef.current = null;
     };
   }, [doc, sizes.length]);
+  reactExports.useEffect(() => {
+    const pages = [.../* @__PURE__ */ new Set([currentOrigIdxRef.current, ...[...visibleRows].flatMap((row) => rows[row] ?? [])])];
+    ocrQueueRef.current?.update(pages);
+  }, [doc, sizes.length, currentPage, visibleRows, rows]);
   reactExports.useEffect(() => {
     setPageBlocks(/* @__PURE__ */ new Map());
     setDocFonts(/* @__PURE__ */ new Map());
@@ -97542,6 +97600,19 @@ function App() {
               },
               children: rows.map((row, r) => {
                 const rowVisible = visibleRows.has(r);
+                if (!rowVisible) {
+                  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "div",
+                    {
+                      ref: setRowRef(r),
+                      "data-idx": r,
+                      className: "pdf-row pdf-row-placeholder",
+                      style: { height: `${Math.max(1, rowHeights[r] * scale)}px` },
+                      "aria-hidden": "true"
+                    },
+                    r
+                  );
+                }
                 const rowWidths = row.map((i) => Math.floor(dispSize(i).width * scale));
                 const rowW = rowWidths.reduce((a, b) => a + b, 0) + PAGE_GAP * (row.length - 1);
                 const pageOffset = (i) => rowWidths.slice(0, i).reduce((a, b) => a + b, 0) + PAGE_GAP * i;

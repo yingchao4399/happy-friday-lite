@@ -2,10 +2,10 @@ import fs from 'fs'
 import path from 'path'
 import { Worker } from 'worker_threads'
 import AdmZip from 'adm-zip'
-import { flushDb, closeDb, initDb } from './db.js'
+import { flushDb, closeDb, initDb, snapshotDb } from './db.js'
 import { loadConfig, saveConfig, getDataDir } from './config.js'
 import { isBackupEntry } from './backupEntries.js'
-import initSqlJs from 'sql.js'
+import { openSqliteStorage } from './sqlite-storage.js'
 import { removePathNoFollowSync } from './fs-safe.js'
 
 let restoreLifecycle = {}
@@ -32,10 +32,10 @@ function generateBackupName() {
  * @param {(p:{current:number,total:number,name?:string,compressing?:boolean})=>void} [onProgress]
  * @returns {Promise<{success:boolean,path?:string,error?:string}>}
  */
-function runBackupWorker(dataDir, zipPath, onProgress) {
+function runBackupWorker(dataDir, zipPath, onProgress, databaseSnapshot = null) {
   return new Promise((resolve) => {
     const worker = new Worker(new URL('./backup-worker.js', import.meta.url), {
-      workerData: { dataDir, zipPath }
+      workerData: { dataDir, zipPath, databaseSnapshot }
     })
     let settled = false
     const finish = (result) => {
@@ -52,7 +52,7 @@ function runBackupWorker(dataDir, zipPath, onProgress) {
         onProgress({ compressing: true })
       } else if (msg.type === 'done') {
         finish(msg.success
-          ? { success: true, path: msg.path }
+          ? { success: true, path: msg.path, hasDatabase: msg.hasDatabase }
           : { success: false, error: msg.error })
       }
     })
@@ -78,8 +78,8 @@ export async function createUpgradeSnapshot(dataDir, releaseId) {
   const zipPath = path.join(backupDir, `friday-before-${safeId}-${stamp}.zip`)
   const result = await runBackupWorker(dataDir, zipPath)
   if (!result.success) throw new Error(`升级前备份失败: ${result.error}`)
-  const zip = new AdmZip(zipPath)
-  if (!zip.getEntries().some(entry => entry.entryName === 'friday.db')) {
+  // 目录核验由 worker 完成，主进程无需再次读入整个压缩包。
+  if (!result.hasDatabase) {
     throw new Error('升级前备份缺少 friday.db，已停止迁移')
   }
   fs.writeFileSync(marker, JSON.stringify({ releaseId, path: zipPath, createdAt: new Date().toISOString() }, null, 2), 'utf8')
@@ -100,6 +100,7 @@ export async function createBackup(destPath, isAutoDir = false, onProgress = nul
   // 确保数据库落盘（必须在主进程中完成，使 zip 内容一致）
   flushDb()
 
+  let snapshotDirectory
   try {
     // 确定最终 zip 路径
     let zipPath = destPath
@@ -112,7 +113,10 @@ export async function createBackup(destPath, isAutoDir = false, onProgress = nul
     }
 
     // 在 worker 线程中执行收集与压缩，主进程保持响应
-    const workerResult = await runBackupWorker(dataDir, zipPath, onProgress)
+    snapshotDirectory = fs.mkdtempSync(path.join(path.dirname(dataDir), '.friday-backup-'))
+    const databaseSnapshot = path.join(snapshotDirectory, 'friday.db')
+    await snapshotDb(databaseSnapshot)
+    const workerResult = await runBackupWorker(dataDir, zipPath, onProgress, databaseSnapshot)
     if (!workerResult.success) {
       return workerResult
     }
@@ -132,6 +136,8 @@ export async function createBackup(destPath, isAutoDir = false, onProgress = nul
   } catch (e) {
     console.error('[Backup] createBackup error:', e)
     return { success: false, error: e.message }
+  } finally {
+    if (snapshotDirectory) removeRestoreTemporaryDirectory(snapshotDirectory)
   }
 }
 
@@ -178,8 +184,7 @@ export async function restoreBackup(zipPath) {
     }
 
     // 在接触现存数据前验证数据库和配置，损坏备份不能覆盖可用数据。
-    const SQL = await initSqlJs()
-    const validationDb = new SQL.Database(fs.readFileSync(path.join(restoreRoot, 'friday.db')))
+    const validationDb = openSqliteStorage(path.join(restoreRoot, 'friday.db'), { readOnly: true })
     try {
       const result = validationDb.exec('PRAGMA integrity_check')
       if (result[0]?.values[0]?.[0] !== 'ok') throw new Error('备份数据库校验失败')

@@ -1,0 +1,9 @@
+{
+  "title": "Friday 启动未完成",
+  "emptyDatabase": "数据库文件为空，已停止初始化，避免覆盖原有数据。",
+  "initializationFailed": "数据初始化失败，请检查原因后重新启动。",
+  "preserved": "原文件和备份均已保留。请先保存数据目录副本，再从 backups 或升级备份中恢复有效数据库。数据目录：",
+  "reason": "失败原因",
+  "openDataDirectory": "打开数据目录",
+  "close": "关闭"
+}

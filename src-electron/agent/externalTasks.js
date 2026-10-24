@@ -102,7 +102,7 @@ async function runInstruction(task, controller) {
     throw new Error('Friday 未配置可用模型，请先在模型设置中配置')
   }
   const model = createLangChainModel(modelConfig)
-  const capabilities = permittedCapabilities(task.scopes).map(describeCapability)
+  const capabilities = await Promise.all(permittedCapabilities(task.scopes).map(describeCapability))
   const history = [...task.results]
   for (let index = history.length; index < MAX_STEPS; index++) {
     checkTaskBoundary(task, controller)

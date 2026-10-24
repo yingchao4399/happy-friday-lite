@@ -5,7 +5,7 @@ registerTool({
   name: 'list_app_actions',
   description: '发现 Friday 已注册的应用业务动作，包括笔记、日程、画布、知识库、聊天、自动化和 Office。keyword 可按模块名筛选。',
   schema: z.object({ keyword: z.string().max(100).optional() }),
-  handler: async ({ keyword = '' }, ctx) => JSON.stringify(listRegisteredTools().filter(def => def.meta?.catalogOnly && def.meta?.exposedViaMcp && def.name.includes(keyword) && (!ctx.capabilityPolicy?.scopes || getRequiredScopes(def).every(scope => ctx.capabilityPolicy.scopes.includes(scope)))).map(describeCapability)),
+  handler: async ({ keyword = '' }, ctx) => JSON.stringify(await Promise.all(listRegisteredTools().filter(def => def.meta?.catalogOnly && def.meta?.exposedViaMcp && def.name.includes(keyword) && (!ctx.capabilityPolicy?.scopes || getRequiredScopes(def).every(scope => ctx.capabilityPolicy.scopes.includes(scope)))).map(describeCapability))),
   meta: { exposedViaMcp: true, capabilityType: 'read' }
 })
 

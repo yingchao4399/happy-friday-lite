@@ -27,11 +27,11 @@ import { getFileAssocStatus, setFileAssoc, clearFileAssoc } from './file-assoc.j
 import { resolveDataDir, setDataDirPointer, clearDataDirPointer } from './data-dir.js'
 import { listProviderModels } from './modelCatalog.js'
 import { testChatModel, testEmbeddingModel } from './modelTest.js'
-import { registerAgentCommands } from './agent/ipc.js'
 import {
-  registerHarnessCommands,
-  syncHarnessConfigurationIfRunning
-} from './harness/index.js'
+  registerLazyAgentCommands as registerAgentCommands,
+  registerLazyHarnessCommands as registerHarnessCommands,
+  syncLazyHarnessConfigurationIfRunning as syncHarnessConfigurationIfRunning
+} from './lazy-agent-commands.js'
 import { getLogDir, setLoggingEnabled } from './logger.js'
 import { getShareUrl, getNoteShareUrl, getDrawingShareUrl } from './shareServer.js'
 import {

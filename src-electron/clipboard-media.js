@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import sharp from 'sharp'
 import crypto from 'node:crypto'
 import { clipboardFileType } from './clipboard-content.js'
 
@@ -11,7 +10,7 @@ function unavailable(code) {
 export async function storeClipboardPng(buffer, directory) {
   if (!Buffer.isBuffer(buffer) || buffer.length > 64 * 1024 * 1024) throw unavailable('CLIPBOARD_IMAGE_TOO_LARGE')
   let png
-  try { png = await sharp(buffer, { limitInputPixels: 100_000_000 }).rotate().png().toBuffer() }
+  try { const { default: sharp } = await import('sharp'); png = await sharp(buffer, { limitInputPixels: 100_000_000 }).rotate().png().toBuffer() }
   catch { throw unavailable('CLIPBOARD_IMAGE_INVALID') }
   const hash = crypto.createHash('sha256').update(png).digest('hex')
   await fs.mkdir(directory, { recursive: true })
@@ -52,6 +51,7 @@ export async function readClipboardImage(item, directory, { thumbnail = true } =
     if (stat.isSymbolicLink() || !stat.isFile() || path.dirname(real) !== root) throw unavailable('CLIPBOARD_IMAGE_UNAVAILABLE')
     if (stat.size > 64 * 1024 * 1024) throw unavailable('CLIPBOARD_IMAGE_TOO_LARGE')
     const buffer = await fs.readFile(real)
+    const { default: sharp } = await import('sharp')
     const source = sharp(buffer, { limitInputPixels: 100_000_000 })
     const { width, height, format } = await source.metadata()
     if (format !== 'png' || !width || !height) throw unavailable('CLIPBOARD_IMAGE_INVALID')

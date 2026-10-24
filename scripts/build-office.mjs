@@ -24,7 +24,7 @@ const VENDOR = path.join(ROOT, 'vendor', 'happyoffice')
 const OFFICE_ROOT = path.join(ROOT, 'resources', 'office')
 
 const EDITORS = ['docs', 'sheets', 'slides', 'pdf']
-const BUNDLE_ENTRIES = [...EDITORS, 'office-utils']
+const BUNDLE_ENTRIES = [...EDITORS, 'office-utils', 'attachment-parser']
 const SKIP_RENDERER = process.argv.includes('--skip-renderer')
 const SKIP_NATIVE = process.argv.includes('--skip-native')
 const SKIP_CLI = process.argv.includes('--skip-cli')
@@ -173,6 +173,18 @@ function assetImportPlugin() {
   }
 }
 
+// 附件读取走异步入口，普通文档打开无需解析 PDF worker 和旧 Office 字符映射表。
+function lazyAttachmentParserPlugin() {
+  return {
+    name: 'lazy-office-attachment-parser',
+    setup(build) {
+      build.onResolve({ filter: /^@genoffice\/file-parse$/ }, args => {
+        if (args.kind === 'dynamic-import') return { path: './attachment-parser.cjs', external: true }
+      })
+    },
+  }
+}
+
 async function buildMainBundles() {
   console.log('[office] Bundling editor main-process modules (esbuild)…')
   const vendorRequire = createRequire(path.join(VENDOR, 'package.json'))
@@ -190,13 +202,16 @@ async function buildMainBundles() {
   const outDir = path.join(OFFICE_ROOT, 'main')
   fs.mkdirSync(outDir, { recursive: true })
   for (const editor of BUNDLE_ENTRIES) {
+    const outputName = ['office-utils', 'attachment-parser'].includes(editor) ? editor : `${editor}-main`
     await esbuild.build({
       entryPoints: [path.join(entriesRoot, `${editor}.ts`)],
       bundle: true,
       platform: 'node',
       format: 'cjs',
       target: 'node22',
-      outfile: path.join(outDir, editor === 'office-utils' ? 'office-utils.cjs' : `${editor}-main.cjs`),
+      minify: true,
+      keepNames: true,
+      outfile: path.join(outDir, `${outputName}.cjs`),
       // CJS 的位置必须运行时计算；写死开发目录会让安装版及目录迁移失效。
       banner: { js: "const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;" },
       define: {
@@ -207,10 +222,10 @@ async function buildMainBundles() {
         'harfbuzzjs/dist/harfbuzz.js': path.join(harfbuzzDist, 'harfbuzz.js'),
       },
       // 上游自动更新依赖在本产品中不使用，stub 为空模块
-      plugins: [stubPlugin(['electron-updater']), rawImportPlugin(), assetImportPlugin()],
+      plugins: [lazyAttachmentParserPlugin(), stubPlugin(['electron-updater']), rawImportPlugin(), assetImportPlugin()],
       logLevel: 'warning',
     })
-    console.log(`[office] bundled ${editor === 'office-utils' ? 'office-utils' : `${editor}-main`}.cjs`)
+    console.log(`[office] bundled ${outputName}.cjs`)
   }
 }
 

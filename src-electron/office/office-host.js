@@ -3,8 +3,6 @@ import fs from 'fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 import { app, dialog, ipcMain, nativeTheme, shell } from 'electron'
-import XLSX from 'xlsx'
-import AdmZip from 'adm-zip'
 import { registerOfficeAiBridge } from './office-ai-bridge.js'
 import { getDataDir } from '../config.js'
 import { normalizeOfficeDocumentSelection } from './document-selection.js'
@@ -65,6 +63,7 @@ function officeRoot() {
 }
 
 let protocolInstaller = null
+const officeFileStore = () => state.bundles?.docs || protocolInstaller
 
 // genoffice-app:// 渲染协议必须在 app ready 前注册为特权协议
 // （本模块在 main.js 顶部被导入，早于 app.whenReady）
@@ -91,8 +90,8 @@ function editorPaths(editor) {
   }
 }
 
-/** 最近文件和偏好由 docs 提供，其余引擎在首次打开时加载。 */
-async function loadBundles(editors = ['docs']) {
+/** 所有编辑器引擎在首次使用时加载，启动时只安装轻量宿主。 */
+async function loadBundles(editors) {
   const bundles = {}
   for (const editor of editors) {
     const { bundlePath } = editorPaths(editor)
@@ -236,13 +235,13 @@ function wireShellHooks(editor) {
     const entry = entryByWebContents(wc)
     if (entry) entry.filePath = filePath
     // 最近文件统一记录在 docs bundle 的 recents 存储中
-    try { docs.recordRecentFile?.(filePath) } catch { /* ignore */ }
+    try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* ignore */ }
     emitFileSaved('sheets', filePath, entry?.viewId)
   })
   if (editor === 'slides') slides.setSlidesOpenedHook?.((wc, filePath) => {
     const entry = entryByWebContents(wc)
     if (entry) entry.filePath = filePath
-    try { docs.recordRecentFile?.(filePath) } catch { /* ignore */ }
+    try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* ignore */ }
     emitFileSaved('slides', filePath, entry?.viewId)
   })
   // PDF 编辑器无 opened hook，openOfficeFile 内统一补记
@@ -355,6 +354,8 @@ function leaveHtmlFullScreen() {
 
 function attachView(entry) {
   const { viewId, type, view } = entry
+  // 隐藏 Tab 不应继续以全速运行；打印/导出临时窗口由各引擎单独管理。
+  view.webContents.setBackgroundThrottling(true)
   state.mainWindow.contentView.addChildView(view)
   view.setVisible(false)
   view.setBounds(contentBounds())
@@ -450,8 +451,7 @@ export async function initOfficeHost(mainWindow) {
     return false
   }
   state.mainWindow = mainWindow
-  state.bundles = await loadBundles()
-  if (Object.keys(state.bundles).length === 0) return false
+  state.bundles = {}
 
   // ready 之后挂载 genoffice-app:// 协议处理器（各编辑器 renderer 目录）
   if (protocolInstaller && typeof protocolInstaller.installRendererProtocol === 'function') {
@@ -463,8 +463,6 @@ export async function initOfficeHost(mainWindow) {
   }
 
   tolerateDuplicateIpcHandlers()
-  configureRuntimes('docs')
-  registerEditorIpc('docs')
   registerAppPrefsIpc()
   registerOfficeFileCommands({
     findEntry: entryByWebContents,
@@ -509,7 +507,6 @@ export async function initOfficeHost(mainWindow) {
     },
     readSettings: readOfficeAppSettings,
   })
-  wireShellHooks('docs')
 
   // 窗口尺寸变化时让 renderer 重推最新边界（不套用陈旧 contentBounds，避免抖动）；
   // 覆盖 resize / 最大化 / 还原 / 全屏切换。放映全屏期间 renderer 推送被忽略，
@@ -611,6 +608,7 @@ export function officeDefaultSaveDir() {
 
 /** 生成空白 xlsx 工作簿文件并返回路径（单空 Sheet1，复用上游 uniquePathIn 去重命名） */
 function createBlankWorkbookFile() {
+  const XLSX = _require('xlsx')
   const dir = officeDefaultSaveDir()
   fs.mkdirSync(dir, { recursive: true })
   const workbook = XLSX.utils.book_new()
@@ -638,6 +636,7 @@ function uniqueOfficePath(dir, fileName) {
 
 /** 生成空白 docx（最小 OOXML 包：单个空段落） */
 function blankDocxBuffer() {
+  const AdmZip = _require('adm-zip')
   const zip = new AdmZip()
   zip.addFile('[Content_Types].xml', Buffer.from(
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
@@ -697,6 +696,7 @@ async function createBlankOfficeFile(type, displayName) {
   const ext = { docs: '.docx', sheets: '.xlsx', slides: '.pptx', pdf: '.pdf' }[type]
   const filePath = uniqueOfficePath(dir, `${displayName}${ext}`)
   if (type === 'sheets') {
+    const XLSX = _require('xlsx')
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), 'Sheet1')
     fs.writeFileSync(filePath, XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }))
@@ -734,9 +734,9 @@ export async function openOfficeFile(filePath, opts = {}) {
   const viewId = allocViewId(type, opts.viewId)
   const { view } = createTypeView(type, filePath)
   attachView({ viewId, type, view, filePath })
-  // 最近文件统一记录在 docs bundle 的 recents 存储中（recordRecentFile 自带去重）
+  // 共用轻量最近文件记录，打开 PDF/Excel/PPT 无需同时加载 Word。
   if (filePath) {
-    try { state.bundles.docs.recordRecentFile?.(filePath) } catch { /* ignore */ }
+    try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* ignore */ }
   }
   if (!opts.background) showView(viewId)
   if (opts.notifyOpened) notifyVue('office-opened', { type, viewId, filePath })
@@ -854,7 +854,7 @@ export async function newOfficeDocument(type, requestedViewId, name) {
   const { view, filePath } = createTypeView(type, namedPath)
   attachView({ viewId, type, view, filePath })
   if (namedPath) {
-    try { state.bundles.docs.recordRecentFile?.(filePath) } catch { /* ignore */ }
+    try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* ignore */ }
   }
   showView(viewId)
   return { success: true, type, viewId, blank: !namedPath, filePath }
@@ -946,7 +946,7 @@ export function setOfficeContentBounds(rect) {
 
 /** 上游首页同款最近文件条目：路径 + stat 信息 + 收藏标记（保留已删除项，dimmed 展示） */
 function recentEntries() {
-  const docs = state.bundles?.docs
+  const docs = officeFileStore()
   if (!docs?.readRecentFiles) return []
   let starred = []
   try { starred = docs.readStarredFiles?.() || [] } catch { /* ignore */ }
@@ -976,7 +976,7 @@ function recentEntries() {
 }
 
 /** Office 首页最近文件列表（含 stat 与收藏标记） */
-export function getOfficeRecents() {
+export async function getOfficeRecents() {
   try {
     return recentEntries()
   } catch (e) {
@@ -986,8 +986,8 @@ export function getOfficeRecents() {
 }
 
 /** 收藏/取消收藏（复用 docs bundle 的 starred 存储） */
-export function toggleOfficeStarred(filePath) {
-  const docs = state.bundles?.docs
+export async function toggleOfficeStarred(filePath) {
+  const docs = officeFileStore()
   if (!docs?.toggleStarredFile) return { success: false }
   try {
     docs.toggleStarredFile(String(filePath))
@@ -998,8 +998,8 @@ export function toggleOfficeStarred(filePath) {
 }
 
 /** 从最近文件列表移除（不删除磁盘文件） */
-export function removeOfficeRecents(filePaths) {
-  const docs = state.bundles?.docs
+export async function removeOfficeRecents(filePaths) {
+  const docs = officeFileStore()
   if (!docs?.removeRecentFiles) return { success: false }
   try {
     docs.removeRecentFiles((filePaths || []).map(String))
@@ -1011,8 +1011,8 @@ export function removeOfficeRecents(filePaths) {
 
 /** 首页重命名文档：磁盘改名 + 最近列表/收藏同步（docs bundle replaceRecentFile）。
  *  已打开的文件拒绝改名（编辑器会话仍指向旧路径，保存会写回旧文件）。 */
-export function renameOfficeFile(filePath, newName) {
-  const docs = state.bundles?.docs
+export async function renameOfficeFile(filePath, newName) {
+  const docs = officeFileStore()
   if (!docs?.replaceRecentFile) return { success: false, error: 'unavailable' }
   const oldPath = String(filePath || '')
   const ext = path.extname(oldPath)
@@ -1046,8 +1046,8 @@ export function renameOfficeFile(filePath, newName) {
 
 /** 首页删除文档：彻底删除磁盘文件（不入回收站）+ 清理最近列表/收藏记录。
  *  已打开的文件拒绝删除（编辑器会话仍占用，保存会复活文件）。 */
-export function deleteOfficeFile(filePath) {
-  const docs = state.bundles?.docs
+export async function deleteOfficeFile(filePath) {
+  const docs = officeFileStore()
   const target = String(filePath || '')
   let stat
   try { stat = fs.statSync(target) } catch {
@@ -1137,6 +1137,7 @@ export async function locateOfficeSpan(viewId, selection) {
   const wc = entry.view.webContents
   let request
   if (entry.type === 'sheets') {
+    const XLSX = _require('xlsx')
     const book = XLSX.readFile(entry.filePath)
     for (const sheet of book.SheetNames) {
       for (const [address, cell] of Object.entries(book.Sheets[sheet])) {

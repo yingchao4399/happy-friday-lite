@@ -1,7 +1,6 @@
 import fs from 'fs'
 import { enqueue, setTaskHandler, setOnTaskComplete, setOnProgress, cancelCurrentTask } from './queue.js'
-import { processFileTask, inferKbType, getKbRootPath, rebuildKbStore } from './index.js'
-import { KB_TYPES } from './vectorstore.js'
+import { inferKbType, getKbRootPath, KB_TYPES } from './paths.js'
 
 /**
  * RAG 触发时机实现
@@ -29,7 +28,10 @@ export async function initRag(sendToRenderer = null) {
   initialized = true
 
   // 注册任务处理器
-  setTaskHandler(processFileTask)
+  setTaskHandler(async (...args) => {
+    const { processFileTask } = await import('./index.js')
+    return processFileTask(...args)
+  })
 
   if (sendToRenderer) {
     // 注册进度回调，通知前端实时进度
@@ -93,6 +95,7 @@ export function stopBuildIndex() {
  * @returns {Promise<Object>} 重建结果统计
  */
 export async function triggerManualUpdate(kbType = null, onProgress = null) {
+  const { rebuildKbStore } = await import('./index.js')
   const targetTypes = kbType ? [kbType] : KB_TYPES
   const results = {}
 

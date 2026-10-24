@@ -1,5 +1,17 @@
 const { contextBridge, ipcRenderer, webUtils } = require('electron')
 
+// 等浏览器/ProseMirror 完成默认复制后再读系统剪贴板；不截获或改写原操作。
+let clipboardCaptureTimer = null
+for (const type of ['copy', 'cut']) {
+  document.addEventListener(type, event => {
+    if (!event.isTrusted) return
+    clearTimeout(clipboardCaptureTimer)
+    clipboardCaptureTimer = setTimeout(() => {
+      ipcRenderer.invoke('clipboard-capture-internal').catch(() => {})
+    }, 0)
+  }, true)
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
   platform: process.platform,
 

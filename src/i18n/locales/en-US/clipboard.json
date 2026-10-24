@@ -31,6 +31,8 @@
   "copy": "Copy",
   "cancel": "Cancel",
   "settings": "Clipboard settings",
+  "nativeCaptureUnavailable": "Windows clipboard monitoring could not start. Text and image capture remain available; file capture and file copying are unavailable. Restart Friday to retry.",
+  "captureFailed": "This clipboard item could not be captured. Wait for the source app to finish, then copy again. Restart Friday if the problem persists.",
   "close": "Close",
   "openImage": "View image",
   "imagePreview": "Image preview",

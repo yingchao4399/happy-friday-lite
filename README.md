@@ -6,6 +6,15 @@
 
 An Electron + Vue 3 desktop personal knowledge assistant that combines an AI agent, RAG knowledge retrieval, rich-text notes, and a calendar. All data is stored locally with privacy as a priority.
 
+## 3.0.6-preview.5 performance repair
+
+- Use Electron's built-in disk SQLite instead of keeping and exporting the entire database in WebAssembly. Existing SQLite files remain readable; backups use consistent online snapshots.
+- Bound capability audit summaries before serialization, omit UI payload content, and limit reads of oversized legacy audit records. Tool results and permission checks remain intact.
+- Restore native Windows clipboard monitoring across apps for text, rich text, images and files, with shared deduplication for internal copy/cut events. Persist only changed entries and provide a native editing menu for unhandled editable content. Monitoring failures show a recovery message and fall back to text and image capture.
+- Restore Chromium background throttling for hidden Office views. Empty existing databases stop initialization with a recovery message.
+- Load Office attachment parsers through one shared optional bundle. Opening Word, Excel or Slides no longer synchronously loads legacy Office encodings and the PDF attachment engine. Load the Word AI panel asynchronously while preserving its layout width, conversation and draft behavior.
+- Reproducible whole-process memory comparisons and validation limits are recorded in [the performance report](docs/Memory-performance-2026-10-24.md).
+
 ## ✨ Key Features
 
 ### 📑 Office

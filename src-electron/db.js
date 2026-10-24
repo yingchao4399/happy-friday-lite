@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import initSqlJs from 'sql.js'
+import { openSqliteStorage } from './sqlite-storage.js'
 import { applyPreviewMigrations } from './preview-migrations.js'
 
 let dataDir = null
@@ -21,13 +21,12 @@ function nowISO() {
 
 function queryAll(sql, params = []) {
   const stmt = db.prepare(sql)
-  stmt.bind(params)
-  const rows = []
-  while (stmt.step()) {
-    rows.push(stmt.getAsObject())
-  }
-  stmt.free()
-  return rows
+  try {
+    stmt.bind(params)
+    const rows = []
+    while (stmt.step()) rows.push(stmt.getAsObject())
+    return rows
+  } finally { stmt.free() }
 }
 
 // 原始查询函数（支持 UPDATE/DELETE 等无结果集语句，也支持 SELECT 返回行）
@@ -50,30 +49,15 @@ function runSql(sql, params = []) {
   db.run(sql, params)
 }
 
-// 持久化：将内存数据库导出并同步写入磁盘
+// 磁盘 SQLite 已在事务提交时落盘，保留统一 flush 协议供备份与退出使用。
 function persistDb() {
   if (!db) return
-  const data = db.export()
-  const buffer = Buffer.from(data)
-  const dbPath = path.join(dataDir, 'friday.db')
-  fs.writeFileSync(dbPath, buffer)
+  db.flush()
 }
 
-// 防抖写入：多次写操作合并为一次磁盘 IO，避免每次 INSERT/UPDATE 都全量导出+同步写盘
-// 数据始终安全保留在内存中，flushDb()/closeDb() 会在退出或备份前强制落盘
-let saveTimer = null
-let dirty = false
-const SAVE_DEBOUNCE_MS = 200
-
+// 保留每次业务写入后的 saveDb 约定；原生 SQLite 已同步提交，无需定时整库落盘。
 function saveDb() {
-  dirty = true
-  if (saveTimer) return
-  saveTimer = setTimeout(() => {
-    saveTimer = null
-    if (!dirty || !db) return
-    dirty = false
-    persistDb()
-  }, SAVE_DEBOUNCE_MS)
+  persistDb()
 }
 
 async function initDatabase() {
@@ -81,26 +65,27 @@ async function initDatabase() {
     fs.mkdirSync(dataDir, { recursive: true })
   }
 
-  const SQL = await initSqlJs()
   const dbPath = path.join(dataDir, 'friday.db')
+
+  // 旧版整库写盘中断可能留下空文件，不能把它当作新用户数据库覆盖。
+  if (fs.existsSync(dbPath) && fs.statSync(dbPath).size === 0) {
+    throw Object.assign(new Error('DATABASE_FILE_EMPTY'), { code: 'DATABASE_FILE_EMPTY', recoverable: true })
+  }
 
   if (fs.existsSync(dbPath)) {
     // 启动迁移前保留最近五份数据库副本，便于预览版恢复旧数据。
     const backupDir = path.join(dataDir, 'backups')
     fs.mkdirSync(backupDir, { recursive: true })
     const stamp = new Date().toISOString().replace(/[:.]/g, '-')
-    fs.copyFileSync(dbPath, path.join(backupDir, `friday-${stamp}.db`))
+    await fs.promises.copyFile(dbPath, path.join(backupDir, `friday-${stamp}.db`))
     const backups = fs.readdirSync(backupDir)
       .filter(name => /^friday-.*\.db$/.test(name))
       .sort()
     for (const stale of backups.slice(0, Math.max(0, backups.length - 5))) {
       fs.rmSync(path.join(backupDir, stale), { force: true })
     }
-    const fileBuffer = fs.readFileSync(dbPath)
-    db = new SQL.Database(fileBuffer)
-  } else {
-    db = new SQL.Database()
   }
+  db = openSqliteStorage(dbPath)
 
   db.run(`
     CREATE TABLE IF NOT EXISTS sessions (
@@ -478,26 +463,18 @@ export async function initDb() {
 
 // 确保数据库内容写入磁盘（备份前调用）
 export function flushDb() {
-  if (saveTimer) {
-    clearTimeout(saveTimer)
-    saveTimer = null
-  }
-  if (dirty && db) {
-    dirty = false
-    persistDb()
-  }
+  persistDb()
+}
+
+// SQLite 在线备份产生一致快照；压缩期间继续编辑不会改变这份数据库。
+export async function snapshotDb(destination) {
+  if (!db) throw new Error('数据库尚未初始化')
+  await db.backupTo(destination)
 }
 
 export function closeDb() {
-  if (saveTimer) {
-    clearTimeout(saveTimer)
-    saveTimer = null
-  }
   if (db) {
-    if (dirty) {
-      dirty = false
-      persistDb()
-    }
+    persistDb()
     db.close()
     db = null
   }

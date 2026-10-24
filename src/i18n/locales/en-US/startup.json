@@ -1,0 +1,9 @@
+{
+  "title": "Friday could not finish starting",
+  "emptyDatabase": "The database file is empty. Initialization stopped to protect existing data.",
+  "initializationFailed": "Data initialization failed. Check the cause before restarting.",
+  "preserved": "Original files and backups have been kept. Copy the data directory before restoring a valid database from backups or an upgrade snapshot. Data directory:",
+  "reason": "Cause",
+  "openDataDirectory": "Open data directory",
+  "close": "Close"
+}

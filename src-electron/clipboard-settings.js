@@ -11,10 +11,9 @@ export const clipboardDefaults = Object.freeze({
 
 export const clipboardShortcuts = ['CommandOrControl+Shift+V', 'CommandOrControl+Alt+V', 'Alt+Shift+V']
 
-// 本轮只验收应用内剪贴板。系统监听、托盘、全局快捷键、录屏自动收录、钉窗和网络分享
-// 留到下一轮；保留旧配置字段以便升级后可恢复，不让旧值重新启动这些入口。
+// 系统剪贴板采集与历史复制是基础能力；其余桌面扩展继续单独控制。
 export const clipboardCapabilities = Object.freeze({
-  externalCapture: false,
+  externalCapture: true,
   tray: false,
   globalShortcut: false,
   recordingCapture: false,

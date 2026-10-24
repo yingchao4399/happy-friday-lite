@@ -26,7 +26,8 @@ import { removePathNoFollowSync } from '../fs-safe.js'
  */
 
 // 参与向量化的知识库类型（工作区 agent 不参与）
-export const KB_TYPES = ['personal', 'local']
+import { KB_TYPES } from './paths.js'
+export { KB_TYPES } from './paths.js'
 
 // 向量字段名（schema 中定义，后续 insert/query 必须严格使用此名称）
 const VECTOR_FIELD = 'embedding'

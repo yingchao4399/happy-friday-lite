@@ -7,7 +7,6 @@
  */
 
 import { createLogger } from './agent/logger.js'
-import { createAgentWithContext } from './agent/index.js'
 import { getDataDir, loadConfig } from './config.js'
 import { CHAT_CHUNK, CHAT_DONE, CHAT_ERROR } from './events.js'
 import * as db from './db.js'
@@ -159,6 +158,7 @@ async function runAgent(task, trigger) {
         toolSegment.output = payload.output || ''
       }
     }
+    const { createAgentWithContext } = await import('./agent/index.js')
     const { agent } = await createAgentWithContext({ ...model, enableThinking: false }, {
       mainWindow,
       requestId,

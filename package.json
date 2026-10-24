@@ -1,6 +1,6 @@
 {
   "name": "happy-friday-lite",
-  "version": "3.0.6-preview.2",
+  "version": "3.0.6-preview.5",
   "description": "Happy Friday Lite - Electron + Vue3",
   "author": "Chen Jie <chenjie.plus@qq.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -190,7 +190,9 @@
       "LICENSE",
       "dist/**/*",
       "build/icons/icon.png",
+      "build/icons/window-64.png",
       "src/i18n/locales/*/clipboard.json",
+      "src/i18n/locales/*/startup.json",
       "main.js",
       "preload.cjs",
       "src-electron/**/*",

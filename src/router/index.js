@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import DeepSeekHarness from '@/views/harness/DeepSeekHarness.vue'
 
 export const routes = [
   {
@@ -72,7 +71,7 @@ export const routes = [
   {
     path: '/harness',
     name: 'harness',
-    component: DeepSeekHarness
+    component: () => import('@/views/harness/DeepSeekHarness.vue')
   },
   {
     path: '/history',

@@ -4,6 +4,8 @@ import * as db from '../db.js'
 import { getDataDir } from '../config.js'
 import { loadDocument } from './loaders.js'
 import { splitDocuments } from './chunkers.js'
+import { inferKbType, getKbRootPath } from './paths.js'
+export { inferKbType, getKbRootPath } from './paths.js'
 import {
   addDocuments,
   deleteStore,
@@ -34,20 +36,8 @@ import {
 // 根据文件路径推断所属知识库类型
 // 文件路径形如: {dataDir}/knowledge/{categoryId}/{kbName}/...
 // 工作区(agent)不参与向量化与检索，返回 null 跳过处理
-export function inferKbType(filePath) {
-  const dataDir = getDataDir()
-  const knowledgeDir = path.join(dataDir, 'knowledge')
-  const relativePath = path.relative(knowledgeDir, filePath)
-  if (relativePath.startsWith('personal')) return 'personal'
-  if (relativePath.startsWith('local')) return 'local'
-  return null
-}
 
 // 获取指定知识库类型的根目录
-export function getKbRootPath(kbType) {
-  const dataDir = getDataDir()
-  return path.join(dataDir, 'knowledge', kbType)
-}
 
 // 判断文件是否为可索引的文件类型
 function isIndexableFile(fileName) {

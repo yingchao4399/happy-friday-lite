@@ -14,3 +14,4 @@ export {
   formatHeadlessEnvelope,
   headlessExitCode,
 } from '../../../vendor/happyoffice/packages/electron-utils/src/index'
+export * from '../../../vendor/happyoffice/apps/docs/src/main/recent-files'

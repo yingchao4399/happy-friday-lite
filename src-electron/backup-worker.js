@@ -35,7 +35,7 @@ function post(msg) {
   parentPort?.postMessage(msg)
 }
 
-const { dataDir, zipPath } = workerData || {}
+const { dataDir, zipPath, databaseSnapshot } = workerData || {}
 
 if (!dataDir || !zipPath) {
   post({ type: 'done', success: false, error: '缺少 dataDir 或 zipPath' })
@@ -53,7 +53,7 @@ if (!dataDir || !zipPath) {
     for (let i = 0; i < total; i++) {
       const file = files[i]
       const dirName = path.dirname(file.relPath)
-      zip.addLocalFile(file.path, dirName === '.' ? '' : dirName)
+      zip.addLocalFile(file.relPath === 'friday.db' && databaseSnapshot ? databaseSnapshot : file.path, dirName === '.' ? '' : dirName)
       // 每若干个文件或最后一个时上报进度，避免消息洪泛
       if (i % 5 === 0 || i === total - 1) {
         post({ type: 'progress', current: i + 1, total, name: file.relPath })
@@ -63,7 +63,7 @@ if (!dataDir || !zipPath) {
     post({ type: 'compressing' })
     zip.writeZip(zipPath)
 
-    post({ type: 'done', success: true, path: zipPath })
+    post({ type: 'done', success: true, path: zipPath, hasDatabase: zip.getEntries().some(entry => entry.entryName === 'friday.db') })
   } catch (e) {
     post({ type: 'done', success: false, error: e?.message || String(e) })
   }

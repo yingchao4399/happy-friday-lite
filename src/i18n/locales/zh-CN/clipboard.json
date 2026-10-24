@@ -31,6 +31,8 @@
   "copy": "复制",
   "cancel": "取消",
   "settings": "剪贴板设置",
+  "nativeCaptureUnavailable": "Windows 剪贴板监听未能启动，已暂用文本和图片采集。文件采集和复制文件暂不可用，请重启 Friday 后重试。",
+  "captureFailed": "这次剪贴板内容未能收录。请等待源应用完成操作，然后重新复制；若仍失败，请重启 Friday。",
   "close": "关闭",
   "openImage": "查看大图",
   "imagePreview": "图片预览",

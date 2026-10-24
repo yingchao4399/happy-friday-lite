@@ -20,7 +20,7 @@
  * 按 on_chat_model_stream / on_tool_start / on_tool_end / on_interrupt 分发到上述通道。
  */
 
-import { ipcMain, dialog } from 'electron'
+import { ipcMain as defaultIpcMain, dialog } from 'electron'
 import { Command } from '@langchain/langgraph'
 import { CHAT_CHUNK, CHAT_REASONING_CHUNK, CHAT_DONE, CHAT_ERROR, CONFIG_CHANGED } from '../events.js'
 import { CancellationTokens } from '../cancellation.js'
@@ -80,7 +80,7 @@ const activeInvocations = new Map()
  * 注册所有 Agent IPC 通道
  * @param {Object} mainWindow Electron 主窗口
  */
-export function registerAgentCommands(mainWindow) {
+export function registerAgentCommands(mainWindow, ipcMain = defaultIpcMain) {
   log.info('====== 注册 Agent IPC 通道 ======')
 
   // ========== agent-invoke: 发起 Agent 调用 ==========

@@ -1,5 +1,4 @@
 import * as db from '../db.js'
-import { deleteBySource } from './vectorstore.js'
 
 /**
  * 基于 SQLite file_status 表的串行任务队列
@@ -161,6 +160,7 @@ async function processOne() {
       console.log(`[RAG Queue] Task cancelled, cleaning up: ${task.filePath}`)
       db.deleteFileStatus(task.kbType, task.filePath)
       db.deleteParentDocsBySourcePath(task.filePath)
+      const { deleteBySource } = await import('./vectorstore.js')
       await deleteBySource(task.filePath)
       console.log(`[RAG Queue] Cleanup done for cancelled task: ${task.filePath}`)
       if (onTaskComplete) onTaskComplete(task, 'cancelled')

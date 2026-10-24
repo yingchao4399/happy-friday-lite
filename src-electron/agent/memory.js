@@ -15,8 +15,8 @@
 
 import crypto from 'crypto'
 import { queryAllRaw } from '../db.js'
-import { getSharedStore } from './backend.js'
 import { createLogger } from './logger.js'
+import { auditText, AUDIT_TEXT_LIMIT } from './audit-summary.js'
 
 const log = createLogger('Memory')
 
@@ -146,8 +146,8 @@ export function logToolCall({
 }) {
   const id = generateId()
   const now = nowISO()
-  const argsStr = typeof args === 'string' ? args : JSON.stringify(args || {})
-  const outputStr = typeof output === 'string' ? output : JSON.stringify(output || {})
+  const argsStr = auditText(args, { metadataOnly: actor === 'friday-ui' && typeof args !== 'string' })
+  const outputStr = auditText(output, { metadataOnly: actor === 'friday-ui' && typeof output !== 'string' })
 
   queryAllRaw(
     'INSERT INTO agent_tool_logs (id, actor, threadId, requestId, toolName, arguments, output, status, durationMs, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -162,7 +162,13 @@ export function logToolCall({
  * @returns {Array}
  */
 export function listToolLogs({ threadId = null, toolName = null, limit = 100 } = {}) {
-  let sql = 'SELECT * FROM agent_tool_logs WHERE 1=1'
+  // 历史版本可能已写入数 MB 的 OCR 参数；在 SQLite 内截断，禁止再读回整份。
+  let sql = `SELECT id, actor, threadId, requestId, toolName,
+    substr(arguments, 1, ${AUDIT_TEXT_LIMIT}) AS arguments,
+    substr(output, 1, ${AUDIT_TEXT_LIMIT}) AS output,
+    length(arguments) > ${AUDIT_TEXT_LIMIT} AS argumentsTruncated,
+    length(output) > ${AUDIT_TEXT_LIMIT} AS outputTruncated,
+    status, durationMs, createdAt FROM agent_tool_logs WHERE 1=1`
   const params = []
   if (threadId) {
     sql += ' AND threadId = ?'
@@ -173,7 +179,7 @@ export function listToolLogs({ threadId = null, toolName = null, limit = 100 } =
     params.push(toolName)
   }
   sql += ' ORDER BY createdAt DESC LIMIT ?'
-  params.push(limit)
+  params.push(Math.max(1, Math.min(100, Math.trunc(Number(limit) || 100))))
   return queryAllRaw(sql, params)
 }
 
@@ -185,6 +191,7 @@ export function listToolLogs({ threadId = null, toolName = null, limit = 100 } =
  * @param {string} [threadId]
  */
 export async function loadMemoriesToStore(threadId = null) {
+  const { getSharedStore } = await import('./backend.js')
   const store = getSharedStore()
   const memories = listMemories({ threadId, namespace: 'memories' })
   for (const m of memories) {
@@ -204,6 +211,7 @@ export async function loadMemoriesToStore(threadId = null) {
  * @param {string} [threadId]
  */
 export async function syncStoreToSQLite(threadId = null) {
+  const { getSharedStore } = await import('./backend.js')
   const store = getSharedStore()
   try {
     // 列出 StoreBackend 中 /memories/ 命名空间下的所有 key

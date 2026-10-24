@@ -12,6 +12,7 @@ import { removePathNoFollowSync } from '../src-electron/fs-safe.js'
 const root = fileURLToPath(new URL('../', import.meta.url)), filename = fileURLToPath(import.meta.url)
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'docs/baseline-3.0.6-manifest.json'), 'utf8'))
 const variant = process.argv.find(arg => arg.startsWith('--variant='))?.slice(10)
+const baselineRoot = process.argv.find(arg => arg.startsWith('--baseline-root='))?.slice(16) || manifest.baseline
 const profileEnabled = process.argv.includes('--profile')
 const uiChecks = process.argv.includes('--ui-checks')
 const bootLanguage = process.argv.find(arg => arg.startsWith('--lang='))?.slice(7)
@@ -23,7 +24,7 @@ if (!process.versions.electron) {
   for (let round = 0; round < 3; round++) {
     for (const kind of round % 2 ? ['preview', 'installed'] : ['installed', 'preview']) {
       const env = { ...process.env }; delete env.ELECTRON_RUN_AS_NODE
-      const child = spawn(require('electron'), [filename, '--variant=' + kind], { cwd: root, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })
+      const child = spawn(require('electron'), [filename, '--variant=' + kind, '--baseline-root=' + baselineRoot], { cwd: root, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })
       let output = '', errors = ''
       child.stdout.on('data', chunk => { output += chunk })
       child.stderr.on('data', chunk => { errors += chunk })
@@ -54,12 +55,12 @@ if (!process.versions.electron) {
   const data = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-office-startup-'))
   app.setPath('userData', path.join(data, 'profile'))
   app.on('window-all-closed', () => {})
-  const moduleRoot = variant === 'installed' ? manifest.baseline : root
-  const baselineHashes = manifest.entries.map(entry => [path.join(manifest.baseline, entry.path), hash(path.join(manifest.baseline, entry.path))])
+  const moduleRoot = variant === 'installed' ? baselineRoot : root
+  const baselineHashes = manifest.entries.map(entry => path.join(baselineRoot, entry.path)).filter(file => fs.existsSync(file)).map(file => [file, hash(file)])
   if (variant === 'installed') {
     // 独立进程内模拟安装资源布局，使原 host 正确读取 resources/office；
     // userData 已在上面独立设置，源文件和资源本身不改动。
-    Object.defineProperty(process, 'resourcesPath', { configurable: true, value: path.dirname(manifest.baseline) })
+    Object.defineProperty(process, 'resourcesPath', { configurable: true, value: path.dirname(baselineRoot) })
     Object.defineProperty(app, 'isPackaged', { configurable: true, value: true })
   }
   let win, host, db, ok = false

@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import path from 'node:path'
-import { load } from 'cheerio'
+import { loadHtml as load } from './html-parser.js'
 import { clipboardItemHtml, clipboardHtmlImages } from './clipboard-html-images.js'
 import { clipboardFileType } from './clipboard-content.js'
 import { readMediaTranscript, transcribeMedia } from './rag/mediaTranscription.js'

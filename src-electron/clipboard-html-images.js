@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import crypto from 'node:crypto'
-import { load } from 'cheerio'
+import { loadHtml as load } from './html-parser.js'
 import { readClipboardImage, storeClipboardPng } from './clipboard-media.js'
 
 const cache = new Map()
