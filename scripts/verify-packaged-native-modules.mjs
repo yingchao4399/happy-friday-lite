@@ -1,16 +1,25 @@
-// Audit every native binary and every platform package in an unpacked Linux
-// Electron app. This runs after afterPack and before release artifact upload.
-import { existsSync } from 'node:fs'
+// Audit every native binary and every platform package in an unpacked Electron
+// app. Linux remains the strict ELF audit; Windows uses the same entry point
+// and validates PE helpers in the final win-unpacked directory.
+import { existsSync, openSync, readSync, closeSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { auditNativeArtifact } from './native-artifact-audit.cjs'
 import { verifyDeepseekImports } from './afterpack.cjs'
 
-const targetArch = process.argv[2] || process.arch
-const outputDir = process.argv[3] || 'release'
-const unpackedDir = targetArch === 'x64' ? 'linux-unpacked' : `linux-${targetArch}-unpacked`
-const appDir = resolve(outputDir, unpackedDir)
+const args = process.argv.slice(2)
+const appDirArgIndex = args.indexOf('--appDir')
+const appDir = appDirArgIndex >= 0
+  ? resolve(args[appDirArgIndex + 1])
+  : (() => {
+      const targetArch = args[0] || process.arch
+      const outputDir = args[1] || 'release'
+      const unpackedDir = targetArch === 'x64' ? 'linux-unpacked' : `linux-${targetArch}-unpacked`
+      return resolve(outputDir, unpackedDir)
+    })()
+const targetArch = args[0] === '--appDir' ? process.arch : (args[0] || process.arch)
+const isWindowsArtifact = /(^|[\\/])win(?:32)?-unpacked$/.test(appDir)
 const packagedModules = join(appDir, 'resources', 'app', 'node_modules')
 
 if (!existsSync(packagedModules)) {
@@ -20,12 +29,14 @@ if (!existsSync(packagedModules)) {
 verifyDeepseekImports(packagedModules)
 console.log('[verify-packaged-native-modules] Verified packaged Harness imports')
 
-const audit = auditNativeArtifact(appDir, targetArch)
-console.log(`[verify-packaged-native-modules] Verified ${audit.binaries.length} native binaries are Linux ${targetArch}`)
-console.log(`[verify-packaged-native-modules] Verified ${audit.specs.length} target runtime packages`)
-console.log(`[verify-packaged-native-modules] Verified ${audit.platformOptionals.length} platform-specific optional dependency edges`)
-for (const warning of audit.warnings) {
-  console.warn(`[verify-packaged-native-modules] WARNING: ${warning}`)
+if (!isWindowsArtifact) {
+  const audit = auditNativeArtifact(appDir, targetArch)
+  console.log(`[verify-packaged-native-modules] Verified ${audit.binaries.length} native binaries are Linux ${targetArch}`)
+  console.log(`[verify-packaged-native-modules] Verified ${audit.specs.length} target runtime packages`)
+  console.log(`[verify-packaged-native-modules] Verified ${audit.platformOptionals.length} platform-specific optional dependency edges`)
+  for (const warning of audit.warnings) {
+    console.warn(`[verify-packaged-native-modules] WARNING: ${warning}`)
+  }
 }
 
 const requireBuiltinProbe = spawnSync(process.execPath, ['-e', `
@@ -53,4 +64,28 @@ if (process.platform === 'linux' && process.arch === targetArch) {
     throw new Error(`Packaged Electron native probe failed: ${probe.error || probe.stderr || probe.stdout}`)
   }
   process.stdout.write(probe.stdout)
+}
+
+if (isWindowsArtifact) {
+  const resources = join(appDir, 'resources')
+  const required = [
+    join(resources, 'office', 'native', 'system-print.exe'),
+    join(resources, 'office', 'native', 'xlsx-sidecar.exe'),
+    join(resources, 'office', 'ocr', 'win-ocr.exe'),
+  ]
+  const failures = []
+  for (const file of required) {
+    if (!existsSync(file)) {
+      failures.push(`missing Windows native helper: ${file}`)
+      continue
+    }
+    const header = Buffer.alloc(2)
+    const fd = openSync(file, 'r')
+    readSync(fd, header, 0, header.length, 0)
+    closeSync(fd)
+    const descriptor = header.toString('ascii')
+    if (descriptor !== 'MZ') failures.push(`not a PE executable: ${file}`)
+  }
+  if (failures.length) throw new Error(`Windows native artifact audit failed:\n${failures.map(value => `- ${value}`).join('\n')}`)
+  console.log(`[verify-packaged-native-modules] Verified ${required.length} Windows native helpers are PE executables`)
 }
