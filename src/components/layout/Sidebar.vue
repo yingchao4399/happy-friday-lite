@@ -66,7 +66,10 @@ const router = useRouter();
 const { t } = useI18n();
 
 const isModuleVisible = (item) => item.key === 'settings' || appStore.sidebarModules[item.key] !== false;
-const visibleSidebarMenuConfig = computed(() => sidebarMenuConfig.filter(isModuleVisible));
+const visibleSidebarMenuConfig = computed(() => sidebarMenuConfig.filter(isModuleVisible).sort((a, b) => {
+  const rank = id => { const index = appStore.moduleOrder.indexOf(id); return index < 0 ? appStore.moduleOrder.length + sidebarMenuConfig.findIndex(item => item.key === id) : index; };
+  return rank(a.key) - rank(b.key);
+}));
 const visibleSidebarBottomMenuConfig = computed(() => sidebarBottomMenuConfig.filter(isModuleVisible));
 
 // Use Vite's base URL so the avatar also resolves from Electron's file:// build.

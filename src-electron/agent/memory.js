@@ -135,6 +135,7 @@ export function listMemories({ threadId = null, namespace = 'memories' } = {}) {
  * @returns {Object}
  */
 export function logToolCall({
+  actor = 'friday-agent',
   threadId = null,
   requestId = null,
   toolName,
@@ -149,8 +150,8 @@ export function logToolCall({
   const outputStr = typeof output === 'string' ? output : JSON.stringify(output || {})
 
   queryAllRaw(
-    'INSERT INTO agent_tool_logs (id, threadId, requestId, toolName, arguments, output, status, durationMs, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [id, threadId, requestId, toolName, argsStr, outputStr, status, durationMs, now]
+    'INSERT INTO agent_tool_logs (id, actor, threadId, requestId, toolName, arguments, output, status, durationMs, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [id, actor, threadId, requestId, toolName, argsStr, outputStr, status, durationMs, now]
   )
   return { id, threadId, requestId, toolName, status, durationMs, createdAt: now }
 }

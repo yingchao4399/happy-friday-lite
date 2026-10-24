@@ -24,6 +24,7 @@
 
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
+import { convertToOpenAIFunction } from '@langchain/core/utils/function_calling'
 import { createLogger } from '../logger.js'
 import { logToolCall } from '../memory.js'
 
@@ -114,6 +115,98 @@ export function listToolNames() {
   return Array.from(registry.keys())
 }
 
+export function getCapabilityScope(def) {
+  if (def?.meta?.capabilityType === 'navigation') return 'ui'
+  if (def?.meta?.capabilityType === 'write') return 'write'
+  if (def?.meta?.capabilityType === 'read') return 'read'
+  return def?.meta?.requireApproval ? 'write' : 'read'
+}
+
+export function getRequiredScopes(def) {
+  return def?.meta?.requiredScopes || [getCapabilityScope(def)]
+}
+
+export function describeCapability(def) {
+  const parameters = convertToOpenAIFunction(tool(async () => '', {
+    name: def.name, description: def.description, schema: def.schema
+  })).parameters
+  return { name: def.name, description: def.description, inputSchema: parameters, scopes: getRequiredScopes(def) }
+}
+
+/**
+ * Friday AI Core 的统一能力执行入口。
+ * 所有外部入口（Agent、MCP、后台任务）必须先经过 schema、权限和审计包装，
+ * 不允许直接调用注册定义中的 handler。
+ */
+export async function executeCapability(name, args = {}, ctx = {}, options = {}) {
+  const def = registry.get(name)
+  const actor = options.actor || ctx.actor || 'friday-agent'
+  const startTime = Date.now()
+  const requestId = ctx.requestId || `${actor}_${startTime}`
+  const toolCallId = `${name}_${startTime}_${Math.random().toString(36).slice(2, 8)}`
+  const riskAssessment = getRiskAssessment(args)
+  // 未通过校验的输入可能包含敏感数据，不记录原始值。
+  let businessArgs = '[not validated]'
+  const hidden = !def || def.meta?.sensitive
+  let status = 'success'
+  let output
+  const previousPolicy = ctx.capabilityPolicy
+  const previousRisk = ctx.currentRiskAssessment
+  const previousApproval = ctx.approvedInvocation
+  try {
+    if (!def) throw new Error(`未知能力: ${name}`)
+    const parsed = def.schema.safeParse(args)
+    if (!parsed.success) throw new Error(`能力参数无效: ${parsed.error.issues.map(issue => issue.message).join('; ')}`)
+    businessArgs = stripRiskAssessment(parsed.data)
+    if (options.requireMcpExposure && !def.meta?.exposedViaMcp) throw new Error(`能力未开放给 MCP: ${name}`)
+    const requiredScopes = getRequiredScopes(def)
+    if (options.scopes && requiredScopes.some(scope => !options.scopes.includes(scope))) {
+      throw new Error(`调用主体未获 ${requiredScopes.join('+')} 权限: ${name}`)
+    }
+    let approved = !!options.approvalGranted
+    if (options.requireApproval && def.meta?.requireApproval && !approved) {
+      const { requestExternalApproval } = await import('../externalApproval.js')
+      if (!await requestExternalApproval(name, parsed.data, { ...ctx, actor })) throw new Error(`用户拒绝执行: ${name}`)
+      approved = true
+    }
+    if (ctx.signal?.aborted) throw new Error('任务已取消')
+    ctx.emit?.('agent-tool-call', {
+      requestId, toolCallId, toolName: name, arguments: hidden ? '[hidden]' : businessArgs,
+      actor, riskAssessment, requireApproval: !!def.meta?.requireApproval
+    })
+    ctx.capabilityPolicy = { ...options, actor }
+    ctx.currentRiskAssessment = riskAssessment
+    // 审批凭据只描述本次实际调用，不能作为子能力的通用放行开关。
+    ctx.approvedInvocation = approved ? { name, args: businessArgs } : null
+    output = await def.handler(businessArgs, ctx)
+    return output
+  } catch (error) {
+    status = 'error'
+    output = { error: error.message }
+    throw error
+  } finally {
+    ctx.capabilityPolicy = previousPolicy
+    ctx.currentRiskAssessment = previousRisk
+    ctx.approvedInvocation = previousApproval
+    const outputText = hidden ? '[hidden]' : typeof output === 'string' ? output : JSON.stringify(output ?? null)
+    ctx.emit?.('agent-tool-result', { requestId, toolCallId, toolName: name, actor, output: outputText, status })
+    try {
+      logToolCall({
+        actor,
+        threadId: ctx.threadId || requestId,
+        requestId,
+        toolName: name,
+        arguments: hidden ? '[hidden]' : businessArgs,
+        output: outputText,
+        status,
+        durationMs: Date.now() - startTime
+      })
+    } catch (error) {
+      log.warn(`能力审计写入失败: ${name}: ${error.message}`)
+    }
+  }
+}
+
 /**
  * 把所有注册项转为 LangChain tool 数组
  * 自动包装：
@@ -127,6 +220,7 @@ export function listToolNames() {
 export function buildLangChainTools(ctx) {
   const tools = []
   for (const def of registry.values()) {
+    if (def.meta?.catalogOnly) continue
     const { name, description, schema, handler, meta } = def
     const toolSchema = meta.requireApproval ? withRiskAssessment(schema) : schema
     const toolDescription = meta.requireApproval
@@ -135,66 +229,12 @@ export function buildLangChainTools(ctx) {
 
     // 包装 handler：增加日志、审计、IPC 通知
     const wrappedHandler = async (args) => {
-      const startTime = Date.now()
-      const toolCallId = `${name}_${startTime}_${Math.random().toString(36).slice(2, 8)}`
-      const riskAssessment = getRiskAssessment(args)
-      const handlerArgs = stripRiskAssessment(args)
-      // 风险评估是调用协议元数据，不属于任何工具的业务参数。
-      delete handlerArgs.riskAssessment
-      delete handlerArgs.risk_assessment
-
-      log.info(`调用工具: ${name}, args=${JSON.stringify(args)}`)
-
-      // 推送工具调用开始事件到前端
-      ctx.emit('agent-tool-call', {
-        requestId: ctx.requestId,
-        toolCallId,
-        toolName: name,
-        arguments: handlerArgs,
-        riskAssessment,
-        requireApproval: !!meta.requireApproval && !ctx.unattended
-      })
-
-      let output = ''
-      let status = 'success'
       try {
-        ctx.currentRiskAssessment = riskAssessment
-        output = await handler(handlerArgs, ctx)
-        log.info(`工具完成: ${name}, duration=${Date.now() - startTime}ms, outputLen=${String(output).length}`)
+        return await executeCapability(name, args, ctx, { actor: 'friday-agent' })
       } catch (e) {
-        status = 'error'
-        output = `工具执行失败: ${e.message}`
         log.error(`工具失败: ${name}, error=${e.message}`)
-        log.error(e.stack)
-      } finally {
-        delete ctx.currentRiskAssessment
+        return `工具执行失败: ${e.message}`
       }
-
-      // 推送工具结果事件到前端
-      ctx.emit('agent-tool-result', {
-        requestId: ctx.requestId,
-        toolCallId,
-        toolName: name,
-        output,
-        status
-      })
-
-      // 审计日志落库
-      try {
-        logToolCall({
-          threadId: ctx.threadId,
-          requestId: ctx.requestId,
-          toolName: name,
-          arguments: handlerArgs,
-          output,
-          status,
-          durationMs: Date.now() - startTime
-        })
-      } catch (e) {
-        log.warn(`审计日志落库失败: ${name}`, e.message)
-      }
-
-      return output
     }
 
     // 使用 LangChain tool() 函数创建工具
@@ -217,7 +257,7 @@ export function buildLangChainTools(ctx) {
 export function buildInterruptConfig() {
   const interruptOn = {}
   for (const def of registry.values()) {
-    if (def.meta?.requireApproval) {
+    if (def.meta?.requireApproval && !def.meta?.catalogOnly) {
       interruptOn[def.name] = true
     }
   }

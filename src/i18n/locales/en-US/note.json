@@ -1,5 +1,8 @@
 {
   "title": "Note Module",
+  "pin": "Pin note",
+  "unpin": "Unpin note",
+  "openOriginal": "Open original note",
   "placeholder": "Start writing your note...",
   "titlePlaceholder": "Enter a title",
   "back": "Back",
@@ -52,6 +55,18 @@
     "noNotebooks": "No notebooks",
     "duplicate": "Duplicate",
     "delete": "Delete"
+  },
+  "selection": {
+    "start": "Select notes",
+    "count": "{count} selected",
+    "cancel": "Cancel selection",
+    "selectAll": "Select or deselect all",
+    "selectNote": "Select note: {name}",
+    "pin": "Pin or unpin selected notes",
+    "delete": "Delete selected notes",
+    "deleteConfirm": "Move {count} selected notes to Recently Deleted?",
+    "addedToKb": "Added {count} notes to the \"{name}\" knowledge base",
+    "actionFailed": "Batch action failed: {error}"
   },
   "toc": {
     "title": "Contents",
@@ -264,6 +279,7 @@
   },
   "toast": {
     "savedToKb": "Saved to \"{name}\" knowledge base",
+    "alreadyInKb": "This note is already in the \"{name}\" knowledge base",
     "saveFailed": "Save failed",
     "saveFailedWithError": "Save failed: {error}",
     "saveFailedShort": "Save failed",

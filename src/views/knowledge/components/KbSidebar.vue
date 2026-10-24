@@ -5,6 +5,9 @@
         <div class="sidebar-topbar" v-show="!searchMode">
           <span class="topbar-spacer" aria-hidden="true"></span>
           <div class="topbar-actions">
+            <button class="topbar-btn" @click="$emit('add-category')" :title="$t('knowledge.actions.newCategory')" :aria-label="$t('knowledge.actions.newCategory')">
+              <PlusIcon :size="16" />
+            </button>
             <button class="topbar-btn" @click="$emit('enter-search')" title="搜索">
               <SearchIcon />
             </button>
@@ -29,7 +32,7 @@
       <div class="sidebar-content">
         <template v-for="category in filteredCategories" :key="category.id">
           <div class="category-group" v-if="category._matched || !searchQuery">
-            <div class="category-header" @click="$emit('toggle-category', category.id)">
+            <div class="category-header" @click="$emit('toggle-category', category.id)" @contextmenu.prevent="$emit('show-category-menu', $event, category)">
               <ChevronIcon :class="{ expanded: category.expanded }" />
               <span class="category-name">{{ category.name }}</span>
               <button
@@ -42,6 +45,9 @@
               </button>
               <button v-if="!searchQuery && category.id !== 'agent'" class="add-btn" @click.stop="$emit('add-kb', category.id)" title="添加知识库">
                 <PlusIcon :size="14" />
+              </button>
+              <button v-if="!searchQuery && category.id.startsWith('category-')" class="add-btn" @click.stop="$emit('show-category-menu', $event, category)" :title="$t('knowledge.actions.manageCategory')">
+                <MoreHorizontalIcon :size="14" />
               </button>
             </div>
             <Transition name="slide">
@@ -70,6 +76,7 @@
 </template>
 
 <script setup>
+import { MoreHorizontalIcon } from 'lucide-vue-next';
 import { SearchIcon, ChevronIcon, PlusIcon, BookIcon, FolderOpenIcon } from './icons';
 import { coverOptions } from '../constants';
 
@@ -91,6 +98,8 @@ defineEmits([
   'update:searchQuery',
   'toggle-category',
   'add-kb',
+  'add-category',
+  'show-category-menu',
   'select-kb',
   'show-context-menu',
   'open-agent-dir'
@@ -289,6 +298,8 @@ defineEmits([
         &:hover .add-btn {
           opacity: 1;
         }
+
+        &:focus-within .add-btn { opacity: 1; }
 
         .open-dir-btn {
           margin-right: 2px;

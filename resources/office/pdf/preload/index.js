@@ -1,5 +1,15 @@
 "use strict";
 const electron = require("electron");
+function installOfficeFileBridge(bridge, ipc) {
+  bridge.exposeInMainWorld("fridayOffice", {
+    exportSelectionText: (request) => ipc.invoke("office-file-export-selection-text", request),
+    snapshot: (request) => ipc.invoke("office-file-current-snapshot", request),
+    exportSnapshot: (request) => ipc.invoke("office-file-export-snapshot", request),
+    cancelExport: () => ipc.invoke("office-file-cancel-export"),
+    command: (command) => ipc.invoke("office-file-command", command),
+    preferences: (patch) => ipc.invoke("office-file-preferences", patch)
+  });
+}
 const DROP_OPEN_CHANNEL = "app:open-dropped-files";
 const OPENABLE_DOC_RE = /\.(docx|xlsx|xlsm|xls|csv|pptx|pdf|md|markdown|html|htm)$/i;
 const KNOWN_UNSUPPORTED_DOC_RE = /\.(doc|rtf|odt|ppt|pps|odp|ods|xlsb|pages|key|numbers)$/i;
@@ -81,6 +91,7 @@ const PDF_CHANNELS = {
   saveAsResult: "pdf:save-as-result",
   saveAsFlow: "pdf:save-as-flow",
   printRequest: "pdf:print-request",
+  printFile: "pdf:print-file",
   fileRenamed: "pdf:file-renamed",
   getLanguage: "app:get-language",
   languageChanged: "app:language-changed",
@@ -98,7 +109,9 @@ const AI_CHANNELS = {
   imageSearch: "ai:image-search",
   fetchImage: "ai:fetch-image"
 };
+installOfficeFileBridge(electron.contextBridge, electron.ipcRenderer);
 const api = {
+  printFile: (path, pages, job) => electron.ipcRenderer.invoke(PDF_CHANNELS.printFile, path, pages, job),
   consumePending: () => electron.ipcRenderer.invoke(PDF_CHANNELS.consumePending),
   readFile: (path) => electron.ipcRenderer.invoke(PDF_CHANNELS.readFile, path),
   save: (request) => electron.ipcRenderer.invoke(PDF_CHANNELS.save, request),

@@ -1,3 +1,4 @@
+const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;
 "use strict";
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -1108,6 +1109,12 @@ function setHeadlessMode(on) {
   headless = on;
 }
 
+// vendor/happyoffice/packages/electron-utils/src/system-print-window.ts
+var import_electron2 = require("electron");
+
+// vendor/happyoffice/packages/electron-utils/src/system-print.ts
+var import_electron3 = require("electron");
+
 // vendor/happyoffice/packages/electron-utils/src/headless-export.ts
 var HEADLESS_TARGETS = {
   docs: ["pdf", "html"],
@@ -1242,17 +1249,17 @@ function resolveRendererFile(roots, requestUrl) {
 }
 
 // vendor/happyoffice/packages/electron-utils/src/renderer-protocol.ts
-var import_electron2 = require("electron");
+var import_electron4 = require("electron");
 var import_node_url = require("node:url");
 function registerRendererScheme() {
-  import_electron2.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
+  import_electron4.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
 }
 function installRendererProtocol(roots) {
   const table = new Map(Object.entries(roots));
-  import_electron2.protocol.handle(RENDERER_SCHEME, (request) => {
+  import_electron4.protocol.handle(RENDERER_SCHEME, (request) => {
     const file = resolveRendererFile(table, request.url);
     if (!file) return new Response(null, { status: 404 });
-    return import_electron2.net.fetch((0, import_node_url.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
+    return import_electron4.net.fetch((0, import_node_url.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
   });
 }
 // Annotate the CommonJS export names for ESM import in node:

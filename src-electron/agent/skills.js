@@ -31,6 +31,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { getAgentRootDir } from './backend.js'
 import { createLogger } from './logger.js'
+import { removePathNoFollowSync } from '../fs-safe.js'
 
 const log = createLogger('Skills')
 
@@ -351,7 +352,7 @@ export function deleteSkill(id) {
     if (!fs.existsSync(target)) {
       return { success: false, error: 'Skill 不存在' }
     }
-    fs.rmSync(target, { recursive: true, force: true })
+    removePathNoFollowSync(target, { root: skillDir })
     log.info(`已删除 Skill: ${id}`)
     // 重建索引，保持 _index.json 与磁盘一致
     generateSkillIndex()
@@ -458,7 +459,7 @@ export function restoreBuiltinSkills() {
     try {
       const destDir = path.join(skillDir, name)
       if (fs.existsSync(destDir)) {
-        fs.rmSync(destDir, { recursive: true, force: true })
+        removePathNoFollowSync(destDir, { root: skillDir })
       }
       copyDirRecursive(srcDir, destDir)
       restored.push(name)

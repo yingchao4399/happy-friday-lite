@@ -24,11 +24,12 @@
 import fs from 'fs'
 import path from 'path'
 import http from 'http'
-import { randomBytes } from 'crypto'
+import { randomBytes, timingSafeEqual, createHash, randomUUID } from 'crypto'
 import { createLogger } from './logger.js'
 import { getDataDir, loadConfig, saveConfig } from '../config.js'
 import { getAgentRootDir } from './backend.js'
-import { listRegisteredTools } from './tools/registry.js'
+import { executeCapability, getRequiredScopes, listRegisteredTools } from './tools/registry.js'
+import { submitExternalTask, getExternalTaskStatus, cancelExternalTask, pauseExternalTask, resumeExternalTask, cancelExternalTasksForActor, recoverExternalTasks } from './externalTasks.js'
 // 触发 builtin 工具注册副作用（registerTool），确保 listRegisteredTools() 返回全部内置工具
 import './tools/index.js'
 
@@ -379,7 +380,6 @@ let toolSpecsCache = null
  * 缓存：内置工具集在运行期不变
  */
 function getToolSpecs() {
-  if (toolSpecsCache) return toolSpecsCache
   toolSpecsCache = listRegisteredTools()
     .filter((def) => def.meta?.exposedViaMcp === true)
     .map((def) => {
@@ -413,7 +413,7 @@ function getToolSpecs() {
  * - autoApprove=true：MCP 模式下无前端审批通道，跳过 execute_command 的审批
  * - emit 为空函数：无前端可推送工具调用事件
  */
-function buildMcpCtx() {
+function buildMcpCtx(client) {
   const id = `mcp-${Date.now()}-${randomBytes(4).toString('hex')}`
   return {
     logger: log,
@@ -423,7 +423,8 @@ function buildMcpCtx() {
     requestId: id,
     mainWindow: null,
     emit: () => {},
-    autoApprove: true,
+    actor: `mcp:${client.id}`,
+    autoApprove: false,
     db: null
   }
 }
@@ -432,14 +433,29 @@ function buildMcpCtx() {
  * 工厂：每个请求新建一个低层 Server（stateless 模式不可跨请求复用 connect）
  * 必须声明 capabilities.tools，否则客户端看不到工具能力
  */
-function buildLocalServer() {
+const VIRTUAL_TOOLS = [
+  { name: 'discover_capabilities', description: '列出当前客户端已获授权的 Friday 能力及参数格式。', inputSchema: { type: 'object', properties: {} } },
+  { name: 'search_resources', description: '跨 Friday 内容搜索。', inputSchema: { type: 'object', properties: { query: { type: 'string' }, limit: { type: 'integer' } }, required: ['query'] } },
+  { name: 'invoke_capability', description: '按名称通过 Friday AI Core 执行一项已授权能力。', inputSchema: { type: 'object', properties: { name: { type: 'string' }, args: { type: 'object' } }, required: ['name'] } },
+  { name: 'submit_task', description: '提交异步任务，可提供自然语言 instruction 或已规划的 steps。', inputSchema: { type: 'object', properties: { instruction: { type: 'string' }, steps: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, args: { type: 'object' } }, required: ['name'] } } } } },
+  { name: 'get_task_status', description: '查询本客户端任务状态、结果及执行记录。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'cancel_task', description: '取消本客户端仍在运行的任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'pause_task', description: '在当前步骤结束后暂停任务，保留已完成结果。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'resume_task', description: '继续已暂停任务，不重复已完成的步骤。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } }
+]
+
+function availableToolSpecs(client) {
+  return getToolSpecs().filter(spec => getRequiredScopes(spec.def).every(scope => client.scopes.includes(scope)))
+}
+
+function buildLocalServer(client) {
   const server = new Server(
     { name: SERVER_NAME, version: SERVER_VERSION },
     { capabilities: { tools: {} } }
   )
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: getToolSpecs().map(s => ({
+    tools: [...availableToolSpecs(client), ...VIRTUAL_TOOLS].map(s => ({
       name: s.name,
       description: s.description,
       inputSchema: s.inputSchema
@@ -449,16 +465,39 @@ function buildLocalServer() {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request?.params?.name
     const args = request?.params?.arguments || {}
-    const spec = getToolSpecs().find(s => s.name === name)
-    if (!spec) {
+    const spec = availableToolSpecs(client).find(s => s.name === name)
+    const virtual = VIRTUAL_TOOLS.some(s => s.name === name)
+    if (!spec && !virtual) {
       return {
         content: [{ type: 'text', text: `Unknown tool: ${name}` }],
         isError: true
       }
     }
-    const ctx = buildMcpCtx()
+    const ctx = buildMcpCtx(client)
     try {
-      const result = await spec.def.handler(args, ctx)
+      let result
+      if (name === 'discover_capabilities') {
+        result = availableToolSpecs(client).map(item => ({ name: item.name, description: item.description, inputSchema: item.inputSchema, scopes: getRequiredScopes(item.def) }))
+      } else if (name === 'submit_task') {
+        result = submitExternalTask(args, ctx.actor, client.scopes)
+      } else if (name === 'get_task_status') {
+        result = getExternalTaskStatus(args.taskId, ctx.actor)
+      } else if (name === 'cancel_task') {
+        result = cancelExternalTask(args.taskId, ctx.actor)
+      } else if (name === 'pause_task') {
+        result = pauseExternalTask(args.taskId, ctx.actor)
+      } else if (name === 'resume_task') {
+        result = resumeExternalTask(args.taskId, ctx.actor, client.scopes)
+      } else {
+        const target = name === 'search_resources' ? 'search_all' : name === 'invoke_capability' ? args.name : name
+        const input = name === 'invoke_capability' ? args.args || {} : args
+        result = await executeCapability(target, input, ctx, {
+        actor: ctx.actor,
+        requireMcpExposure: true,
+        requireApproval: true,
+        scopes: client.scopes
+        })
+      }
       const text = typeof result === 'string' ? result : JSON.stringify(result)
       return { content: [{ type: 'text', text }] }
     } catch (e) {
@@ -520,8 +559,69 @@ function readBody(req) {
 /** 校验 Host 头：仅允许 127.0.0.1 / localhost / [::1]，防 DNS rebinding */
 function isLocalHost(hostHeader) {
   if (!hostHeader) return false
-  const host = hostHeader.split(':')[0].toLowerCase()
+  const host = hostHeader.toLowerCase().replace(/:\d+$/, '')
   return host === '127.0.0.1' || host === 'localhost' || host === '[::1]'
+}
+
+function getLocalMcpToken() {
+  const cfg = loadConfig() || {}
+  if (!cfg.mcp?.authToken) {
+    cfg.mcp = { ...(cfg.mcp || {}), authToken: randomBytes(32).toString('hex') }
+    saveConfig(cfg)
+  }
+  return cfg.mcp.authToken
+}
+
+// 仅供应用主进程内置客户端使用；不要把此凭据发送到渲染进程或日志。
+export function getLocalMcpAuthHeaders() {
+  return { Authorization: `Bearer ${getLocalMcpToken()}` }
+}
+
+function hashToken(token) {
+  return createHash('sha256').update(token).digest('hex')
+}
+
+function getLocalMcpClient(req) {
+  const header = req.headers.authorization || ''
+  const supplied = header.match(/^Bearer\s+(.+)$/i)?.[1] || ''
+  if (!supplied) return null
+  const cfg = loadConfig() || {}
+  const hash = Buffer.from(hashToken(supplied), 'hex')
+  for (const client of cfg.mcp?.clients || []) {
+    const expected = Buffer.from(client.tokenHash || '', 'hex')
+    if (hash.length === expected.length && timingSafeEqual(hash, expected)) return { id: client.id, scopes: client.scopes || ['read'] }
+  }
+  const legacy = Buffer.from(hashToken(getLocalMcpToken()), 'hex')
+  return hash.length === legacy.length && timingSafeEqual(hash, legacy)
+    ? { id: 'legacy', scopes: ['read', 'ui'] }
+    : null
+}
+
+export function pairLocalMcpClient({ name, scopes = ['read'] } = {}) {
+  const allowed = ['read', 'write', 'ui']
+  if (!name || typeof name !== 'string' || name.length > 80) throw new Error('客户端名称无效')
+  if (!Array.isArray(scopes) || !scopes.length || scopes.some(scope => !allowed.includes(scope))) throw new Error('授权范围无效')
+  const token = randomBytes(32).toString('hex')
+  const cfg = loadConfig() || {}
+  if (!name.trim()) throw new Error('客户端名称无效')
+  const client = { id: randomUUID(), name: name.trim(), scopes: [...new Set(scopes)], tokenHash: hashToken(token), createdAt: new Date().toISOString() }
+  cfg.mcp = { ...(cfg.mcp || {}), clients: [...(cfg.mcp?.clients || []), client] }
+  saveConfig(cfg)
+  const port = localPort || getConfiguredPort() || LOCAL_PORT_PREFERRED
+  return { id: client.id, name: client.name, scopes: client.scopes, json: JSON.stringify({ mcpServers: { 'happy-friday': { type: 'streamable_http', url: `http://127.0.0.1:${port}/mcp`, headers: { Authorization: `Bearer ${token}` } } } }, null, 2) }
+}
+
+export function listLocalMcpClients() {
+  return (loadConfig()?.mcp?.clients || []).map(({ tokenHash: _hash, ...client }) => client)
+}
+
+export function revokeLocalMcpClient(id) {
+  const cfg = loadConfig() || {}
+  const before = cfg.mcp?.clients || []
+  cfg.mcp = { ...(cfg.mcp || {}), clients: before.filter(client => client.id !== id) }
+  saveConfig(cfg)
+  cancelExternalTasksForActor(`mcp:${id}`)
+  return { success: cfg.mcp.clients.length < before.length }
 }
 
 function sendJson(res, status, body) {
@@ -534,6 +634,11 @@ async function handleHttpRequest(req, res) {
   // Host 头校验
   if (!isLocalHost(req.headers.host || '')) {
     sendJson(res, 403, { jsonrpc: '2.0', error: { code: -32600, message: 'Forbidden: non-local Host' } })
+    return
+  }
+  const client = getLocalMcpClient(req)
+  if (!client) {
+    sendJson(res, 401, { jsonrpc: '2.0', error: { code: -32001, message: 'Unauthorized: pair this local MCP client in Friday first' } })
     return
   }
   // 仅接受 POST（stateless streamable http）
@@ -551,7 +656,7 @@ async function handleHttpRequest(req, res) {
     return
   }
   // 每请求新建 Server + transport（stateless）
-  const server = buildLocalServer()
+  const server = buildLocalServer(client)
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true
@@ -575,6 +680,10 @@ async function handleHttpRequest(req, res) {
  * 启动本机 MCP HTTP 服务
  */
 export async function startLocalMcpServer({ persist = true } = {}) {
+  if (!startLocalMcpServer.recovered) {
+    recoverExternalTasks()
+    startLocalMcpServer.recovered = true
+  }
   if (localHttpServer) {
     if (persist) persistLocalConfig({ port: localPort, enabled: true })
     return { success: true, port: localPort }
@@ -690,7 +799,8 @@ export function getLocalMcpConfig() {
       mcpServers: {
         'happy-friday': {
           type: 'streamable_http',
-          url: `http://127.0.0.1:${port}/mcp`
+          url: `http://127.0.0.1:${port}/mcp`,
+          headers: { Authorization: `Bearer ${getLocalMcpToken()}` }
         }
       }
     },

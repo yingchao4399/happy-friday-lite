@@ -1,5 +1,8 @@
 {
   "title": "DeepSeek Harness",
+  "failedStage": "失败阶段",
+  "logLocation": "日志目录",
+  "phase": { "dependencies": "检查运行依赖", "configuration": "加载模型配置", "mcp": "初始化 MCP", "plugins": "加载插件树并等待服务", "ready": "服务已就绪" },
   "starting": "正在启动 DeepSeek Harness",
   "startingDetail": "正在同步统一模型配置并连接 Happy Friday 工具。",
   "modelRequired": "需要配置模型",

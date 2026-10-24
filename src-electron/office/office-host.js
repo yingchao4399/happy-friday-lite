@@ -1,12 +1,14 @@
 import path from 'path'
 import fs from 'fs'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 import { app, dialog, ipcMain, nativeTheme, shell } from 'electron'
 import XLSX from 'xlsx'
 import AdmZip from 'adm-zip'
 import { registerOfficeAiBridge } from './office-ai-bridge.js'
 import { getDataDir } from '../config.js'
+import { normalizeOfficeDocumentSelection } from './document-selection.js'
+import { registerOfficeFileCommands } from './file-commands.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const _require = createRequire(import.meta.url)
@@ -47,6 +49,7 @@ const state = {
   htmlFullScreen: false,
   wasWindowFullScreen: false,
   initialized: false,
+  latestDocumentSelection: null,
 }
 
 let savedEventSubscribers = []
@@ -88,16 +91,16 @@ function editorPaths(editor) {
   }
 }
 
-/** 加载四个上游编辑器主进程 bundle（每个 bundle 自包含其 workspace 依赖） */
-async function loadBundles() {
+/** 最近文件和偏好由 docs 提供，其余引擎在首次打开时加载。 */
+async function loadBundles(editors = ['docs']) {
   const bundles = {}
-  for (const editor of EDITORS) {
+  for (const editor of editors) {
     const { bundlePath } = editorPaths(editor)
     if (!fs.existsSync(bundlePath)) {
       console.warn(`[Office] bundle missing: ${bundlePath}`)
       continue
     }
-    const mod = await import(`file://${bundlePath}`)
+    const mod = await import(pathToFileURL(bundlePath).href)
     bundles[editor] = mod.default ?? mod
   }
   return bundles
@@ -121,17 +124,17 @@ function tolerateDuplicateIpcHandlers() {
   ipcMain.handle.__officePatched = true
 }
 
-function configureRuntimes() {
+function configureRuntimes(editor) {
   const { docs, sheets, slides, pdf } = state.bundles
   const root = officeRoot()
 
-  docs.configureDocsRuntime({
+  if (editor === 'docs') docs.configureDocsRuntime({
     preloadPath: editorPaths('docs').preloadPath,
     rendererFile: editorPaths('docs').rendererFile,
   })
 
   const sidecarPath = path.join(root, 'sheets', 'sidecar', process.platform === 'win32' ? 'xlsx-sidecar.exe' : 'xlsx-sidecar')
-  sheets.configureSheetsRuntime({
+  if (editor === 'sheets') sheets.configureSheetsRuntime({
     preloadPath: editorPaths('sheets').preloadPath,
     rendererFile: editorPaths('sheets').rendererFile,
     sidecarPath: fs.existsSync(sidecarPath) ? sidecarPath : undefined,
@@ -143,7 +146,7 @@ function configureRuntimes() {
     },
   })
 
-  slides.configureSlidesRuntime({
+  if (editor === 'slides') slides.configureSlidesRuntime({
     preloadPath: editorPaths('slides').preloadPath,
     rendererFilePath: editorPaths('slides').rendererFile,
     openGeneratedPath: (p) => {
@@ -152,7 +155,7 @@ function configureRuntimes() {
     },
   })
 
-  pdf.configurePdfRuntime({
+  if (editor === 'pdf') pdf.configurePdfRuntime({
     preloadPath: editorPaths('pdf').preloadPath,
     rendererFile: editorPaths('pdf').rendererFile,
     openGeneratedPath: (p) => {
@@ -162,14 +165,15 @@ function configureRuntimes() {
   })
 }
 
-function registerEditorIpc() {
+function registerEditorIpc(editor) {
   const { docs, sheets, slides } = state.bundles
   // ai:* / project:* / app:get-language 等重复通道由 tolerateDuplicateIpcHandlers 兜底
-  try { docs.registerAiIpc?.() } catch (e) { console.warn('[Office] docs registerAiIpc:', e.message) }
-  try { docs.registerProjectIpc?.() } catch (e) { console.warn('[Office] docs registerProjectIpc:', e.message) }
-  try { docs.registerDocsIpc() } catch (e) { console.warn('[Office] registerDocsIpc:', e.message) }
-  try { sheets.registerSheetsIpc() } catch (e) { console.warn('[Office] registerSheetsIpc:', e.message) }
-  try { slides.registerSlidesIpc() } catch (e) { console.warn('[Office] registerSlidesIpc:', e.message) }
+  if (editor === 'docs') {
+    docs.registerAiIpc?.()
+    docs.registerProjectIpc?.()
+    docs.registerDocsIpc()
+  } else if (editor === 'sheets') sheets.registerSheetsIpc()
+  else if (editor === 'slides') slides.registerSlidesIpc()
   // Friday 接管编辑器 ai:* 通道（须在编辑器注册之后，后注册者覆盖）
   registerOfficeAiBridge()
 }
@@ -210,32 +214,32 @@ function registerAppPrefsIpc() {
   nativeTheme.themeSource = currentOfficeTheme()
 }
 
-function wireShellHooks() {
+function wireShellHooks(editor) {
   const { docs, sheets, slides } = state.bundles
   const win = state.mainWindow
 
-  docs.setDocsShellWindow?.(win)
-  sheets.setSheetsShellWindow?.(win)
-  slides.setSlidesShellWindow?.(win)
+  if (editor === 'docs') docs.setDocsShellWindow?.(win)
+  if (editor === 'sheets') sheets.setSheetsShellWindow?.(win)
+  if (editor === 'slides') slides.setSlidesShellWindow?.(win)
 
   // 保存/另存为/首次保存 → 同步视图条目状态并通知知识库与 RAG
-  docs.setDocsFileSavedHook?.((wc, filePath) => {
+  if (editor === 'docs') docs.setDocsFileSavedHook?.((wc, filePath) => {
     const entry = entryByWebContents(wc)
     if (entry) entry.filePath = filePath
     emitFileSaved('docs', filePath, entry?.viewId)
   })
-  docs.setDocsFileOpenedHook?.((wcArg, filePath) => {
+  if (editor === 'docs') docs.setDocsFileOpenedHook?.((wcArg, filePath) => {
     const entry = entryByWebContents(wcArg)
     if (entry) entry.filePath = filePath
   })
-  sheets.setSheetsWorkbookOpenedHook?.((wc, filePath) => {
+  if (editor === 'sheets') sheets.setSheetsWorkbookOpenedHook?.((wc, filePath) => {
     const entry = entryByWebContents(wc)
     if (entry) entry.filePath = filePath
     // 最近文件统一记录在 docs bundle 的 recents 存储中
     try { docs.recordRecentFile?.(filePath) } catch { /* ignore */ }
     emitFileSaved('sheets', filePath, entry?.viewId)
   })
-  slides.setSlidesOpenedHook?.((wc, filePath) => {
+  if (editor === 'slides') slides.setSlidesOpenedHook?.((wc, filePath) => {
     const entry = entryByWebContents(wc)
     if (entry) entry.filePath = filePath
     try { docs.recordRecentFile?.(filePath) } catch { /* ignore */ }
@@ -243,6 +247,38 @@ function wireShellHooks() {
   })
   // PDF 编辑器无 opened hook，openOfficeFile 内统一补记
 }
+
+const pendingEditors = new Map()
+async function ensureEditor(type) {
+  if (!EDITORS.includes(type) || !state.initialized) return false
+  if (state.bundles[type]) return true
+  if (pendingEditors.has(type)) return pendingEditors.get(type)
+  const loading = (async () => {
+    const started = performance.now()
+    try {
+      const loaded = await loadBundles([type])
+      if (!loaded[type]) return false
+      state.bundles[type] = loaded[type]
+      configureRuntimes(type)
+      registerEditorIpc(type)
+      // 延迟注册的编辑器不得覆盖 Friday 的主题/自动保存策略。
+      registerAppPrefsIpc()
+      wireShellHooks(type)
+      if (type === 'slides') wireSlidesShowFullscreen()
+      console.log('[Office] 引擎首次加载完成:', type, Math.round(performance.now() - started), 'ms')
+      return true
+    } catch (error) {
+      delete state.bundles[type]
+      console.warn('[Office] 引擎加载失败:', type, error.message)
+      return false
+    } finally { pendingEditors.delete(type) }
+  })()
+  pendingEditors.set(type, loading)
+  return loading
+}
+
+/** 诊断只报告引擎状态，不包含文档正文或用户配置。 */
+export function getOfficeLoadedEditors() { return Object.keys(state.bundles || {}) }
 
 function emitFileSaved(type, filePath, viewId) {
   if (!filePath) return
@@ -323,6 +359,12 @@ function attachView(entry) {
   view.setVisible(false)
   view.setBounds(contentBounds())
   state.views.set(viewId, entry)
+  view.webContents.on('console-message', (event) => {
+    if (['warning', 'error'].includes(event.level)) console.error(`[Office:${viewId}] ${event.message} (${event.sourceId}:${event.lineNumber})`)
+  })
+  view.webContents.on('did-fail-load', (_event, code, description, url, isMainFrame) => {
+    console.error(`[Office:${viewId}] load failed (${code}) ${description}: ${url} main=${isMainFrame}`)
+  })
   // 编辑器内全屏（如 Slides 放映）：从"窗口内全屏"升级为整个屏幕的系统全屏
   view.webContents.on('enter-html-full-screen', enterHtmlFullScreen)
   view.webContents.on('leave-html-full-screen', leaveHtmlFullScreen)
@@ -330,6 +372,7 @@ function attachView(entry) {
     console.error(`[Office] ${viewId} renderer crashed`)
     // 保留崩溃现场供上层提示恢复；关闭视图并通知前端（对应 Tab 激活时会重建）
     hideView(viewId, true)
+    clearOfficeDocumentSelection(viewId)
     notifyVue('office-view-closed', { type, viewId })
   })
 }
@@ -340,6 +383,9 @@ function showView(viewId) {
   }
   const entry = state.views.get(viewId)
   if (entry) {
+    if (state.latestDocumentSelection?.documentId && state.latestDocumentSelection.documentId !== viewId) {
+      clearOfficeDocumentSelection(state.latestDocumentSelection.documentId)
+    }
     entry.view.setBounds(state.htmlFullScreen ? fullContentBounds() : contentBounds())
     entry.view.setVisible(true)
     state.visibleId = viewId
@@ -358,7 +404,13 @@ function hideView(viewId, destroy = false) {
     if (state.htmlFullScreen) leaveHtmlFullScreen()
   }
   if (destroy && !entry.view.webContents.isDestroyed()) {
-    try { entry.view.webContents.close() } catch { /* already gone */ }
+    const contents = entry.view.webContents
+    // 先完成当前 IPC/视图分离，再销毁原生资源；保存确认已由 closeOfficeFile 完成。
+    setImmediate(() => {
+      if (!contents.isDestroyed()) {
+        try { contents.close({ waitForBeforeUnload: false }) } catch { /* 已销毁 */ }
+      }
+    })
   }
 }
 
@@ -411,11 +463,53 @@ export async function initOfficeHost(mainWindow) {
   }
 
   tolerateDuplicateIpcHandlers()
-  configureRuntimes()
-  registerEditorIpc()
+  configureRuntimes('docs')
+  registerEditorIpc('docs')
   registerAppPrefsIpc()
-  wireShellHooks()
-  wireSlidesShowFullscreen()
+  registerOfficeFileCommands({
+    findEntry: entryByWebContents,
+    openDocument: async () => {
+      const result = await openOfficeFileDialog()
+      if (result.success) notifyVue('office-opened', result)
+      return result
+    },
+    saveAsDocument: async entry => {
+      if (entry.type !== 'pdf') return { ok: false, error: { code: 'OFFICE_SAVE_AS_UNSUPPORTED', recoverable: true } }
+      const pdf = state.bundles.pdf
+      const wc = entry.view.webContents
+      pdf.setPdfSaveAsInFlight(wc, true)
+      let targetPath
+      try {
+        const selected = await dialog.showSaveDialog(state.mainWindow, { defaultPath: entry.filePath || 'document.pdf', filters: [{ name: 'PDF', extensions: ['pdf'] }] })
+        if (selected.canceled || !selected.filePath) return { ok: false, cancelled: true }
+        targetPath = selected.filePath
+        if (entry.filePath && path.resolve(targetPath).toLocaleLowerCase() === path.resolve(entry.filePath).toLocaleLowerCase()) return { ok: false, error: { code: 'OFFICE_EXPORT_SOURCE_OVERWRITE', path: targetPath, recoverable: true } }
+        const ok = await pdf.requestPdfSaveAs(wc, targetPath)
+        return { ok, data: ok ? { path: targetPath } : null, error: ok ? null : { code: 'OFFICE_SAVE_AS_FAILED', path: targetPath, recoverable: true } }
+      } catch (error) { return { ok: false, error: { code: 'OFFICE_SAVE_AS_FAILED', message: error.message, path: targetPath, recoverable: true } } }
+      finally { pdf.setPdfSaveAsInFlight(wc, false) }
+    },
+    snapshot: (entry, request) => {
+      if (entry.type === 'slides') return state.bundles.slides.exportSlidesSnapshot(entry.view.webContents.id)
+      if (entry.type === 'sheets') return state.bundles.sheets.exportWorkbookSnapshot(entry.view.webContents, request)
+      throw new Error('OFFICE_EXPORT_SNAPSHOT_UNSUPPORTED')
+    },
+    mainWindow: () => state.mainWindow,
+    newDocument: async type => {
+      const result = await newOfficeDocument(type)
+      if (result.success) notifyVue('office-opened', result)
+      return result
+    },
+    closeDocument: closeOfficeFile,
+    notify: (channel, payload) => {
+      notifyVue(channel, payload)
+      for (const entry of state.views.values()) {
+        if (!entry.view.webContents.isDestroyed()) entry.view.webContents.send(channel, payload)
+      }
+    },
+    readSettings: readOfficeAppSettings,
+  })
+  wireShellHooks('docs')
 
   // 窗口尺寸变化时让 renderer 重推最新边界（不套用陈旧 contentBounds，避免抖动）；
   // 覆盖 resize / 最大化 / 还原 / 全屏切换。放映全屏期间 renderer 推送被忽略，
@@ -625,13 +719,13 @@ async function createBlankOfficeFile(type, displayName) {
 export async function openOfficeFile(filePath, opts = {}) {
   const { resolveEditorType } = await import('./office-files.js')
   const type = resolveEditorType(filePath)
-  if (!type || !state.bundles?.[type]) {
+  if (!type || !await ensureEditor(type)) {
     return { success: false, error: `unsupported file type: ${filePath}` }
   }
   // 同一文件已在某个视图打开 → 直接激活
   for (const [id, entry] of state.views) {
     if (entry.type === type && entry.filePath === filePath && !entry.view.webContents.isDestroyed()) {
-      showView(id)
+      if (!opts.background) showView(id)
       if (opts.notifyOpened) notifyVue('office-opened', { type, viewId: id, filePath })
       return { success: true, type, viewId: id, filePath, reused: true }
     }
@@ -644,7 +738,7 @@ export async function openOfficeFile(filePath, opts = {}) {
   if (filePath) {
     try { state.bundles.docs.recordRecentFile?.(filePath) } catch { /* ignore */ }
   }
-  showView(viewId)
+  if (!opts.background) showView(viewId)
   if (opts.notifyOpened) notifyVue('office-opened', { type, viewId, filePath })
   return { success: true, type, viewId, filePath }
 }
@@ -727,7 +821,9 @@ export async function closeOfficeFile(viewId) {
   if (!proceed) return false
 
   if (type === 'docs') bundles.docs.teardownDocsRenderer?.(wc)
-  hideView(viewId, type !== 'docs') // docs 的 webContents.close() 会卡死 UI 线程（上游已知问题），仅分离
+  clearOfficeDocumentSelection(viewId)
+  // Windows Electron 42 已实测安全释放；其他平台暂保留上游的冻结规避，等待平台验收。
+  hideView(viewId, type !== 'docs' || process.platform === 'win32')
   notifyVue('office-view-closed', { type, viewId })
   return true
 }
@@ -739,7 +835,7 @@ export async function closeOfficeFile(viewId) {
  * 再按普通文件打开，文档即刻拥有真实文件名并进入最近列表；落盘失败回退原空白视图行为。
  */
 export async function newOfficeDocument(type, requestedViewId, name) {
-  if (!state.bundles?.[type]) return { success: false, error: 'editor unavailable' }
+  if (!await ensureEditor(type)) return { success: false, error: 'editor unavailable' }
   // 与 renameOfficeFile 一致的非法字符清理
   const base = String(name || '')
     .replace(/[\r\n\t]+/g, ' ')
@@ -789,6 +885,46 @@ export function getOfficeState() {
     filePath: e.filePath,
     open: !e.view.webContents.isDestroyed(),
   }))
+}
+
+/** Read and normalize the selection exposed by the active upstream editor. */
+export async function getOfficeDocumentSelection(viewId = state.visibleId) {
+  const targetId = typeof viewId === 'string' ? viewId : state.visibleId
+  if (typeof targetId !== 'string') return state.latestDocumentSelection
+  const entry = state.views.get(targetId)
+  if (!entry || entry.view.webContents.isDestroyed() || entry.view.webContents.isLoading()) return null
+  try {
+    const reply = await entry.view.webContents.executeJavaScript(
+      `window.__genofficeControl?.({ cmd: 'selection' })`, true
+    )
+    const selection = normalizeOfficeDocumentSelection(entry, reply)
+    if (!selection) return null
+    const previous = state.latestDocumentSelection
+    if (JSON.stringify(previous) !== JSON.stringify(selection)) {
+      state.latestDocumentSelection = selection
+      notifyVue('document-selection-changed', selection)
+    }
+    return selection
+  } catch {
+    return null
+  }
+}
+
+export function getLatestOfficeDocumentSelection() {
+  return state.latestDocumentSelection
+}
+
+export function clearOfficeDocumentSelection(viewId) {
+  if (state.latestDocumentSelection?.documentId !== viewId) return
+  state.latestDocumentSelection = null
+  notifyVue('document-selection-changed', null)
+}
+
+/** UI 自动化必须观察当前可见的嵌入编辑器，而不是被它遮住的 Vue 页面。 */
+export function getOfficeUiTarget() {
+  const entry = state.views.get(state.visibleId)
+  if (!entry || entry.view.webContents.isDestroyed()) return null
+  return { viewId: entry.viewId, webContents: entry.view.webContents }
 }
 
 export function setOfficeContentBounds(rect) {
@@ -974,8 +1110,12 @@ export async function queryOfficeDirty(viewId) {
 
 /** 应用退出前释放资源（停止 sidecar、关闭视图） */
 export function shutdownOfficeHost() {
+  state.latestDocumentSelection = null
   try { state.bundles?.sheets?.stopSheetsSidecar?.() } catch { /* ignore */ }
-  for (const [viewId, entry] of [...state.views]) hideView(viewId, entry.type !== 'docs')
+  for (const [viewId, entry] of [...state.views]) {
+    if (entry.type === 'docs') state.bundles?.docs?.teardownDocsRenderer?.(entry.view.webContents)
+    hideView(viewId, entry.type !== 'docs' || process.platform === 'win32')
+  }
   savedEventSubscribers = []
 }
 
@@ -986,6 +1126,50 @@ export async function captureOfficeView(viewId, outPath) {
   const image = await entry.view.webContents.capturePage()
   fs.writeFileSync(outPath, image.toPNG())
   return true
+}
+
+/** 在实际 Office 编辑器内定位来源；不改写文档。 */
+export async function locateOfficeSpan(viewId, selection) {
+  const entry = state.views.get(viewId)
+  if (!entry || entry.view.webContents.isDestroyed()) return { success: false, reason: 'no view' }
+  const text = String(selection || '').slice(0, 500)
+  if (!text.trim()) return { success: false, reason: 'empty selection' }
+  const wc = entry.view.webContents
+  let request
+  if (entry.type === 'sheets') {
+    const book = XLSX.readFile(entry.filePath)
+    for (const sheet of book.SheetNames) {
+      for (const [address, cell] of Object.entries(book.Sheets[sheet])) {
+        if (address.startsWith('!')) continue
+        const value = String(cell.w ?? cell.v ?? '')
+        if (value && (value.includes(text) || (value.length > 1 && text.includes(value)))) {
+          request = { cmd: 'goto', target: { kind: 'sheets', sheet, range: address } }
+          break
+        }
+      }
+      if (request) break
+    }
+    if (!request) return { success: false, reason: 'cell text not found' }
+  } else if (entry.type === 'docs' || entry.type === 'slides') {
+    request = { cmd: 'find', text }
+  } else if (entry.type === 'pdf') {
+    const { loadDocument } = await import('../rag/loaders.js')
+    const pages = await loadDocument(entry.filePath)
+    const match = pages.find(page => page.pageContent.includes(text))
+    if (!match) return { success: false, reason: 'page text not found' }
+    request = { cmd: 'goto', target: { kind: 'pdf', page: match.metadata.loc?.pageNumber || match.metadata.pageNumber || 1 } }
+  }
+  if (!request) return { success: false, reason: 'unsupported editor' }
+  for (const deadline = Date.now() + 30000; Date.now() < deadline;) {
+    if (wc.isDestroyed()) return { success: false, reason: 'view closed' }
+    if (!wc.isLoading()) {
+      const reply = await wc.executeJavaScript(`window.__genofficeControl?.(${JSON.stringify(request)})`, true).catch(() => null)
+      if (reply?.status === 'ok') return { success: true, located: true, ...reply.result }
+      if (reply?.status === 'error') return { success: false, reason: reply.error?.message }
+    }
+    await new Promise(resolve => setTimeout(resolve, 200))
+  }
+  return { success: false, reason: 'editor not ready' }
 }
 
 /** 调试/诊断：探测指定编辑器 renderer 的加载状态 */
@@ -1004,6 +1188,24 @@ export async function probeOfficeView(viewId) {
     return { ok: true, url: wc.getURL(), isLoading: wc.isLoading(), probe: JSON.parse(probe) }
   } catch (e) {
     return { ok: false, url: wc.getURL(), isLoading: wc.isLoading(), reason: e.message }
+  }
+}
+
+/** 验收/诊断：读取嵌入编辑器的可见 DOM 摘要，不修改编辑器状态。 */
+export async function inspectOfficeView(viewId) {
+  const entry = state.views.get(viewId)
+  if (!entry || entry.view.webContents.isDestroyed()) return { ok: false, reason: 'no view' }
+  try {
+    const value = await entry.view.webContents.executeJavaScript(`JSON.stringify({
+      url: location.href, title: document.title,
+      body: document.body?.innerText?.slice(0, 2000) || '', bodyHtml: document.body?.innerHTML?.slice(0, 3000) || '',
+      root: (() => { const e = document.getElementById('root'); if (!e) return null; const r = e.getBoundingClientRect(); return { children: e.childElementCount, text: e.innerText.slice(0,500), html: e.innerHTML.slice(0,1000), rect: { x:r.x, y:r.y, width:r.width, height:r.height }, style: getComputedStyle(e).cssText } })(),
+      controls: [...document.querySelectorAll('button,input,textarea,[contenteditable="true"],canvas,[role]')].slice(0, 120).map(e => ({ tag: e.tagName, role: e.getAttribute('role'), label: e.getAttribute('aria-label'), title: e.title, cls: String(e.className).slice(0, 120), text: (e.innerText || '').slice(0, 80) })),
+      globals: Object.keys(window).filter(key => /univer|editor|slide|workbook|pdf/i.test(key)).slice(0, 80)
+    })`, true)
+    return { ok: true, value: JSON.parse(value) }
+  } catch (error) {
+    return { ok: false, reason: error.message }
   }
 }
 

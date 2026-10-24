@@ -1,9 +1,12 @@
 import http from 'http'
-import os from 'os'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import * as db from './db.js'
+import crypto from 'crypto'
+import { clipboardAssetMime } from './clipboard-content.js'
+import { shareNetworkAddresses } from './share-network.js'
+import { prepareClipboardShareFiles, removeClipboardShareDirectory } from './clipboard-share-files.js'
 
 // 内网分享服务：在主进程启动一个 HTTP 服务，局域网内可通过浏览器访问
 // 复用前端构建产物（dist/），直接加载已有的对话界面（隐藏输入框）。
@@ -16,19 +19,14 @@ const DIST_DIR = path.join(__dirname, '..', 'dist')
 
 let server = null
 let serverPort = null
+let clipboardCleanupTimer = null
+const clipboardShares = new Map()
+const CLIPBOARD_SHARE_TTL = 10 * 60 * 1000
 const PREFERRED_PORT = 17918
 
 // 获取本机内网 IPv4 地址（非回环）
 function getLocalIp() {
-  const interfaces = os.networkInterfaces()
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address
-      }
-    }
-  }
-  return '127.0.0.1'
+  return shareNetworkAddresses()[0].address
 }
 
 const MIME_TYPES = {
@@ -52,6 +50,101 @@ const MIME_TYPES = {
 
 function getMime(filePath) {
   return MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream'
+}
+
+function escapeShareHtml(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
+}
+
+export async function createClipboardShare(payload = {}, options = {}) {
+  if (!serverPort) return null
+  const currentServer = server
+  const prepared = await prepareClipboardShareFiles(Array.isArray(payload.filePaths) ? payload.filePaths : [], options)
+  try {
+  if (!serverPort || server !== currentServer) throw new Error('CLIPBOARD_SHARE_UNAVAILABLE')
+  const now = Date.now()
+  for (const [token, share] of clipboardShares) if (share.expiresAt <= now) revokeClipboardShare(token)
+  if (clipboardShares.size >= 128) revokeClipboardShare(clipboardShares.keys().next().value)
+  const token = crypto.randomBytes(24).toString('base64url')
+  const isFile = file => { try { return typeof file === 'string' && fs.statSync(file).isFile() } catch { return false } }
+  const filePaths = prepared.files
+  const images = [...new Set([...(Array.isArray(payload.imagePaths) ? payload.imagePaths : []), payload.imagePath].filter(Boolean))]
+  if (images.length > 200) throw new Error('CLIPBOARD_SHARE_TOO_MANY_FILES')
+  if (!images.every(isFile)) throw new Error('CLIPBOARD_SHARE_FILE_MISSING')
+  const imagePaths = images
+  const expiresAt = now + CLIPBOARD_SHARE_TTL
+  clipboardShares.set(token, { text: String(payload.text || ''), html: String(payload.html || ''), imagePaths, filePaths, expiresAt, directory: prepared.directory, resourceId: payload.resourceId, streams: new Set() })
+  const urls = shareNetworkAddresses().map(iface => ({ label: iface.label, url: 'http://' + iface.address + ':' + serverPort + '/clipboard-share/' + token }))
+  return { token, url: urls[0].url, urls, localOnly: urls.every(entry => new URL(entry.url).hostname === '127.0.0.1'), folderCount: prepared.folderCount, expiresAt: new Date(expiresAt).toISOString(), omittedFiles: 0 }
+  } catch (error) { await removeClipboardShareDirectory(prepared.directory); throw error }
+}
+
+export function revokeClipboardShare(token) {
+  const share = clipboardShares.get(token)
+  if (!share) return false
+  clipboardShares.delete(token)
+  for (const stream of share.streams || []) stream.destroy()
+  removeClipboardShareDirectory(share.directory)
+  return true
+}
+
+export function revokeClipboardResourceShares(id) {
+  for (const [token, share] of clipboardShares) if (share.resourceId === id) revokeClipboardShare(token)
+}
+
+function getClipboardShare(token) {
+  const share = clipboardShares.get(token)
+  if (!share || share.expiresAt <= Date.now()) { revokeClipboardShare(token); return null }
+  return share
+}
+
+function streamClipboardFile(req, res, file, download = false, share) {
+  let stat
+  try { stat = fs.statSync(file) } catch { res.writeHead(404); res.end(); return }
+  if (!stat.isFile()) { res.writeHead(404); res.end(); return }
+  const mime = clipboardAssetMime(file) || getMime(file)
+  let start = 0, end = stat.size - 1, status = 200
+  if (req.headers.range) {
+    const match = req.headers.range.match(/^bytes=(\d*)-(\d*)$/)
+    if (!match || (!match[1] && !match[2])) { res.writeHead(416, { 'Content-Range': 'bytes */' + stat.size }); res.end(); return }
+    start = match[1] ? Number(match[1]) : Math.max(0, stat.size - Number(match[2]))
+    end = match[1] && match[2] ? Math.min(Number(match[2]), end) : end
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) { res.writeHead(416, { 'Content-Range': 'bytes */' + stat.size }); res.end(); return }
+    status = 206; res.setHeader('Content-Range', 'bytes ' + start + '-' + end + '/' + stat.size)
+  }
+  if (download) res.setHeader('Content-Disposition', "attachment; filename=download; filename*=UTF-8''" + encodeURIComponent(path.basename(file)))
+  res.writeHead(status, { 'Content-Type': mime, 'Cache-Control': 'no-store', 'Accept-Ranges': 'bytes', 'Content-Length': Math.max(0, end - start + 1), 'X-Content-Type-Options': 'nosniff' })
+  if (req.method === 'HEAD' || !stat.size) { res.end(); return }
+  const stream = fs.createReadStream(file, { start, end })
+  share?.streams?.add(stream)
+  stream.on('close', () => { share?.streams?.delete(stream); if (!res.writableEnded) res.destroy() })
+  stream.on('error', () => res.destroy())
+  res.on('close', () => stream.destroy())
+  stream.pipe(res)
+}
+
+function serveClipboardShare(req, res, token, resource = '', download = false) {
+  const share = getClipboardShare(token)
+  if (!share) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Share expired'); return }
+  res.setHeader('Referrer-Policy', 'no-referrer')
+  res.setHeader('X-Frame-Options', 'DENY')
+  if (resource) {
+    const [kind, number] = resource.split('/'), index = Number(number)
+    const file = Number.isInteger(index) ? (kind === 'image' ? share.imagePaths : share.filePaths)[index] : null
+    if (!file) { res.writeHead(404); res.end(); return }
+    streamClipboardFile(req, res, file, kind === 'file' && (download || !clipboardAssetMime(file)), share)
+    return
+  }
+  const base = '/clipboard-share/' + encodeURIComponent(token)
+  const image = share.imagePaths.map((_, index) => '<img src="' + base + '/image/' + index + '" alt="Clipboard image">').join('')
+  const files = share.filePaths.map((file, index) => {
+    const url = base + '/file/' + index, mime = clipboardAssetMime(file)
+    const media = mime.startsWith('image/') ? '<img loading="lazy" src="' + url + '" alt="' + escapeShareHtml(path.basename(file)) + '">' : mime.startsWith('video/') ? '<video controls preload="metadata" src="' + url + '"></video>' : mime.startsWith('audio/') ? '<audio controls preload="metadata" src="' + url + '"></audio>' : ''
+    return '<li>' + media + '<a href="' + url + '?download=1">下载 / Download ' + escapeShareHtml(path.basename(file)) + '</a></li>'
+  }).join('')
+  const text = escapeShareHtml(share.text || share.html.replace(/<[^>]*>/g, ' '))
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Security-Policy': "default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'" })
+  res.end('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Friday Clipboard</title><style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:24px;line-height:1.6;color:#222}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f5f5;padding:16px;border-radius:8px}img,video,audio{max-width:100%;height:auto;display:block;margin:10px 0}a{color:#2563eb}</style></head><body><h1>Friday Clipboard</h1>' + (text ? '<pre>' + text + '</pre>' : '') + image + '<ul>' + files + '</ul></body></html>')
 }
 
 // 提供前端构建产物的静态文件服务（SPA：未命中的路径回退到 index.html）
@@ -216,7 +309,7 @@ function serveDrawingShareApi(res, canvasId) {
 function handleRequest(req, res) {
   try {
     // 仅允许 GET 请求
-    if (req.method !== 'GET') {
+    if (!['GET', 'HEAD'].includes(req.method)) {
       res.writeHead(405, { 'Content-Type': 'text/plain; charset=utf-8' })
       res.end('Method Not Allowed')
       return
@@ -228,6 +321,11 @@ function handleRequest(req, res) {
     if (url.pathname === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true }))
+      return
+    }
+    const clipboardMatch = url.pathname.match(/^\/clipboard-share\/([^/]+)(?:\/(image\/\d+|file\/\d+))?$/)
+    if (clipboardMatch) {
+      serveClipboardShare(req, res, decodeURIComponent(clipboardMatch[1]), clipboardMatch[2] || '', url.searchParams.get('download') === '1')
       return
     }
 
@@ -288,6 +386,10 @@ export async function startShareServer() {
       s.listen(port, '0.0.0.0', () => {
         server = s
         serverPort = s.address().port
+        clipboardCleanupTimer = setInterval(() => {
+          for (const [token, share] of clipboardShares) if (share.expiresAt <= Date.now()) revokeClipboardShare(token)
+        }, 15000)
+        clipboardCleanupTimer.unref?.()
         console.log(`[ShareServer] ✅ Share server running on http://0.0.0.0:${serverPort}`)
         resolve(serverPort)
       })
@@ -297,6 +399,8 @@ export async function startShareServer() {
 }
 
 export function stopShareServer() {
+  clearInterval(clipboardCleanupTimer); clipboardCleanupTimer = null
+  for (const token of clipboardShares.keys()) revokeClipboardShare(token)
   if (server) {
     try { server.close() } catch (_e) {}
     server = null

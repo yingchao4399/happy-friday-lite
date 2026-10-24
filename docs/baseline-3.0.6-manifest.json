@@ -1,0 +1,621 @@
+{
+  "generatedAt": "2026-10-23T11:16:55.899Z",
+  "baseline": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Happy Friday Lite\\resources\\app",
+  "developmentRoot": "C:\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source",
+  "version": "3.0.6-preview.2",
+  "fileCount": 102,
+  "entries": [
+    {
+      "path": "main.js",
+      "installedSha256": "0a3b6157bff6f3169fc3defd0159106afcb8552db386a845e2bb8e189a4eede6",
+      "developmentSha256": "a4a1fe3d24dd2992fdb2884cebaf6b6cd3300c87654abc90445286690ee7035e",
+      "same": false
+    },
+    {
+      "path": "package.json",
+      "installedSha256": "695e5e7c72a96a5851355afe17e49fec3f12defd2a3947c1666fc968c9f64dc2",
+      "developmentSha256": "7e00582af45e97142fa66ca499a14ff89b33e63d2ed802edd199a0c9c659265d",
+      "same": false
+    },
+    {
+      "path": "preload.cjs",
+      "installedSha256": "3a85a7fd5158afc13c6fcf52bade6a11459eac7249bfce57e778665e31810fb9",
+      "developmentSha256": "7de5ca42902f09b1e6b2f86430e48ebaf779b290d3698453db4b7ebe96bad6ba",
+      "same": false
+    },
+    {
+      "path": "src-electron/agent/approvalMessages.js",
+      "installedSha256": "7b9c611a5c4c15f37117d76650a52a29c868bbf91366d449aa6cda329da19812",
+      "developmentSha256": "7b9c611a5c4c15f37117d76650a52a29c868bbf91366d449aa6cda329da19812",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/backend.js",
+      "installedSha256": "ea2b005e3109be760026295b430d677d32116ee5263ecb343ce7276f9d9ac326",
+      "developmentSha256": "ea2b005e3109be760026295b430d677d32116ee5263ecb343ce7276f9d9ac326",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/externalApproval.js",
+      "installedSha256": "eaec8684732b78286d8f0e90644708516ca40805ccb8c4015f6649ff9fa33f15",
+      "developmentSha256": "eaec8684732b78286d8f0e90644708516ca40805ccb8c4015f6649ff9fa33f15",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/externalTasks.js",
+      "installedSha256": "3b5a3315140a22a00d04087851f640a7238156590b741c1c007ed00fbc2971dc",
+      "developmentSha256": "3b5a3315140a22a00d04087851f640a7238156590b741c1c007ed00fbc2971dc",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/fileIndex.js",
+      "installedSha256": "135198f447dae4beec20719fbd1850ed5ec499e9ed32366bc1b92cc2d1730a0f",
+      "developmentSha256": "135198f447dae4beec20719fbd1850ed5ec499e9ed32366bc1b92cc2d1730a0f",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/humanInTheLoop.js",
+      "installedSha256": "c083be55263a14ad0b70e256c064f11219dc074fb551c4b8b69c4f33594272e1",
+      "developmentSha256": "c083be55263a14ad0b70e256c064f11219dc074fb551c4b8b69c4f33594272e1",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/index.js",
+      "installedSha256": "59ae46a76f25df34f3d40e33dc3fc4157b56f59c6502c13d593015cc04c32d7d",
+      "developmentSha256": "59ae46a76f25df34f3d40e33dc3fc4157b56f59c6502c13d593015cc04c32d7d",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/ipc.js",
+      "installedSha256": "b015537538ca52eb5895872645adc2039209496192f02990101b462131e60db8",
+      "developmentSha256": "b015537538ca52eb5895872645adc2039209496192f02990101b462131e60db8",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/ipcGateway.js",
+      "installedSha256": "41340a2a4e605ecd4433cf9e6efb3925b2b9412f11b4eaaf4391504f64ec505f",
+      "developmentSha256": "4e60b5c9664e9bb84eae8af6d1f4a3db22846098b0d59fa5573edf72d0d8b7fa",
+      "same": false
+    },
+    {
+      "path": "src-electron/agent/logger.js",
+      "installedSha256": "5dc64031e0c60322e444eb02f0635775b7234bd0ad22b657378a7fe1070a4b1e",
+      "developmentSha256": "5dc64031e0c60322e444eb02f0635775b7234bd0ad22b657378a7fe1070a4b1e",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/mcp.js",
+      "installedSha256": "06fc9e0e03f1ee9920f236297a2f2c773c8c035b31a1addcc025a4cace469e9d",
+      "developmentSha256": "77c2be485bd9462346dfd54004b2d5e1822274d0f89a8918e71a8357525a73b2",
+      "same": false
+    },
+    {
+      "path": "src-electron/agent/memory.js",
+      "installedSha256": "d7371f80a05a6b1cb786488f2dc03b92b40b371d71b853e45dff708d8cf258ce",
+      "developmentSha256": "d7371f80a05a6b1cb786488f2dc03b92b40b371d71b853e45dff708d8cf258ce",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/memoryFiles.js",
+      "installedSha256": "855db4ad50c4cf765e90b21c6350648cd4111b2a0a250789ce00e3c6a81f7a58",
+      "developmentSha256": "855db4ad50c4cf765e90b21c6350648cd4111b2a0a250789ce00e3c6a81f7a58",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/modelAdapter.js",
+      "installedSha256": "c1ca7a01e72342f92ac14839c312f6b4e1138a9257ff217c1b915788b005318c",
+      "developmentSha256": "c1ca7a01e72342f92ac14839c312f6b4e1138a9257ff217c1b915788b005318c",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/permissions.js",
+      "installedSha256": "8f1d93873a99e9ed9af684ee04eee06bac071e65d2eae0cb251d8ff0e741996b",
+      "developmentSha256": "8f1d93873a99e9ed9af684ee04eee06bac071e65d2eae0cb251d8ff0e741996b",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/resources.js",
+      "installedSha256": "8a3384bf02d2dfc0af483a451ff5e1e1e15747a6ef43079e9065378060de3d56",
+      "developmentSha256": "8a3384bf02d2dfc0af483a451ff5e1e1e15747a6ef43079e9065378060de3d56",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/skills.js",
+      "installedSha256": "53ce9cf273985a7fe73cf3b7d17fdf4b979dc8ebf1750b1724ba10a65d390adb",
+      "developmentSha256": "53ce9cf273985a7fe73cf3b7d17fdf4b979dc8ebf1750b1724ba10a65d390adb",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/subagents.js",
+      "installedSha256": "6ac3e6b2e6f1a2e2ff334515dc39b41e0a7c14cb781d7769d0a81d4e1beda28e",
+      "developmentSha256": "6ac3e6b2e6f1a2e2ff334515dc39b41e0a7c14cb781d7769d0a81d4e1beda28e",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/appActions.js",
+      "installedSha256": "55830321e07db14ee1573efb8742130b75954f59c04ccf408ebcb33151845669",
+      "developmentSha256": "55830321e07db14ee1573efb8742130b75954f59c04ccf408ebcb33151845669",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/automationOps.js",
+      "installedSha256": "bd320bc51b45db70bbb2501481a669c537995efaa26097f11d7f6907b8c184ce",
+      "developmentSha256": "bd320bc51b45db70bbb2501481a669c537995efaa26097f11d7f6907b8c184ce",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/calculator.js",
+      "installedSha256": "013449207b11e66b91435fd73f2d2da6459a86f4def91a35d62a6db836e222cf",
+      "developmentSha256": "013449207b11e66b91435fd73f2d2da6459a86f4def91a35d62a6db836e222cf",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/drawingOps.js",
+      "installedSha256": "24389acaac272840fd851d456c2be2df523491fdae06586bff77d120dec67d2a",
+      "developmentSha256": "24389acaac272840fd851d456c2be2df523491fdae06586bff77d120dec67d2a",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/fileOps.js",
+      "installedSha256": "1ab42456f3009780b6764458f604e24d09ff15bf3a236cbaea8df9ae4e065c97",
+      "developmentSha256": "1ab42456f3009780b6764458f604e24d09ff15bf3a236cbaea8df9ae4e065c97",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/httpRequests.js",
+      "installedSha256": "22a3ed677bbd591697b1ec9034032459d0c14a6fbfc39e9d75e5f7a1dde0f984",
+      "developmentSha256": "22a3ed677bbd591697b1ec9034032459d0c14a6fbfc39e9d75e5f7a1dde0f984",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/jsonOps.js",
+      "installedSha256": "a0c4d6e1bf03b62aa7bdd6d78fc98cee0c834b42af703f528db5b682837720e2",
+      "developmentSha256": "a0c4d6e1bf03b62aa7bdd6d78fc98cee0c834b42af703f528db5b682837720e2",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/knowledgeBase.js",
+      "installedSha256": "a9bd6cd19111c932f23b5b8f956bb1f8b2e55b232dd14ce4ca7cf4c00ba342ea",
+      "developmentSha256": "a9bd6cd19111c932f23b5b8f956bb1f8b2e55b232dd14ce4ca7cf4c00ba342ea",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/markitdown.js",
+      "installedSha256": "83ef7c61ae72df61bfc6c12f3117e79587435983e18b8e0f49b8607af3c33d34",
+      "developmentSha256": "83ef7c61ae72df61bfc6c12f3117e79587435983e18b8e0f49b8607af3c33d34",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/noteOps.js",
+      "installedSha256": "be8e33c7bdb0c36db89a87da52761ecaccc702be3df747198c12f2133dcaaece",
+      "developmentSha256": "be8e33c7bdb0c36db89a87da52761ecaccc702be3df747198c12f2133dcaaece",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/pipInstall.js",
+      "installedSha256": "836af61d3a2c95f41aa896ca2ae8f435438bc691a8b5c5d68de8442ee0831ea2",
+      "developmentSha256": "836af61d3a2c95f41aa896ca2ae8f435438bc691a8b5c5d68de8442ee0831ea2",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/pythonRepl.js",
+      "installedSha256": "8b812dc63444f2965fa434d3b309635d4c2f60dbc3cf3c89a9b3de0e486c6dec",
+      "developmentSha256": "8b812dc63444f2965fa434d3b309635d4c2f60dbc3cf3c89a9b3de0e486c6dec",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/resources.js",
+      "installedSha256": "819f5520d75ef1b505c39c592a8911237c5dc71a22bf6b884a074dc2608e34dc",
+      "developmentSha256": "819f5520d75ef1b505c39c592a8911237c5dc71a22bf6b884a074dc2608e34dc",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/scheduleOps.js",
+      "installedSha256": "cb5bffbc19a7f153d1995a6caf357cdcee1642d9c1100908ac569587b1f7f194",
+      "developmentSha256": "cb5bffbc19a7f153d1995a6caf357cdcee1642d9c1100908ac569587b1f7f194",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/searchAll.js",
+      "installedSha256": "722af0b43521270d52b63e0d06cb3c6c5641e4e60c8d81072c7a1633ec7a17ed",
+      "developmentSha256": "722af0b43521270d52b63e0d06cb3c6c5641e4e60c8d81072c7a1633ec7a17ed",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/shellExec.js",
+      "installedSha256": "369ff28c0157f3d9ab9c61cf6f8dbd7e3bb68e799502c6d98f3772bfa35bcc78",
+      "developmentSha256": "369ff28c0157f3d9ab9c61cf6f8dbd7e3bb68e799502c6d98f3772bfa35bcc78",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/systemOps.js",
+      "installedSha256": "5828addd34bffffb00fc3c67e31f418035bf14dc503a889de3abae4eb6fe9833",
+      "developmentSha256": "5828addd34bffffb00fc3c67e31f418035bf14dc503a889de3abae4eb6fe9833",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/uiControl.js",
+      "installedSha256": "17cfc3bf9d532924e5f0c0be8289a5892138d3e1c7a434e9b8d4b22e25c19342",
+      "developmentSha256": "17cfc3bf9d532924e5f0c0be8289a5892138d3e1c7a434e9b8d4b22e25c19342",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/builtin/webpageScraper.js",
+      "installedSha256": "b896b4f028ca206e648a2f09ac233ef1795940e3a0aa258449d99c2a8c593396",
+      "developmentSha256": "b896b4f028ca206e648a2f09ac233ef1795940e3a0aa258449d99c2a8c593396",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/index.js",
+      "installedSha256": "d2504e86e81c4cbacd63cd5d4ec2cf95f51fdc1300c2f0b479879de0709bebc3",
+      "developmentSha256": "d2504e86e81c4cbacd63cd5d4ec2cf95f51fdc1300c2f0b479879de0709bebc3",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/tools/registry.js",
+      "installedSha256": "7e0447fc7f10f08d1f0eb608d25c75798ca55fc1d4eaa222c31746beddb12ca2",
+      "developmentSha256": "7e0447fc7f10f08d1f0eb608d25c75798ca55fc1d4eaa222c31746beddb12ca2",
+      "same": true
+    },
+    {
+      "path": "src-electron/agent/uiControl.js",
+      "installedSha256": "40dd6011c9e9aadcd48b714762532ee2f28a3885070b076ef56d9a83b6e2d798",
+      "developmentSha256": "40dd6011c9e9aadcd48b714762532ee2f28a3885070b076ef56d9a83b6e2d798",
+      "same": true
+    },
+    {
+      "path": "src-electron/attachmentContext.js",
+      "installedSha256": "02652ff983330ae9636009493927593c9e814c031a01791f7f2eb969852184f4",
+      "developmentSha256": "02652ff983330ae9636009493927593c9e814c031a01791f7f2eb969852184f4",
+      "same": true
+    },
+    {
+      "path": "src-electron/automation.js",
+      "installedSha256": "518148d3415db1eee6aae4494046d9045b7c45c15b8dc4c33101f28c1fdb8a44",
+      "developmentSha256": "518148d3415db1eee6aae4494046d9045b7c45c15b8dc4c33101f28c1fdb8a44",
+      "same": true
+    },
+    {
+      "path": "src-electron/backup-worker.js",
+      "installedSha256": "48e8dcc51b2976b4a4acf8a95b070089a05968e1da28fe0dcbc5e7cf9e0efa69",
+      "developmentSha256": "48e8dcc51b2976b4a4acf8a95b070089a05968e1da28fe0dcbc5e7cf9e0efa69",
+      "same": true
+    },
+    {
+      "path": "src-electron/backup.js",
+      "installedSha256": "278ee9ce1d38b79431a28cb159d29e90cd3861ba45a38bc95b5e681118e3b652",
+      "developmentSha256": "278ee9ce1d38b79431a28cb159d29e90cd3861ba45a38bc95b5e681118e3b652",
+      "same": true
+    },
+    {
+      "path": "src-electron/backupEntries.js",
+      "installedSha256": "e85ef6782641a72d0258cad23ca522758a5e2587f6467ed7f5350e4a38760db4",
+      "developmentSha256": "e85ef6782641a72d0258cad23ca522758a5e2587f6467ed7f5350e4a38760db4",
+      "same": true
+    },
+    {
+      "path": "src-electron/balance.js",
+      "installedSha256": "57bcb1c27147c7d660a9bdafa6ad45fe3b8db5990893b98c742e6dd7cd37d0d5",
+      "developmentSha256": "57bcb1c27147c7d660a9bdafa6ad45fe3b8db5990893b98c742e6dd7cd37d0d5",
+      "same": true
+    },
+    {
+      "path": "src-electron/cancellation.js",
+      "installedSha256": "85267cc9efb955ccf06df6252cafd507a9f80e822c50cae2fc341bcadcb83719",
+      "developmentSha256": "85267cc9efb955ccf06df6252cafd507a9f80e822c50cae2fc341bcadcb83719",
+      "same": true
+    },
+    {
+      "path": "src-electron/commands.js",
+      "installedSha256": "c5f03ac926c63cadd7a2c7e5a42e75bc33ddb5702d767615da85a7e613726045",
+      "developmentSha256": "7d473c9352f26795fde359ab5dd0baeb9543afc7a0085b024e7a31f4c72d5c73",
+      "same": false
+    },
+    {
+      "path": "src-electron/config.js",
+      "installedSha256": "f58b35b2f6a43551065aef1594bf4f75a98d24c1075d81ed1d49bc3b512a96b9",
+      "developmentSha256": "f58b35b2f6a43551065aef1594bf4f75a98d24c1075d81ed1d49bc3b512a96b9",
+      "same": true
+    },
+    {
+      "path": "src-electron/data-dir.js",
+      "installedSha256": "11739ec9b038174699bbf86f6d7c0e4c9ccd9c11f79fb44a5afe7c6bbe56a0e6",
+      "developmentSha256": "11739ec9b038174699bbf86f6d7c0e4c9ccd9c11f79fb44a5afe7c6bbe56a0e6",
+      "same": true
+    },
+    {
+      "path": "src-electron/db.js",
+      "installedSha256": "ca4f4f91645fccf9407872de4b08ec613063b53d821d5d70b811a7c786821dfb",
+      "developmentSha256": "a7b2daf18d45cb89378454c9d19b7e31e49a2413bac8d06028523baf58a8732c",
+      "same": false
+    },
+    {
+      "path": "src-electron/error.js",
+      "installedSha256": "22affa9ece5e609f55c90b5085decb6da77bfc41d9b4e40440b4a0ea8a86d014",
+      "developmentSha256": "22affa9ece5e609f55c90b5085decb6da77bfc41d9b4e40440b4a0ea8a86d014",
+      "same": true
+    },
+    {
+      "path": "src-electron/events.js",
+      "installedSha256": "1a2de44e378715a63caa347fffc1d12236ed01fed1ac4a4cd099f800473a689b",
+      "developmentSha256": "1a2de44e378715a63caa347fffc1d12236ed01fed1ac4a4cd099f800473a689b",
+      "same": true
+    },
+    {
+      "path": "src-electron/file-assoc.js",
+      "installedSha256": "f64e6cd381177b61ff40c82bde277747da295502a08180e2fa52359ee7c6691c",
+      "developmentSha256": "f64e6cd381177b61ff40c82bde277747da295502a08180e2fa52359ee7c6691c",
+      "same": true
+    },
+    {
+      "path": "src-electron/fileWatcher.js",
+      "installedSha256": "c7f042e8034fb7b1c3f93bd588902d5a15ca8392acf692d996d59cbb4f21ad2c",
+      "developmentSha256": "c7f042e8034fb7b1c3f93bd588902d5a15ca8392acf692d996d59cbb4f21ad2c",
+      "same": true
+    },
+    {
+      "path": "src-electron/harness/index.js",
+      "installedSha256": "9b929c14b65bfbb965dea7a05c611771ff59afb3d7d40358c7ed1b08e9c97d7c",
+      "developmentSha256": "e64f7cbeac021ebc380e5d698319b0a5fc8564cc12d1c8a550d311e8d4fc9e3b",
+      "same": false
+    },
+    {
+      "path": "src-electron/harness/lockRecovery.js",
+      "installedSha256": "0395a9a4c4ab89f1d2eeb1882d987143dd74be6c7d25e74a78b390680ad055a3",
+      "developmentSha256": "0395a9a4c4ab89f1d2eeb1882d987143dd74be6c7d25e74a78b390680ad055a3",
+      "same": true
+    },
+    {
+      "path": "src-electron/harness/toolApprovalPolicy.mjs",
+      "installedSha256": "a41ad31ae79a04439650071a6c0d81f27211d1dfaef1ad323fdc776c272d3450",
+      "developmentSha256": "a41ad31ae79a04439650071a6c0d81f27211d1dfaef1ad323fdc776c272d3450",
+      "same": true
+    },
+    {
+      "path": "src-electron/historyClean.js",
+      "installedSha256": "7060eaa578abaa0ceb7942057739b581c8faa6c14749071a69810e5c9124d7cf",
+      "developmentSha256": "7060eaa578abaa0ceb7942057739b581c8faa6c14749071a69810e5c9124d7cf",
+      "same": true
+    },
+    {
+      "path": "src-electron/llm.js",
+      "installedSha256": "1902b137e607fd32b3113bd37f1b4b15fb2ba7ee66f9cf00a1ef646e6d556984",
+      "developmentSha256": "1902b137e607fd32b3113bd37f1b4b15fb2ba7ee66f9cf00a1ef646e6d556984",
+      "same": true
+    },
+    {
+      "path": "src-electron/logger.js",
+      "installedSha256": "d9ea0b66d13bb843a96034563f4b82fafb7818567d39b54e9e2790e1e0162432",
+      "developmentSha256": "1f051c7bea365d7a007a2c9828b8a86227a1734b19dcad8775b059cfba4f8043",
+      "same": false
+    },
+    {
+      "path": "src-electron/modelCatalog.js",
+      "installedSha256": "300e4542207ed7f26b8fbfec949f2a64cfcb09d07f67a0566c5b153207f6d90c",
+      "developmentSha256": "300e4542207ed7f26b8fbfec949f2a64cfcb09d07f67a0566c5b153207f6d90c",
+      "same": true
+    },
+    {
+      "path": "src-electron/modelTest.js",
+      "installedSha256": "b8d82343f37896bdabc44d78b06391377a0afcfa0cb7936928b1babc44f470d9",
+      "developmentSha256": "b8d82343f37896bdabc44d78b06391377a0afcfa0cb7936928b1babc44f470d9",
+      "same": true
+    },
+    {
+      "path": "src-electron/obsidian/ipc.js",
+      "installedSha256": "70e9fff00319d9601a3a0f35843ffa8c4d42eda661ac9a55fde762d25941dfee",
+      "developmentSha256": "70e9fff00319d9601a3a0f35843ffa8c4d42eda661ac9a55fde762d25941dfee",
+      "same": true
+    },
+    {
+      "path": "src-electron/obsidian/parser.js",
+      "installedSha256": "c793a4c8a0b92503aefe7f76e7205ecc45ef2a3e9d73a6eb18c3840a72b2101b",
+      "developmentSha256": "c793a4c8a0b92503aefe7f76e7205ecc45ef2a3e9d73a6eb18c3840a72b2101b",
+      "same": true
+    },
+    {
+      "path": "src-electron/obsidian/scheduler.js",
+      "installedSha256": "f3ececd6c3de381cc84f15b44de33a5948ff69feb30133884e6f922b32cdc2d5",
+      "developmentSha256": "f3ececd6c3de381cc84f15b44de33a5948ff69feb30133884e6f922b32cdc2d5",
+      "same": true
+    },
+    {
+      "path": "src-electron/obsidian/store.js",
+      "installedSha256": "228de096e7efc597b4a60cb3aa3a4ea0924029046a3ad3d6db9871d75196e26a",
+      "developmentSha256": "228de096e7efc597b4a60cb3aa3a4ea0924029046a3ad3d6db9871d75196e26a",
+      "same": true
+    },
+    {
+      "path": "src-electron/obsidian/sync.js",
+      "installedSha256": "adb297121d310f87659e5f1ca408cb3b4c1d02bda803b5ba5819b71f4ff32659",
+      "developmentSha256": "adb297121d310f87659e5f1ca408cb3b4c1d02bda803b5ba5819b71f4ff32659",
+      "same": true
+    },
+    {
+      "path": "src-electron/obsidian/webdavClient.js",
+      "installedSha256": "5e3abbd2eeabe94a86ad333aa2ec0f3135c3d59732f93147ad70054dfe3deb8d",
+      "developmentSha256": "5e3abbd2eeabe94a86ad333aa2ec0f3135c3d59732f93147ad70054dfe3deb8d",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-agent.js",
+      "installedSha256": "ae9bdb36ce47c912c5c36f176e737ff01c57b79bbfdc927d4f2e1b2f14eac3a1",
+      "developmentSha256": "ae9bdb36ce47c912c5c36f176e737ff01c57b79bbfdc927d4f2e1b2f14eac3a1",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-ai-bridge.js",
+      "installedSha256": "4096bf1bb140c42def2a4a84c132a8fe2469c568f33add0959edee5fd3792d45",
+      "developmentSha256": "4096bf1bb140c42def2a4a84c132a8fe2469c568f33add0959edee5fd3792d45",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-files.js",
+      "installedSha256": "7e3acca13a9a443ea1c9b5ae1b10875dd7a0252bf9fcb27ee3613c200c18d3a3",
+      "developmentSha256": "7e3acca13a9a443ea1c9b5ae1b10875dd7a0252bf9fcb27ee3613c200c18d3a3",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-headless.js",
+      "installedSha256": "39e38de0a353a364a9b00103c78065f1c9d1999c083d448ed8df4c7e7fa0c980",
+      "developmentSha256": "39e38de0a353a364a9b00103c78065f1c9d1999c083d448ed8df4c7e7fa0c980",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-host.js",
+      "installedSha256": "3f392cf7489c6f3475958a4c89b2b0074a5ea6893cb9ee92320030a30d8eabf2",
+      "developmentSha256": "3f392cf7489c6f3475958a4c89b2b0074a5ea6893cb9ee92320030a30d8eabf2",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-ipc.js",
+      "installedSha256": "eb11af2724179627696b01e1a6761194191e5db092218ca11cca0812f5d00e9f",
+      "developmentSha256": "eb11af2724179627696b01e1a6761194191e5db092218ca11cca0812f5d00e9f",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-knowledge.js",
+      "installedSha256": "4261208544714ee3d8295ab6fa4c3a9680f5c5b27794fdc86984733478f3bad9",
+      "developmentSha256": "4261208544714ee3d8295ab6fa4c3a9680f5c5b27794fdc86984733478f3bad9",
+      "same": true
+    },
+    {
+      "path": "src-electron/office/office-session.js",
+      "installedSha256": "cb30f0749ac1b49d1fd5a2c7ef50c65c7b9be521ca1f70cd13be314dc4b5b1fc",
+      "developmentSha256": "cb30f0749ac1b49d1fd5a2c7ef50c65c7b9be521ca1f70cd13be314dc4b5b1fc",
+      "same": true
+    },
+    {
+      "path": "src-electron/openaiUrl.js",
+      "installedSha256": "14c34b942611723733978279ad9310af7ec139d138d874b90c7e8a9b09d16a85",
+      "developmentSha256": "14c34b942611723733978279ad9310af7ec139d138d874b90c7e8a9b09d16a85",
+      "same": true
+    },
+    {
+      "path": "src-electron/pdf.js",
+      "installedSha256": "2290c65e0c800d22e04acbfae0994084bf7b2d4a0f894cbb5f6f1467502c5f21",
+      "developmentSha256": "2290c65e0c800d22e04acbfae0994084bf7b2d4a0f894cbb5f6f1467502c5f21",
+      "same": true
+    },
+    {
+      "path": "src-electron/python-env.js",
+      "installedSha256": "3974019509fe6beaa7b65b687a19c2b176b774c56a56aa03e68ac964949546a7",
+      "developmentSha256": "3974019509fe6beaa7b65b687a19c2b176b774c56a56aa03e68ac964949546a7",
+      "same": true
+    },
+    {
+      "path": "src-electron/python.js",
+      "installedSha256": "af41efed2343dfab8cfa517d7733c20b73b9d4db4eb01a9f95314fdcdb04dfd0",
+      "developmentSha256": "af41efed2343dfab8cfa517d7733c20b73b9d4db4eb01a9f95314fdcdb04dfd0",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/chunkers.js",
+      "installedSha256": "f516348d4fa0bc06cf7f6625cb31e8bd01ddf87358a0a9212efeff91e515c674",
+      "developmentSha256": "f516348d4fa0bc06cf7f6625cb31e8bd01ddf87358a0a9212efeff91e515c674",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/embeddings.js",
+      "installedSha256": "c98dde164423835230838b6b7e4871e1062bda520e26800f6a6cc05e99997ecd",
+      "developmentSha256": "c98dde164423835230838b6b7e4871e1062bda520e26800f6a6cc05e99997ecd",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/imageOcr.js",
+      "installedSha256": "92104a1d251d52829f621c03c9f8f7d410de25c216a0dc3added5a83dbfbf006",
+      "developmentSha256": "92104a1d251d52829f621c03c9f8f7d410de25c216a0dc3added5a83dbfbf006",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/index.js",
+      "installedSha256": "e4b55848357b7d5dfe9248f781673f807331e3185a62ac73695c2433d478d950",
+      "developmentSha256": "e4b55848357b7d5dfe9248f781673f807331e3185a62ac73695c2433d478d950",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/loaders.js",
+      "installedSha256": "8a3adcd15acefc6a7dd72d6dab9afff29703f632a218a0fb5f815470d7de0781",
+      "developmentSha256": "8a3adcd15acefc6a7dd72d6dab9afff29703f632a218a0fb5f815470d7de0781",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/mediaTranscription.js",
+      "installedSha256": "9dd15cdbf599d0dc96aadbde5e46a667be45446ad8941cdb65d535e5de85173d",
+      "developmentSha256": "d86af2d0177fb09a552b792db5968254e8751deec4965253de0950452dc3043d",
+      "same": false
+    },
+    {
+      "path": "src-electron/rag/queue.js",
+      "installedSha256": "9bdd49f538a048e9c509194189b492f1b3ea3c93c42be8e6e937ed784640aca6",
+      "developmentSha256": "9bdd49f538a048e9c509194189b492f1b3ea3c93c42be8e6e937ed784640aca6",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/sources.js",
+      "installedSha256": "346d71bb8b26cadf0b0ae0f06c58d6853e066bbe17b0d4f69135ca991ce0a15e",
+      "developmentSha256": "346d71bb8b26cadf0b0ae0f06c58d6853e066bbe17b0d4f69135ca991ce0a15e",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/triggers.js",
+      "installedSha256": "a9bafa076dc3a805f985c6de39d5959c902798ae82688da328f1a2bce20b0ce0",
+      "developmentSha256": "a9bafa076dc3a805f985c6de39d5959c902798ae82688da328f1a2bce20b0ce0",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/vectorstore.js",
+      "installedSha256": "51d5af89d55d1387014c0781127d38fb0bd305f15899a1a03f0f841df5efb5d3",
+      "developmentSha256": "51d5af89d55d1387014c0781127d38fb0bd305f15899a1a03f0f841df5efb5d3",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/windows-ocr.ps1",
+      "installedSha256": "b683d948ea0dea7553509067b2bba9b80256df98900f7bfcd1df448165f8f62b",
+      "developmentSha256": "b683d948ea0dea7553509067b2bba9b80256df98900f7bfcd1df448165f8f62b",
+      "same": true
+    },
+    {
+      "path": "src-electron/rag/windows-transcribe.ps1",
+      "installedSha256": "b94edafc26c53b387d41aa74c287e50a2d297d221b8ac62563664aa8332f3cf1",
+      "developmentSha256": "a2532063ef6c0c08155f8e64a353034e4d51927980ab54eba123af80159f678a",
+      "same": false
+    },
+    {
+      "path": "src-electron/scheduleReminder.js",
+      "installedSha256": "1f4af29cd962c00b77a8b00267ba5b430e81878341800cd84b94dce4af527dff",
+      "developmentSha256": "1f4af29cd962c00b77a8b00267ba5b430e81878341800cd84b94dce4af527dff",
+      "same": true
+    },
+    {
+      "path": "src-electron/session.js",
+      "installedSha256": "c627c5139f7b4b12f53ab8d885d6e0b50be7b62e847b47c45743b250323873fb",
+      "developmentSha256": "c627c5139f7b4b12f53ab8d885d6e0b50be7b62e847b47c45743b250323873fb",
+      "same": true
+    },
+    {
+      "path": "src-electron/shareServer.js",
+      "installedSha256": "f5980fd642399b1e4f788dec033986762b0861361c7e4358080eb9a5e7a19ed0",
+      "developmentSha256": "51ddc9f43d61c2ac0fa68b66999f69e719fb5165c32fd45e0962cdee9bd97e7f",
+      "same": false
+    },
+    {
+      "path": "src-electron/types.js",
+      "installedSha256": "ba601dbc36a3b4bc973a05ba8635b2feb824bb1772f2533c943aaad65f771e1f",
+      "developmentSha256": "ba601dbc36a3b4bc973a05ba8635b2feb824bb1772f2533c943aaad65f771e1f",
+      "same": true
+    },
+    {
+      "path": "src-electron/usage.js",
+      "installedSha256": "8da41a8dcbf6defae584cced7a7f6b969ee89e94cd747007a1197b00e0e77a9f",
+      "developmentSha256": "8da41a8dcbf6defae584cced7a7f6b969ee89e94cd747007a1197b00e0e77a9f",
+      "same": true
+    },
+    {
+      "path": "src/config/prompts.js",
+      "installedSha256": "62f57f95bacae20f53f52b616a785812f875c5449560966c0a1002c8e70241d0",
+      "developmentSha256": "62f57f95bacae20f53f52b616a785812f875c5449560966c0a1002c8e70241d0",
+      "same": true
+    }
+  ]
+}

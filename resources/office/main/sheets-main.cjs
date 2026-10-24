@@ -1,3 +1,4 @@
+const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -314,7 +315,7 @@ var require_BufferList = __commonJS({
         this.head = this.tail = null;
         this.length = 0;
       };
-      BufferList.prototype.join = function join16(s) {
+      BufferList.prototype.join = function join17(s) {
         if (this.length === 0) return "";
         var p = this.head;
         var ret = "" + p.data;
@@ -19671,7 +19672,7 @@ async function JBig2(moduleArg = {}) {
   var quit_ = (status, toThrow) => {
     throw toThrow;
   };
-  var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs";
+  var _scriptName = __fridayBundleUrl;
   var scriptDirectory = "";
   var readAsync, readBinary;
   if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -19973,7 +19974,7 @@ async function OpenJPEG(moduleArg = {}) {
   var quit_ = (status, toThrow) => {
     throw toThrow;
   };
-  var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs";
+  var _scriptName = __fridayBundleUrl;
   var scriptDirectory = "";
   var readAsync, readBinary;
   if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -27731,7 +27732,7 @@ var init_pdf_worker = __esm({
         var defineProperty = Object.defineProperty;
         var stringSlice = uncurryThis("".slice);
         var replace = uncurryThis("".replace);
-        var join16 = uncurryThis([].join);
+        var join17 = uncurryThis([].join);
         var CONFIGURABLE_LENGTH = DESCRIPTORS && !fails(function() {
           return defineProperty(function() {
           }, "length", { value: 8 }).length !== 8;
@@ -27758,7 +27759,7 @@ var init_pdf_worker = __esm({
           }
           var state = enforceInternalState(value);
           if (!hasOwn(state, "source")) {
-            state.source = join16(TEMPLATE, typeof name == "string" ? name : "");
+            state.source = join17(TEMPLATE, typeof name == "string" ? name : "");
           }
           return value;
         };
@@ -29837,7 +29838,7 @@ var init_pdf_worker = __esm({
         var anUint8Array = __webpack_require__3(4154);
         var notDetached = __webpack_require__3(5169);
         var numberToString2 = uncurryThis(1.1.toString);
-        var join16 = uncurryThis([].join);
+        var join17 = uncurryThis([].join);
         var $Array = Array;
         var Uint8Array2 = globalThis2.Uint8Array;
         var INCORRECT_BEHAVIOR_OR_DOESNT_EXISTS = !Uint8Array2 || !Uint8Array2.prototype.toHex || !(function() {
@@ -29857,7 +29858,7 @@ var init_pdf_worker = __esm({
               var hex3 = numberToString2(this[i], 16);
               result[i] = hex3.length === 1 ? "0" + hex3 : hex3;
             }
-            return join16(result, "");
+            return join17(result, "");
           }
         });
       },
@@ -88420,7 +88421,7 @@ var init_pdf = __esm({
         var defineProperty = Object.defineProperty;
         var stringSlice = uncurryThis("".slice);
         var replace = uncurryThis("".replace);
-        var join16 = uncurryThis([].join);
+        var join17 = uncurryThis([].join);
         var CONFIGURABLE_LENGTH = DESCRIPTORS && !fails(function() {
           return defineProperty(function() {
           }, "length", { value: 8 }).length !== 8;
@@ -88447,7 +88448,7 @@ var init_pdf = __esm({
           }
           var state = enforceInternalState(value);
           if (!hasOwn(state, "source")) {
-            state.source = join16(TEMPLATE, typeof name == "string" ? name : "");
+            state.source = join17(TEMPLATE, typeof name == "string" ? name : "");
           }
           return value;
         };
@@ -90885,7 +90886,7 @@ var init_pdf = __esm({
         var anUint8Array = __webpack_require__3(4154);
         var notDetached = __webpack_require__3(5169);
         var numberToString2 = uncurryThis(1.1.toString);
-        var join16 = uncurryThis([].join);
+        var join17 = uncurryThis([].join);
         var $Array = Array;
         var Uint8Array2 = globalThis2.Uint8Array;
         var INCORRECT_BEHAVIOR_OR_DOESNT_EXISTS = !Uint8Array2 || !Uint8Array2.prototype.toHex || !(function() {
@@ -90905,7 +90906,7 @@ var init_pdf = __esm({
               var hex3 = numberToString2(this[i], 16);
               result[i] = hex3.length === 1 ? "0" + hex3 : hex3;
             }
-            return join16(result, "");
+            return join17(result, "");
           }
         });
       },
@@ -99709,7 +99710,7 @@ var init_pdf = __esm({
     if (isNodeJS2) {
       let canvas;
       try {
-        const require2 = process.getBuiltinModule("module").createRequire("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs");
+        const require2 = process.getBuiltinModule("module").createRequire(__fridayBundleUrl);
         try {
           canvas = require2("@napi-rs/canvas");
         } catch (ex) {
@@ -99744,7 +99745,7 @@ var init_pdf = __esm({
     };
     NodeCanvasFactory = class extends BaseCanvasFactory {
       _createCanvas(width, height) {
-        const require2 = process.getBuiltinModule("module").createRequire("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs");
+        const require2 = process.getBuiltinModule("module").createRequire(__fridayBundleUrl);
         const canvas = require2("@napi-rs/canvas");
         return canvas.createCanvas(width, height);
       }
@@ -117422,8 +117423,8 @@ var require_cfb = __commonJS({
         }
         return L.length - R.length;
       }
-      function dirname10(p) {
-        if (p.charAt(p.length - 1) == "/") return p.slice(0, -1).indexOf("/") === -1 ? p : dirname10(p.slice(0, -1));
+      function dirname11(p) {
+        if (p.charAt(p.length - 1) == "/") return p.slice(0, -1).indexOf("/") === -1 ? p : dirname11(p.slice(0, -1));
         var c = p.lastIndexOf("/");
         return c === -1 ? p : p.slice(0, c + 1);
       }
@@ -117844,10 +117845,10 @@ var require_cfb = __commonJS({
           data.push([cfb.FullPaths[i2], cfb.FileIndex[i2]]);
         }
         for (i2 = 0; i2 < data.length; ++i2) {
-          var dad = dirname10(data[i2][0]);
+          var dad = dirname11(data[i2][0]);
           s = fullPaths[dad];
           while (!s) {
-            while (dirname10(dad) && !fullPaths[dirname10(dad)]) dad = dirname10(dad);
+            while (dirname11(dad) && !fullPaths[dirname11(dad)]) dad = dirname11(dad);
             data.push([dad, {
               name: filename(dad).replace("/", ""),
               type: 1,
@@ -117857,7 +117858,7 @@ var require_cfb = __commonJS({
               content: null
             }]);
             fullPaths[dad] = true;
-            dad = dirname10(data[i2][0]);
+            dad = dirname11(data[i2][0]);
             s = fullPaths[dad];
           }
         }
@@ -117883,13 +117884,13 @@ var require_cfb = __commonJS({
             elt.size = 0;
             elt.type = 5;
           } else if (nm.slice(-1) == "/") {
-            for (j = i2 + 1; j < data.length; ++j) if (dirname10(cfb.FullPaths[j]) == nm) break;
+            for (j = i2 + 1; j < data.length; ++j) if (dirname11(cfb.FullPaths[j]) == nm) break;
             elt.C = j >= data.length ? -1 : j;
-            for (j = i2 + 1; j < data.length; ++j) if (dirname10(cfb.FullPaths[j]) == dirname10(nm)) break;
+            for (j = i2 + 1; j < data.length; ++j) if (dirname11(cfb.FullPaths[j]) == dirname11(nm)) break;
             elt.R = j >= data.length ? -1 : j;
             elt.type = 1;
           } else {
-            if (dirname10(cfb.FullPaths[i2 + 1] || "") == dirname10(nm)) elt.R = i2 + 1;
+            if (dirname11(cfb.FullPaths[i2 + 1] || "") == dirname11(nm)) elt.R = i2 + 1;
             elt.type = 2;
           }
         }
@@ -173387,6 +173388,7 @@ __export(sheets_exports, {
   createSheetsView: () => createSheetsView,
   createSheetsWindow: () => createSheetsWindow,
   exportSheetsPdfHeadless: () => exportSheetsPdfHeadless,
+  exportWorkbookSnapshot: () => exportWorkbookSnapshot,
   getActiveSheetsWebContents: () => getActiveSheetsWebContents,
   getSheetsWindow: () => getSheetsWindow,
   hasActiveQueuedWorkbook: () => hasActiveQueuedWorkbook,
@@ -173419,11 +173421,11 @@ module.exports = __toCommonJS(sheets_exports);
 
 // vendor/happyoffice/apps/sheets/src/main/sheets-main.ts
 var import_node_crypto6 = require("node:crypto");
-var import_node_fs9 = require("node:fs");
+var import_node_fs10 = require("node:fs");
 var import_promises10 = require("node:fs/promises");
 var import_node_http = require("node:http");
-var import_node_path17 = require("node:path");
-var import_electron4 = require("electron");
+var import_node_path18 = require("node:path");
+var import_electron6 = require("electron");
 
 // vendor/happyoffice/node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -188298,8 +188300,8 @@ async function popupMenu(contents, params, labels) {
       return {
         label: item.label,
         click: async () => {
-          const { BrowserWindow: BrowserWindow3 } = await import("electron");
-          await saveImageFromUrl(BrowserWindow3.fromWebContents(contents), params.srcURL, {
+          const { BrowserWindow: BrowserWindow5 } = await import("electron");
+          await saveImageFromUrl(BrowserWindow5.fromWebContents(contents), params.srcURL, {
             title: item.label.replace(/…$/, "")
           });
         }
@@ -197246,8 +197248,130 @@ function isHeadlessMode() {
   return headless;
 }
 
-// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+// vendor/happyoffice/packages/electron-utils/src/system-print-window.ts
+var import_electron2 = require("electron");
+var ownerLocks = /* @__PURE__ */ new WeakMap();
+function lockSystemPrintOwner(owner) {
+  if (!owner || owner.isDestroyed()) return () => {
+  };
+  let lock = ownerLocks.get(owner);
+  if (!lock) {
+    lock = { count: 0, wasEnabled: owner.isEnabled() };
+    ownerLocks.set(owner, lock);
+  }
+  lock.count++;
+  owner.setEnabled(false);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--lock.count > 0) return;
+    ownerLocks.delete(owner);
+    if (!owner.isDestroyed() && lock.wasEnabled) {
+      owner.setEnabled(true);
+      owner.focus();
+    }
+  };
+}
+function createSystemPrintWindow(owner, options) {
+  const window2 = new import_electron2.BrowserWindow({
+    ...options,
+    show: false,
+    ...process.platform === "win32" ? { width: 900, height: 700, autoHideMenuBar: true, closable: false, skipTaskbar: false } : {}
+  });
+  if (process.platform !== "win32" || !owner || owner.isDestroyed()) return window2;
+  let release = () => {
+  };
+  const ownerClosed = () => {
+    if (!window2.isDestroyed()) window2.destroy();
+  };
+  owner.once("closed", ownerClosed);
+  window2.once("show", () => {
+    if (owner.isDestroyed()) return;
+    release = lockSystemPrintOwner(owner);
+  });
+  window2.once("closed", () => {
+    owner.removeListener("closed", ownerClosed);
+    release();
+  });
+  return window2;
+}
+
+// vendor/happyoffice/packages/electron-utils/src/system-print.ts
+var import_electron3 = require("electron");
+var import_node_child_process = require("node:child_process");
+var import_node_fs3 = require("node:fs");
 var import_node_path5 = require("node:path");
+var import_node_url2 = require("node:url");
+function helperPath() {
+  const here = (0, import_node_path5.dirname)((0, import_node_url2.fileURLToPath)(__fridayBundleUrl));
+  return [
+    (0, import_node_path5.join)(here, "../native/system-print.exe"),
+    (0, import_node_path5.join)(here, "../../../../packages/electron-utils/native/system-print.exe"),
+    ...process.resourcesPath ? [(0, import_node_path5.join)(process.resourcesPath, "office/native/system-print.exe"), (0, import_node_path5.join)(process.resourcesPath, "native/system-print.exe")] : []
+  ].find((candidate) => (0, import_node_fs3.existsSync)(candidate));
+}
+var paperSizes = {
+  A0: [841e3, 1189e3],
+  A1: [594e3, 841e3],
+  A2: [42e4, 594e3],
+  A3: [297e3, 42e4],
+  A4: [21e4, 297e3],
+  A5: [148e3, 21e4],
+  A6: [105e3, 148e3],
+  Letter: [215900, 279400],
+  Legal: [215900, 355600],
+  Tabloid: [279400, 431800],
+  Ledger: [279400, 431800]
+};
+function systemPrintPaperSize(size) {
+  if (!size) return void 0;
+  const pair = typeof size === "string" ? paperSizes[size] : [size.width, size.height];
+  if (!pair || pair.some((n) => !Number.isFinite(n) || n <= 0)) throw new Error("INVALID_PRINT_PAGE_SIZE");
+  return { width: Math.round(Math.min(...pair)), height: Math.round(Math.max(...pair)) };
+}
+async function printPdfFileWithSystemDialog(pdfPath, options = {}, owner) {
+  if (process.platform !== "win32") return { success: false, failureReason: "WINDOWS_PRINT_UNAVAILABLE" };
+  if (owner?.isDestroyed()) return { success: false, failureReason: "Print job canceled" };
+  const helper = helperPath();
+  if (!helper) return { success: false, failureReason: "WINDOWS_PRINT_HELPER_MISSING" };
+  const size = systemPrintPaperSize(options.pageSize);
+  return new Promise((resolve5) => {
+    const release = lockSystemPrintOwner(owner);
+    const closed = () => child.kill();
+    const child = (0, import_node_child_process.execFile)(helper, [], { windowsHide: false, timeout: 15 * 60 * 1e3, maxBuffer: 64 * 1024, encoding: "utf8" }, (error51, stdout) => {
+      owner?.removeListener("closed", closed);
+      release();
+      try {
+        const result = JSON.parse(stdout.trim());
+        if (typeof result.success === "boolean" && typeof result.failureReason === "string") {
+          resolve5(result);
+          return;
+        }
+      } catch {
+      }
+      resolve5({ success: false, failureReason: owner?.isDestroyed() ? "Print job canceled" : error51?.killed ? "WINDOWS_PRINT_TIMEOUT" : "WINDOWS_PRINT_FAILED" });
+    });
+    owner?.once("closed", closed);
+    child.stdin?.on("error", () => {
+    });
+    child.stdin?.end(JSON.stringify({
+      pdfPath,
+      title: owner && !owner.isDestroyed() ? owner.getTitle() : "Friday",
+      landscape: options.landscape,
+      color: options.color,
+      copies: options.copies ?? 1,
+      collate: options.collate,
+      pageRanges: options.pageRanges,
+      duplexMode: options.duplexMode,
+      paperWidth: size?.width,
+      paperHeight: size?.height
+    }));
+  });
+}
+
+// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+var import_node_path6 = require("node:path");
 var RENDERER_SCHEME = "genoffice-app";
 var RENDERER_SCHEME_PRIVILEGE = {
   scheme: RENDERER_SCHEME,
@@ -197290,22 +197414,22 @@ function resolveRendererFile(roots, requestUrl) {
   } catch {
     return null;
   }
-  const file2 = (0, import_node_path5.resolve)(root, pathname.replace(/^\/+/, ""));
-  return file2 === root || file2.startsWith(root + import_node_path5.sep) ? file2 : null;
+  const file2 = (0, import_node_path6.resolve)(root, pathname.replace(/^\/+/, ""));
+  return file2 === root || file2.startsWith(root + import_node_path6.sep) ? file2 : null;
 }
 
 // vendor/happyoffice/packages/electron-utils/src/renderer-protocol.ts
-var import_electron2 = require("electron");
-var import_node_url2 = require("node:url");
+var import_electron4 = require("electron");
+var import_node_url3 = require("node:url");
 function registerRendererScheme() {
-  import_electron2.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
+  import_electron4.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
 }
 function installRendererProtocol(roots) {
   const table = new Map(Object.entries(roots));
-  import_electron2.protocol.handle(RENDERER_SCHEME, (request) => {
+  import_electron4.protocol.handle(RENDERER_SCHEME, (request) => {
     const file2 = resolveRendererFile(table, request.url);
     if (!file2) return new Response(null, { status: 404 });
-    return import_electron2.net.fetch((0, import_node_url2.pathToFileURL)(file2).toString()).catch(() => new Response(null, { status: 404 }));
+    return import_electron4.net.fetch((0, import_node_url3.pathToFileURL)(file2).toString()).catch(() => new Response(null, { status: 404 }));
   });
 }
 
@@ -197397,8 +197521,8 @@ function createI18n(dicts) {
 
 // vendor/happyoffice/packages/project-store/src/store.ts
 var import_node_crypto2 = require("node:crypto");
-var import_node_fs3 = require("node:fs");
-var import_node_path6 = require("node:path");
+var import_node_fs4 = require("node:fs");
+var import_node_path7 = require("node:path");
 var TOOL_FIELD_MAX_CHARS = 16e3;
 var TEXT_MAX_CHARS = 32e3;
 var SCOPE_TEXT_MAX_CHARS = 400;
@@ -197407,42 +197531,42 @@ function nowIso() {
   return (/* @__PURE__ */ new Date()).toISOString();
 }
 function ensureDir(dir) {
-  if (!(0, import_node_fs3.existsSync)(dir)) (0, import_node_fs3.mkdirSync)(dir, { recursive: true });
+  if (!(0, import_node_fs4.existsSync)(dir)) (0, import_node_fs4.mkdirSync)(dir, { recursive: true });
 }
 function readJson(filePath) {
   try {
-    if (!(0, import_node_fs3.existsSync)(filePath)) return null;
-    return JSON.parse((0, import_node_fs3.readFileSync)(filePath, "utf8"));
+    if (!(0, import_node_fs4.existsSync)(filePath)) return null;
+    return JSON.parse((0, import_node_fs4.readFileSync)(filePath, "utf8"));
   } catch {
     return null;
   }
 }
 function writeJson(filePath, data) {
-  ensureDir((0, import_node_path6.dirname)(filePath));
+  ensureDir((0, import_node_path7.dirname)(filePath));
   const tmpPath = `${filePath}.tmp`;
-  (0, import_node_fs3.writeFileSync)(tmpPath, JSON.stringify(data, null, 2), "utf8");
-  (0, import_node_fs3.renameSync)(tmpPath, filePath);
+  (0, import_node_fs4.writeFileSync)(tmpPath, JSON.stringify(data, null, 2), "utf8");
+  (0, import_node_fs4.renameSync)(tmpPath, filePath);
 }
 var ProjectStore = class _ProjectStore {
   baseDir;
   constructor(userDataPath2) {
-    this.baseDir = (0, import_node_path6.join)(userDataPath2, "projects");
+    this.baseDir = (0, import_node_path7.join)(userDataPath2, "projects");
   }
   // ── Path helpers ──────────────────────────────────────────
   indexPath() {
-    return (0, import_node_path6.join)(this.baseDir, "index.json");
+    return (0, import_node_path7.join)(this.baseDir, "index.json");
   }
   projectDir(projectId) {
-    return (0, import_node_path6.join)(this.baseDir, projectId);
+    return (0, import_node_path7.join)(this.baseDir, projectId);
   }
   projectJsonPath(projectId) {
-    return (0, import_node_path6.join)(this.projectDir(projectId), "project.json");
+    return (0, import_node_path7.join)(this.projectDir(projectId), "project.json");
   }
   chatsDir(projectId) {
-    return (0, import_node_path6.join)(this.projectDir(projectId), "chats");
+    return (0, import_node_path7.join)(this.projectDir(projectId), "chats");
   }
   chatPath(projectId, chatId) {
-    return (0, import_node_path6.join)(this.chatsDir(projectId), `${chatId}.jsonl`);
+    return (0, import_node_path7.join)(this.chatsDir(projectId), `${chatId}.jsonl`);
   }
   // ── seq counters (in-memory cache, initialized from JSONL line count on first read) ──
   /** projectId:chatId → current max seq */
@@ -197595,7 +197719,7 @@ var ProjectStore = class _ProjectStore {
     try {
       ensureDir(this.chatsDir(projectId));
       const lines = buf.map((r) => JSON.stringify(r) + "\n").join("");
-      (0, import_node_fs3.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
+      (0, import_node_fs4.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
     } catch (err) {
       console.warn("[project-store] flushPending failed:", err);
     }
@@ -197628,7 +197752,7 @@ var ProjectStore = class _ProjectStore {
         };
       }
       const key = this.seqKey(projectId, chatId);
-      if (msg.role !== "assistant" && !(0, import_node_fs3.existsSync)(this.chatPath(projectId, chatId))) {
+      if (msg.role !== "assistant" && !(0, import_node_fs4.existsSync)(this.chatPath(projectId, chatId))) {
         const buf2 = this.pendingFirstWrite.get(key) ?? [];
         buf2.push(record2);
         this.pendingFirstWrite.set(key, buf2);
@@ -197638,7 +197762,7 @@ var ProjectStore = class _ProjectStore {
       const buf = this.pendingFirstWrite.get(key) ?? [];
       this.pendingFirstWrite.delete(key);
       const lines = [...buf, record2].map((r) => JSON.stringify(r) + "\n").join("");
-      (0, import_node_fs3.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
+      (0, import_node_fs4.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
     } catch (err) {
       console.warn("[project-store] appendChatMessage failed:", err);
     }
@@ -197652,8 +197776,8 @@ var ProjectStore = class _ProjectStore {
     const filePath = this.chatPath(projectId, chatId);
     const messages = [...pending];
     try {
-      if ((0, import_node_fs3.existsSync)(filePath)) {
-        const raw = (0, import_node_fs3.readFileSync)(filePath, "utf8");
+      if ((0, import_node_fs4.existsSync)(filePath)) {
+        const raw = (0, import_node_fs4.readFileSync)(filePath, "utf8");
         const lines = raw.split("\n").filter((l) => l.trim());
         for (const line of lines) {
           try {
@@ -197676,16 +197800,16 @@ var ProjectStore = class _ProjectStore {
    */
   listChats(projectId) {
     const dir = this.chatsDir(projectId);
-    if (!(0, import_node_fs3.existsSync)(dir)) return [];
+    if (!(0, import_node_fs4.existsSync)(dir)) return [];
     try {
-      const files = (0, import_node_fs3.readdirSync)(dir).filter((f) => f.endsWith(".jsonl"));
+      const files = (0, import_node_fs4.readdirSync)(dir).filter((f) => f.endsWith(".jsonl"));
       return files.map((f) => {
         const chatId = f.replace(/\.jsonl$/, "");
-        const fullPath = (0, import_node_path6.join)(dir, f);
+        const fullPath = (0, import_node_path7.join)(dir, f);
         let updatedAt = nowIso();
         let approxCount = 0;
         try {
-          const st = (0, import_node_fs3.statSync)(fullPath);
+          const st = (0, import_node_fs4.statSync)(fullPath);
           updatedAt = st.mtime.toISOString();
           approxCount = Math.round(st.size / 120);
         } catch {
@@ -197708,17 +197832,17 @@ var ProjectStore = class _ProjectStore {
     const newPath = this.chatPath(toProjectId, toId);
     let mergedMaxSeq;
     try {
-      if ((0, import_node_fs3.existsSync)(oldPath)) {
-        ensureDir((0, import_node_path6.dirname)(newPath));
-        if (!(0, import_node_fs3.existsSync)(newPath)) {
-          (0, import_node_fs3.renameSync)(oldPath, newPath);
+      if ((0, import_node_fs4.existsSync)(oldPath)) {
+        ensureDir((0, import_node_path7.dirname)(newPath));
+        if (!(0, import_node_fs4.existsSync)(newPath)) {
+          (0, import_node_fs4.renameSync)(oldPath, newPath);
         } else {
           const existing = this.loadChat(toProjectId, toId, 1e4);
           let seq = existing.reduce((m, msg) => Math.max(m, msg.seq), -1) + 1;
           const moved = this.loadChat(fromProjectId, fromId, 1e4);
           const lines = moved.map((m) => JSON.stringify({ ...m, seq: seq++ }) + "\n").join("");
-          if (lines) (0, import_node_fs3.appendFileSync)(newPath, lines, "utf8");
-          (0, import_node_fs3.unlinkSync)(oldPath);
+          if (lines) (0, import_node_fs4.appendFileSync)(newPath, lines, "utf8");
+          (0, import_node_fs4.unlinkSync)(oldPath);
           mergedMaxSeq = seq - 1;
         }
       }
@@ -197792,7 +197916,7 @@ var ProjectStore = class _ProjectStore {
   listProjectFiles(projectId) {
     const proj = this.readProject(projectId);
     if (!proj) return [];
-    return [...new Set(proj.files)].filter((filePath) => (0, import_node_fs3.existsSync)(filePath));
+    return [...new Set(proj.files)].filter((filePath) => (0, import_node_fs4.existsSync)(filePath));
   }
   /**
    * Creates a project (name must be non-empty; id is the first 12 hex chars of
@@ -197853,11 +197977,11 @@ var ProjectStore = class _ProjectStore {
     if (!proj) throw new Error(`Project does not exist: ${id}`);
     const src = this.projectDir(id);
     const ts = Date.now();
-    const trashDir = (0, import_node_path6.join)(this.baseDir, ".trash");
+    const trashDir = (0, import_node_path7.join)(this.baseDir, ".trash");
     ensureDir(trashDir);
-    const dst = (0, import_node_path6.join)(trashDir, `${id}-${ts}`);
+    const dst = (0, import_node_path7.join)(trashDir, `${id}-${ts}`);
     try {
-      if ((0, import_node_fs3.existsSync)(src)) (0, import_node_fs3.renameSync)(src, dst);
+      if ((0, import_node_fs4.existsSync)(src)) (0, import_node_fs4.renameSync)(src, dst);
     } catch (err) {
       console.warn("[project-store] deleteProject rename to trash failed:", err);
     }
@@ -197912,9 +198036,9 @@ var ProjectStore = class _ProjectStore {
     const srcChatPath = this.chatPath(fromProjectId, chatId);
     const dstChatPath = this.chatPath(targetProjectId, chatId);
     try {
-      if ((0, import_node_fs3.existsSync)(srcChatPath)) {
+      if ((0, import_node_fs4.existsSync)(srcChatPath)) {
         ensureDir(this.chatsDir(targetProjectId));
-        (0, import_node_fs3.renameSync)(srcChatPath, dstChatPath);
+        (0, import_node_fs4.renameSync)(srcChatPath, dstChatPath);
       }
     } catch (err) {
       console.warn("[project-store] moveFileToProject chat rename failed:", err);
@@ -197947,7 +198071,7 @@ var ProjectStore = class _ProjectStore {
       for (const msg of msgs) {
         entries.push({
           filePath,
-          fileName: filePath ? (0, import_node_path6.basename)(filePath) : chatId,
+          fileName: filePath ? (0, import_node_path7.basename)(filePath) : chatId,
           chatId,
           ts: msg.ts,
           role: msg.role,
@@ -200144,11 +200268,11 @@ async function chatOpenAiCompatible(wd, baseUrl2, config2, system, user, options
 }
 
 // vendor/happyoffice/packages/ai-provider/src/codex-app-server.ts
-var import_node_child_process = require("node:child_process");
+var import_node_child_process2 = require("node:child_process");
 var import_node_crypto3 = require("node:crypto");
 var import_promises4 = require("node:fs/promises");
 var import_node_readline = require("node:readline");
-var import_node_path7 = require("node:path");
+var import_node_path8 = require("node:path");
 var import_node_os3 = require("node:os");
 var DIAGNOSTIC_LIMIT = 16e3;
 var REQUEST_TIMEOUT_MS = 3e4;
@@ -200173,14 +200297,14 @@ async function fileExists(path) {
 function managedCodexRoot(platform, env) {
   if (platform !== "win32") return void 0;
   const localAppData = env.LOCALAPPDATA ?? env.LocalAppData;
-  return localAppData ? (0, import_node_path7.join)(localAppData, "OpenAI", "Codex", "bin") : void 0;
+  return localAppData ? (0, import_node_path8.join)(localAppData, "OpenAI", "Codex", "bin") : void 0;
 }
 function isInside(path, root, platform) {
-  const normalizedPath = (0, import_node_path7.resolve)(path);
-  const normalizedRoot = (0, import_node_path7.resolve)(root);
+  const normalizedPath = (0, import_node_path8.resolve)(path);
+  const normalizedRoot = (0, import_node_path8.resolve)(root);
   const pathValue = platform === "win32" ? normalizedPath.toLowerCase() : normalizedPath;
   const rootValue = platform === "win32" ? normalizedRoot.toLowerCase() : normalizedRoot;
-  return pathValue === rootValue || pathValue.startsWith(`${rootValue}${import_node_path7.sep}`);
+  return pathValue === rootValue || pathValue.startsWith(`${rootValue}${import_node_path8.sep}`);
 }
 async function newestManagedCodex(root, platform) {
   let entries;
@@ -200192,14 +200316,14 @@ async function newestManagedCodex(root, platform) {
   const executable = platform === "win32" ? "codex.exe" : "codex";
   const candidates = await Promise.all(
     entries.filter((entry) => entry.isDirectory()).map(async (entry) => {
-      const path = (0, import_node_path7.join)(root, entry.name, executable);
+      const path = (0, import_node_path8.join)(root, entry.name, executable);
       try {
         const [info3, directoryInfo] = await Promise.all([
           (0, import_promises4.stat)(path),
-          (0, import_promises4.stat)((0, import_node_path7.join)(root, entry.name))
+          (0, import_promises4.stat)((0, import_node_path8.join)(root, entry.name))
         ]);
         if (!info3.isFile()) return null;
-        const companion = platform !== "win32" || await fileExists((0, import_node_path7.join)(root, entry.name, "codex-code-mode-host.exe"));
+        const companion = platform !== "win32" || await fileExists((0, import_node_path8.join)(root, entry.name, "codex-code-mode-host.exe"));
         return { path, modified: Math.max(info3.mtimeMs, directoryInfo.mtimeMs), companion };
       } catch {
         return null;
@@ -200217,28 +200341,28 @@ async function commonUnixBinDirs(env) {
   const dirs = ["/opt/homebrew/bin", "/usr/local/bin"];
   if (home) {
     dirs.push(
-      (0, import_node_path7.join)(home, ".local", "bin"),
-      (0, import_node_path7.join)(home, ".npm-global", "bin"),
-      (0, import_node_path7.join)(home, ".volta", "bin"),
-      (0, import_node_path7.join)(home, ".bun", "bin"),
-      (0, import_node_path7.join)(home, ".yarn", "bin")
+      (0, import_node_path8.join)(home, ".local", "bin"),
+      (0, import_node_path8.join)(home, ".npm-global", "bin"),
+      (0, import_node_path8.join)(home, ".volta", "bin"),
+      (0, import_node_path8.join)(home, ".bun", "bin"),
+      (0, import_node_path8.join)(home, ".yarn", "bin")
     );
-    const nvmRoot = (0, import_node_path7.join)(home, ".nvm", "versions", "node");
+    const nvmRoot = (0, import_node_path8.join)(home, ".nvm", "versions", "node");
     const versions = await (0, import_promises4.readdir)(nvmRoot).catch(() => []);
-    for (const version3 of versions.sort().reverse()) dirs.push((0, import_node_path7.join)(nvmRoot, version3, "bin"));
+    for (const version3 of versions.sort().reverse()) dirs.push((0, import_node_path8.join)(nvmRoot, version3, "bin"));
   }
   return dirs;
 }
 async function codexOnPath(platform, env) {
   const pathValue = env.PATH ?? env.Path ?? env.path ?? "";
   const names = platform === "win32" ? ["codex.exe"] : ["codex"];
-  const directories = pathValue ? pathValue.split(platform === "win32" ? ";" : import_node_path7.delimiter) : [];
+  const directories = pathValue ? pathValue.split(platform === "win32" ? ";" : import_node_path8.delimiter) : [];
   if (platform !== "win32") directories.push(...await commonUnixBinDirs(env));
   for (const directory of directories) {
     const cleanDirectory = cleanCliPath(directory);
     if (!cleanDirectory) continue;
     for (const name of names) {
-      const candidate = (0, import_node_path7.join)(cleanDirectory, name);
+      const candidate = (0, import_node_path8.join)(cleanDirectory, name);
       if (!await fileExists(candidate)) continue;
       if (platform !== "win32") {
         try {
@@ -200258,10 +200382,10 @@ async function resolveCodexCliPath(configuredPath, options = {}) {
   const managedRoot = options.managedInstallRoot ?? managedCodexRoot(platform, env);
   const configured = cleanCliPath(configuredPath);
   if (configured) {
-    const configuredExecutable = (0, import_node_path7.isAbsolute)(configured) && (await (0, import_promises4.stat)(configured).catch(() => null))?.isDirectory() ? (0, import_node_path7.join)(configured, platform === "win32" ? "codex.exe" : "codex") : configured;
-    const managed = managedRoot && (0, import_node_path7.isAbsolute)(configuredExecutable) ? isInside(configuredExecutable, managedRoot, platform) : false;
+    const configuredExecutable = (0, import_node_path8.isAbsolute)(configured) && (await (0, import_promises4.stat)(configured).catch(() => null))?.isDirectory() ? (0, import_node_path8.join)(configured, platform === "win32" ? "codex.exe" : "codex") : configured;
+    const managed = managedRoot && (0, import_node_path8.isAbsolute)(configuredExecutable) ? isInside(configuredExecutable, managedRoot, platform) : false;
     if (!managed) {
-      if (!(0, import_node_path7.isAbsolute)(configuredExecutable)) return configuredExecutable;
+      if (!(0, import_node_path8.isAbsolute)(configuredExecutable)) return configuredExecutable;
       if (await fileExists(configuredExecutable)) return configuredExecutable;
     }
   }
@@ -200294,9 +200418,9 @@ function cancelledError() {
 function codexChildEnv(cliPath) {
   const env = { ...process.env };
   if (process.platform === "win32" && !env.HOME && env.USERPROFILE) env.HOME = env.USERPROFILE;
-  if ((0, import_node_path7.isAbsolute)(cliPath)) {
+  if ((0, import_node_path8.isAbsolute)(cliPath)) {
     const key = Object.keys(env).find((name) => name.toLowerCase() === "path") ?? "PATH";
-    env[key] = `${(0, import_node_path7.dirname)(cliPath)}${import_node_path7.delimiter}${env[key] ?? ""}`;
+    env[key] = `${(0, import_node_path8.dirname)(cliPath)}${import_node_path8.delimiter}${env[key] ?? ""}`;
   }
   return env;
 }
@@ -200307,7 +200431,7 @@ var CodexAppServerClient = class {
   constructor(cliPath, onClose) {
     this.cliPath = cliPath;
     this.onClose = onClose;
-    this.child = (0, import_node_child_process.spawn)(cliPath, codexAppServerLaunchArgs(), {
+    this.child = (0, import_node_child_process2.spawn)(cliPath, codexAppServerLaunchArgs(), {
       env: codexChildEnv(cliPath),
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true
@@ -200519,7 +200643,7 @@ async function materializeImages(messages, tempDir) {
   for (const message of messages) {
     if (message.role !== "user") continue;
     for (const image of message.images ?? []) {
-      const path = (0, import_node_path7.join)(tempDir, `image-${paths.length + 1}${imageExtension(image)}`);
+      const path = (0, import_node_path8.join)(tempDir, `image-${paths.length + 1}${imageExtension(image)}`);
       await (0, import_promises4.writeFile)(path, Buffer.from(image.base64, "base64"));
       paths.push(path);
     }
@@ -200783,7 +200907,7 @@ async function runCodexAppServer(config2, system, messages, tools, maxTokens, cb
     let nextMessages = incrementalMessages(session, signature, messages);
     if (!session || nextMessages === null) {
       if (session) client.deleteSession(nativeSessionId);
-      const tempDir = await (0, import_promises4.mkdtemp)((0, import_node_path7.join)((0, import_node_os3.tmpdir)(), CODEX_TEMP_PREFIX));
+      const tempDir = await (0, import_promises4.mkdtemp)((0, import_node_path8.join)((0, import_node_os3.tmpdir)(), CODEX_TEMP_PREFIX));
       let threadId;
       try {
         threadId = await startNativeThread(client, config2, tempDir);
@@ -201298,17 +201422,17 @@ function gskProxyUrl() {
 }
 
 // vendor/happyoffice/packages/ai-search/src/gsk.ts
-var import_node_child_process2 = require("node:child_process");
-var import_node_fs5 = require("node:fs");
+var import_node_child_process3 = require("node:child_process");
+var import_node_fs6 = require("node:fs");
 var import_node_os5 = require("node:os");
-var import_node_path9 = require("node:path");
+var import_node_path10 = require("node:path");
 var import_node_module2 = require("node:module");
 
 // vendor/happyoffice/packages/ai-search/src/genoffice-auth.ts
-var import_node_fs4 = require("node:fs");
+var import_node_fs5 = require("node:fs");
 var import_node_module = require("node:module");
 var import_node_os4 = require("node:os");
-var import_node_path8 = require("node:path");
+var import_node_path9 = require("node:path");
 var APP_TYPE = "genoffice";
 var KEY_NAME = "genoffice";
 var HTTP_TIMEOUT_MS = 3e4;
@@ -201321,7 +201445,7 @@ function resolveFetch() {
   let impl = (...args) => fetch(...args);
   if (process.versions.electron) {
     try {
-      const require2 = (0, import_node_module.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs");
+      const require2 = (0, import_node_module.createRequire)(__fridayBundleUrl);
       const { net: net3 } = require2("electron");
       if (net3?.fetch) impl = net3.fetch.bind(net3);
     } catch {
@@ -201340,7 +201464,7 @@ async function proxyFallbackFetch() {
   let impl = (...args) => fetch(...args);
   if (process.versions.electron) {
     try {
-      const require2 = (0, import_node_module.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs");
+      const require2 = (0, import_node_module.createRequire)(__fridayBundleUrl);
       const { session } = require2("electron");
       if (session) {
         const ses = session.fromPartition("genoffice-login-proxy");
@@ -201360,12 +201484,12 @@ async function loginFetchChannels() {
   return proxyFallbackPreferred ? [fallback, primary] : [primary, fallback];
 }
 function genofficeAuthPath() {
-  return (0, import_node_path8.join)(process.env.GENOFFICE_AUTH_DIR || (0, import_node_path8.join)((0, import_node_os4.homedir)(), ".genoffice"), "auth.json");
+  return (0, import_node_path9.join)(process.env.GENOFFICE_AUTH_DIR || (0, import_node_path9.join)((0, import_node_os4.homedir)(), ".genoffice"), "auth.json");
 }
 var cachedAuth;
 function readAuthFile() {
   try {
-    const raw = asRecord2(JSON.parse((0, import_node_fs4.readFileSync)(genofficeAuthPath(), "utf-8")));
+    const raw = asRecord2(JSON.parse((0, import_node_fs5.readFileSync)(genofficeAuthPath(), "utf-8")));
     if (typeof raw.api_key !== "string" || !raw.api_key) return null;
     return {
       apiKey: raw.api_key,
@@ -201385,8 +201509,8 @@ function genofficeApiKey() {
 }
 function saveAuth(auth) {
   const path = genofficeAuthPath();
-  (0, import_node_fs4.mkdirSync)((0, import_node_path8.dirname)(path), { recursive: true });
-  (0, import_node_fs4.writeFileSync)(
+  (0, import_node_fs5.mkdirSync)((0, import_node_path9.dirname)(path), { recursive: true });
+  (0, import_node_fs5.writeFileSync)(
     path,
     JSON.stringify(
       { api_key: auth.apiKey, key_id: auth.keyId, access_token: auth.accessToken },
@@ -201576,12 +201700,12 @@ function resolveGskEntry() {
   if (process.env.GSK_CLI_PATH) return process.env.GSK_CLI_PATH;
   if (cachedEntry !== void 0) return cachedEntry;
   try {
-    const require2 = (0, import_node_module2.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs");
+    const require2 = (0, import_node_module2.createRequire)(__fridayBundleUrl);
     cachedEntry = require2.resolve("@genspark/cli/dist/index.js");
   } catch {
     const resourcesPath = process.resourcesPath;
-    const packed = resourcesPath ? (0, import_node_path9.join)(resourcesPath, "gsk", "node_modules", "@genspark", "cli", "dist", "index.js") : null;
-    cachedEntry = packed && (0, import_node_fs5.existsSync)(packed) ? packed : null;
+    const packed = resourcesPath ? (0, import_node_path10.join)(resourcesPath, "gsk", "node_modules", "@genspark", "cli", "dist", "index.js") : null;
+    cachedEntry = packed && (0, import_node_fs6.existsSync)(packed) ? packed : null;
   }
   return cachedEntry;
 }
@@ -201590,10 +201714,10 @@ function electronCompatArgs() {
   if (!process.versions.electron) return [];
   if (compatPath === void 0) {
     try {
-      const dir = (0, import_node_path9.join)((0, import_node_os5.homedir)(), ".genoffice", "bin");
-      (0, import_node_fs5.mkdirSync)(dir, { recursive: true });
-      compatPath = (0, import_node_path9.join)(dir, "electron-compat.js");
-      (0, import_node_fs5.writeFileSync)(compatPath, "delete process.versions.electron;\n");
+      const dir = (0, import_node_path10.join)((0, import_node_os5.homedir)(), ".genoffice", "bin");
+      (0, import_node_fs6.mkdirSync)(dir, { recursive: true });
+      compatPath = (0, import_node_path10.join)(dir, "electron-compat.js");
+      (0, import_node_fs6.writeFileSync)(compatPath, "delete process.versions.electron;\n");
     } catch {
       compatPath = null;
     }
@@ -201605,9 +201729,9 @@ function gskApiKey() {
   const own = genofficeApiKey();
   if (own) return own;
   try {
-    const configPath = (0, import_node_path9.join)((0, import_node_os5.homedir)(), ".genspark-tool-cli", "config.json");
-    if (!(0, import_node_fs5.existsSync)(configPath)) return "";
-    const config2 = JSON.parse((0, import_node_fs5.readFileSync)(configPath, "utf-8"));
+    const configPath = (0, import_node_path10.join)((0, import_node_os5.homedir)(), ".genspark-tool-cli", "config.json");
+    if (!(0, import_node_fs6.existsSync)(configPath)) return "";
+    const config2 = JSON.parse((0, import_node_fs6.readFileSync)(configPath, "utf-8"));
     return config2.api_key ?? "";
   } catch {
     return "";
@@ -201663,7 +201787,7 @@ function runGsk(args, timeoutMs, signal) {
   if (!entry) return Promise.reject(new Error("@genspark/cli is not installed"));
   const key = gskApiKey();
   return new Promise((resolve5, reject) => {
-    (0, import_node_child_process2.execFile)(
+    (0, import_node_child_process3.execFile)(
       process.execPath,
       [...electronCompatArgs(), entry, ...args, "--output", "json"],
       {
@@ -201790,8 +201914,8 @@ async function gskLoginInfo() {
 }
 
 // vendor/happyoffice/packages/ai-search/src/media-tools.ts
-var import_node_fs6 = require("node:fs");
-var import_node_path10 = require("node:path");
+var import_node_fs7 = require("node:fs");
+var import_node_path11 = require("node:path");
 var GSK_NOT_LOGGED_IN_ERROR = "Genspark account is not logged in on this machine; ask the user to log in first";
 var GSK_TOOLS_OFF_ERROR = "Genspark cloud tools are turned off in Settings (AI Model); enable them or configure an image provider under Settings (AI Media) to use this tool";
 var MAX_MEDIA_BYTES = 200 * 1024 * 1024;
@@ -201820,7 +201944,7 @@ var MIME_BY_EXT2 = {
 function readAiSettingsFile(path) {
   let stored = {};
   try {
-    if ((0, import_node_fs6.existsSync)(path)) stored = JSON.parse((0, import_node_fs6.readFileSync)(path, "utf-8"));
+    if ((0, import_node_fs7.existsSync)(path)) stored = JSON.parse((0, import_node_fs7.readFileSync)(path, "utf-8"));
   } catch {
   }
   return resolveAiSettings(stored, defaultAiSettings());
@@ -201845,8 +201969,8 @@ async function loadMediaReference(ref) {
     }
     const rawCt = resp.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
     const ct = rawCt && rawCt !== "application/octet-stream" ? rawCt : void 0;
-    const name = (0, import_node_path10.basename)(new URL(ref).pathname) || void 0;
-    const mime2 = ct && ct !== "application/octet-stream" ? ct : MIME_BY_EXT2[(0, import_node_path10.extname)(name ?? "").toLowerCase()];
+    const name = (0, import_node_path11.basename)(new URL(ref).pathname) || void 0;
+    const mime2 = ct && ct !== "application/octet-stream" ? ct : MIME_BY_EXT2[(0, import_node_path11.extname)(name ?? "").toLowerCase()];
     if (!mime2) throw new Error(`Could not tell the media type of ${ref}`);
     return { bytes, mime: mime2, ...name ? { name } : {} };
   }
@@ -201855,13 +201979,13 @@ async function loadMediaReference(ref) {
     if (!local) throw new Error(`Not an accessible image: ${ref}`);
     return { bytes: new Uint8Array(local.bytes), mime: local.mime };
   }
-  const mime = MIME_BY_EXT2[(0, import_node_path10.extname)(ref).toLowerCase()];
+  const mime = MIME_BY_EXT2[(0, import_node_path11.extname)(ref).toLowerCase()];
   if (!mime) throw new Error(`Unsupported media file: ${ref} (images, video and audio only)`);
-  if (!(0, import_node_fs6.existsSync)(ref)) throw new Error(`File not found: ${ref}`);
-  if ((0, import_node_fs6.statSync)(ref).size > MAX_MEDIA_BYTES) {
+  if (!(0, import_node_fs7.existsSync)(ref)) throw new Error(`File not found: ${ref}`);
+  if ((0, import_node_fs7.statSync)(ref).size > MAX_MEDIA_BYTES) {
     throw new MediaTooLargeError(`${ref} is too large to analyze`);
   }
-  return { bytes: new Uint8Array((0, import_node_fs6.readFileSync)(ref)), mime, name: (0, import_node_path10.basename)(ref) };
+  return { bytes: new Uint8Array((0, import_node_fs7.readFileSync)(ref)), mime, name: (0, import_node_path11.basename)(ref) };
 }
 var GSK_RMBG_MODEL = "fal-bria-rmbg";
 async function generateImageTool(settingsPath, op, options = {}) {
@@ -202137,7 +202261,7 @@ function decodeDuckUrl(href) {
 
 // vendor/happyoffice/packages/file-parse/src/parse.ts
 var import_promises5 = require("node:fs/promises");
-var import_node_path12 = require("node:path");
+var import_node_path13 = require("node:path");
 
 // vendor/happyoffice/packages/file-parse/src/doc.ts
 var import_word_extractor = __toESM(require_word(), 1);
@@ -217137,7 +217261,7 @@ function run(text) {
     text
   };
 }
-function join9(pieces, sep5 = "") {
+function join10(pieces, sep5 = "") {
   return {
     omml: pieces.map((p) => p.omml).join(sep5 === "" ? "" : run(sep5).omml),
     text: pieces.map((p) => p.text).join(sep5)
@@ -217193,7 +217317,7 @@ function parseArgs(p) {
   for (; ; ) {
     const seq = parseSeq(p, true);
     if (!seq) return null;
-    args.push(join9(seq));
+    args.push(join10(seq));
     const ch2 = p.src[p.i];
     if (ch2 === ",") {
       p.i++;
@@ -217258,7 +217382,7 @@ function parseCommandInner(p) {
       const both = argOf("bc");
       const beg = both ?? argOf("lc") ?? "(";
       const end = both ? closingOf(both) : argOf("rc") ?? ")";
-      const body = join9(args, ",");
+      const body = join10(args, ",");
       return {
         omml: `<m:d><m:dPr>${val("begChr", beg)}${val("endChr", end)}</m:dPr>${slot("e", body)}</m:d>`,
         text: `${beg}${body.text}${end}`
@@ -217281,9 +217405,9 @@ function parseCommandInner(p) {
       };
     }
     case "l":
-      return join9(args, ",");
+      return join10(args, ",");
     case "o":
-      return join9(args);
+      return join10(args);
     case "r": {
       if (args.length >= 2) {
         const [deg, body2] = args;
@@ -217316,7 +217440,7 @@ function parseCommandInner(p) {
       const sides = { to: "hideTop", bo: "hideBot", le: "hideLeft", ri: "hideRight" };
       const named = Object.keys(sides).filter((k) => has(k));
       const hidden = named.length ? Object.entries(sides).filter(([k]) => !named.includes(k)).map(([, tag]) => val(tag, "1")).join("") : "";
-      const body = join9(args, ",");
+      const body = join10(args, ",");
       return {
         omml: `<m:borderBox><m:borderBoxPr>${hidden}</m:borderBoxPr>${slot("e", body)}</m:borderBox>`,
         text: body.text
@@ -217335,7 +217459,7 @@ function eqFieldToOmml(instr) {
   const p = { src: m[1].replace(/\\\*\s*[A-Za-z]+/g, "").trim(), i: 0, depth: 0 };
   const seq = parseSeq(p, false);
   if (!seq || p.i < p.src.length) return null;
-  const body = join9(seq);
+  const body = join10(seq);
   if (body.omml === "") return null;
   return { omml: `<m:oMath>${body.omml}</m:oMath>`, text: body.text };
 }
@@ -224725,12 +224849,12 @@ function runText(block) {
 
 // vendor/happyoffice/packages/file-parse/src/pdf.ts
 var import_node_module3 = require("node:module");
-var import_node_path11 = require("node:path");
+var import_node_path12 = require("node:path");
 function standardFontDataUrl() {
   try {
-    const require2 = (0, import_node_module3.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/sheets-main.cjs");
+    const require2 = (0, import_node_module3.createRequire)(__fridayBundleUrl);
     const pdfPath = require2.resolve("pdfjs-dist/legacy/build/pdf.mjs");
-    return `${(0, import_node_path11.join)((0, import_node_path11.dirname)(pdfPath), "..", "..", "standard_fonts")}/`;
+    return `${(0, import_node_path12.join)((0, import_node_path12.dirname)(pdfPath), "..", "..", "standard_fonts")}/`;
   } catch {
     return void 0;
   }
@@ -225145,7 +225269,7 @@ var TEXT_EXTS = /* @__PURE__ */ new Set([
   "py"
 ]);
 async function parseFileToText(filePath) {
-  const ext = (0, import_node_path12.extname)(filePath).slice(1).toLowerCase();
+  const ext = (0, import_node_path13.extname)(filePath).slice(1).toLowerCase();
   const imageMime = IMAGE_MIMES[ext];
   if (imageMime) return { ok: true, kind: "image", mime: imageMime };
   try {
@@ -225175,10 +225299,10 @@ async function parseFileToText(filePath) {
 
 // vendor/happyoffice/packages/xlsx-gateway/src/gateway/xlsx-package-io.ts
 var import_node_crypto4 = require("node:crypto");
-var import_node_fs8 = require("node:fs");
+var import_node_fs9 = require("node:fs");
 var import_promises6 = require("node:fs/promises");
 var import_node_os6 = require("node:os");
-var import_node_path13 = require("node:path");
+var import_node_path14 = require("node:path");
 
 // vendor/happyoffice/packages/xlsx-gateway/src/domain/style-color.ts
 var PATTERN_TYPES = [
@@ -225405,7 +225529,7 @@ var workbookVisualEditSchema = external_exports.object({
 });
 
 // vendor/happyoffice/packages/xlsx-gateway/src/gateway/xlsx-gateway.ts
-var import_node_fs7 = require("node:fs");
+var import_node_fs8 = require("node:fs");
 var import_jszip8 = __toESM(require_lib3(), 1);
 
 // vendor/happyoffice/packages/xlsx-gateway/src/gateway/future-functions.ts
@@ -232795,17 +232919,17 @@ async function syncFileBestEffort(path) {
   );
   let descriptor;
   try {
-    descriptor = (0, import_node_fs7.openSync)(path, "r+");
+    descriptor = (0, import_node_fs8.openSync)(path, "r+");
   } catch (error51) {
     if (tolerated(error51)) return;
     throw error51;
   }
   try {
-    (0, import_node_fs7.fsyncSync)(descriptor);
+    (0, import_node_fs8.fsyncSync)(descriptor);
   } catch (error51) {
     if (!tolerated(error51)) throw error51;
   } finally {
-    (0, import_node_fs7.closeSync)(descriptor);
+    (0, import_node_fs8.closeSync)(descriptor);
   }
 }
 async function shiftAnchoredSheetParts(pkg, worksheetPath, worksheetXml, ops, touchedEntries, tableInsertions) {
@@ -233587,21 +233711,21 @@ var saveArchiveResultSchema = external_exports.object({
   afterEntries: external_exports.array(archiveEntrySchema)
 });
 async function readArchiveEntryText(client, sourcePath, entryName) {
-  const workDir = await (0, import_promises6.mkdtemp)((0, import_node_path13.join)((0, import_node_os6.tmpdir)(), "ai-excel-read-"));
+  const workDir = await (0, import_promises6.mkdtemp)((0, import_node_path14.join)((0, import_node_os6.tmpdir)(), "ai-excel-read-"));
   try {
     const extracted = readEntriesResultSchema.parse(
       await client.readEntries({ path: sourcePath, entries: [entryName], outputDir: workDir })
     );
     const filePath = extracted.entries[0]?.path;
     if (!filePath) throw new Error(`Workbook is missing ${entryName}.`);
-    return normalizeOoxmlPartPrefix((0, import_node_fs8.readFileSync)(filePath, "utf8"));
+    return normalizeOoxmlPartPrefix((0, import_node_fs9.readFileSync)(filePath, "utf8"));
   } finally {
     await (0, import_promises6.rm)(workDir, { recursive: true, force: true });
   }
 }
 async function saveWorkbookViaSidecar(request) {
-  const workDir = await (0, import_promises6.mkdtemp)((0, import_node_path13.join)((0, import_node_os6.tmpdir)(), "ai-excel-save-"));
-  const temporaryTarget = (0, import_node_path13.join)((0, import_node_path13.dirname)(request.targetPath), `.${(0, import_node_crypto4.randomUUID)()}.tmp.xlsx`);
+  const workDir = await (0, import_promises6.mkdtemp)((0, import_node_path14.join)((0, import_node_os6.tmpdir)(), "ai-excel-save-"));
+  const temporaryTarget = (0, import_node_path14.join)((0, import_node_path14.dirname)(request.targetPath), `.${(0, import_node_crypto4.randomUUID)()}.tmp.xlsx`);
   try {
     const manifest = manifestResultSchema.parse(
       await request.client.archiveManifest(request.sourcePath)
@@ -233692,7 +233816,7 @@ function createSidecarEntrySource(client, sourcePath, manifest, workDir) {
           `${path} is ${entry.uncompressedSize} bytes uncompressed \u2014 too large to edit. Entries above 500MB can be preserved but not patched.`
         );
       }
-      const extractDir = (0, import_node_path13.join)(workDir, `extract-${extractionCount}`);
+      const extractDir = (0, import_node_path14.join)(workDir, `extract-${extractionCount}`);
       extractionCount += 1;
       await (0, import_promises6.mkdir)(extractDir, { recursive: true });
       const extracted = readEntriesResultSchema.parse(
@@ -233700,7 +233824,7 @@ function createSidecarEntrySource(client, sourcePath, manifest, workDir) {
       );
       const filePath = extracted.entries[0]?.path;
       if (!filePath) throw new Error(`Sidecar did not extract ${path}.`);
-      const content = normalizeOoxmlPartPrefix((0, import_node_fs8.readFileSync)(filePath, "utf8"));
+      const content = normalizeOoxmlPartPrefix((0, import_node_fs9.readFileSync)(filePath, "utf8"));
       cache.set(path, content);
       return content;
     }
@@ -233710,16 +233834,16 @@ async function writePlanContents(workDir, prefix, contents) {
   const written = [];
   let index = 0;
   for (const [name, content] of contents) {
-    const contentPath = (0, import_node_path13.join)(workDir, `${prefix}-${index}.bin`);
+    const contentPath = (0, import_node_path14.join)(workDir, `${prefix}-${index}.bin`);
     index += 1;
     if (typeof content === "string") writeUtf8StringChunked(contentPath, content);
-    else (0, import_node_fs8.writeFileSync)(contentPath, content);
+    else (0, import_node_fs9.writeFileSync)(contentPath, content);
     written.push({ name, contentPath });
   }
   return written;
 }
 function writeUtf8StringChunked(path, content) {
-  const descriptor = (0, import_node_fs8.openSync)(path, "wx");
+  const descriptor = (0, import_node_fs9.openSync)(path, "wx");
   try {
     const chunkCharacters = 1024 * 1024;
     const buffer = Buffer.allocUnsafe(4 * chunkCharacters);
@@ -233731,14 +233855,14 @@ function writeUtf8StringChunked(path, content) {
       }
       const bytes = buffer.write(content.slice(start, end), 0, "utf8");
       for (let offset = 0; offset < bytes; ) {
-        const written = (0, import_node_fs8.writeSync)(descriptor, buffer, offset, bytes - offset);
+        const written = (0, import_node_fs9.writeSync)(descriptor, buffer, offset, bytes - offset);
         if (written === 0) throw new Error(`Could not finish writing ${path}.`);
         offset += written;
       }
       start = end;
     }
   } finally {
-    (0, import_node_fs8.closeSync)(descriptor);
+    (0, import_node_fs9.closeSync)(descriptor);
   }
 }
 function manifestsEqual(left, right) {
@@ -233805,7 +233929,7 @@ async function copyOverLockedTarget(temporaryPath, path) {
     if (error51.code === "ENOENT") return null;
     throw error51;
   });
-  const backup = before ? (0, import_node_path13.join)((0, import_node_os6.tmpdir)(), recoveredName(path, (0, import_node_crypto4.randomUUID)())) : null;
+  const backup = before ? (0, import_node_path14.join)((0, import_node_os6.tmpdir)(), recoveredName(path, (0, import_node_crypto4.randomUUID)())) : null;
   if (backup) {
     try {
       await (0, import_promises6.copyFile)(path, backup);
@@ -233841,11 +233965,11 @@ async function copyOverLockedTarget(temporaryPath, path) {
   });
 }
 var recoveredName = (path, tag) => {
-  const ext = (0, import_node_path13.extname)(path);
-  return `${(0, import_node_path13.basename)(path, ext)}.recovered-${tag}${ext}`;
+  const ext = (0, import_node_path14.extname)(path);
+  return `${(0, import_node_path14.basename)(path, ext)}.recovered-${tag}${ext}`;
 };
 async function preserveBackup(backup, path) {
-  const recovered = (0, import_node_path13.join)((0, import_node_path13.dirname)(path), recoveredName(path, String(Date.now())));
+  const recovered = (0, import_node_path14.join)((0, import_node_path14.dirname)(path), recoveredName(path, String(Date.now())));
   try {
     await (0, import_promises6.copyFile)(backup, recovered);
   } catch {
@@ -233896,6 +234020,7 @@ var IPC_CHANNELS = {
   closeSaveResult: "workbook:close-save-result",
   exportPdf: "workbook:export-pdf",
   printWorkbook: "workbook:print",
+  previewWorkbookPrint: "workbook:print-preview",
   exportCsv: "workbook:export-csv",
   csvSaveConfirm: "workbook:csv-save-confirm",
   /** AI create_document: new standalone file in the default folder (no dialog) */
@@ -235700,6 +235825,13 @@ var workbookExportPdfResultSchema = external_exports.union([
   external_exports.object({ canceled: external_exports.literal(true) }).strict(),
   external_exports.object({ canceled: external_exports.literal(false), path: external_exports.string().min(1) }).strict()
 ]);
+var workbookPrintRequestSchema = workbookExportPdfRequestSchema.extend({
+  copies: external_exports.number().int().min(1).max(999).optional(),
+  color: external_exports.boolean().optional(),
+  collate: external_exports.boolean().optional(),
+  duplexMode: external_exports.enum(["simplex", "shortEdge", "longEdge"]).optional(),
+  pageRanges: external_exports.array(external_exports.object({ from: external_exports.number().int().min(0), to: external_exports.number().int().min(0) }).strict()).max(1e3).refine((ranges) => ranges.every((range) => range.to >= range.from)).optional()
+});
 var workbookPrintResultSchema = external_exports.union([
   external_exports.object({ ok: external_exports.literal(true) }).strict(),
   external_exports.object({ ok: external_exports.literal(false), error: external_exports.string().optional() }).strict()
@@ -235751,14 +235883,14 @@ var ATTACHMENT_IMAGE_EXTS = /* @__PURE__ */ new Set(["png", "jpg", "jpeg", "gif"
 // vendor/happyoffice/apps/sheets/src/main/atomic-write.ts
 var import_node_crypto5 = require("node:crypto");
 var import_promises7 = require("node:fs/promises");
-var import_node_path14 = require("node:path");
+var import_node_path15 = require("node:path");
 var RETRYABLE_RENAME_CODES2 = /* @__PURE__ */ new Set(["EPERM", "EACCES", "EBUSY"]);
 var RENAME_RETRIES2 = 4;
 var sleep3 = (ms) => new Promise((resolve5) => setTimeout(resolve5, ms));
 async function atomicWriteFile(filePath, data) {
-  const tmp = (0, import_node_path14.join)(
-    (0, import_node_path14.dirname)(filePath),
-    `.${(0, import_node_path14.basename)(filePath)}.${(0, import_node_crypto5.randomBytes)(6).toString("hex")}.tmp`
+  const tmp = (0, import_node_path15.join)(
+    (0, import_node_path15.dirname)(filePath),
+    `.${(0, import_node_path15.basename)(filePath)}.${(0, import_node_crypto5.randomBytes)(6).toString("hex")}.tmp`
   );
   try {
     await (0, import_promises7.writeFile)(tmp, data);
@@ -235908,8 +236040,8 @@ function internSheetIds(edits) {
 // vendor/happyoffice/apps/sheets/src/main/pdf-export.ts
 var import_promises8 = require("node:fs/promises");
 var import_node_os7 = require("node:os");
-var import_node_path15 = require("node:path");
-var import_electron3 = require("electron");
+var import_node_path16 = require("node:path");
+var import_electron5 = require("electron");
 
 // vendor/happyoffice/apps/sheets/src/main/pdf-page-variants.ts
 function variantForPage(pageNumber, flags) {
@@ -235955,22 +236087,27 @@ function printOptionsFor(request) {
       left: Math.round(margins.left * CSS_PX_PER_INCH),
       right: Math.round(margins.right * CSS_PX_PER_INCH)
     },
-    scaleFactor: Math.round(request.scale * 100)
+    scaleFactor: Math.round(request.scale * 100),
+    ...request.copies === void 0 ? {} : { copies: request.copies },
+    ...request.color === void 0 ? {} : { color: request.color },
+    ...request.collate === void 0 ? {} : { collate: request.collate },
+    ...request.duplexMode === void 0 ? {} : { duplexMode: request.duplexMode },
+    ...request.pageRanges === void 0 ? {} : { pageRanges: request.pageRanges }
   };
 }
 
 // vendor/happyoffice/apps/sheets/src/main/pdf-export.ts
 async function exportPdf(event, request) {
-  const parent = import_electron3.BrowserWindow.fromWebContents(event.sender);
+  const parent = import_electron5.BrowserWindow.fromWebContents(event.sender);
   const dialogOptions = {
     defaultPath: request.fileName,
     filters: [{ name: "PDF", extensions: ["pdf"] }]
   };
-  const selection = isHeadlessMode() && request.outPath ? { canceled: false, filePath: request.outPath } : await showSaveDialogWithMemory(import_electron3.dialog, parent, dialogOptions);
+  const selection = isHeadlessMode() && request.outPath ? { canceled: false, filePath: request.outPath } : await showSaveDialogWithMemory(import_electron5.dialog, parent, dialogOptions);
   if (selection.canceled || !selection.filePath) return { canceled: true };
-  const workDir = await (0, import_promises8.mkdtemp)((0, import_node_path15.join)((0, import_node_os7.tmpdir)(), "ai-excel-pdf-"));
-  const htmlPath = (0, import_node_path15.join)(workDir, "print.html");
-  const window2 = new import_electron3.BrowserWindow({
+  const workDir = await (0, import_promises8.mkdtemp)((0, import_node_path16.join)((0, import_node_os7.tmpdir)(), "ai-excel-pdf-"));
+  const htmlPath = (0, import_node_path16.join)(workDir, "print.html");
+  const window2 = new import_electron5.BrowserWindow({
     show: false,
     webPreferences: { sandbox: true, javascript: false }
   });
@@ -235986,25 +236123,22 @@ async function exportPdf(event, request) {
   }
 }
 async function printWorkbook(event, request) {
-  const owner = import_electron3.BrowserWindow.fromWebContents(event.sender);
-  const workDir = await (0, import_promises8.mkdtemp)((0, import_node_path15.join)((0, import_node_os7.tmpdir)(), "ai-excel-print-"));
-  const htmlPath = (0, import_node_path15.join)(workDir, "print.html");
-  const window2 = new import_electron3.BrowserWindow({
-    show: false,
-    ...owner && !owner.isDestroyed() ? { parent: owner } : {},
-    // Chromium attaches the native Windows print dialog to the printed window;
-    // a hidden owner hides the dialog too, so Windows gets a real one
-    ...process.platform === "win32" ? { width: 900, height: 700, autoHideMenuBar: true, closable: false, skipTaskbar: true } : {},
+  const owner = import_electron5.BrowserWindow.fromWebContents(event.sender);
+  const workDir = await (0, import_promises8.mkdtemp)((0, import_node_path16.join)((0, import_node_os7.tmpdir)(), "ai-excel-print-"));
+  const htmlPath = (0, import_node_path16.join)(workDir, "print.html");
+  const window2 = createSystemPrintWindow(owner, {
+    title: request.fileName,
     webPreferences: { sandbox: true, javascript: false }
   });
   try {
     await (0, import_promises8.writeFile)(htmlPath, request.html, "utf8");
     await window2.loadFile(htmlPath);
-    if (process.platform === "win32") {
-      window2.show();
-      window2.focus();
-    }
-    const outcome = await new Promise((resolve5) => {
+    const outcome = process.platform === "win32" ? await (async () => {
+      const pdfPath = (0, import_node_path16.join)(workDir, "print.pdf");
+      await (0, import_promises8.writeFile)(pdfPath, await renderPdf(window2.webContents, request));
+      return printPdfFileWithSystemDialog(pdfPath, printOptionsFor(request), owner);
+    })() : await new Promise((resolve5) => {
+      window2.once("closed", () => resolve5({ success: false, failureReason: "Print job canceled" }));
       window2.webContents.print(
         printOptionsFor(request),
         (success2, failureReason) => resolve5({ success: success2, failureReason })
@@ -236015,7 +236149,29 @@ async function printWorkbook(event, request) {
   } catch (error51) {
     return { ok: false, error: error51 instanceof Error ? error51.message : String(error51) };
   } finally {
-    window2.destroy();
+    if (!window2.isDestroyed()) window2.destroy();
+    if (!event.sender.isDestroyed() && owner?.isEnabled()) event.sender.focus();
+    await (0, import_promises8.rm)(workDir, { recursive: true, force: true });
+  }
+}
+async function previewWorkbookPrint(event, request) {
+  const workDir = await (0, import_promises8.mkdtemp)((0, import_node_path16.join)((0, import_node_os7.tmpdir)(), "ai-excel-preview-"));
+  const window2 = new import_electron5.BrowserWindow({ show: false, webPreferences: { sandbox: true, javascript: false } });
+  const dispose = () => {
+    if (!window2.isDestroyed()) window2.destroy();
+  };
+  event.sender.once("destroyed", dispose);
+  try {
+    const htmlPath = (0, import_node_path16.join)(workDir, "preview.html");
+    await (0, import_promises8.writeFile)(htmlPath, request.html, "utf8");
+    await window2.loadFile(htmlPath);
+    const bytes = await renderPdf(window2.webContents, request);
+    const { PDFDocument: PDFDocument2 } = await Promise.resolve().then(() => __toESM(require_cjs()));
+    const pdf = await PDFDocument2.load(bytes);
+    return { base64: bytes.toString("base64"), pageCount: pdf.getPageCount() };
+  } finally {
+    event.sender.removeListener("destroyed", dispose);
+    dispose();
     await (0, import_promises8.rm)(workDir, { recursive: true, force: true });
   }
 }
@@ -236079,22 +236235,22 @@ function allowsAutomaticWorkbookRecovery(sheets) {
 
 // vendor/happyoffice/apps/sheets/src/main/temp-files.ts
 var import_promises9 = require("node:fs/promises");
-var import_node_path16 = require("node:path");
+var import_node_path17 = require("node:path");
 var PASTED_FILE_TTL_MS = 7 * 24 * 60 * 60 * 1e3;
 var UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
 var SESSION_SNAPSHOT_NAME = new RegExp(`^${UUID}\\.xlsx$`, "i");
 var IMPORT_DIRECTORY_NAME = new RegExp(`^${UUID}$`, "i");
 var OWNED_PASTED_FILE = /^pasted-[0-9]{8}-[0-9]{6}-[0-9]+\.(?:png|jpe?g|gif|webp)$/i;
 function isDirectOwnedChild(path, parent, namePattern2) {
-  const resolvedPath = (0, import_node_path16.resolve)(path);
-  return (0, import_node_path16.dirname)(resolvedPath) === (0, import_node_path16.resolve)(parent) && namePattern2.test((0, import_node_path16.basename)(resolvedPath));
+  const resolvedPath = (0, import_node_path17.resolve)(path);
+  return (0, import_node_path17.dirname)(resolvedPath) === (0, import_node_path17.resolve)(parent) && namePattern2.test((0, import_node_path17.basename)(resolvedPath));
 }
 async function cleanupSessionResources(options) {
   try {
     await options.closeSidecar();
   } catch {
   }
-  const snapshotRoot = (0, import_node_path16.join)(options.tempRoot, "genoffice-sheets-sessions");
+  const snapshotRoot = (0, import_node_path17.join)(options.tempRoot, "genoffice-sheets-sessions");
   if (isDirectOwnedChild(options.snapshotPath, snapshotRoot, SESSION_SNAPSHOT_NAME)) {
     await (0, import_promises9.rm)(options.snapshotPath, { force: true }).catch(() => void 0);
   }
@@ -236103,12 +236259,12 @@ async function cleanupSessionResources(options) {
   }
 }
 async function cleanupImportTempDirectory(tempRoot, importTempDir) {
-  const importRoot = (0, import_node_path16.join)(tempRoot, "genoffice-imports");
+  const importRoot = (0, import_node_path17.join)(tempRoot, "genoffice-imports");
   if (!isDirectOwnedChild(importTempDir, importRoot, IMPORT_DIRECTORY_NAME)) return;
   await (0, import_promises9.rm)(importTempDir, { recursive: true, force: true }).catch(() => void 0);
 }
 async function cleanupExpiredPastedFiles(tempRoot, now = Date.now()) {
-  const dir = (0, import_node_path16.join)(tempRoot, "genoffice-pasted");
+  const dir = (0, import_node_path17.join)(tempRoot, "genoffice-pasted");
   const cutoff = now - PASTED_FILE_TTL_MS;
   const removed = [];
   let entries;
@@ -236119,7 +236275,7 @@ async function cleanupExpiredPastedFiles(tempRoot, now = Date.now()) {
   }
   for (const entry of entries) {
     if (!entry.isFile() || !OWNED_PASTED_FILE.test(entry.name)) continue;
-    const path = (0, import_node_path16.join)(dir, entry.name);
+    const path = (0, import_node_path17.join)(dir, entry.name);
     try {
       const info3 = await (0, import_promises9.lstat)(path);
       if (!info3.isFile() || info3.mtimeMs >= cutoff) continue;
@@ -236132,7 +236288,7 @@ async function cleanupExpiredPastedFiles(tempRoot, now = Date.now()) {
 }
 
 // vendor/happyoffice/apps/sheets/src/main/xlsx-sidecar-client.ts
-var import_node_child_process3 = require("node:child_process");
+var import_node_child_process4 = require("node:child_process");
 var import_node_readline2 = require("node:readline");
 var PROTOCOL_VERSION = 1;
 var REQUEST_TIMEOUT_MS2 = 3e4;
@@ -236275,7 +236431,7 @@ var XlsxSidecarClient = class {
     if (this.process && !this.process.killed) return this.process;
     let child;
     try {
-      child = (0, import_node_child_process3.spawn)(this.binaryPath, [], {
+      child = (0, import_node_child_process4.spawn)(this.binaryPath, [], {
         stdio: ["pipe", "pipe", "pipe"],
         windowsHide: true
       });
@@ -237445,9 +237601,9 @@ var tMain = createI18n({
 });
 var tm = (key, params) => tMain(getUiLang(), key, params);
 var runtime = {
-  preloadPath: (0, import_node_path17.join)(__dirname, "../preload/index.js"),
+  preloadPath: (0, import_node_path18.join)(__dirname, "../preload/index.js"),
   rendererUrl: process.env.ELECTRON_RENDERER_URL,
-  rendererFile: (0, import_node_path17.join)(__dirname, "../renderer/index.html"),
+  rendererFile: (0, import_node_path18.join)(__dirname, "../renderer/index.html"),
   createDocument: createStandaloneSheetsDocument
 };
 function configureSheetsRuntime(config2) {
@@ -237459,7 +237615,7 @@ function openGeneratedFile(path) {
   } catch (err) {
     console.warn("[sheets] Failed to open generated file:", err);
   }
-  import_electron4.shell.showItemInFolder(path);
+  import_electron6.shell.showItemInFolder(path);
 }
 function sanitizeGeneratedFileBase(title) {
   const cleaned = String(title ?? "").replace(/[/\\:*?"<>|\u0000-\u001f]/g, "_").trim().slice(0, 80).trim();
@@ -237469,8 +237625,8 @@ function uniquePathIn(dir, fileName) {
   const dot = fileName.lastIndexOf(".");
   const base = dot > 0 ? fileName.slice(0, dot) : fileName;
   const ext = dot > 0 ? fileName.slice(dot) : "";
-  let candidate = (0, import_node_path17.join)(dir, fileName);
-  for (let i = 2; (0, import_node_fs9.existsSync)(candidate); i++) candidate = (0, import_node_path17.join)(dir, `${base}-${i}${ext}`);
+  let candidate = (0, import_node_path18.join)(dir, fileName);
+  for (let i = 2; (0, import_node_fs10.existsSync)(candidate); i++) candidate = (0, import_node_path18.join)(dir, `${base}-${i}${ext}`);
   return candidate;
 }
 async function createStandaloneSheetsDocument(request) {
@@ -237482,14 +237638,14 @@ async function createStandaloneSheetsDocument(request) {
     if (request.type === "pdf") {
       const bytes = await printHtmlToPdf(
         buildPrintableHtml(title, request.content),
-        () => new import_electron4.BrowserWindow({ show: false, webPreferences: { sandbox: true, javascript: false } })
+        () => new import_electron6.BrowserWindow({ show: false, webPreferences: { sandbox: true, javascript: false } })
       );
-      const path2 = uniquePathIn(configuredDefaultSaveDir(import_electron4.app), `${title}.pdf`);
+      const path2 = uniquePathIn(configuredDefaultSaveDir(import_electron6.app), `${title}.pdf`);
       await (0, import_promises10.writeFile)(path2, bytes);
       openGeneratedFile(path2);
       return { ok: true, path: path2 };
     }
-    const path = uniquePathIn(configuredDefaultSaveDir(import_electron4.app), `${title}.${request.type}`);
+    const path = uniquePathIn(configuredDefaultSaveDir(import_electron6.app), `${title}.${request.type}`);
     await (0, import_promises10.writeFile)(path, request.content, "utf8");
     openGeneratedFile(path);
     return { ok: true, path };
@@ -237510,7 +237666,7 @@ var pastedTempCleanupStarted = false;
 function startPastedTempCleanup() {
   if (pastedTempCleanupStarted) return;
   pastedTempCleanupStarted = true;
-  void cleanupExpiredPastedFiles(import_electron4.app.getPath("temp"));
+  void cleanupExpiredPastedFiles(import_electron6.app.getPath("temp"));
 }
 function sessionFor(event) {
   const entry = sheetsTabs.get(event.sender.id);
@@ -237524,17 +237680,17 @@ function resolveTransferredEdits(entry, request) {
   return { ...request, edits };
 }
 function dialogParent(event) {
-  return sheetsShellWindow ?? import_electron4.BrowserWindow.fromWebContents(event.sender) ?? void 0;
+  return sheetsShellWindow ?? import_electron6.BrowserWindow.fromWebContents(event.sender) ?? void 0;
 }
 async function openFileDialog(event, options) {
-  return showOpenDialogWithMemory(import_electron4.dialog, dialogParent(event), options);
+  return showOpenDialogWithMemory(import_electron6.dialog, dialogParent(event), options);
 }
 async function saveFileDialog(event, options) {
   return showSaveDialogWithMemory(
-    import_electron4.dialog,
+    import_electron6.dialog,
     dialogParent(event),
     options,
-    configuredDefaultSaveDir(import_electron4.app)
+    configuredDefaultSaveDir(import_electron6.app)
   );
 }
 function registerSheetsSession(webContents, client) {
@@ -237567,7 +237723,7 @@ function setActiveSheetsWebContents(wc) {
   activeSheetsWebContents = wc;
 }
 function sheetsFileRenamed(wc, oldPath, newPath) {
-  const stem = (p) => (0, import_node_path17.basename)(p).replace(/ \(\d+\)(?=\.[^.]+$)/, "");
+  const stem = (p) => (0, import_node_path18.basename)(p).replace(/ \(\d+\)(?=\.[^.]+$)/, "");
   if (untitledWorkbookPaths.delete(oldPath) && stem(newPath) === stem(oldPath)) {
     untitledWorkbookPaths.add(newPath);
   }
@@ -237579,7 +237735,7 @@ function sheetsFileRenamed(wc, oldPath, newPath) {
     entry.sessions.set(id, { ...session, path: newPath });
     matched = true;
   }
-  if (matched) wc.send(IPC_CHANNELS.workbookRenamed, (0, import_node_path17.basename)(newPath));
+  if (matched) wc.send(IPC_CHANNELS.workbookRenamed, (0, import_node_path18.basename)(newPath));
 }
 var untitledWorkbookPaths = /* @__PURE__ */ new Set();
 function markSheetsUntitledPath(path) {
@@ -237610,13 +237766,13 @@ function nudgeQueuedWorkbook(contents) {
   contents.send(IPC_CHANNELS.menuAction, "open");
 }
 function userDataPath(...parts) {
-  return (0, import_node_path17.join)(import_electron4.app.getPath("userData"), ...parts);
+  return (0, import_node_path18.join)(import_electron6.app.getPath("userData"), ...parts);
 }
 var recoveryDir = () => userDataPath("sheets-autosave");
-var recoveryPathFor = (filePath) => (0, import_node_path17.join)(recoveryDir(), `${(0, import_node_crypto6.createHash)("sha1").update(filePath).digest("hex").slice(0, 16)}.xlsx`);
+var recoveryPathFor = (filePath) => (0, import_node_path18.join)(recoveryDir(), `${(0, import_node_crypto6.createHash)("sha1").update(filePath).digest("hex").slice(0, 16)}.xlsx`);
 function clearWorkbookRecovery(filePath) {
   try {
-    (0, import_node_fs9.unlinkSync)(recoveryPathFor(filePath));
+    (0, import_node_fs10.unlinkSync)(recoveryPathFor(filePath));
   } catch {
   }
 }
@@ -237625,7 +237781,7 @@ function promptRecoveryRestore(contents, filePath, recoveryPath) {
   return new Promise((resolve5) => {
     let savedAtMs = Date.now();
     try {
-      savedAtMs = (0, import_node_fs9.statSync)(recoveryPath).mtimeMs;
+      savedAtMs = (0, import_node_fs10.statSync)(recoveryPath).mtimeMs;
     } catch {
     }
     const settle = (choice) => {
@@ -237641,7 +237797,7 @@ function promptRecoveryRestore(contents, filePath, recoveryPath) {
       body: tm("autosaveFoundBody"),
       restoreLabel: tm("autosaveRestore"),
       discardLabel: tm("autosaveDiscard"),
-      fileName: (0, import_node_path17.basename)(filePath),
+      fileName: (0, import_node_path18.basename)(filePath),
       savedAtMs
     });
   });
@@ -237655,15 +237811,15 @@ async function promptRecoveryRestoreNative(parent) {
     message: tm("autosaveFoundTitle"),
     detail: tm("autosaveFoundBody")
   };
-  const answer = parent ? await import_electron4.dialog.showMessageBox(parent, options) : await import_electron4.dialog.showMessageBox(options);
+  const answer = parent ? await import_electron6.dialog.showMessageBox(parent, options) : await import_electron6.dialog.showMessageBox(options);
   return answer.response === 0 ? "restore" : "discard";
 }
 function pendingRecoveryFor(filePath) {
   const copy = recoveryPathFor(filePath);
   try {
-    if (!(0, import_node_fs9.existsSync)(copy)) return null;
-    if ((0, import_node_fs9.statSync)(copy).mtimeMs <= (0, import_node_fs9.statSync)(filePath).mtimeMs) {
-      (0, import_node_fs9.unlinkSync)(copy);
+    if (!(0, import_node_fs10.existsSync)(copy)) return null;
+    if ((0, import_node_fs10.statSync)(copy).mtimeMs <= (0, import_node_fs10.statSync)(filePath).mtimeMs) {
+      (0, import_node_fs10.unlinkSync)(copy);
       return null;
     }
     return copy;
@@ -237673,19 +237829,19 @@ function pendingRecoveryFor(filePath) {
 }
 function readJson2(path, fallback) {
   try {
-    if ((0, import_node_fs9.existsSync)(path)) return JSON.parse((0, import_node_fs9.readFileSync)(path, "utf-8"));
+    if ((0, import_node_fs10.existsSync)(path)) return JSON.parse((0, import_node_fs10.readFileSync)(path, "utf-8"));
   } catch {
   }
   return fallback;
 }
 function writeJson2(path, value) {
-  (0, import_node_fs9.mkdirSync)((0, import_node_path17.join)(path, ".."), { recursive: true });
-  (0, import_node_fs9.writeFileSync)(path, JSON.stringify(value, null, 2));
+  (0, import_node_fs10.mkdirSync)((0, import_node_path18.join)(path, ".."), { recursive: true });
+  (0, import_node_fs10.writeFileSync)(path, JSON.stringify(value, null, 2));
 }
 var SETTINGS_PATH = () => userDataPath("ai-settings.json");
-var debugPort = import_electron4.app.isPackaged ? void 0 : process.env.XLSX_DEBUG_PORT;
-if (debugPort) import_electron4.app.commandLine.appendSwitch("remote-debugging-port", debugPort);
-var forcedWorkbookPath = import_electron4.app.isPackaged ? void 0 : process.env.XLSX_OPEN_PATH;
+var debugPort = import_electron6.app.isPackaged ? void 0 : process.env.XLSX_DEBUG_PORT;
+if (debugPort) import_electron6.app.commandLine.appendSwitch("remote-debugging-port", debugPort);
+var forcedWorkbookPath = import_electron6.app.isPackaged ? void 0 : process.env.XLSX_OPEN_PATH;
 var queuedWorkbookPaths = /* @__PURE__ */ new Map();
 function queueWorkbookForView(contents, path) {
   queuedWorkbookPaths.set(contents.id, path);
@@ -237746,7 +237902,7 @@ async function createSheetsWindow(options = {}) {
   const client = sidecar ?? new XlsxSidecarClient(resolveSidecarPath());
   sidecar = client;
   client.start();
-  const window2 = new import_electron4.BrowserWindow({
+  const window2 = new import_electron6.BrowserWindow({
     width: 1440,
     height: 900,
     minWidth: 720,
@@ -237770,7 +237926,7 @@ async function createSheetsWindow(options = {}) {
   registerSheetsSession(window2.webContents, client);
   window2.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   window2.webContents.on("will-navigate", (event) => event.preventDefault());
-  if (!import_electron4.app.isPackaged) {
+  if (!import_electron6.app.isPackaged) {
     window2.webContents.on("console-message", (details) => {
       process.stderr.write(`[renderer:${details.level}] ${details.message}
 `);
@@ -237802,7 +237958,7 @@ async function exportSheetsPdfHeadless(input, outPath, timeoutMs = 6e5) {
   const client = sidecar ?? new XlsxSidecarClient(resolveSidecarPath());
   sidecar = client;
   client.start();
-  const win = new import_electron4.BrowserWindow({
+  const win = new import_electron6.BrowserWindow({
     show: false,
     width: 1440,
     height: 900,
@@ -237847,7 +238003,7 @@ function createSheetsView(options = {}) {
   const client = sidecar ?? new XlsxSidecarClient(resolveSidecarPath());
   sidecar = client;
   client.start();
-  const view = new import_electron4.WebContentsView({
+  const view = new import_electron6.WebContentsView({
     webPreferences: {
       preload: runtime.preloadPath,
       contextIsolation: true,
@@ -237861,7 +238017,7 @@ function createSheetsView(options = {}) {
   registerSheetsSession(view.webContents, client);
   view.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   view.webContents.on("will-navigate", (event) => event.preventDefault());
-  if (!import_electron4.app.isPackaged) {
+  if (!import_electron6.app.isPackaged) {
     view.webContents.on("console-message", (details) => {
       process.stderr.write(`[renderer:${details.level}] ${details.message}
 `);
@@ -237922,11 +238078,11 @@ var ATTACHMENT_IMAGE_MIME = {
 var ATTACHMENT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 var attachmentTextCache = /* @__PURE__ */ new Map();
 function statAttachment(filePath) {
-  const name = (0, import_node_path17.basename)(filePath);
+  const name = (0, import_node_path18.basename)(filePath);
   const ext = name.split(".").pop()?.toLowerCase() ?? "";
   if (!ATTACHMENT_EXTS.has(ext)) return { error: `${name}: ${tm("errUnsupportedExt", { ext })}` };
   try {
-    const stat4 = (0, import_node_fs9.statSync)(filePath);
+    const stat4 = (0, import_node_fs10.statSync)(filePath);
     if (!stat4.isFile()) return { error: `${name}: ${tm("errNotFile")}` };
     if (stat4.size > ATTACHMENT_MAX_BYTES) {
       return {
@@ -237957,15 +238113,15 @@ function savePastedImage(data, ext) {
   if (!ATTACHMENT_IMAGE_EXTS.has(cleanExt)) return null;
   const bytes = data instanceof ArrayBuffer ? Buffer.from(data) : ArrayBuffer.isView(data) ? Buffer.from(data.buffer, data.byteOffset, data.byteLength) : null;
   if (!bytes || bytes.byteLength === 0) return null;
-  const dir = (0, import_node_path17.join)(import_electron4.app.getPath("temp"), "genoffice-pasted");
-  (0, import_node_fs9.mkdirSync)(dir, { recursive: true });
+  const dir = (0, import_node_path18.join)(import_electron6.app.getPath("temp"), "genoffice-pasted");
+  (0, import_node_fs10.mkdirSync)(dir, { recursive: true });
   const stamp = (/* @__PURE__ */ new Date()).toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "-");
-  const filePath = (0, import_node_path17.join)(dir, `pasted-${stamp}-${++pastedImageSeq}.${cleanExt}`);
-  (0, import_node_fs9.writeFileSync)(filePath, bytes);
+  const filePath = (0, import_node_path18.join)(dir, `pasted-${stamp}-${++pastedImageSeq}.${cleanExt}`);
+  (0, import_node_fs10.writeFileSync)(filePath, bytes);
   return filePath;
 }
 async function extractAttachmentText(filePath) {
-  const stat4 = (0, import_node_fs9.statSync)(filePath);
+  const stat4 = (0, import_node_fs10.statSync)(filePath);
   const stamp = `${stat4.mtimeMs}:${stat4.size}`;
   const cached2 = attachmentTextCache.get(filePath);
   if (cached2 && cached2.stamp === stamp) return cached2.text;
@@ -237991,11 +238147,11 @@ var appShuttingDown = false;
 function markSheetsShuttingDown() {
   appShuttingDown = true;
 }
-import_electron4.app.on("before-quit", markSheetsShuttingDown);
+import_electron6.app.on("before-quit", markSheetsShuttingDown);
 for (const signal of ["SIGTERM", "SIGINT"]) {
   process.on(signal, () => {
     appShuttingDown = true;
-    import_electron4.app.quit();
+    import_electron6.app.quit();
   });
 }
 async function requestSheetsClose(contents, parent) {
@@ -238016,7 +238172,7 @@ async function requestSheetsClose(contents, parent) {
     cancelId: 2,
     noLink: true
   };
-  const { response } = parent && !parent.isDestroyed() ? await import_electron4.dialog.showMessageBox(parent, options) : await import_electron4.dialog.showMessageBox(options);
+  const { response } = parent && !parent.isDestroyed() ? await import_electron6.dialog.showMessageBox(parent, options) : await import_electron6.dialog.showMessageBox(options);
   if (response === 2) return false;
   if (response === 1) return true;
   if (appShuttingDown || contents.isDestroyed()) return true;
@@ -238036,17 +238192,17 @@ var coreIpcRegistered = false;
 function registerSheetsIpc() {
   if (coreIpcRegistered) return;
   coreIpcRegistered = true;
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     IPC_CHANNELS.aiGenerateImage,
     (_event, op) => generateImageTool(SETTINGS_PATH(), {
       prompt: String(op?.prompt ?? ""),
       ...op?.aspectRatio ? { aspectRatio: String(op.aspectRatio) } : {}
     })
   );
-  import_electron4.ipcMain.on(IPC_CHANNELS.recoveryPromptReply, (event, restore) => {
+  import_electron6.ipcMain.on(IPC_CHANNELS.recoveryPromptReply, (event, restore) => {
     recoveryPromptWaiters.get(event.sender.id)?.(restore === true ? "restore" : "discard");
   });
-  import_electron4.ipcMain.on(IPC_CHANNELS.pendingEditsChanged, (event, count) => {
+  import_electron6.ipcMain.on(IPC_CHANNELS.pendingEditsChanged, (event, count) => {
     if (typeof count !== "number" || !Number.isFinite(count) || count < 0) return;
     const senderId = event.sender.id;
     pendingEditCounts.set(senderId, Math.floor(count));
@@ -238060,28 +238216,28 @@ function registerSheetsIpc() {
       });
     }
   });
-  import_electron4.ipcMain.on(IPC_CHANNELS.closeSaveResult, (event, ok) => {
+  import_electron6.ipcMain.on(IPC_CHANNELS.closeSaveResult, (event, ok) => {
     const waiter = closeSaveWaiters.get(event.sender.id);
     if (!waiter) return;
     closeSaveWaiters.delete(event.sender.id);
     waiter(ok === true);
   });
-  import_electron4.ipcMain.removeHandler("app:get-language");
-  import_electron4.ipcMain.handle("app:get-language", () => getUiLang());
-  import_electron4.ipcMain.handle("sheets:consume-new-blank", () => {
+  import_electron6.ipcMain.removeHandler("app:get-language");
+  import_electron6.ipcMain.handle("app:get-language", () => getUiLang());
+  import_electron6.ipcMain.handle("sheets:consume-new-blank", () => {
     if (pendingNewBlank) {
       pendingNewBlank = false;
       return true;
     }
     return false;
   });
-  import_electron4.ipcMain.handle("sheets:has-queued-workbook", (event) => queuedWorkbookPaths.has(event.sender.id));
-  import_electron4.ipcMain.handle("sheets:consume-headless-export", (event) => {
+  import_electron6.ipcMain.handle("sheets:has-queued-workbook", (event) => queuedWorkbookPaths.has(event.sender.id));
+  import_electron6.ipcMain.handle("sheets:consume-headless-export", (event) => {
     const target = headlessExportTargets.get(event.sender.id) ?? null;
     headlessExportTargets.delete(event.sender.id);
     return target;
   });
-  import_electron4.ipcMain.on("sheets:headless-export-done", (event, result) => {
+  import_electron6.ipcMain.on("sheets:headless-export-done", (event, result) => {
     const settle = headlessExportWaiters.get(event.sender.id);
     if (!settle) return;
     headlessExportWaiters.delete(event.sender.id);
@@ -238111,7 +238267,7 @@ function registerSheetsIpc() {
     );
     if (event.sender.isDestroyed()) {
       if (prepared.importTempDir !== void 0) {
-        await cleanupImportTempDirectory(import_electron4.app.getPath("temp"), prepared.importTempDir);
+        await cleanupImportTempDirectory(import_electron6.app.getPath("temp"), prepared.importTempDir);
       }
       return null;
     }
@@ -238127,7 +238283,7 @@ function registerSheetsIpc() {
       entry.sessions.delete(result.sessionId);
       if (session !== void 0) {
         await cleanupSessionResources({
-          tempRoot: import_electron4.app.getPath("temp"),
+          tempRoot: import_electron6.app.getPath("temp"),
           snapshotPath: session.snapshotPath,
           importTempDir: session.importTempDir,
           closeSidecar: () => entry.client.close(result.sessionId)
@@ -238138,7 +238294,7 @@ function registerSheetsIpc() {
     workbookOpenedHook?.(event.sender, path);
     return result;
   };
-  import_electron4.ipcMain.handle(IPC_CHANNELS.selectWorkbook, async (event) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.selectWorkbook, async (event) => {
     try {
       return await openSelectedWorkbook(event);
     } catch (err) {
@@ -238155,7 +238311,7 @@ function registerSheetsIpc() {
         entry.sessions.delete(sessionId);
         if (session !== void 0) {
           await cleanupSessionResources({
-            tempRoot: import_electron4.app.getPath("temp"),
+            tempRoot: import_electron6.app.getPath("temp"),
             snapshotPath: session.snapshotPath,
             importTempDir: session.importTempDir,
             closeSidecar: () => entry.client.close(sessionId)
@@ -238174,7 +238330,7 @@ function registerSheetsIpc() {
         );
         if (event.sender.isDestroyed()) {
           if (prepared.importTempDir !== void 0) {
-            await cleanupImportTempDirectory(import_electron4.app.getPath("temp"), prepared.importTempDir);
+            await cleanupImportTempDirectory(import_electron6.app.getPath("temp"), prepared.importTempDir);
           }
           break;
         }
@@ -238198,7 +238354,7 @@ function registerSheetsIpc() {
     }
     return opened.length > 0 ? opened : null;
   };
-  import_electron4.ipcMain.handle(IPC_CHANNELS.selectWorkbooksForMerge, async (event) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.selectWorkbooksForMerge, async (event) => {
     const selection = await openFileDialog(event, {
       properties: ["openFile", "multiSelections"],
       filters: [{ name: tm("filterSpreadsheets"), extensions: ["xlsx", "xlsm", "xls", "csv"] }]
@@ -238207,23 +238363,23 @@ function registerSheetsIpc() {
     return openMergeSources(event, selection.filePaths);
   });
   const MERGE_SOURCE_EXTS = /* @__PURE__ */ new Set(["xlsx", "xlsm", "xls", "csv"]);
-  import_electron4.ipcMain.handle(IPC_CHANNELS.openWorkbooksForMerge, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.openWorkbooksForMerge, async (event, input) => {
     const paths = external_exports.array(external_exports.string().min(1)).min(1).max(20).parse(input);
     for (const path of paths) {
       const ext = path.slice(path.lastIndexOf(".") + 1).toLowerCase();
       if (!MERGE_SOURCE_EXTS.has(ext)) throw new Error(`Unsupported merge source: ${ext}`);
-      if (!(0, import_node_fs9.existsSync)(path)) throw new Error("Merge source not found.");
+      if (!(0, import_node_fs10.existsSync)(path)) throw new Error("Merge source not found.");
     }
     return openMergeSources(event, paths);
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.readWorkbookRange, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.readWorkbookRange, async (event, input) => {
     const entry = sessionFor(event);
     const request = workbookRangeRequestSchema.parse(input);
     if (!entry.sessions.has(request.sessionId)) throw new Error("Unknown workbook session.");
     const result = await entry.client.readRange(request);
     return workbookRangeResultSchema.parse(result);
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.readWorkbookFormulas, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.readWorkbookFormulas, async (event, input) => {
     const entry = sessionFor(event);
     const request = workbookFormulaCellsRequestSchema.parse(input);
     if (!entry.sessions.has(request.sessionId)) throw new Error("Unknown workbook session.");
@@ -238244,7 +238400,7 @@ function registerSheetsIpc() {
     ),
     cached: external_exports.boolean().optional()
   }).strict();
-  import_electron4.ipcMain.handle(IPC_CHANNELS.recalcWorkbook, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.recalcWorkbook, async (event, input) => {
     const entry = sessionFor(event);
     const request = workbookRecalcRequestSchema.parse(input);
     const session = entry.sessions.get(request.sessionId);
@@ -238291,7 +238447,7 @@ function registerSheetsIpc() {
       })
     });
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.readWorkbookMedia, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.readWorkbookMedia, async (event, input) => {
     const entry = sessionFor(event);
     const request = workbookMediaRequestSchema.parse(input);
     if (!entry.sessions.has(request.sessionId)) throw new Error("Unknown workbook session.");
@@ -238307,11 +238463,11 @@ function registerSheetsIpc() {
     if (bytes.length >= 6 && bytes.subarray(0, 4).toString("latin1") === "GIF8") return "image/gif";
     return null;
   }
-  import_electron4.ipcMain.handle(IPC_CHANNELS.readLocalImage, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.readLocalImage, async (event, input) => {
     sessionFor(event);
     const request = localImageRequestSchema.parse(input);
-    const resolved = request.path.startsWith("~/") ? (0, import_node_path17.join)(import_electron4.app.getPath("home"), request.path.slice(2)) : request.path;
-    if (!(0, import_node_path17.isAbsolute)(resolved)) throw new Error(tm("errImgAbsPath"));
+    const resolved = request.path.startsWith("~/") ? (0, import_node_path18.join)(import_electron6.app.getPath("home"), request.path.slice(2)) : request.path;
+    if (!(0, import_node_path18.isAbsolute)(resolved)) throw new Error(tm("errImgAbsPath"));
     const info3 = await (0, import_promises10.stat)(resolved).catch(() => null);
     if (!info3?.isFile()) throw new Error(tm("errImgNotFound", { path: request.path }));
     if (info3.size > 20 * 1024 * 1024) throw new Error(tm("errImgTooLarge20"));
@@ -238322,23 +238478,23 @@ function registerSheetsIpc() {
     }
     return localImageResultSchema.parse({ mediaType, base64: bytes.toString("base64") });
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.captureScreenSources, async (event) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.captureScreenSources, async (event) => {
     sessionFor(event);
     if (process.platform === "darwin") {
-      const status = import_electron4.systemPreferences.getMediaAccessStatus("screen");
+      const status = import_electron6.systemPreferences.getMediaAccessStatus("screen");
       if (status !== "granted" && status !== "not-determined") {
         return screenSourcesResultSchema.parse({ status: "denied", sources: [] });
       }
     }
-    const sources = await import_electron4.desktopCapturer.getSources({
+    const sources = await import_electron6.desktopCapturer.getSources({
       types: ["screen", "window"],
       thumbnailSize: { width: 320, height: 200 },
       fetchWindowIcons: false
     });
-    if (process.platform === "darwin" && import_electron4.systemPreferences.getMediaAccessStatus("screen") !== "granted") {
+    if (process.platform === "darwin" && import_electron6.systemPreferences.getMediaAccessStatus("screen") !== "granted") {
       return screenSourcesResultSchema.parse({ status: "denied", sources: [] });
     }
-    const selfWindow = sheetsShellWindow ?? import_electron4.BrowserWindow.fromWebContents(event.sender);
+    const selfWindow = sheetsShellWindow ?? import_electron6.BrowserWindow.fromWebContents(event.sender);
     const selfId = selfWindow?.getMediaSourceId();
     return screenSourcesResultSchema.parse({
       status: "ok",
@@ -238350,10 +238506,10 @@ function registerSheetsIpc() {
       }))
     });
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.captureScreenSource, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.captureScreenSource, async (event, input) => {
     sessionFor(event);
     const request = screenCaptureRequestSchema.parse(input);
-    const displays = import_electron4.screen.getAllDisplays();
+    const displays = import_electron6.screen.getAllDisplays();
     const captureSize = {
       width: Math.min(
         4096,
@@ -238364,7 +238520,7 @@ function registerSheetsIpc() {
         Math.max(1080, ...displays.map((d) => Math.ceil(d.size.height * d.scaleFactor)))
       )
     };
-    const sources = await import_electron4.desktopCapturer.getSources({
+    const sources = await import_electron6.desktopCapturer.getSources({
       types: ["screen", "window"],
       thumbnailSize: captureSize,
       fetchWindowIcons: false
@@ -238385,7 +238541,7 @@ function registerSheetsIpc() {
       height
     });
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.readPivotDefinition, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.readPivotDefinition, async (event, input) => {
     const entry = sessionFor(event);
     const request = workbookPivotRequestSchema.parse(input);
     const session = entry.sessions.get(request.sessionId);
@@ -238396,18 +238552,22 @@ function registerSheetsIpc() {
     ]);
     return workbookPivotDefinitionSchema.parse(parsePivotDefinition(pivotXml, cacheXml));
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.exportPdf, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.exportPdf, async (event, input) => {
     sessionFor(event);
     const request = workbookExportPdfRequestSchema.parse(input);
     const result = await exportPdf(event, request);
     if (!result.canceled && result.path) openGeneratedFile(result.path);
     return result;
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.printWorkbook, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.printWorkbook, async (event, input) => {
     sessionFor(event);
-    return printWorkbook(event, workbookExportPdfRequestSchema.parse(input));
+    return printWorkbook(event, workbookPrintRequestSchema.parse(input));
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.exportCsv, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.previewWorkbookPrint, async (event, input) => {
+    sessionFor(event);
+    return previewWorkbookPrint(event, workbookExportPdfRequestSchema.parse(input));
+  });
+  import_electron6.ipcMain.handle(IPC_CHANNELS.exportCsv, async (event, input) => {
     const entry = sessionFor(event);
     const request = workbookExportCsvRequestSchema.parse(input);
     const parent = dialogParent(event);
@@ -238421,7 +238581,7 @@ function registerSheetsIpc() {
         cancelId: 2,
         noLink: true
       };
-      const { response } = parent ? await import_electron4.dialog.showMessageBox(parent, options) : await import_electron4.dialog.showMessageBox(options);
+      const { response } = parent ? await import_electron6.dialog.showMessageBox(parent, options) : await import_electron6.dialog.showMessageBox(options);
       if (response === 0) return { canceled: true, saveAsXlsxInstead: true };
       if (response === 2) return { canceled: true };
     }
@@ -238454,7 +238614,7 @@ function registerSheetsIpc() {
     }
     return { canceled: false, path: targetPath };
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     IPC_CHANNELS.createDocument,
     async (event, input) => {
       sessionFor(event);
@@ -238462,7 +238622,7 @@ function registerSheetsIpc() {
       try {
         if (request.type === "csv") {
           const filePath = uniquePathIn(
-            configuredDefaultSaveDir(import_electron4.app),
+            configuredDefaultSaveDir(import_electron6.app),
             `${sanitizeGeneratedFileBase(request.title)}.csv`
           );
           await atomicWriteFile(
@@ -238475,7 +238635,7 @@ function registerSheetsIpc() {
         if (request.type === "xlsx") {
           const buffer = await sheetCsvToXlsxBuffer(request.content, request.sheetName ?? "Sheet1");
           const filePath = uniquePathIn(
-            configuredDefaultSaveDir(import_electron4.app),
+            configuredDefaultSaveDir(import_electron6.app),
             `${sanitizeGeneratedFileBase(request.title)}.xlsx`
           );
           await atomicWriteFile(filePath, buffer);
@@ -238490,7 +238650,7 @@ function registerSheetsIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(IPC_CHANNELS.csvSaveConfirm, async (event) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.csvSaveConfirm, async (event) => {
     sessionFor(event);
     const options = {
       type: "warning",
@@ -238502,10 +238662,10 @@ function registerSheetsIpc() {
       noLink: true
     };
     const parent = dialogParent(event);
-    const { response } = parent ? await import_electron4.dialog.showMessageBox(parent, options) : await import_electron4.dialog.showMessageBox(options);
+    const { response } = parent ? await import_electron6.dialog.showMessageBox(parent, options) : await import_electron6.dialog.showMessageBox(options);
     return response === 0 ? "csv" : response === 1 ? "xlsx" : "cancel";
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.saveWorkbook, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.saveWorkbook, async (event, input) => {
     const entry = sessionFor(event);
     const client = entry.client;
     const request = resolveTransferredEdits(entry, workbookSaveRequestSchema.parse(input));
@@ -238515,12 +238675,12 @@ function registerSheetsIpc() {
     let targetPath = session.path;
     if (request.targetPath !== void 0) {
       if (request.mode !== "save-as") throw new Error("An explicit save path needs Save As.");
-      if (!(0, import_node_path17.isAbsolute)(request.targetPath)) throw new Error("Save path must be absolute.");
+      if (!(0, import_node_path18.isAbsolute)(request.targetPath)) throw new Error("Save path must be absolute.");
       targetPath = /\.xlsx$/i.test(request.targetPath) ? request.targetPath : `${request.targetPath}.xlsx`;
       if (!canMcpSheetWrite(event.sender.id, targetPath)) {
         throw new Error("save target was not authorized");
       }
-      if ((0, import_node_fs9.existsSync)(targetPath) && request.overwrite !== true) {
+      if ((0, import_node_fs10.existsSync)(targetPath) && request.overwrite !== true) {
         throw new Error(`file already exists: ${targetPath}`);
       }
     } else if (request.mode === "save-as" || session.suggestSaveAs !== void 0) {
@@ -238573,7 +238733,7 @@ function registerSheetsIpc() {
     }
     entry.sessions.delete(request.sessionId);
     await cleanupSessionResources({
-      tempRoot: import_electron4.app.getPath("temp"),
+      tempRoot: import_electron6.app.getPath("temp"),
       snapshotPath: session.snapshotPath,
       // A CSV in-place save keeps saving into the temp copy — its directory
       // must survive the session swap.
@@ -238599,13 +238759,13 @@ function registerSheetsIpc() {
     if (session.restoreTarget !== void 0) clearWorkbookRecovery(session.restoreTarget);
     return { canceled: false, file: file2, touchedEntries: mutation.touchedEntries };
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.saveEditsBegin, (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.saveEditsBegin, (event, input) => {
     const entry = sessionFor(event);
     const request = workbookSaveEditsBeginSchema.parse(input);
     if (!entry.sessions.has(request.sessionId)) throw new Error("Unknown workbook session.");
     entry.saveTransfers.begin(request);
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.saveEditsChunk, (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.saveEditsChunk, (event, input) => {
     const entry = sessionFor(event);
     const request = workbookSaveEditsChunkSchema.parse(input);
     entry.saveTransfers.addChunk({
@@ -238615,12 +238775,12 @@ function registerSheetsIpc() {
       edits: saveEditsChunkArraySchema.parse(JSON.parse(request.editsJson))
     });
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.saveEditsAbort, (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.saveEditsAbort, (event, input) => {
     const entry = sessionFor(event);
     const request = workbookSaveEditsAbortSchema.parse(input);
     entry.saveTransfers.discard(request.transferId, request.sessionId);
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.writeWorkbookRecovery, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.writeWorkbookRecovery, async (event, input) => {
     const entry = sessionFor(event);
     const request = resolveTransferredEdits(entry, workbookSaveRequestSchema.parse(input));
     const session = entry.sessions.get(request.sessionId);
@@ -238636,7 +238796,7 @@ function registerSheetsIpc() {
       return { ok: false };
     }
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.closeWorkbook, async (event, sessionId) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.closeWorkbook, async (event, sessionId) => {
     const entry = sessionFor(event);
     const validatedSessionId = external_exports.string().uuid().parse(sessionId);
     entry.saveTransfers.discardSession(validatedSessionId);
@@ -238644,13 +238804,13 @@ function registerSheetsIpc() {
     if (!entry.sessions.delete(validatedSessionId)) return;
     if (session === void 0) return;
     await cleanupSessionResources({
-      tempRoot: import_electron4.app.getPath("temp"),
+      tempRoot: import_electron6.app.getPath("temp"),
       snapshotPath: session.snapshotPath,
       importTempDir: session.importTempDir,
       closeSidecar: () => entry.client.close(validatedSessionId)
     });
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     IPC_CHANNELS.autoRenameWorkbook,
     (event, sessionId, baseName) => {
       const entry = sessionFor(event);
@@ -238659,32 +238819,32 @@ function registerSheetsIpc() {
       if (!session || !untitledWorkbookPaths.has(session.path)) return { renamed: false };
       const base = sanitizeAutoRenameBase(external_exports.string().min(1).max(100).parse(baseName));
       if (!base) return { renamed: false };
-      const dir = (0, import_node_path17.dirname)(session.path);
-      let target = (0, import_node_path17.join)(dir, `${base}.xlsx`);
-      for (let i = 2; (0, import_node_fs9.existsSync)(target) && i < 100; i++) target = (0, import_node_path17.join)(dir, `${base}-${i}.xlsx`);
-      if ((0, import_node_fs9.existsSync)(target) || target === session.path) return { renamed: false };
+      const dir = (0, import_node_path18.dirname)(session.path);
+      let target = (0, import_node_path18.join)(dir, `${base}.xlsx`);
+      for (let i = 2; (0, import_node_fs10.existsSync)(target) && i < 100; i++) target = (0, import_node_path18.join)(dir, `${base}-${i}.xlsx`);
+      if ((0, import_node_fs10.existsSync)(target) || target === session.path) return { renamed: false };
       try {
-        (0, import_node_fs9.renameSync)(session.path, target);
+        (0, import_node_fs10.renameSync)(session.path, target);
       } catch (err) {
         console.warn("[sheets] auto-rename failed:", err);
         return { renamed: false };
       }
       untitledWorkbookPaths.delete(session.path);
       entry.sessions.set(validatedSessionId, { ...session, path: target });
-      event.sender.send(IPC_CHANNELS.workbookRenamed, (0, import_node_path17.basename)(target));
+      event.sender.send(IPC_CHANNELS.workbookRenamed, (0, import_node_path18.basename)(target));
       workbookOpenedHook?.(event.sender, target);
-      return { renamed: true, name: (0, import_node_path17.basename)(target) };
+      return { renamed: true, name: (0, import_node_path18.basename)(target) };
     }
   );
-  import_electron4.ipcMain.handle(IPC_CHANNELS.openExternal, async (event, url2) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.openExternal, async (event, url2) => {
     sessionFor(event);
     const validatedUrl = safeExternalUrl(url2);
     if (!validatedUrl) {
       throw new Error("Only http(s) links can be opened.");
     }
-    await import_electron4.shell.openExternal(validatedUrl);
+    await import_electron6.shell.openExternal(validatedUrl);
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.filesPick, async (event) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.filesPick, async (event) => {
     sessionFor(event);
     const selection = await openFileDialog(event, {
       title: tm("dlgAddAttachment"),
@@ -238697,16 +238857,16 @@ function registerSheetsIpc() {
     if (selection.canceled || selection.filePaths.length === 0) return null;
     return collectAttachments(selection.filePaths);
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.filesAdd, (event, paths) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.filesAdd, (event, paths) => {
     sessionFor(event);
     return collectAttachments(external_exports.array(external_exports.string().min(1).max(1024)).max(50).parse(paths));
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     IPC_CHANNELS.filesRead,
     async (event, filePath, offset, maxChars) => {
       sessionFor(event);
       const validatedPath = external_exports.string().min(1).max(1024).parse(filePath);
-      const name = (0, import_node_path17.basename)(validatedPath);
+      const name = (0, import_node_path18.basename)(validatedPath);
       const ext = name.split(".").pop()?.toLowerCase() ?? "";
       if (!ATTACHMENT_EXTS.has(ext)) return { ok: false, error: tm("errUnsupportedExt", { ext }) };
       if (ATTACHMENT_IMAGE_EXTS.has(ext)) {
@@ -238728,24 +238888,24 @@ function registerSheetsIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(IPC_CHANNELS.filesReadImage, (event, filePath) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.filesReadImage, (event, filePath) => {
     sessionFor(event);
     const validatedPath = external_exports.string().min(1).max(1024).parse(filePath);
-    const name = (0, import_node_path17.basename)(validatedPath);
+    const name = (0, import_node_path18.basename)(validatedPath);
     const ext = name.split(".").pop()?.toLowerCase() ?? "";
     const mime = ATTACHMENT_IMAGE_MIME[ext];
     if (!mime) return { ok: false, error: `${name}: ${tm("errNotImage")}` };
     try {
-      const stat4 = (0, import_node_fs9.statSync)(validatedPath);
+      const stat4 = (0, import_node_fs10.statSync)(validatedPath);
       if (stat4.size > ATTACHMENT_IMAGE_MAX_BYTES) {
         return { ok: false, error: `${name}: ${tm("errImageTooLarge")}` };
       }
-      return { ok: true, base64: (0, import_node_fs9.readFileSync)(validatedPath).toString("base64"), mime };
+      return { ok: true, base64: (0, import_node_fs10.readFileSync)(validatedPath).toString("base64"), mime };
     } catch {
       return { ok: false, error: `${name}: ${tm("errUnreadable")}` };
     }
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     IPC_CHANNELS.filesAddPastedImage,
     (event, data, ext) => {
       sessionFor(event);
@@ -238758,17 +238918,17 @@ var aiIpcRegistered = false;
 function registerSheetsAiIpc() {
   if (aiIpcRegistered) return;
   aiIpcRegistered = true;
-  import_electron4.app.once("before-quit", shutdownCodexAppServers);
-  setRescueFetch((url2, init) => import_electron4.net.fetch(url2, init));
-  setAiUserAgent(`GenOffice/${import_electron4.app.getVersion()}`);
-  import_electron4.ipcMain.handle(IPC_CHANNELS.aiGetSettings, (event) => {
+  import_electron6.app.once("before-quit", shutdownCodexAppServers);
+  setRescueFetch((url2, init) => import_electron6.net.fetch(url2, init));
+  setAiUserAgent(`GenOffice/${import_electron6.app.getVersion()}`);
+  import_electron6.ipcMain.handle(IPC_CHANNELS.aiGetSettings, (event) => {
     sessionFor(event);
     const stored = readJson2(SETTINGS_PATH(), {});
     const settings = resolveAiSettings(stored, defaultAiSettings());
     settings.provider = activeProvider(settings);
     return settings;
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     IPC_CHANNELS.aiGskStatus,
     async (_event, withEmail) => {
       if (!hasGskAuth()) return { loggedIn: false };
@@ -238777,15 +238937,15 @@ function registerSheetsAiIpc() {
       return info3?.email ? { loggedIn: true, email: info3.email } : { loggedIn: true };
     }
   );
-  import_electron4.ipcMain.handle(IPC_CHANNELS.aiGskLogin, () => {
-    ensureGenofficeLogin((url2) => void import_electron4.shell.openExternal(url2));
+  import_electron6.ipcMain.handle(IPC_CHANNELS.aiGskLogin, () => {
+    ensureGenofficeLogin((url2) => void import_electron6.shell.openExternal(url2));
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.aiSetSettings, (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.aiSetSettings, (event, input) => {
     sessionFor(event);
     const settings = aiSettingsInputSchema.parse(input);
     writeJson2(SETTINGS_PATH(), settings);
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.aiChat, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.aiChat, async (event, input) => {
     sessionFor(event);
     const request = aiChatRequestSchema.parse(input);
     const provider = request.settings.provider;
@@ -238810,7 +238970,7 @@ function registerSheetsAiIpc() {
       return { ok: false, error: isAiOverloadedError(err) ? tm("errAiBusy") : String(err) };
     }
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.aiStream, async (event, input) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.aiStream, async (event, input) => {
     const entry = sessionFor(event);
     const request = aiStreamRequestSchema.parse(input);
     const { requestId, system, messages } = request;
@@ -238876,11 +239036,11 @@ function registerSheetsAiIpc() {
       entry.aiStreams.delete(requestId);
     }
   });
-  import_electron4.ipcMain.handle(IPC_CHANNELS.aiStreamCancel, (event, requestId) => {
+  import_electron6.ipcMain.handle(IPC_CHANNELS.aiStreamCancel, (event, requestId) => {
     const entry = sessionFor(event);
     entry.aiStreams.get(external_exports.string().min(1).parse(requestId))?.abort();
   });
-  import_electron4.ipcMain.handle("ai:web-search", async (_event, query, maxResults) => {
+  import_electron6.ipcMain.handle("ai:web-search", async (_event, query, maxResults) => {
     try {
       return await webSearchTool(
         SETTINGS_PATH(),
@@ -238891,7 +239051,7 @@ function registerSheetsAiIpc() {
       return { results: [], method: "error", error: String(err) };
     }
   });
-  import_electron4.ipcMain.handle("ai:image-search", async (_event, query, maxResults) => {
+  import_electron6.ipcMain.handle("ai:image-search", async (_event, query, maxResults) => {
     try {
       return await imageSearchTool(
         SETTINGS_PATH(),
@@ -238902,7 +239062,7 @@ function registerSheetsAiIpc() {
       return { images: [], method: "error", error: String(err) };
     }
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:fetch-image",
     async (_event, url2) => {
       try {
@@ -238936,13 +239096,13 @@ function registerSheetsAiIpc() {
 var sheetsProjectStore = null;
 var sheetsProjectIpcRegistered = false;
 function getSheetsProjectStore() {
-  if (!sheetsProjectStore) sheetsProjectStore = new ProjectStore(import_electron4.app.getPath("userData"));
+  if (!sheetsProjectStore) sheetsProjectStore = new ProjectStore(import_electron6.app.getPath("userData"));
   return sheetsProjectStore;
 }
 function registerProjectIpc() {
   if (sheetsProjectIpcRegistered) return;
   sheetsProjectIpcRegistered = true;
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "project:resolveChat",
     (event, args) => {
       const store = getSheetsProjectStore();
@@ -238960,7 +239120,7 @@ function registerProjectIpc() {
       return store.resolveChatForFile(resolvedPath);
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "project:appendChat",
     (_event, args) => {
       const msg = {
@@ -238973,13 +239133,13 @@ function registerProjectIpc() {
       getSheetsProjectStore().appendChatMessage(args.projectId, args.chatId, msg);
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "project:loadChat",
     (_event, args) => {
       return getSheetsProjectStore().loadChat(args.projectId, args.chatId, args.limit ?? 200);
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "project:rebindChat",
     (event, args) => {
       const store = getSheetsProjectStore();
@@ -239237,17 +239397,80 @@ async function writeWorkbookTo(client, session, request, targetPath) {
   });
   return mutation;
 }
+async function exportWorkbookSnapshot(contents, input) {
+  const entry = sessionFor({ sender: contents });
+  const request = resolveTransferredEdits(entry, workbookSaveRequestSchema.parse(input));
+  const session = entry.sessions.get(request.sessionId);
+  if (!session) throw new Error("Unknown workbook session.");
+  const temporary = (0, import_node_path18.join)(import_electron6.app.getPath("temp"), `friday-workbook-export-${(0, import_node_crypto6.randomUUID)()}.xlsx`);
+  const temporarySessions = /* @__PURE__ */ new Map();
+  const structural = request.structuralOps.length > 0;
+  const shifted = structural || request.sheetOps.length > 0;
+  const heldTables = structural ? request.tableAdditions : [];
+  const heldPivots = shifted ? request.pivotAdditions : [];
+  const heldNames = shifted ? request.definedNamesState : null;
+  try {
+    await writeWorkbookTo(entry.client, session, {
+      ...request,
+      tableAdditions: heldTables.length ? [] : request.tableAdditions,
+      pivotAdditions: heldPivots.length ? [] : request.pivotAdditions,
+      definedNamesState: shifted ? null : request.definedNamesState
+    }, temporary);
+    if (heldTables.length || heldPivots.length || heldNames !== null) {
+      const reopened = await openWorkbookSession(entry.client, temporary, temporarySessions);
+      const transient = temporarySessions.get(reopened.sessionId);
+      if (!transient) throw new Error("OFFICE_EXPORT_SNAPSHOT_MISSING");
+      const second = workbookSaveRequestSchema.parse({
+        sessionId: reopened.sessionId,
+        mode: "save",
+        edits: [],
+        bulkConstantFills: [],
+        structuralOps: [],
+        chartEdits: [],
+        visualEdits: [],
+        visualAdditions: [],
+        tableAdditions: heldTables,
+        pivotAdditions: heldPivots,
+        sheetOps: [],
+        sheetOrder: [],
+        filterStates: [],
+        hyperlinkEdits: [],
+        cfStates: [],
+        dvStates: [],
+        pageSetupStates: [],
+        noteStates: [],
+        pivotCacheRefreshPaths: [],
+        pivotRefreshUpdates: [],
+        sheetProtections: [],
+        sparklineAdditions: [],
+        formulaValues: [],
+        definedNamesState: heldNames,
+        themeState: null,
+        workbookProtectionState: null,
+        protectedRangeStates: []
+      });
+      await writeWorkbookTo(entry.client, transient, second, temporary);
+    }
+    return new Uint8Array(await (0, import_promises10.readFile)(temporary));
+  } finally {
+    for (const [id, transient] of temporarySessions) {
+      await cleanupSessionResources({ tempRoot: import_electron6.app.getPath("temp"), snapshotPath: transient.snapshotPath, closeSidecar: () => entry.client.close(id) });
+    }
+    await (0, import_promises10.rm)(temporary, { force: true }).catch(() => {
+    });
+  }
+}
 async function snapshotWorkbook(path) {
-  const dir = (0, import_node_path17.join)(import_electron4.app.getPath("temp"), "genoffice-sheets-sessions");
+  const dir = (0, import_node_path18.join)(import_electron6.app.getPath("temp"), "genoffice-sheets-sessions");
   await (0, import_promises10.mkdir)(dir, { recursive: true });
-  const snapshotPath = (0, import_node_path17.join)(dir, `${(0, import_node_crypto6.randomUUID)()}.xlsx`);
+  const snapshotPath = (0, import_node_path18.join)(dir, `${(0, import_node_crypto6.randomUUID)()}.xlsx`);
   await (0, import_promises10.copyFile)(path, snapshotPath);
   return snapshotPath;
 }
 var cachedShortDate;
 function systemShortDate2() {
   if (cachedShortDate === void 0) {
-    cachedShortDate = shortDatePatternForSystemLocale(import_electron4.app.getSystemLocale());
+    cachedShortDate = shortDatePatternForSystemLocale(import_electron6.app.getSystemLocale());
     setSystemShortDate(cachedShortDate);
   }
   return cachedShortDate;
@@ -239294,7 +239517,7 @@ async function openWorkbookSession(client, path, sessions, options) {
   } catch (error51) {
     await (0, import_promises10.rm)(snapshotPath, { force: true }).catch(() => void 0);
     if (importTempDir !== void 0) {
-      await cleanupImportTempDirectory(import_electron4.app.getPath("temp"), importTempDir);
+      await cleanupImportTempDirectory(import_electron6.app.getPath("temp"), importTempDir);
     }
     throw error51;
   }
@@ -239319,10 +239542,10 @@ async function prepareWorkbookForOpen(client, path, contents, parent, options) {
     }
     return { openPath: path };
   }
-  const stem = (0, import_node_path17.basename)(path).replace(/\.[^.]+$/, "");
-  const directory = (0, import_node_path17.join)(import_electron4.app.getPath("temp"), "genoffice-imports", (0, import_node_crypto6.randomUUID)());
+  const stem = (0, import_node_path18.basename)(path).replace(/\.[^.]+$/, "");
+  const directory = (0, import_node_path18.join)(import_electron6.app.getPath("temp"), "genoffice-imports", (0, import_node_crypto6.randomUUID)());
   await (0, import_promises10.mkdir)(directory, { recursive: true });
-  const openPath = (0, import_node_path17.join)(directory, `${stem}.xlsx`);
+  const openPath = (0, import_node_path18.join)(directory, `${stem}.xlsx`);
   try {
     if (extension === "csv") {
       await (0, import_promises10.writeFile)(
@@ -239333,7 +239556,7 @@ async function prepareWorkbookForOpen(client, path, contents, parent, options) {
       await client.convertWorkbook({ path, targetPath: openPath });
     }
   } catch (error51) {
-    await cleanupImportTempDirectory(import_electron4.app.getPath("temp"), directory);
+    await cleanupImportTempDirectory(import_electron6.app.getPath("temp"), directory);
     throw error51;
   }
   return extension === "csv" ? { openPath, importTempDir: directory, csvImport: true, csvSourcePath: path } : { openPath, importTempDir: directory, suggestSaveAs: path.replace(/\.[^.]+$/, ".xlsx") };
@@ -239349,8 +239572,8 @@ function setSheetsCloseTabHook(fn) {
 function installApplicationMenu() {
   const sendMenuAction = sendSheetsMenuAction;
   const labels = appMenuLabels(getUiLang());
-  import_electron4.Menu.setApplicationMenu(
-    import_electron4.Menu.buildFromTemplate([
+  import_electron6.Menu.setApplicationMenu(
+    import_electron6.Menu.buildFromTemplate([
       ...process.platform === "darwin" ? [{ role: "appMenu" }] : [],
       {
         label: tm("menuFile"),
@@ -239445,8 +239668,8 @@ async function applyMainProcessProxy() {
     return;
   }
   try {
-    await import_electron4.app.whenReady();
-    const resolved = await import_electron4.session.defaultSession.resolveProxy("https://www.genspark.ai/");
+    await import_electron6.app.whenReady();
+    const resolved = await import_electron6.session.defaultSession.resolveProxy("https://www.genspark.ai/");
     const m = /PROXY\s+([^;]+)/i.exec(resolved || "");
     if (m?.[1]) {
       await setDispatcher(`http://${m[1].trim()}`);
@@ -239459,27 +239682,27 @@ async function applyMainProcessProxy() {
 }
 function startSheetsStandalone() {
   registerRendererScheme();
-  installNavigationGuard(import_electron4.app);
-  installContextMenu(import_electron4.app, () => contextMenuLabels(getUiLang()));
-  if (!import_electron4.app.isPackaged && process.env.GENOFFICE_USER_DATA) {
-    import_electron4.app.setPath("userData", process.env.GENOFFICE_USER_DATA);
+  installNavigationGuard(import_electron6.app);
+  installContextMenu(import_electron6.app, () => contextMenuLabels(getUiLang()));
+  if (!import_electron6.app.isPackaged && process.env.GENOFFICE_USER_DATA) {
+    import_electron6.app.setPath("userData", process.env.GENOFFICE_USER_DATA);
   }
   void applyMainProcessProxy();
-  import_electron4.app.whenReady().then(() => {
-    installRendererProtocol({ sheets: (0, import_node_path17.join)(__dirname, "../renderer") });
-    setUiLang(normalizeLang(process.env.GENOFFICE_LANG ?? import_electron4.app.getLocale()));
-    import_electron4.app.setAccessibilitySupportEnabled(true);
+  import_electron6.app.whenReady().then(() => {
+    installRendererProtocol({ sheets: (0, import_node_path18.join)(__dirname, "../renderer") });
+    setUiLang(normalizeLang(process.env.GENOFFICE_LANG ?? import_electron6.app.getLocale()));
+    import_electron6.app.setAccessibilitySupportEnabled(true);
     installApplicationMenu();
     startCaptureServer();
     return createSheetsWindow();
   });
-  import_electron4.app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") import_electron4.app.quit();
+  import_electron6.app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") import_electron6.app.quit();
   });
-  import_electron4.app.on("before-quit", () => {
+  import_electron6.app.on("before-quit", () => {
     stopSheetsSidecar();
   });
-  import_electron4.app.on("activate", () => {
+  import_electron6.app.on("activate", () => {
     if (!mainWindow) void createSheetsWindow();
   });
 }
@@ -239487,13 +239710,13 @@ function resolveSidecarPath() {
   const executable = process.platform === "win32" ? "xlsx-sidecar.exe" : "xlsx-sidecar";
   if (runtime.sidecarPath) return runtime.sidecarPath;
   if (process.env.XLSX_SIDECAR_PATH) return process.env.XLSX_SIDECAR_PATH;
-  if (import_electron4.app.isPackaged) return (0, import_node_path17.join)(process.resourcesPath, "native", executable);
-  return (0, import_node_path17.join)(import_electron4.app.getAppPath(), "native", "xlsx-engine", "target", "release", executable);
+  if (import_electron6.app.isPackaged) return (0, import_node_path18.join)(process.resourcesPath, "native", executable);
+  return (0, import_node_path18.join)(import_electron6.app.getAppPath(), "native", "xlsx-engine", "target", "release", executable);
 }
 async function sha256File(path) {
   return new Promise((resolve5, reject) => {
     const hash2 = (0, import_node_crypto6.createHash)("sha256");
-    const stream = (0, import_node_fs9.createReadStream)(path);
+    const stream = (0, import_node_fs10.createReadStream)(path);
     stream.on("data", (chunk) => hash2.update(chunk));
     stream.once("error", reject);
     stream.once("end", () => resolve5(hash2.digest("hex")));
@@ -239505,7 +239728,7 @@ async function closeAllSessions(entry) {
   await Promise.allSettled(
     sessions.map(async ([sessionId, session]) => {
       await cleanupSessionResources({
-        tempRoot: import_electron4.app.getPath("temp"),
+        tempRoot: import_electron6.app.getPath("temp"),
         snapshotPath: session.snapshotPath,
         importTempDir: session.importTempDir,
         closeSidecar: () => entry.client.close(sessionId)
@@ -239520,6 +239743,7 @@ async function closeAllSessions(entry) {
   createSheetsView,
   createSheetsWindow,
   exportSheetsPdfHeadless,
+  exportWorkbookSnapshot,
   getActiveSheetsWebContents,
   getSheetsWindow,
   hasActiveQueuedWorkbook,

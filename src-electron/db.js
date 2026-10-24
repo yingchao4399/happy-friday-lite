@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import initSqlJs from 'sql.js'
+import { applyPreviewMigrations } from './preview-migrations.js'
 
 let dataDir = null
 let db = null
@@ -84,6 +85,17 @@ async function initDatabase() {
   const dbPath = path.join(dataDir, 'friday.db')
 
   if (fs.existsSync(dbPath)) {
+    // 启动迁移前保留最近五份数据库副本，便于预览版恢复旧数据。
+    const backupDir = path.join(dataDir, 'backups')
+    fs.mkdirSync(backupDir, { recursive: true })
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+    fs.copyFileSync(dbPath, path.join(backupDir, `friday-${stamp}.db`))
+    const backups = fs.readdirSync(backupDir)
+      .filter(name => /^friday-.*\.db$/.test(name))
+      .sort()
+    for (const stale of backups.slice(0, Math.max(0, backups.length - 5))) {
+      fs.rmSync(path.join(backupDir, stale), { force: true })
+    }
     const fileBuffer = fs.readFileSync(dbPath)
     db = new SQL.Database(fileBuffer)
   } else {
@@ -296,6 +308,24 @@ async function initDatabase() {
     );
   `)
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS resource_links (
+      id TEXT PRIMARY KEY,
+      fromUri TEXT NOT NULL,
+      toUri TEXT NOT NULL,
+      relation TEXT NOT NULL,
+      evidence TEXT,
+      actor TEXT NOT NULL,
+      createdAt TEXT NOT NULL,
+      UNIQUE(fromUri, toUri, relation)
+    );
+  `)
+
+  try { db.run("ALTER TABLE agent_tool_logs ADD COLUMN actor TEXT NOT NULL DEFAULT 'friday-agent'") } catch { /* 已迁移 */ }
+  for (const column of ['fromVersion', 'toVersion']) {
+    try { db.run(`ALTER TABLE resource_links ADD COLUMN ${column} TEXT`) } catch { /* 已迁移 */ }
+  }
+
   // automation_tasks: 本地 DeepAgent 定时任务。cronExpression 使用本机时区的五字段 Cron。
   db.run(`
     CREATE TABLE IF NOT EXISTS automation_tasks (
@@ -369,12 +399,15 @@ async function initDatabase() {
   db.run('CREATE INDEX IF NOT EXISTS idx_agent_memories_namespace ON agent_memories(namespace)')
   db.run('CREATE INDEX IF NOT EXISTS idx_agent_tool_logs_threadId ON agent_tool_logs(threadId)')
   db.run('CREATE INDEX IF NOT EXISTS idx_agent_tool_logs_requestId ON agent_tool_logs(requestId)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_resource_links_fromUri ON resource_links(fromUri)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_resource_links_toUri ON resource_links(toUri)')
   db.run('CREATE INDEX IF NOT EXISTS idx_automation_tasks_enabled ON automation_tasks(enabled)')
   db.run('CREATE INDEX IF NOT EXISTS idx_automation_tasks_nextRunAt ON automation_tasks(nextRunAt)')
   db.run('CREATE INDEX IF NOT EXISTS idx_automation_runs_taskId ON automation_runs(taskId)')
   db.run('CREATE INDEX IF NOT EXISTS idx_automation_runs_sessionId ON automation_runs(sessionId)')
   db.run('CREATE INDEX IF NOT EXISTS idx_automation_runs_startedAt ON automation_runs(startedAt)')
 
+  applyPreviewMigrations(db)
   saveDb()
   await migrateFromJson()
 }
@@ -482,7 +515,16 @@ function normalizeEvent(row) {
 function normalizeNote(row) {
   if (!row) return row
   row.isDeleted = !!row.isDeleted
+  row.isPinned = !!queryOne('SELECT noteId FROM note_pinned WHERE noteId = ?', [row.id])
   return row
+}
+
+export function setNotePinned(noteId, isPinned) {
+  if (!getNote(noteId)) throw new Error('笔记不存在或已删除')
+  if (isPinned) db.run('INSERT OR REPLACE INTO note_pinned VALUES (?, ?)', [noteId, nowISO()])
+  else db.run('DELETE FROM note_pinned WHERE noteId = ?', [noteId])
+  saveDb()
+  return getNote(noteId)
 }
 
 function normalizeAutomationTask(row) {
@@ -754,14 +796,21 @@ export function updateNote(noteId, title, content, contentText, notebookId, marp
   return null
 }
 
-export function softDeleteNote(noteId) {
-  db.run(
-    'UPDATE notes SET isDeleted = 1, updatedAt = ? WHERE id = ?',
-    [nowISO(), noteId]
-  )
-  const modified = db.getRowsModified()
-  saveDb()
-  return modified > 0
+export function softDeleteNote(noteId, details = {}) {
+  const note = getNote(noteId)
+  if (!note) return false
+  const deletedAt = nowISO()
+  db.run('BEGIN IMMEDIATE')
+  try {
+    db.run('INSERT INTO trash_entries VALUES (?, ?, ?, ?, ?)', [generateId(), 'note', noteId, JSON.stringify({ ...details, title: note.title, notebookId: note.notebookId }), deletedAt])
+    db.run('UPDATE notes SET isDeleted = 1, updatedAt = ? WHERE id = ?', [deletedAt, noteId])
+    db.run('COMMIT')
+    saveDb()
+    return true
+  } catch (error) {
+    db.run('ROLLBACK')
+    throw error
+  }
 }
 
 export function searchNotes(query) {
@@ -770,6 +819,78 @@ export function searchNotes(query) {
     "SELECT * FROM notes WHERE isDeleted = 0 AND (LOWER(title) LIKE ? OR LOWER(contentText) LIKE ?)",
     [q, q]
   ).map(normalizeNote)
+}
+
+/**
+ * 跨应用内容的第一阶段统一检索：搜索笔记、聊天（含 AI 回复）、画布和日程。
+ * 返回稳定的资源类型与内部 URI，供 AI 与 MCP 统一消费；知识库向量检索由 RAG 层补充。
+ */
+export function searchAllContent(query, limit = 20) {
+  const terms = [...new Set(String(query || '').toLowerCase().split(/[\s,，、]+/).map(x => x.trim()).filter(x => x.length >= 2))]
+  if (!terms.length) return []
+  const cap = Math.min(Math.max(Number(limit) || 20, 1), 50)
+  const results = []
+  const like = term => `%${term.replace(/[\\%_]/g, '\\$&')}%`
+  const conditions = (columns) => terms.map(() => `(${columns.map(column => `LOWER(${column}) LIKE ? ESCAPE '\\'`).join(' OR ')})`).join(' OR ')
+  const params = columns => terms.flatMap(term => columns.map(() => like(term)))
+
+  const notes = queryAll(
+    `SELECT id, title, contentText AS content, updatedAt FROM notes WHERE isDeleted = 0 AND (${conditions(['title', 'contentText'])}) ORDER BY updatedAt DESC LIMIT ?`,
+    [...params(['title', 'contentText']), cap]
+  )
+  for (const row of notes) results.push({ id: row.id, type: 'note', title: row.title, content: row.content || '', updatedAt: row.updatedAt, uri: `friday://notes/${encodeURIComponent(row.id)}` })
+
+  const messages = queryAll(
+    `SELECT m.id, m.sessionId, m.role, m.content, m.createdAt, s.title AS sessionTitle FROM messages m LEFT JOIN sessions s ON s.id = m.sessionId WHERE (${conditions(['m.content', 's.title'])}) ORDER BY m.createdAt DESC LIMIT ?`,
+    [...params(['m.content', 's.title']), cap]
+  )
+  for (const row of messages) results.push({ id: String(row.id), type: row.role === 'assistant' ? 'ai_message' : 'chat_message', title: row.sessionTitle || 'Friday 对话', content: row.content || '', updatedAt: row.createdAt, uri: `friday://sessions/${encodeURIComponent(row.sessionId)}?message=${encodeURIComponent(row.id)}` })
+
+  const canvases = queryAll(
+    `SELECT id, title, graphJSON AS content, updatedAt FROM drawing_canvases WHERE (${conditions(['title', 'graphJSON'])}) ORDER BY updatedAt DESC LIMIT ?`,
+    [...params(['title', 'graphJSON']), cap]
+  )
+  for (const row of canvases) results.push({ id: row.id, type: 'canvas', title: row.title || '未命名画布', content: row.content || '', updatedAt: row.updatedAt, uri: `friday://canvases/${encodeURIComponent(row.id)}` })
+
+  const events = queryAll(
+    `SELECT id, title, description AS content, updatedAt FROM schedule_events WHERE (${conditions(['title', 'description'])}) ORDER BY start DESC LIMIT ?`,
+    [...params(['title', 'description']), cap]
+  )
+  for (const row of events) results.push({ id: row.id, type: 'schedule_event', title: row.title, content: row.content || '', updatedAt: row.updatedAt, uri: `friday://schedule/${encodeURIComponent(row.id)}` })
+
+  return results.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''))).slice(0, cap)
+}
+
+export function linkResources(fromUri, toUri, relation, evidence = '', actor = 'friday-agent', versions = {}) {
+  const existing = queryOne('SELECT * FROM resource_links WHERE fromUri = ? AND toUri = ? AND relation = ?', [fromUri, toUri, relation])
+  if (existing) {
+    const updates = { evidence, actor, fromVersion: versions.fromVersion || null, toVersion: versions.toVersion || null }
+    db.run('UPDATE resource_links SET evidence = ?, actor = ?, fromVersion = ?, toVersion = ? WHERE id = ?', [updates.evidence, updates.actor, updates.fromVersion, updates.toVersion, existing.id])
+    saveDb()
+    return { ...existing, ...updates }
+  }
+  const link = { id: generateId(), fromUri, toUri, relation, evidence, actor, fromVersion: versions.fromVersion || null, toVersion: versions.toVersion || null, createdAt: nowISO() }
+  db.run(
+    'INSERT INTO resource_links (id, fromUri, toUri, relation, evidence, actor, createdAt, fromVersion, toVersion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [link.id, link.fromUri, link.toUri, link.relation, link.evidence, link.actor, link.createdAt, link.fromVersion, link.toVersion]
+  )
+  saveDb()
+  return link
+}
+
+export function getResourceLinks(uri, limit = 50) {
+  return queryAll(
+    'SELECT * FROM resource_links WHERE fromUri = ? OR toUri = ? ORDER BY createdAt DESC LIMIT ?',
+    [uri, uri, Math.min(Math.max(Number(limit) || 50, 1), 200)]
+  )
+}
+
+export function unlinkResources(id) {
+  const link = queryOne('SELECT * FROM resource_links WHERE id = ?', [id])
+  if (!link) return false
+  db.run('DELETE FROM resource_links WHERE id = ?', [id])
+  saveDb()
+  return true
 }
 
 // ========== Drawing: 画布与分类 ==========

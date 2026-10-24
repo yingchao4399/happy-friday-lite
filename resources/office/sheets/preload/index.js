@@ -1,5 +1,15 @@
 "use strict";
 const electron = require("electron");
+function installOfficeFileBridge(bridge, ipc) {
+  bridge.exposeInMainWorld("fridayOffice", {
+    exportSelectionText: (request) => ipc.invoke("office-file-export-selection-text", request),
+    snapshot: (request) => ipc.invoke("office-file-current-snapshot", request),
+    exportSnapshot: (request) => ipc.invoke("office-file-export-snapshot", request),
+    cancelExport: () => ipc.invoke("office-file-cancel-export"),
+    command: (command) => ipc.invoke("office-file-command", command),
+    preferences: (patch) => ipc.invoke("office-file-preferences", patch)
+  });
+}
 const MAX_SAVE_EDITS = 1e6;
 const MAX_SAVE_EDITS_TOTAL = 1e7;
 const SAVE_EDITS_CHUNK_JSON_MAX = 256e6;
@@ -38,6 +48,7 @@ const IPC_CHANNELS = {
   closeSaveResult: "workbook:close-save-result",
   exportPdf: "workbook:export-pdf",
   printWorkbook: "workbook:print",
+  previewWorkbookPrint: "workbook:print-preview",
   exportCsv: "workbook:export-csv",
   csvSaveConfirm: "workbook:csv-save-confirm",
   /** AI create_document: new standalone file in the default folder (no dialog) */
@@ -112,6 +123,7 @@ function installDropOpenBridge() {
     electron.ipcRenderer.send(DROP_OPEN_CHANNEL, payload.slice(0, MAX_DROPPED_FILES));
   });
 }
+installOfficeFileBridge(electron.contextBridge, electron.ipcRenderer);
 const desktopApi = {
   getLanguage: () => electron.ipcRenderer.invoke("app:get-language"),
   onLanguageChanged(handler) {
@@ -312,6 +324,14 @@ const desktopApi = {
       throw new Error("Invalid print response.");
     }
     return result;
+  },
+  async previewWorkbookPrint(request) {
+    if (!isPdfExportRequest(request)) throw new Error("Invalid print preview request.");
+    const result = await electron.ipcRenderer.invoke(IPC_CHANNELS.previewWorkbookPrint, request);
+    if (!isRecord(result) || typeof result.base64 !== "string" || result.base64.length > 1e8 || typeof result.pageCount !== "number" || !Number.isInteger(result.pageCount) || result.pageCount < 1) {
+      throw new Error("Invalid print preview response.");
+    }
+    return { base64: result.base64, pageCount: result.pageCount };
   },
   async exportCsv(request) {
     if (!isRecord(request) || typeof request.fileName !== "string" || request.fileName.length === 0 || request.fileName.length > 255 || typeof request.content !== "string" || request.content.length > MAX_CSV_EXPORT_CHARS || typeof request.hasFormulas !== "boolean" || request.activeSheetName !== void 0 && (typeof request.activeSheetName !== "string" || request.activeSheetName.length > 255) || request.targetPath !== void 0 && (typeof request.targetPath !== "string" || request.targetPath.length === 0)) {

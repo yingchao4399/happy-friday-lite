@@ -1,0 +1,28 @@
+/* 与现有 Office 对话框共用主题和按钮，设置在左、纸面预览在右。 */
+.modal.sheet-print-dialog { width: min(1060px, calc(100vw - 32px)); max-height: calc(100vh - 32px); display: flex; flex-direction: column; padding: 20px; border-radius: var(--radius-medium); }
+.sheet-print-body { display: grid; grid-template-columns: 290px minmax(0, 1fr); min-height: 0; height: min(620px, calc(100vh - 170px)); gap: 20px; }
+.sheet-print-settings { overflow-y: auto; min-width: 0; padding-right: 8px; }
+.sheet-print-settings fieldset { margin: 0 0 14px; padding: 0; border: 0; min-width: 0; }
+.sheet-print-settings legend { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.sheet-print-settings label { margin-bottom: 10px; }
+.sheet-print-settings input, .sheet-print-settings select { color: var(--text); border-radius: var(--radius-small); }
+.sheet-print-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.sheet-print-settings .sheet-print-check { display: flex; align-items: center; gap: 6px; color: var(--text); }
+.sheet-print-check input { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); flex: 0 0 auto; }
+.sheet-print-note { font-size: 12px; line-height: 1.5; color: var(--text-muted); margin: 8px 0 0; }
+.sheet-print-preview { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.sheet-print-canvas { flex: 1; min-height: 0; overflow: auto; background: var(--color-bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-small); padding: 20px; display: grid; place-items: safe center; }
+.sheet-print-canvas canvas { display: block; box-shadow: var(--shadow-panel); }
+.sheet-print-canvas p { font-size: 13px; color: var(--text-muted); }
+.sheet-print-navigation { display: flex; justify-content: center; align-items: center; gap: 12px; padding-top: 10px; font-size: 12px; color: var(--text-muted); }
+.sheet-print-navigation button { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: var(--radius-small); width: 28px; height: 28px; cursor: pointer; }
+.sheet-print-navigation button:disabled { opacity: 0.4; cursor: default; }
+.sheet-print-navigation select { width: auto; height: 28px; margin: 0 0 0 12px; font-size: 12px; }
+.sheet-print-error { color: var(--sheets-error); overflow-wrap: anywhere; font-size: 12px; line-height: 1.5; margin: 8px 0 0; max-height: 70px; overflow: auto; }
+.sheet-print-dialog .modal-actions { margin-top: 14px; flex-shrink: 0; }
+@media (max-width: 680px) {
+  .modal.sheet-print-dialog { width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 14px; }
+  .sheet-print-body { display: flex; flex-direction: column-reverse; overflow-y: auto; height: calc(100vh - 150px); gap: 14px; }
+  .sheet-print-preview { flex: 0 0 280px; }
+  .sheet-print-settings { flex: 0 0 auto; overflow: visible; padding-right: 0; }
+}

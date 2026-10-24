@@ -2,6 +2,8 @@ import fs from 'fs'
 import path from 'path'
 import { Document } from '@langchain/core/documents'
 import { parseObsidianMarkdown } from '../obsidian/parser.js'
+import { mediaFormats, readMediaTranscript } from './mediaTranscription.js'
+import AdmZip from 'adm-zip'
 
 /**
  * 文档加载器：将不同格式的文件加载为统一的 Document 对象数组
@@ -134,7 +136,10 @@ async function loadEpubFile(filePath) {
   try {
     const { EPubLoader } = await import('@langchain/community/document_loaders/fs/epub')
     const loader = new EPubLoader(filePath)
-    const docs = await loader.load()
+    let docs = await loader.load()
+    // epub2 兼容性较弱（部分合法 EPUB 的默认命名空间会得到空 spine）。
+    // 用 ZIP/XML fallback 保证章节正文仍可读取，并保留章节顺序。
+    if (!docs.length) docs = await loadEpubZipFallback(filePath)
     const stat = fs.statSync(filePath)
     return docs.map(doc => ({
       ...doc,
@@ -153,6 +158,39 @@ async function loadEpubFile(filePath) {
     }
     throw e
   }
+}
+
+async function loadEpubZipFallback(filePath) {
+  const zip = new AdmZip(filePath)
+  const text = name => {
+    const entry = zip.getEntry(name)
+    return entry ? entry.getData().toString('utf8') : ''
+  }
+  const container = text('META-INF/container.xml')
+  const rootMatch = container.match(/rootfile[^>]+full-path=["']([^"']+)["']/i)
+  if (!rootMatch) return []
+  const opfPath = rootMatch[1].replace(/^\//, '')
+  const opf = text(opfPath)
+  if (!opf) return []
+  const base = path.posix.dirname(opfPath)
+  const manifest = new Map()
+  for (const match of opf.matchAll(/<item\b([^>]+)>/gi)) {
+    const attrs = Object.fromEntries([...match[1].matchAll(/([\w:-]+)=["']([^"']*)["']/g)].map(item => [item[1].toLowerCase(), item[2]]))
+    if (attrs.id && attrs.href) manifest.set(attrs.id, { href: path.posix.normalize(path.posix.join(base, decodeURIComponent(attrs.href))), type: attrs['media-type'] || '' })
+  }
+  const docs = []
+  for (const match of opf.matchAll(/<itemref\b([^>]+)>/gi)) {
+    const attrs = Object.fromEntries([...match[1].matchAll(/([\w:-]+)=["']([^"']*)["']/g)].map(item => [item[1].toLowerCase(), item[2]]))
+    const item = manifest.get(attrs.idref)
+    if (!item || !/xhtml|html|xml/i.test(item.type)) continue
+    const html = text(item.href)
+    if (!html) continue
+    const cheerio = await import('cheerio')
+    const $ = cheerio.load(html)
+    $('script, style').remove()
+    docs.push(new Document({ pageContent: $('body').text().replace(/\s+/g, ' ').trim(), metadata: { chapter: attrs.idref } }))
+  }
+  return docs
 }
 
 // 加载 DOCX 文件（使用 mammoth 提取纯文本）
@@ -174,7 +212,8 @@ async function loadDocxFile(filePath) {
 
 // 加载 XLS/XLSX 文件（使用 xlsx 库提取文本）
 async function loadExcelFile(filePath) {
-  const XLSX = await import('xlsx')
+  const module = await import('xlsx')
+  const XLSX = module.default || module
   const workbook = XLSX.readFile(filePath)
   const stat = fs.statSync(filePath)
   const docs = []
@@ -201,18 +240,22 @@ async function loadExcelFile(filePath) {
 // 加载 PPTX 文件（使用 officeparser 提取文本）
 async function loadPptxFile(filePath) {
   const officeparser = await import('officeparser')
-  const text = await officeparser.parseOfficeAsync(filePath)
+  const ast = await officeparser.parseOffice(filePath)
   const stat = fs.statSync(filePath)
-  return [new Document({
-    pageContent: text,
+  const slides = ast.content.filter(node => node.type === 'slide')
+  const toText = node => [node.text || '', ...(node.children || node.content || []).map(toText)].filter(Boolean).join('\n')
+  const parts = slides.length ? slides.map((slide, index) => ({ text: toText(slide), page: slide.metadata?.slideNumber || index + 1 })) : [{ text: ast.toText(), page: 1 }]
+  return parts.map(part => new Document({
+    pageContent: part.text,
     metadata: {
       source: filePath,
       fileType: path.extname(filePath).slice(1),
+      pageNumber: part.page,
       fileSize: stat.size,
       fileCreatedAt: stat.birthtime.toISOString(),
       fileModifiedAt: stat.mtime.toISOString()
     }
-  })]
+  }))
 }
 
 // 加载 .note 笔记引用文件
@@ -258,8 +301,22 @@ export async function loadDocument(filePath, db = null) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`File not found: ${filePath}`)
   }
+  if (mediaFormats.includes(ext)) {
+    const record = readMediaTranscript(filePath)
+    return [new Document({ pageContent: record.text, metadata: { source: filePath, fileType: ext, extraction: record.extraction, transcribedAt: record.transcribedAt } })]
+  }
 
   switch (ext) {
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'bmp':
+    case 'tif':
+    case 'tiff': {
+      const { recognizeImage } = await import('./imageOcr.js')
+      const result = await recognizeImage(filePath)
+      return [new Document({ pageContent: result.text, metadata: { source: filePath, fileType: ext, extraction: 'ocr', language: result.language } })]
+    }
     case 'txt':
     case 'text':
     case 'log':
@@ -283,7 +340,6 @@ export async function loadDocument(filePath, db = null) {
     case 'epub':
       return loadEpubFile(filePath)
 
-    case 'doc':
     case 'docx':
       return loadDocxFile(filePath)
 
@@ -291,7 +347,6 @@ export async function loadDocument(filePath, db = null) {
     case 'xlsx':
       return loadExcelFile(filePath)
 
-    case 'ppt':
     case 'pptx':
       return loadPptxFile(filePath)
 
@@ -302,8 +357,6 @@ export async function loadDocument(filePath, db = null) {
       return loadNoteFile(filePath, db)
 
     default:
-      // 未知类型尝试作为文本加载
-      console.warn(`[RAG] Unknown file type: ${ext}, trying as text`)
-      return loadTextFile(filePath)
+      throw new Error(`未支持的文件格式 .${ext || '(无扩展名)'}，请转换为受支持的文档格式`)
   }
 }

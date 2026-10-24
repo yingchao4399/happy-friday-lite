@@ -266,6 +266,26 @@ let unwatchModel = null;
 let onResize = null;
 let resizeObserver = null;
 let unwatchLayoutSync = null;
+let selectionPollTimer = null;
+let selectionPollBusy = false;
+
+function stopSelectionPolling() {
+  if (selectionPollTimer) clearInterval(selectionPollTimer);
+  selectionPollTimer = null;
+}
+
+function pollOfficeSelection() {
+  if (!routeEditor || route.path !== ownPath || selectionPollBusy || !api) return;
+  selectionPollBusy = true;
+  api.invoke('office-get-selection').catch(() => null).finally(() => { selectionPollBusy = false; });
+}
+
+function startSelectionPolling() {
+  stopSelectionPolling();
+  if (!routeEditor) return;
+  pollOfficeSelection();
+  selectionPollTimer = setInterval(pollOfficeSelection, 750);
+}
 
 onMounted(() => {
   if (!api) { available.value = false; return; }
@@ -296,6 +316,7 @@ onMounted(() => {
   if (routeEditor) {
     // 首次进入编辑器 Tab：恢复显示/按原文件重开/新建空白
     activateEditor().finally(() => { initialActivated = true; });
+    startSelectionPolling();
   }
 });
 
@@ -306,6 +327,7 @@ onActivated(() => {
     refreshHome();
     return;
   }
+  startSelectionPolling();
   // 首次挂载由 onMounted 处理，避免重复触发打开/新建
   if (initialActivated) activateEditor();
 });
@@ -316,6 +338,7 @@ function targetIsEditorTab() {
 }
 
 onDeactivated(() => {
+  stopSelectionPolling();
   // 切换到其他 Tab：隐藏编辑器视图（不销毁），让出 TabBar/Sidebar 交互。
   // 注意：keep-alive 切换时旧实例 deactivated 晚于新实例 activated，
   // 若目标是另一个编辑器 Tab，新实例刚通过 office-show 显示了视图，
@@ -326,6 +349,7 @@ onDeactivated(() => {
 });
 
 onBeforeUnmount(() => {
+  stopSelectionPolling();
   // 被 keep-alive 逐出时兜底隐藏（同样避免干扰仍活跃的编辑器 Tab）
   if (api && !targetIsEditorTab()) {
     try { api.invoke('office-hide-all'); } catch { /* ignore */ }

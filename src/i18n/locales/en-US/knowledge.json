@@ -1,5 +1,19 @@
 {
   "title": "Knowledge Base",
   "placeholder": "This is placeholder for knowledge base",
-  "categories": { "personal": "Personal Knowledge Base", "local": "Local Knowledge Base", "agent": "Agent" }
+  "categories": { "personal": "Personal Knowledge Base", "local": "Local Knowledge Base", "agent": "Agent" },
+  "actions": {
+    "newCategory": "New category",
+    "renameCategory": "Rename category",
+    "manageCategory": "Manage category",
+    "moveUp": "Move category up",
+    "moveDown": "Move category down",
+    "deleteCategory": "Delete category",
+    "deleteCategoryConfirm": "Delete {name} and its knowledge bases? They will go to Recently Deleted.",
+    "categoryName": "Category name",
+    "moveToCategory": "Move to category",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "dismiss": "Dismiss"
+  }
 }

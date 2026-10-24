@@ -7,6 +7,7 @@ import {
   hideAllOfficeViews,
   showOfficeView,
   getOfficeState,
+  getOfficeDocumentSelection,
   setOfficeContentBounds,
   getOfficeRecents,
   toggleOfficeStarred,
@@ -17,6 +18,7 @@ import {
   openOfficeFileDialog,
   queryOfficeDirty,
   isOfficeAvailable,
+  locateOfficeSpan,
 } from './office-host.js'
 import { resolveEditorType } from './office-files.js'
 
@@ -30,14 +32,15 @@ export function registerOfficeIpc() {
     return
   }
 
-  ipcMain.handle('office-open-file', (_e, { filePath, viewId } = {}) => {
+  ipcMain.handle('office-open-file', (_e, { filePath, viewId, background } = {}) => {
     if (typeof filePath !== 'string' || !resolveEditorType(filePath)) {
       return { success: false, error: 'unsupported file type' }
     }
-    return openOfficeFile(filePath, { viewId })
+    return openOfficeFile(filePath, { viewId, background: background === true })
   })
 
   ipcMain.handle('office-close', (_e, { viewId } = {}) => closeOfficeFile(viewId))
+  ipcMain.handle('office-locate-span', (_e, { viewId, selection } = {}) => locateOfficeSpan(viewId, selection))
 
   // 关闭编辑器 Tab 前自动保存：触发编辑器保存并等待落盘（不再弹确认框）
   ipcMain.handle('office-auto-save', (_e, { viewId } = {}) => {
@@ -62,6 +65,7 @@ export function registerOfficeIpc() {
   ipcMain.handle('office-show', (_e, { viewId } = {}) => showOfficeView(viewId))
 
   ipcMain.handle('office-get-state', () => getOfficeState())
+  ipcMain.handle('office-get-selection', () => getOfficeDocumentSelection())
 
   ipcMain.handle('office-set-content-bounds', (_e, rect) => {
     setOfficeContentBounds(rect)

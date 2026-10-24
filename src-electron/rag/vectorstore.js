@@ -11,6 +11,7 @@ import {
 } from '@zvec/zvec'
 import { getEmbeddings, getEmbeddingDimension } from './embeddings.js'
 import { getDataDir } from '../config.js'
+import { removePathNoFollowSync } from '../fs-safe.js'
 
 /**
  * Zvec 向量存储管理
@@ -135,7 +136,7 @@ export async function loadStore(forceReload = false) {
   } else {
     // 若残留空目录（异常中断等场景），先清理以便 ZVecCreateAndOpen 创建
     if (fs.existsSync(storeDir)) {
-      fs.rmSync(storeDir, { recursive: true, force: true })
+      removePathNoFollowSync(storeDir, { root: getDataDir() })
     }
     // 首次创建：探针获取维度
     const dimension = await getEmbeddingDimension(embeddings)

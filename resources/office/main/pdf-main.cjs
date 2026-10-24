@@ -1,3 +1,4 @@
+const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -78,6 +79,7 @@ var init_ipc = __esm({
       saveAsResult: "pdf:save-as-result",
       saveAsFlow: "pdf:save-as-flow",
       printRequest: "pdf:print-request",
+      printFile: "pdf:print-file",
       fileRenamed: "pdf:file-renamed",
       getLanguage: "app:get-language",
       languageChanged: "app:language-changed",
@@ -22153,21 +22155,21 @@ function fontDirs() {
         "/System/Library/Fonts",
         "/System/Library/Fonts/Supplemental",
         "/Library/Fonts",
-        (0, import_node_path9.join)((0, import_node_os5.homedir)(), "Library/Fonts"),
+        (0, import_node_path10.join)((0, import_node_os6.homedir)(), "Library/Fonts"),
         // On-demand system font assets: PingFang and other CJK faces live here on
         // recent macOS ( <hash>.asset/AssetData/*.ttc ), not under /System/Library/Fonts
         "/System/Library/AssetsV2/com_apple_MobileAsset_Font7",
         "/System/Library/AssetsV2/com_apple_MobileAsset_Font6"
       ];
     case "win32":
-      return ["C:\\Windows\\Fonts", (0, import_node_path9.join)((0, import_node_os5.homedir)(), "AppData/Local/Microsoft/Windows/Fonts")];
+      return ["C:\\Windows\\Fonts", (0, import_node_path10.join)((0, import_node_os6.homedir)(), "AppData/Local/Microsoft/Windows/Fonts")];
     default:
-      return ["/usr/share/fonts", "/usr/local/share/fonts", (0, import_node_path9.join)((0, import_node_os5.homedir)(), ".fonts")];
+      return ["/usr/share/fonts", "/usr/local/share/fonts", (0, import_node_path10.join)((0, import_node_os6.homedir)(), ".fonts")];
   }
 }
 function readAt(fd, pos, len) {
   const buf = Buffer.alloc(len);
-  if ((0, import_node_fs6.readSync)(fd, buf, 0, len, pos) !== len) throw new Error("short read");
+  if ((0, import_node_fs7.readSync)(fd, buf, 0, len, pos) !== len) throw new Error("short read");
   return buf;
 }
 function parseNames(buf) {
@@ -22226,17 +22228,17 @@ function readFaceNames(fd, offset) {
 function* fontFiles(dir, depth) {
   let entries;
   try {
-    entries = (0, import_node_fs6.readdirSync)(dir, { withFileTypes: true });
+    entries = (0, import_node_fs7.readdirSync)(dir, { withFileTypes: true });
   } catch {
     return;
   }
   for (const e of entries) {
-    const full = (0, import_node_path9.join)(dir, e.name);
+    const full = (0, import_node_path10.join)(dir, e.name);
     let isDir = e.isDirectory();
     let isFile = e.isFile();
     if (e.isSymbolicLink()) {
       try {
-        const st = (0, import_node_fs6.statSync)(full);
+        const st = (0, import_node_fs7.statSync)(full);
         isDir = st.isDirectory();
         isFile = st.isFile();
       } catch {
@@ -22257,7 +22259,7 @@ function faceOffsets(fd) {
 function indexFile(path, index2) {
   let fd;
   try {
-    fd = (0, import_node_fs6.openSync)(path, "r");
+    fd = (0, import_node_fs7.openSync)(path, "r");
   } catch {
     return;
   }
@@ -22283,7 +22285,7 @@ function indexFile(path, index2) {
     }
   } catch {
   } finally {
-    (0, import_node_fs6.closeSync)(fd);
+    (0, import_node_fs7.closeSync)(fd);
   }
 }
 function getFontIndex() {
@@ -22301,13 +22303,13 @@ function styleScore(face, want) {
   const regularBonus = want.length === 0 && have.some((t) => REGULARISH.includes(t)) ? 1 : 0;
   return hits * 4 - extras + regularBonus;
 }
-var import_node_fs6, import_node_os5, import_node_path9, norm, TTC_TAG, OTTO_TAG, SFNT_FLAVORS, index, styleTokens, REGULARISH;
+var import_node_fs7, import_node_os6, import_node_path10, norm, TTC_TAG, OTTO_TAG, SFNT_FLAVORS, index, styleTokens, REGULARISH;
 var init_sfnt = __esm({
   "vendor/happyoffice/packages/font-metrics/src/sfnt.ts"() {
     "use strict";
-    import_node_fs6 = require("node:fs");
-    import_node_os5 = require("node:os");
-    import_node_path9 = require("node:path");
+    import_node_fs7 = require("node:fs");
+    import_node_os6 = require("node:os");
+    import_node_path10 = require("node:path");
     norm = (s) => s.normalize("NFKC").toLowerCase().replace(/[\s\-_]/g, "");
     TTC_TAG = 1953784678;
     OTTO_TAG = 1330926671;
@@ -22371,7 +22373,7 @@ function faceBytes(face) {
   let bytes = faceCache.get(key);
   if (!bytes) {
     try {
-      bytes = extractFace((0, import_node_fs7.readFileSync)(face.path), face.offset);
+      bytes = extractFace((0, import_node_fs8.readFileSync)(face.path), face.offset);
     } catch {
       return null;
     }
@@ -22442,7 +22444,7 @@ function findFontCovering(text) {
   for (const face of faces) {
     let fd;
     try {
-      fd = (0, import_node_fs7.openSync)(face.path, "r");
+      fd = (0, import_node_fs8.openSync)(face.path, "r");
     } catch {
       continue;
     }
@@ -22457,7 +22459,7 @@ function findFontCovering(text) {
     } catch {
       covers = false;
     } finally {
-      (0, import_node_fs7.closeSync)(fd);
+      (0, import_node_fs8.closeSync)(fd);
     }
     if (!covers) continue;
     const bytes = faceBytes(face);
@@ -22465,11 +22467,11 @@ function findFontCovering(text) {
   }
   return null;
 }
-var import_node_fs7, isTruetype, faceCache, COLOR_FONT_TABLES;
+var import_node_fs8, isTruetype, faceCache, COLOR_FONT_TABLES;
 var init_font_locate = __esm({
   "vendor/happyoffice/packages/font-metrics/src/font-locate.ts"() {
     "use strict";
-    import_node_fs7 = require("node:fs");
+    import_node_fs8 = require("node:fs");
     init_sfnt();
     isTruetype = (b) => b.length >= 4 && b.readUInt32BE(0) !== OTTO_TAG;
     faceCache = /* @__PURE__ */ new Map();
@@ -22518,28 +22520,28 @@ function hbSubsetWasmPath() {
   } catch {
   }
   try {
-    const p = (0, import_node_path10.join)((0, import_node_path10.dirname)(r.resolve("harfbuzzjs")), "harfbuzz-subset.wasm");
-    if ((0, import_node_fs8.existsSync)(p)) return p;
+    const p = (0, import_node_path11.join)((0, import_node_path11.dirname)(r.resolve("harfbuzzjs")), "harfbuzz-subset.wasm");
+    if ((0, import_node_fs9.existsSync)(p)) return p;
   } catch {
   }
   return packagedPath("hb-subset.wasm");
 }
-var import_node_fs8, import_node_module2, import_node_path10, packagedPath, req;
+var import_node_fs9, import_node_module2, import_node_path11, packagedPath, req;
 var init_wasm_path = __esm({
   "vendor/happyoffice/apps/pdf/src/main/wasm-path.ts"() {
     "use strict";
-    import_node_fs8 = require("node:fs");
+    import_node_fs9 = require("node:fs");
     import_node_module2 = require("node:module");
-    import_node_path10 = require("node:path");
-    packagedPath = (fileName) => (0, import_node_path10.join)(process.resourcesPath, "wasm", fileName);
-    req = () => (0, import_node_module2.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs");
+    import_node_path11 = require("node:path");
+    packagedPath = (fileName) => (0, import_node_path11.join)(process.resourcesPath, "wasm", fileName);
+    req = () => (0, import_node_module2.createRequire)(__fridayBundleUrl);
   }
 });
 
 // vendor/happyoffice/apps/pdf/src/main/font-subset.ts
 function loadHb() {
   hbPromise ??= (async () => {
-    const wasmBytes = (0, import_node_fs9.readFileSync)(hbSubsetWasmPath());
+    const wasmBytes = (0, import_node_fs10.readFileSync)(hbSubsetWasmPath());
     const { instance } = await WebAssembly.instantiate(wasmBytes);
     return instance.exports;
   })();
@@ -22684,11 +22686,11 @@ async function subsetTtfInner(font, text) {
     hb.free(fontPtr);
   }
 }
-var import_node_fs9, HB_MEMORY_MODE_WRITABLE, HB_SUBSET_SETS_LAYOUT_FEATURE_TAG, hbPromise, chain;
+var import_node_fs10, HB_MEMORY_MODE_WRITABLE, HB_SUBSET_SETS_LAYOUT_FEATURE_TAG, hbPromise, chain;
 var init_font_subset = __esm({
   "vendor/happyoffice/apps/pdf/src/main/font-subset.ts"() {
     "use strict";
-    import_node_fs9 = require("node:fs");
+    import_node_fs10 = require("node:fs");
     init_wasm_path();
     HB_MEMORY_MODE_WRITABLE = 2;
     HB_SUBSET_SETS_LAYOUT_FEATURE_TAG = 6;
@@ -23120,7 +23122,7 @@ var createPdfium, functions, DEFAULT_PDFIUM_WASM_URL;
 var init_dist = __esm({
   "vendor/happyoffice/node_modules/@embedpdf/pdfium/dist/index.js"() {
     createPdfium = /* @__PURE__ */ (() => {
-      var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs";
+      var _scriptName = __fridayBundleUrl;
       return (async function(moduleArg = {}) {
         var moduleRtn;
         var Module = moduleArg;
@@ -23143,11 +23145,11 @@ var init_dist = __esm({
         var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
         if (ENVIRONMENT_IS_NODE) {
           const { createRequire: createRequire3 } = await import("module");
-          let dirname7 = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs";
-          if (dirname7.startsWith("data:")) {
-            dirname7 = "/";
+          let dirname8 = __fridayBundleUrl;
+          if (dirname8.startsWith("data:")) {
+            dirname8 = "/";
           }
-          var require2 = createRequire3(dirname7);
+          var require2 = createRequire3(dirname8);
         }
         var moduleOverrides = Object.assign({}, Module);
         var thisProgram = "./this.program";
@@ -23169,8 +23171,8 @@ var init_dist = __esm({
           }
           var fs = require2("fs");
           var nodePath = require2("path");
-          if (!"file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs".startsWith("data:")) {
-            scriptDirectory = nodePath.dirname(require2("url").fileURLToPath("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs")) + "/";
+          if (!__fridayBundleUrl.startsWith("data:")) {
+            scriptDirectory = nodePath.dirname(require2("url").fileURLToPath(__fridayBundleUrl)) + "/";
           }
           readBinary = (filename) => {
             filename = isFileURI(filename) ? new URL(filename) : nodePath.normalize(filename);
@@ -23472,7 +23474,7 @@ var init_dist = __esm({
           }
           if (ENVIRONMENT_IS_SHELL)
             return "pdfium.wasm";
-          return new URL("pdfium.wasm", "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs").href;
+          return new URL("pdfium.wasm", __fridayBundleUrl).href;
         }
         var wasmBinaryFile;
         function getBinarySync(file) {
@@ -28779,7 +28781,7 @@ __export(text_edit_exports, {
 function loadPdfium() {
   pdfiumPromise ??= (async () => {
     const { init: init2 } = await Promise.resolve().then(() => (init_dist(), dist_exports));
-    const raw = (0, import_node_fs10.readFileSync)(pdfiumWasmPath());
+    const raw = (0, import_node_fs11.readFileSync)(pdfiumWasmPath());
     const wasmBinary = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength);
     const wrapped = await init2({ wasmBinary, thisProgram: "genoffice-pdf" });
     const m = "pdfium" in wrapped ? wrapped.pdfium : wrapped;
@@ -28792,7 +28794,7 @@ function readFallbackPath(p) {
   let bytes = fallbackPathCache.get(p);
   if (bytes === void 0) {
     try {
-      bytes = (0, import_node_fs10.readFileSync)(p);
+      bytes = (0, import_node_fs11.readFileSync)(p);
     } catch {
       bytes = null;
     }
@@ -28818,7 +28820,7 @@ function loadEditFont(id, style = "regular") {
     cached = null;
     for (const p of EDIT_FONT_PATHS[id]?.[style] ?? []) {
       try {
-        cached = (0, import_node_fs10.readFileSync)(p);
+        cached = (0, import_node_fs11.readFileSync)(p);
         break;
       } catch {
       }
@@ -30294,11 +30296,11 @@ function verifyTextEdits(bytes, edits) {
     });
   });
 }
-var import_node_fs10, import_pdf_lib, FPDF_PAGEOBJ_TEXT, FPDF_FONT_TYPE1, FPDF_FONT_TRUETYPE, FPDF_TEXTRENDERMODE_FILL_STROKE, FPDF_TEXTRENDERMODE_FILL_STROKE_CLIP, FPDF_LINEJOIN_ROUND, pdfiumPromise, FALLBACK_FONT_PATHS, FALLBACK_SYSTEM_FACES, fallbackPathCache, EDIT_FONT_PATHS, editFontCache, norm2, overlapRatio, rectCoverage, joinX, joinRows, readHeapU32, syntheticBoldWidth, LINE_GAP, styleKeyOf, styledBeyondColor, editStyleRuns, PreserveAbort, applyChain, errMsg;
+var import_node_fs11, import_pdf_lib, FPDF_PAGEOBJ_TEXT, FPDF_FONT_TYPE1, FPDF_FONT_TRUETYPE, FPDF_TEXTRENDERMODE_FILL_STROKE, FPDF_TEXTRENDERMODE_FILL_STROKE_CLIP, FPDF_LINEJOIN_ROUND, pdfiumPromise, FALLBACK_FONT_PATHS, FALLBACK_SYSTEM_FACES, fallbackPathCache, EDIT_FONT_PATHS, editFontCache, norm2, overlapRatio, rectCoverage, joinX, joinRows, readHeapU32, syntheticBoldWidth, LINE_GAP, styleKeyOf, styledBeyondColor, editStyleRuns, PreserveAbort, applyChain, errMsg;
 var init_text_edit = __esm({
   "vendor/happyoffice/apps/pdf/src/main/text-edit.ts"() {
     "use strict";
-    import_node_fs10 = require("node:fs");
+    import_node_fs11 = require("node:fs");
     import_pdf_lib = __toESM(require_cjs());
     init_font_cmap();
     init_font_locate2();
@@ -30595,7 +30597,7 @@ function matchImage(objects, rect) {
   return best;
 }
 function decodeImage(b64) {
-  const img = import_electron3.nativeImage.createFromBuffer(Buffer.from(b64, "base64"));
+  const img = import_electron5.nativeImage.createFromBuffer(Buffer.from(b64, "base64"));
   if (img.isEmpty()) throw new Error("could not decode the image data");
   const { width, height } = img.getSize();
   const bgra = Buffer.from(img.toBitmap());
@@ -30833,7 +30835,7 @@ function renderImagePng(bytes, pageIndex, rect, scale = 1) {
               row * w * 4
             );
           }
-          const png = import_electron3.nativeImage.createFromBitmap(tight, { width: w, height: h }).toPNG();
+          const png = import_electron5.nativeImage.createFromBitmap(tight, { width: w, height: h }).toPNG();
           return png.toString("base64");
         } finally {
           m._FPDFBitmap_Destroy(bmp);
@@ -30891,7 +30893,7 @@ function renderPagePreviewPng(bytes, request) {
             flags
           );
           const tight = Buffer.from(m.HEAPU8.subarray(bufPtr, bufPtr + w * h * 4));
-          const png = import_electron3.nativeImage.createFromBitmap(tight, { width: w, height: h }).toPNG();
+          const png = import_electron5.nativeImage.createFromBitmap(tight, { width: w, height: h }).toPNG();
           return png.toString("base64");
         } finally {
           m._FPDFBitmap_Destroy(bmp);
@@ -30939,11 +30941,11 @@ function verifyImageEdits(bytes, edits) {
     });
   });
 }
-var import_electron3, FPDF_PAGEOBJ_IMAGE2, FPDF_BITMAP_BGRA, MATCH_TOL, firstTextIndex, QUARTER_TURN_MATS, RENDER_MAX_PX;
+var import_electron5, FPDF_PAGEOBJ_IMAGE2, FPDF_BITMAP_BGRA, MATCH_TOL, firstTextIndex, QUARTER_TURN_MATS, RENDER_MAX_PX;
 var init_image_edit = __esm({
   "vendor/happyoffice/apps/pdf/src/main/image-edit.ts"() {
     "use strict";
-    import_electron3 = require("electron");
+    import_electron5 = require("electron");
     init_text_edit();
     FPDF_PAGEOBJ_IMAGE2 = 3;
     FPDF_BITMAP_BGRA = 4;
@@ -30959,116 +30961,67 @@ var init_image_edit = __esm({
   }
 });
 
-// vendor/happyoffice/packages/pdf2docx/src/ocr-vision.ts
-function createHelperOcrEngine(helperPath, languages) {
-  return (png) => {
-    const args = languages && languages.length > 0 ? [languages.join(",")] : [];
-    const res = (0, import_node_child_process2.spawnSync)(helperPath, args, {
-      input: png,
-      maxBuffer: HELPER_MAX_BUFFER,
-      timeout: HELPER_TIMEOUT_MS
-    });
-    if (res.status !== 0 || res.stdout == null) return null;
-    let parsed;
-    try {
-      const text = res.stdout.toString("utf8").replace(/^\uFEFF/, "");
-      parsed = JSON.parse(text);
-    } catch {
-      return null;
-    }
-    if (!Array.isArray(parsed.lines)) return null;
-    return {
-      lines: parsed.lines.map((l) => ({
-        text: l.t,
-        confidence: l.c,
-        box: toRect(l.b),
-        ...l.chars ? { chars: l.chars.map((c) => ({ text: c.t, box: toRect(c.b) })) } : {}
-      })),
-      ...typeof parsed.paper === "number" ? { paperShare: parsed.paper } : {}
-    };
-  };
-}
-function createVisionOcrEngine(helperPath, languages) {
-  if (process.platform !== "darwin") return null;
-  if (!(0, import_node_fs12.existsSync)(helperPath)) return null;
-  return createHelperOcrEngine(helperPath, languages);
-}
-function createWindowsOcrEngine(helperPath, languages) {
-  if (process.platform !== "win32") return null;
-  if (!(0, import_node_fs12.existsSync)(helperPath)) return null;
-  return createHelperOcrEngine(helperPath, languages);
-}
-var import_node_child_process2, import_node_fs12, HELPER_MAX_BUFFER, HELPER_TIMEOUT_MS, toRect;
-var init_ocr_vision = __esm({
-  "vendor/happyoffice/packages/pdf2docx/src/ocr-vision.ts"() {
-    "use strict";
-    import_node_child_process2 = require("node:child_process");
-    import_node_fs12 = require("node:fs");
-    HELPER_MAX_BUFFER = 64 * 1024 * 1024;
-    HELPER_TIMEOUT_MS = 3e4;
-    toRect = (b) => ({
-      x0: b[0],
-      y0: b[1],
-      x1: b[2],
-      y1: b[3]
-    });
-  }
-});
-
 // vendor/happyoffice/apps/pdf/src/main/ocr.ts
 var ocr_exports = {};
 __export(ocr_exports, {
   ocrPagePng: () => ocrPagePng
 });
-function ensureOcrEngine() {
-  if (ocrEngine !== void 0) return ocrEngine;
-  const here = (0, import_node_path13.dirname)((0, import_node_url3.fileURLToPath)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs"));
+function ensureOcrHelper() {
+  if (ocrHelper !== void 0) return ocrHelper;
+  if (!["win32", "darwin"].includes(process.platform)) return null;
+  const here = (0, import_node_path14.dirname)((0, import_node_url4.fileURLToPath)(__fridayBundleUrl));
   const helper = process.platform === "darwin" ? "vision-ocr" : "win-ocr.exe";
-  const create = process.platform === "darwin" ? createVisionOcrEngine : createWindowsOcrEngine;
   const candidates = [
-    ...process.resourcesPath ? [(0, import_node_path13.join)(process.resourcesPath, "ocr", helper)] : [],
-    (0, import_node_path13.join)(here, "../../../../packages/pdf2docx/ocr-helper", helper)
+    ...process.resourcesPath ? [(0, import_node_path14.join)(process.resourcesPath, "ocr", helper)] : [],
+    (0, import_node_path14.join)(here, "../ocr", helper),
+    (0, import_node_path14.join)(here, "../../../../packages/pdf2docx/ocr-helper", helper)
   ];
-  ocrEngine = null;
-  for (const path of candidates) {
-    const engine = create(path);
-    if (engine) {
-      ocrEngine = engine;
-      break;
-    }
-  }
-  return ocrEngine;
+  ocrHelper = candidates.find((candidate) => (0, import_node_fs13.existsSync)(candidate)) ?? null;
+  return ocrHelper;
 }
-function ocrPagePng(pngBase64) {
-  const engine = ensureOcrEngine();
-  if (!engine) return null;
+async function ocrPagePng(pngBase64, signal) {
+  const helper = ensureOcrHelper();
+  if (!helper) return null;
   let png;
   try {
     png = Uint8Array.from(Buffer.from(pngBase64, "base64"));
   } catch {
     return [];
   }
-  const result = engine(png, { widthPt: 0, heightPt: 0 });
-  if (!result) return [];
+  const output = await new Promise((resolve4, reject) => {
+    const child = (0, import_node_child_process3.execFile)(helper, [], { windowsHide: true, timeout: 3e4, maxBuffer: 64 * 1024 * 1024, encoding: "utf8", ...signal ? { signal } : {} }, (error, stdout) => {
+      if (error) {
+        if (error.code === 4) resolve4(null);
+        else reject(new Error("PDF_OCR_FAILED"));
+      } else resolve4(stdout);
+    });
+    child.stdin?.on("error", () => {
+    });
+    child.stdin?.end(png);
+  });
+  if (output === null) return null;
+  const result = JSON.parse(output.replace(/^\uFEFF/, ""));
+  if (!Array.isArray(result.lines)) throw new Error("PDF_OCR_FAILED");
   return result.lines.map((l) => ({
-    text: l.text,
-    confidence: l.confidence,
-    box: [l.box.x0, l.box.y0, l.box.x1, l.box.y1],
+    text: l.t,
+    confidence: l.c,
+    box: l.b,
     ...l.chars ? {
       chars: l.chars.map((c) => ({
-        text: c.text,
-        box: [c.box.x0, c.box.y0, c.box.x1, c.box.y1]
+        text: c.t,
+        box: c.b
       }))
     } : {}
   }));
 }
-var import_node_path13, import_node_url3, ocrEngine;
+var import_node_path14, import_node_url4, import_node_fs13, import_node_child_process3, ocrHelper;
 var init_ocr = __esm({
   "vendor/happyoffice/apps/pdf/src/main/ocr.ts"() {
     "use strict";
-    import_node_path13 = require("node:path");
-    import_node_url3 = require("node:url");
-    init_ocr_vision();
+    import_node_path14 = require("node:path");
+    import_node_url4 = require("node:url");
+    import_node_fs13 = require("node:fs");
+    import_node_child_process3 = require("node:child_process");
   }
 });
 
@@ -31083,6 +31036,7 @@ __export(pdf_exports, {
   movePdfFileNoClobber: () => movePdfFileNoClobber,
   pdfFileRenamed: () => pdfFileRenamed,
   pdfIsDirty: () => pdfIsDirty,
+  recognizePdfPage: () => ocrPagePng,
   requestPdfClose: () => requestPdfClose,
   requestPdfSaveAs: () => requestPdfSaveAs,
   sendPdfPrintRequest: () => sendPdfPrintRequest,
@@ -31093,11 +31047,25 @@ __export(pdf_exports, {
 module.exports = __toCommonJS(pdf_exports);
 
 // vendor/happyoffice/apps/pdf/src/main/pdf-main.ts
-var import_node_fs13 = require("node:fs");
-var import_promises7 = require("node:fs/promises");
-var import_node_os6 = require("node:os");
-var import_node_path14 = require("node:path");
-var import_electron4 = require("electron");
+var import_node_fs14 = require("node:fs");
+var import_promises8 = require("node:fs/promises");
+
+// vendor/happyoffice/packages/electron-utils/src/print-job-settings.ts
+var DEFAULT_PRINT_JOB = { copies: 1, color: true, collate: true, duplexMode: "simplex" };
+function parsePrintJobSettings(value) {
+  if (value === void 0) return { ...DEFAULT_PRINT_JOB };
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("INVALID_PRINT_SETTINGS");
+  const input = value;
+  if (Object.keys(input).some((key) => !["copies", "color", "collate", "duplexMode"].includes(key))) throw new Error("INVALID_PRINT_SETTINGS");
+  const result = { ...DEFAULT_PRINT_JOB, ...input };
+  if (!Number.isInteger(result.copies) || result.copies < 1 || result.copies > 999 || typeof result.color !== "boolean" || typeof result.collate !== "boolean" || !["simplex", "longEdge", "shortEdge"].includes(result.duplexMode)) throw new Error("INVALID_PRINT_SETTINGS");
+  return result;
+}
+
+// vendor/happyoffice/apps/pdf/src/main/pdf-main.ts
+var import_node_os7 = require("node:os");
+var import_node_path15 = require("node:path");
+var import_electron6 = require("electron");
 
 // vendor/happyoffice/packages/electron-utils/src/save-image.ts
 var import_promises = require("node:fs/promises");
@@ -31458,8 +31426,8 @@ async function popupMenu(contents, params, labels) {
       return {
         label: item.label,
         click: async () => {
-          const { BrowserWindow: BrowserWindow2 } = await import("electron");
-          await saveImageFromUrl(BrowserWindow2.fromWebContents(contents), params.srcURL, {
+          const { BrowserWindow: BrowserWindow4 } = await import("electron");
+          await saveImageFromUrl(BrowserWindow4.fromWebContents(contents), params.srcURL, {
             title: item.label.replace(/…$/, "")
           });
         }
@@ -39884,8 +39852,122 @@ async function printHtmlToPdf(html, createWindow) {
   }
 }
 
-// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+// vendor/happyoffice/packages/electron-utils/src/system-print-window.ts
+var import_electron2 = require("electron");
+var ownerLocks = /* @__PURE__ */ new WeakMap();
+function lockSystemPrintOwner(owner) {
+  if (!owner || owner.isDestroyed()) return () => {
+  };
+  let lock = ownerLocks.get(owner);
+  if (!lock) {
+    lock = { count: 0, wasEnabled: owner.isEnabled() };
+    ownerLocks.set(owner, lock);
+  }
+  lock.count++;
+  owner.setEnabled(false);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--lock.count > 0) return;
+    ownerLocks.delete(owner);
+    if (!owner.isDestroyed() && lock.wasEnabled) {
+      owner.setEnabled(true);
+      owner.focus();
+    }
+  };
+}
+
+// vendor/happyoffice/packages/electron-utils/src/system-print.ts
+var import_electron3 = require("electron");
+var import_node_child_process = require("node:child_process");
+var import_node_fs3 = require("node:fs");
+var import_promises4 = require("node:fs/promises");
+var import_node_os3 = require("node:os");
 var import_node_path5 = require("node:path");
+var import_node_url2 = require("node:url");
+function helperPath() {
+  const here = (0, import_node_path5.dirname)((0, import_node_url2.fileURLToPath)(__fridayBundleUrl));
+  return [
+    (0, import_node_path5.join)(here, "../native/system-print.exe"),
+    (0, import_node_path5.join)(here, "../../../../packages/electron-utils/native/system-print.exe"),
+    ...process.resourcesPath ? [(0, import_node_path5.join)(process.resourcesPath, "office/native/system-print.exe"), (0, import_node_path5.join)(process.resourcesPath, "native/system-print.exe")] : []
+  ].find((candidate) => (0, import_node_fs3.existsSync)(candidate));
+}
+var paperSizes = {
+  A0: [841e3, 1189e3],
+  A1: [594e3, 841e3],
+  A2: [42e4, 594e3],
+  A3: [297e3, 42e4],
+  A4: [21e4, 297e3],
+  A5: [148e3, 21e4],
+  A6: [105e3, 148e3],
+  Letter: [215900, 279400],
+  Legal: [215900, 355600],
+  Tabloid: [279400, 431800],
+  Ledger: [279400, 431800]
+};
+function systemPrintPaperSize(size) {
+  if (!size) return void 0;
+  const pair = typeof size === "string" ? paperSizes[size] : [size.width, size.height];
+  if (!pair || pair.some((n) => !Number.isFinite(n) || n <= 0)) throw new Error("INVALID_PRINT_PAGE_SIZE");
+  return { width: Math.round(Math.min(...pair)), height: Math.round(Math.max(...pair)) };
+}
+async function printPdfFileWithSystemDialog(pdfPath, options = {}, owner) {
+  if (process.platform !== "win32") return { success: false, failureReason: "WINDOWS_PRINT_UNAVAILABLE" };
+  if (owner?.isDestroyed()) return { success: false, failureReason: "Print job canceled" };
+  const helper = helperPath();
+  if (!helper) return { success: false, failureReason: "WINDOWS_PRINT_HELPER_MISSING" };
+  const size = systemPrintPaperSize(options.pageSize);
+  return new Promise((resolve4) => {
+    const release = lockSystemPrintOwner(owner);
+    const closed = () => child.kill();
+    const child = (0, import_node_child_process.execFile)(helper, [], { windowsHide: false, timeout: 15 * 60 * 1e3, maxBuffer: 64 * 1024, encoding: "utf8" }, (error, stdout) => {
+      owner?.removeListener("closed", closed);
+      release();
+      try {
+        const result = JSON.parse(stdout.trim());
+        if (typeof result.success === "boolean" && typeof result.failureReason === "string") {
+          resolve4(result);
+          return;
+        }
+      } catch {
+      }
+      resolve4({ success: false, failureReason: owner?.isDestroyed() ? "Print job canceled" : error?.killed ? "WINDOWS_PRINT_TIMEOUT" : "WINDOWS_PRINT_FAILED" });
+    });
+    owner?.once("closed", closed);
+    child.stdin?.on("error", () => {
+    });
+    child.stdin?.end(JSON.stringify({
+      pdfPath,
+      title: owner && !owner.isDestroyed() ? owner.getTitle() : "Friday",
+      landscape: options.landscape,
+      color: options.color,
+      copies: options.copies ?? 1,
+      collate: options.collate,
+      pageRanges: options.pageRanges,
+      duplexMode: options.duplexMode,
+      paperWidth: size?.width,
+      paperHeight: size?.height
+    }));
+  });
+}
+async function printPdfBytesWithSystemDialog(bytes, options = {}, owner) {
+  const workDir = await (0, import_promises4.mkdtemp)((0, import_node_path5.join)((0, import_node_os3.tmpdir)(), "friday-pdf-print-"));
+  const pdfPath = (0, import_node_path5.join)(workDir, "print.pdf");
+  try {
+    await (0, import_promises4.writeFile)(pdfPath, bytes);
+    return await printPdfFileWithSystemDialog(pdfPath, options, owner);
+  } finally {
+    await (0, import_promises4.unlink)(pdfPath).catch(() => {
+    });
+    await (0, import_promises4.rmdir)(workDir).catch(() => {
+    });
+  }
+}
+
+// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+var import_node_path6 = require("node:path");
 var RENDERER_SCHEME = "genoffice-app";
 var RENDERER_SCHEME_PRIVILEGE = {
   scheme: RENDERER_SCHEME,
@@ -39928,22 +40010,22 @@ function resolveRendererFile(roots, requestUrl) {
   } catch {
     return null;
   }
-  const file = (0, import_node_path5.resolve)(root, pathname.replace(/^\/+/, ""));
-  return file === root || file.startsWith(root + import_node_path5.sep) ? file : null;
+  const file = (0, import_node_path6.resolve)(root, pathname.replace(/^\/+/, ""));
+  return file === root || file.startsWith(root + import_node_path6.sep) ? file : null;
 }
 
 // vendor/happyoffice/packages/electron-utils/src/renderer-protocol.ts
-var import_electron2 = require("electron");
-var import_node_url2 = require("node:url");
+var import_electron4 = require("electron");
+var import_node_url3 = require("node:url");
 function registerRendererScheme() {
-  import_electron2.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
+  import_electron4.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
 }
 function installRendererProtocol(roots) {
   const table = new Map(Object.entries(roots));
-  import_electron2.protocol.handle(RENDERER_SCHEME, (request) => {
+  import_electron4.protocol.handle(RENDERER_SCHEME, (request) => {
     const file = resolveRendererFile(table, request.url);
     if (!file) return new Response(null, { status: 404 });
-    return import_electron2.net.fetch((0, import_node_url2.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
+    return import_electron4.net.fetch((0, import_node_url3.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
   });
 }
 
@@ -40006,23 +40088,23 @@ function gskProxyUrl() {
 }
 
 // vendor/happyoffice/packages/ai-search/src/gsk.ts
-var import_node_child_process = require("node:child_process");
-var import_node_fs4 = require("node:fs");
-var import_node_os4 = require("node:os");
-var import_node_path7 = require("node:path");
+var import_node_child_process2 = require("node:child_process");
+var import_node_fs5 = require("node:fs");
+var import_node_os5 = require("node:os");
+var import_node_path8 = require("node:path");
 var import_node_module = require("node:module");
 
 // vendor/happyoffice/packages/ai-search/src/genoffice-auth.ts
-var import_node_fs3 = require("node:fs");
-var import_node_os3 = require("node:os");
-var import_node_path6 = require("node:path");
+var import_node_fs4 = require("node:fs");
+var import_node_os4 = require("node:os");
+var import_node_path7 = require("node:path");
 function genofficeAuthPath() {
-  return (0, import_node_path6.join)(process.env.GENOFFICE_AUTH_DIR || (0, import_node_path6.join)((0, import_node_os3.homedir)(), ".genoffice"), "auth.json");
+  return (0, import_node_path7.join)(process.env.GENOFFICE_AUTH_DIR || (0, import_node_path7.join)((0, import_node_os4.homedir)(), ".genoffice"), "auth.json");
 }
 var cachedAuth;
 function readAuthFile() {
   try {
-    const raw = asRecord(JSON.parse((0, import_node_fs3.readFileSync)(genofficeAuthPath(), "utf-8")));
+    const raw = asRecord(JSON.parse((0, import_node_fs4.readFileSync)(genofficeAuthPath(), "utf-8")));
     if (typeof raw.api_key !== "string" || !raw.api_key) return null;
     return {
       apiKey: raw.api_key,
@@ -40050,12 +40132,12 @@ function resolveGskEntry() {
   if (process.env.GSK_CLI_PATH) return process.env.GSK_CLI_PATH;
   if (cachedEntry !== void 0) return cachedEntry;
   try {
-    const require2 = (0, import_node_module.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/pdf-main.cjs");
+    const require2 = (0, import_node_module.createRequire)(__fridayBundleUrl);
     cachedEntry = require2.resolve("@genspark/cli/dist/index.js");
   } catch {
     const resourcesPath = process.resourcesPath;
-    const packed = resourcesPath ? (0, import_node_path7.join)(resourcesPath, "gsk", "node_modules", "@genspark", "cli", "dist", "index.js") : null;
-    cachedEntry = packed && (0, import_node_fs4.existsSync)(packed) ? packed : null;
+    const packed = resourcesPath ? (0, import_node_path8.join)(resourcesPath, "gsk", "node_modules", "@genspark", "cli", "dist", "index.js") : null;
+    cachedEntry = packed && (0, import_node_fs5.existsSync)(packed) ? packed : null;
   }
   return cachedEntry;
 }
@@ -40064,10 +40146,10 @@ function electronCompatArgs() {
   if (!process.versions.electron) return [];
   if (compatPath === void 0) {
     try {
-      const dir = (0, import_node_path7.join)((0, import_node_os4.homedir)(), ".genoffice", "bin");
-      (0, import_node_fs4.mkdirSync)(dir, { recursive: true });
-      compatPath = (0, import_node_path7.join)(dir, "electron-compat.js");
-      (0, import_node_fs4.writeFileSync)(compatPath, "delete process.versions.electron;\n");
+      const dir = (0, import_node_path8.join)((0, import_node_os5.homedir)(), ".genoffice", "bin");
+      (0, import_node_fs5.mkdirSync)(dir, { recursive: true });
+      compatPath = (0, import_node_path8.join)(dir, "electron-compat.js");
+      (0, import_node_fs5.writeFileSync)(compatPath, "delete process.versions.electron;\n");
     } catch {
       compatPath = null;
     }
@@ -40079,9 +40161,9 @@ function gskApiKey() {
   const own = genofficeApiKey();
   if (own) return own;
   try {
-    const configPath = (0, import_node_path7.join)((0, import_node_os4.homedir)(), ".genspark-tool-cli", "config.json");
-    if (!(0, import_node_fs4.existsSync)(configPath)) return "";
-    const config = JSON.parse((0, import_node_fs4.readFileSync)(configPath, "utf-8"));
+    const configPath = (0, import_node_path8.join)((0, import_node_os5.homedir)(), ".genspark-tool-cli", "config.json");
+    if (!(0, import_node_fs5.existsSync)(configPath)) return "";
+    const config = JSON.parse((0, import_node_fs5.readFileSync)(configPath, "utf-8"));
     return config.api_key ?? "";
   } catch {
     return "";
@@ -40137,7 +40219,7 @@ function runGsk(args, timeoutMs, signal) {
   if (!entry) return Promise.reject(new Error("@genspark/cli is not installed"));
   const key = gskApiKey();
   return new Promise((resolve4, reject) => {
-    (0, import_node_child_process.execFile)(
+    (0, import_node_child_process2.execFile)(
       process.execPath,
       [...electronCompatArgs(), entry, ...args, "--output", "json"],
       {
@@ -40202,8 +40284,8 @@ async function gskResolveDownloadUrl(url) {
 }
 
 // vendor/happyoffice/packages/ai-search/src/media-tools.ts
-var import_node_fs5 = require("node:fs");
-var import_node_path8 = require("node:path");
+var import_node_fs6 = require("node:fs");
+var import_node_path9 = require("node:path");
 
 // vendor/happyoffice/packages/ai-provider/src/media.ts
 var OPENAI_IMAGES_BASE_URL = "https://api.openai.com/v1";
@@ -41490,7 +41572,7 @@ var MIME_BY_EXT2 = {
 function readAiSettingsFile(path) {
   let stored = {};
   try {
-    if ((0, import_node_fs5.existsSync)(path)) stored = JSON.parse((0, import_node_fs5.readFileSync)(path, "utf-8"));
+    if ((0, import_node_fs6.existsSync)(path)) stored = JSON.parse((0, import_node_fs6.readFileSync)(path, "utf-8"));
   } catch {
   }
   return resolveAiSettings(stored, defaultAiSettings());
@@ -41515,8 +41597,8 @@ async function loadMediaReference(ref) {
     }
     const rawCt = resp.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
     const ct = rawCt && rawCt !== "application/octet-stream" ? rawCt : void 0;
-    const name = (0, import_node_path8.basename)(new URL(ref).pathname) || void 0;
-    const mime2 = ct && ct !== "application/octet-stream" ? ct : MIME_BY_EXT2[(0, import_node_path8.extname)(name ?? "").toLowerCase()];
+    const name = (0, import_node_path9.basename)(new URL(ref).pathname) || void 0;
+    const mime2 = ct && ct !== "application/octet-stream" ? ct : MIME_BY_EXT2[(0, import_node_path9.extname)(name ?? "").toLowerCase()];
     if (!mime2) throw new Error(`Could not tell the media type of ${ref}`);
     return { bytes, mime: mime2, ...name ? { name } : {} };
   }
@@ -41525,13 +41607,13 @@ async function loadMediaReference(ref) {
     if (!local) throw new Error(`Not an accessible image: ${ref}`);
     return { bytes: new Uint8Array(local.bytes), mime: local.mime };
   }
-  const mime = MIME_BY_EXT2[(0, import_node_path8.extname)(ref).toLowerCase()];
+  const mime = MIME_BY_EXT2[(0, import_node_path9.extname)(ref).toLowerCase()];
   if (!mime) throw new Error(`Unsupported media file: ${ref} (images, video and audio only)`);
-  if (!(0, import_node_fs5.existsSync)(ref)) throw new Error(`File not found: ${ref}`);
-  if ((0, import_node_fs5.statSync)(ref).size > MAX_MEDIA_BYTES) {
+  if (!(0, import_node_fs6.existsSync)(ref)) throw new Error(`File not found: ${ref}`);
+  if ((0, import_node_fs6.statSync)(ref).size > MAX_MEDIA_BYTES) {
     throw new MediaTooLargeError(`${ref} is too large to analyze`);
   }
-  return { bytes: new Uint8Array((0, import_node_fs5.readFileSync)(ref)), mime, name: (0, import_node_path8.basename)(ref) };
+  return { bytes: new Uint8Array((0, import_node_fs6.readFileSync)(ref)), mime, name: (0, import_node_path9.basename)(ref) };
 }
 var GSK_RMBG_MODEL = "fal-bria-rmbg";
 async function generateImageTool(settingsPath, op, options = {}) {
@@ -41573,20 +41655,20 @@ async function generateImageTool(settingsPath, op, options = {}) {
 init_ipc();
 
 // vendor/happyoffice/apps/pdf/src/main/atomic-write.ts
-var import_promises4 = require("node:fs/promises");
+var import_promises5 = require("node:fs/promises");
 async function writePdfAtomically(targetPath, bytes) {
   const tmp = `${targetPath}.gensave-${process.pid}.tmp`;
   try {
-    await (0, import_promises4.writeFile)(tmp, bytes);
-    await (0, import_promises4.rename)(tmp, targetPath);
+    await (0, import_promises5.writeFile)(tmp, bytes);
+    await (0, import_promises5.rename)(tmp, targetPath);
   } catch (err) {
-    await (0, import_promises4.rm)(tmp, { force: true });
+    await (0, import_promises5.rm)(tmp, { force: true });
     throw err;
   }
 }
 
 // vendor/happyoffice/apps/pdf/src/main/save-pdf.ts
-var import_promises5 = require("node:fs/promises");
+var import_promises6 = require("node:fs/promises");
 var import_pdf_lib2 = __toESM(require_cjs());
 init_ipc();
 
@@ -42431,7 +42513,7 @@ async function verifyContentEdits(bytes, request, skips) {
 }
 async function savePdfToPath(sourcePath, targetPath, request) {
   const { bytes, ...skips } = await applySaveRequest(
-    new Uint8Array(await (0, import_promises5.readFile)(sourcePath)),
+    new Uint8Array(await (0, import_promises6.readFile)(sourcePath)),
     request
   );
   await verifyContentEdits(bytes, request, skips);
@@ -42565,8 +42647,8 @@ async function applySaveRequest(bytes, request) {
 
 // vendor/happyoffice/apps/pdf/src/main/signature-store.ts
 var import_node_crypto3 = require("node:crypto");
-var import_promises6 = require("node:fs/promises");
-var import_node_path11 = require("node:path");
+var import_promises7 = require("node:fs/promises");
+var import_node_path12 = require("node:path");
 var MAX_SAVED_SIGNATURES = 10;
 var isFiniteDim = (v) => typeof v === "number" && Number.isFinite(v) && v > 0;
 function isSignatureData(value) {
@@ -42615,29 +42697,29 @@ function removeSignature(list, id) {
 }
 async function loadSignatures(filePath) {
   try {
-    return sanitizeSignatures(JSON.parse(await (0, import_promises6.readFile)(filePath, "utf8")));
+    return sanitizeSignatures(JSON.parse(await (0, import_promises7.readFile)(filePath, "utf8")));
   } catch {
     return [];
   }
 }
 async function saveSignatures(filePath, list) {
-  await (0, import_promises6.mkdir)((0, import_node_path11.dirname)(filePath), { recursive: true });
+  await (0, import_promises7.mkdir)((0, import_node_path12.dirname)(filePath), { recursive: true });
   const tmp = `${filePath}.${process.pid}.tmp`;
-  await (0, import_promises6.writeFile)(tmp, JSON.stringify(list));
-  await (0, import_promises6.rename)(tmp, filePath);
+  await (0, import_promises7.writeFile)(tmp, JSON.stringify(list));
+  await (0, import_promises7.rename)(tmp, filePath);
 }
 
 // vendor/happyoffice/apps/pdf/src/main/generated-output.ts
-var import_node_fs11 = require("node:fs");
-var import_node_path12 = require("node:path");
-function uniqueGeneratedPdfPath(dir, suggestedName, pathExists = import_node_fs11.existsSync) {
+var import_node_fs12 = require("node:fs");
+var import_node_path13 = require("node:path");
+function uniqueGeneratedPdfPath(dir, suggestedName, pathExists = import_node_fs12.existsSync) {
   const invalidFileNameCharacters = /[/\\:*?"<>|\u0000-\u001f]/g;
-  let fileName = (0, import_node_path12.basename)(String(suggestedName || "merged.pdf")).replace(invalidFileNameCharacters, "_").trim();
+  let fileName = (0, import_node_path13.basename)(String(suggestedName || "merged.pdf")).replace(invalidFileNameCharacters, "_").trim();
   if (!fileName || fileName === "." || fileName === "..") fileName = "merged.pdf";
   if (!/\.pdf$/i.test(fileName)) fileName += ".pdf";
   const stem = fileName.slice(0, -4);
-  let candidate = (0, import_node_path12.join)(dir, fileName);
-  for (let i = 2; pathExists(candidate); i++) candidate = (0, import_node_path12.join)(dir, `${stem}-${i}.pdf`);
+  let candidate = (0, import_node_path13.join)(dir, fileName);
+  for (let i = 2; pathExists(candidate); i++) candidate = (0, import_node_path13.join)(dir, `${stem}-${i}.pdf`);
   return candidate;
 }
 
@@ -42986,17 +43068,17 @@ var tDlg = createI18n({
 });
 function isSameRedactionCopyPath(source, target) {
   const canonical = (path) => {
-    const absolute = (0, import_node_path14.resolve)(path);
+    const absolute = (0, import_node_path15.resolve)(path);
     try {
-      return import_node_fs13.realpathSync.native(absolute);
+      return import_node_fs14.realpathSync.native(absolute);
     } catch {
-      return (0, import_node_path14.join)(import_node_fs13.realpathSync.native((0, import_node_path14.dirname)(absolute)), (0, import_node_path14.basename)(absolute));
+      return (0, import_node_path15.join)(import_node_fs14.realpathSync.native((0, import_node_path15.dirname)(absolute)), (0, import_node_path15.basename)(absolute));
     }
   };
   if (canonical(source) === canonical(target)) return true;
   try {
-    const a = (0, import_node_fs13.statSync)(source);
-    const b = (0, import_node_fs13.statSync)(target);
+    const a = (0, import_node_fs14.statSync)(source);
+    const b = (0, import_node_fs14.statSync)(target);
     return a.dev === b.dev && a.ino === b.ino;
   } catch {
     return false;
@@ -43025,8 +43107,8 @@ function sanitizeGeneratedDocumentTitle(title) {
 }
 function uniqueGeneratedTextPath(dir, title, ext) {
   const stem = sanitizeGeneratedDocumentTitle(title);
-  let candidate = (0, import_node_path14.join)(dir, `${stem}.${ext}`);
-  for (let i = 2; (0, import_node_fs13.existsSync)(candidate); i += 1) candidate = (0, import_node_path14.join)(dir, `${stem}-${i}.${ext}`);
+  let candidate = (0, import_node_path15.join)(dir, `${stem}.${ext}`);
+  for (let i = 2; (0, import_node_fs14.existsSync)(candidate); i += 1) candidate = (0, import_node_path15.join)(dir, `${stem}-${i}.${ext}`);
   return candidate;
 }
 async function createStandaloneDocument(request) {
@@ -43041,16 +43123,16 @@ async function createStandaloneDocument(request) {
     if (request.type === "pdf") {
       const bytes = await printHtmlToPdf(
         buildPrintableHtml(title, request.content),
-        () => new import_electron4.BrowserWindow({ show: false, webPreferences: { sandbox: true, javascript: false } })
+        () => new import_electron6.BrowserWindow({ show: false, webPreferences: { sandbox: true, javascript: false } })
       );
-      const path2 = uniqueGeneratedPdfPath(configuredDefaultSaveDir(import_electron4.app), `${title}.pdf`);
-      await (0, import_promises7.writeFile)(path2, bytes);
+      const path2 = uniqueGeneratedPdfPath(configuredDefaultSaveDir(import_electron6.app), `${title}.pdf`);
+      await (0, import_promises8.writeFile)(path2, bytes);
       openGeneratedPdf(path2);
       return { ok: true, path: path2 };
     }
-    const path = uniqueGeneratedTextPath(configuredDefaultSaveDir(import_electron4.app), title, request.type);
-    await (0, import_promises7.writeFile)(path, request.content, "utf8");
-    import_electron4.shell.showItemInFolder(path);
+    const path = uniqueGeneratedTextPath(configuredDefaultSaveDir(import_electron6.app), title, request.type);
+    await (0, import_promises8.writeFile)(path, request.content, "utf8");
+    import_electron6.shell.showItemInFolder(path);
     return { ok: true, path };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
@@ -43062,7 +43144,7 @@ function openGeneratedPdf(path) {
   } catch (err) {
     console.warn("[pdf] Failed to open generated PDF:", err);
   }
-  import_electron4.shell.showItemInFolder(path);
+  import_electron6.shell.showItemInFolder(path);
 }
 var openPathByWc = /* @__PURE__ */ new Map();
 var allowedByWc = /* @__PURE__ */ new Map();
@@ -43100,16 +43182,16 @@ function sanitizeAutoRenameBase(raw) {
   return safe.length > 40 ? safe.slice(0, 40).trim() : safe;
 }
 var defaultNoClobberFileOps = {
-  link: import_node_fs13.linkSync,
-  copyExclusive: (source, target) => (0, import_node_fs13.copyFileSync)(source, target, import_node_fs13.constants.COPYFILE_EXCL),
-  unlink: import_node_fs13.unlinkSync,
+  link: import_node_fs14.linkSync,
+  copyExclusive: (source, target) => (0, import_node_fs14.copyFileSync)(source, target, import_node_fs14.constants.COPYFILE_EXCL),
+  unlink: import_node_fs14.unlinkSync,
   identity: (path) => {
-    const stats = (0, import_node_fs13.statSync)(path, { bigint: true });
+    const stats = (0, import_node_fs14.statSync)(path, { bigint: true });
     return `${stats.dev}:${stats.ino}`;
   },
-  readSource: (path) => (0, import_node_fs13.readFileSync)(path),
-  matchesSource: (path, bytes) => (0, import_node_fs13.readFileSync)(path).equals(bytes),
-  restoreSource: (path, bytes) => (0, import_node_fs13.writeFileSync)(path, bytes, { flag: "wx", flush: true })
+  readSource: (path) => (0, import_node_fs14.readFileSync)(path),
+  matchesSource: (path, bytes) => (0, import_node_fs14.readFileSync)(path).equals(bytes),
+  restoreSource: (path, bytes) => (0, import_node_fs14.writeFileSync)(path, bytes, { flag: "wx", flush: true })
 };
 function fileErrorCode(error) {
   return error && typeof error === "object" && "code" in error ? String(error.code) : void 0;
@@ -43175,7 +43257,7 @@ async function requestPdfClose(contents, parent) {
     cancelId: 2,
     noLink: true
   };
-  const { response } = parent && !parent.isDestroyed() ? await import_electron4.dialog.showMessageBox(parent, options) : await import_electron4.dialog.showMessageBox(options);
+  const { response } = parent && !parent.isDestroyed() ? await import_electron6.dialog.showMessageBox(parent, options) : await import_electron6.dialog.showMessageBox(options);
   if (response === 2) return false;
   if (response === 1) return true;
   return await requestRendererSave(contents);
@@ -43223,7 +43305,7 @@ function requestPdfSaveAs(contents, targetPath) {
     contents.send(PDF_CHANNELS.saveAsRequest, targetPath);
   });
 }
-var signaturesPath = () => (0, import_node_path14.join)(import_electron4.app.getPath("userData"), "pdf-signatures.json");
+var signaturesPath = () => (0, import_node_path15.join)(import_electron6.app.getPath("userData"), "pdf-signatures.json");
 var signatureQueue = Promise.resolve();
 function withSignatures(op) {
   const next = signatureQueue.catch(() => void 0).then(async () => op(await loadSignatures(signaturesPath())));
@@ -43234,22 +43316,38 @@ var ipcRegistered = false;
 function registerPdfIpc() {
   if (ipcRegistered) return;
   ipcRegistered = true;
-  import_electron4.ipcMain.handle(PDF_CHANNELS.consumePending, (e) => openPathByWc.get(e.sender.id) ?? null);
-  import_electron4.ipcMain.handle(PDF_CHANNELS.getUsername, () => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.consumePending, (e) => openPathByWc.get(e.sender.id) ?? null);
+  import_electron6.ipcMain.handle(PDF_CHANNELS.printFile, async (event, path, pages, job) => {
+    if (typeof path !== "string" || !allowedByWc.get(event.sender.id)?.has(path)) return { ok: false, error: "pdf: path not granted to this view" };
+    if (process.platform !== "win32") return { ok: false, unavailable: true };
     try {
-      return (0, import_node_os6.userInfo)().username;
+      const settings = parsePrintJobSettings(job);
+      if (pages !== void 0 && (!Array.isArray(pages) || pages.length === 0 || pages.length > 1e5 || pages.some((page) => !Number.isInteger(page) || page < 1 || page > 1e5))) throw new Error("INVALID_PRINT_SETTINGS");
+      const targets = pages;
+      const result = await printPdfBytesWithSystemDialog(await (0, import_promises8.readFile)(path), {
+        ...settings,
+        ...targets ? { pageRanges: [...new Set(targets)].sort((a, b) => a - b).map((page) => ({ from: page - 1, to: page - 1 })) } : {}
+      }, import_electron6.BrowserWindow.fromWebContents(event.sender));
+      return { ok: result.success, ...result.failureReason && !/cancel/i.test(result.failureReason) ? { error: result.failureReason } : {} };
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : "WINDOWS_PRINT_FAILED" };
+    }
+  });
+  import_electron6.ipcMain.handle(PDF_CHANNELS.getUsername, () => {
+    try {
+      return (0, import_node_os7.userInfo)().username;
     } catch {
       return "";
     }
   });
-  import_electron4.ipcMain.handle(PDF_CHANNELS.readFile, async (e, path) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.readFile, async (e, path) => {
     if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
       throw new Error("pdf: path not granted to this view");
     }
-    const buf = await (0, import_promises7.readFile)(path);
+    const buf = await (0, import_promises8.readFile)(path);
     return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.createDocument,
     async (e, request) => {
       if (!allowedByWc.has(e.sender.id)) {
@@ -43266,7 +43364,7 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(PDF_CHANNELS.save, async (e, request) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.save, async (e, request) => {
     const path = request?.path;
     if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
       return { ok: false, error: "pdf: path not granted to this view" };
@@ -43306,18 +43404,18 @@ function registerPdfIpc() {
       return { ok: false, error: err instanceof Error ? err.message : String(err) };
     }
   });
-  import_electron4.ipcMain.handle(PDF_CHANNELS.requestRedactionCopy, async (e, path) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.requestRedactionCopy, async (e, path) => {
     if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) return false;
-    const base = (0, import_node_path14.basename)(path).replace(/\.pdf$/i, "");
+    const base = (0, import_node_path15.basename)(path).replace(/\.pdf$/i, "");
     setPdfSaveAsInFlight(e.sender, true);
     try {
-      const parent = import_electron4.BrowserWindow.fromWebContents(e.sender);
+      const parent = import_electron6.BrowserWindow.fromWebContents(e.sender);
       const options = {
         title: "Save redacted PDF copy",
         defaultPath: `${base}-redacted.pdf`,
         filters: [{ name: "PDF", extensions: ["pdf"] }]
       };
-      const picked = parent ? await import_electron4.dialog.showSaveDialog(parent, options) : await import_electron4.dialog.showSaveDialog(options);
+      const picked = parent ? await import_electron6.dialog.showSaveDialog(parent, options) : await import_electron6.dialog.showSaveDialog(options);
       if (picked.canceled || !picked.filePath || isSameRedactionCopyPath(path, picked.filePath))
         return false;
       return await requestPdfSaveAs(e.sender, picked.filePath);
@@ -43325,10 +43423,10 @@ function registerPdfIpc() {
       setPdfSaveAsInFlight(e.sender, false);
     }
   });
-  import_electron4.ipcMain.handle(PDF_CHANNELS.isUntitled, (e, path) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.isUntitled, (e, path) => {
     return typeof path === "string" && !!allowedByWc.get(e.sender.id)?.has(path) && untitledPdfPaths.has(path);
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.autoRename,
     (e, path, baseName) => {
       if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
@@ -43338,10 +43436,10 @@ function registerPdfIpc() {
       if (typeof baseName !== "string") return { renamed: false };
       const base = sanitizeAutoRenameBase(baseName);
       if (!base) return { renamed: false };
-      const dir = (0, import_node_path14.dirname)(path);
+      const dir = (0, import_node_path15.dirname)(path);
       let target = null;
       for (let suffix = 1; suffix <= 1e4; suffix++) {
-        const candidate = (0, import_node_path14.join)(dir, suffix === 1 ? `${base}.pdf` : `${base}-${suffix}.pdf`);
+        const candidate = (0, import_node_path15.join)(dir, suffix === 1 ? `${base}.pdf` : `${base}-${suffix}.pdf`);
         if (candidate === path) return { renamed: false };
         const result = movePdfFileNoClobber(path, candidate);
         if (result === "moved") {
@@ -43362,28 +43460,35 @@ function registerPdfIpc() {
       } catch (err) {
         console.warn("[pdf] auto-rename hook failed:", err);
       }
-      return { renamed: true, path: target, name: (0, import_node_path14.basename)(target) };
+      return { renamed: true, path: target, name: (0, import_node_path15.basename)(target) };
     }
   );
-  import_electron4.ipcMain.handle(PDF_CHANNELS.listPageImages, async (e, path) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.listPageImages, async (e, path) => {
     if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
       throw new Error("pdf: path not granted to this view");
     }
     const { listPageImages: listPageImages2 } = await Promise.resolve().then(() => (init_image_edit(), image_edit_exports));
-    return listPageImages2(new Uint8Array(await (0, import_promises7.readFile)(path)));
+    return listPageImages2(new Uint8Array(await (0, import_promises8.readFile)(path)));
   });
-  import_electron4.ipcMain.handle(PDF_CHANNELS.listStaticFormFills, async (e, path) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.listStaticFormFills, async (e, path) => {
     if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
       throw new Error("pdf: path not granted to this view");
     }
-    return readStaticFormFills(new Uint8Array(await (0, import_promises7.readFile)(path)));
+    return readStaticFormFills(new Uint8Array(await (0, import_promises8.readFile)(path)));
   });
-  import_electron4.ipcMain.handle(PDF_CHANNELS.ocrPage, async (_e, png) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.ocrPage, async (e, png) => {
     if (typeof png !== "string" || png.length === 0 || png.length > 64 * 1024 * 1024) return [];
     const { ocrPagePng: ocrPagePng2 } = await Promise.resolve().then(() => (init_ocr(), ocr_exports));
-    return ocrPagePng2(png);
+    const controller = new AbortController();
+    const destroyed = () => controller.abort();
+    e.sender.once("destroyed", destroyed);
+    try {
+      return await ocrPagePng2(png, controller.signal);
+    } finally {
+      e.sender.removeListener("destroyed", destroyed);
+    }
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.pageImagePng,
     async (e, request) => {
       const { path, pageIndex, rect, scale } = request ?? {};
@@ -43392,20 +43497,20 @@ function registerPdfIpc() {
       }
       const { renderImagePng: renderImagePng2 } = await Promise.resolve().then(() => (init_image_edit(), image_edit_exports));
       return renderImagePng2(
-        new Uint8Array(await (0, import_promises7.readFile)(path)),
+        new Uint8Array(await (0, import_promises8.readFile)(path)),
         pageIndex,
         rect,
         typeof scale === "number" && Number.isFinite(scale) ? scale : 1
       );
     }
   );
-  import_electron4.ipcMain.handle(PDF_CHANNELS.pagePreviewPng, async (e, request) => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.pagePreviewPng, async (e, request) => {
     const { path, pageIndex, excludeRects, excludeAnnots, clip, pxWidth, rotate } = request ?? {};
     if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path) || typeof pageIndex !== "number" || !Array.isArray(excludeRects) || excludeAnnots !== void 0 && !Array.isArray(excludeAnnots) || typeof clip !== "object" || typeof pxWidth !== "number" || typeof rotate !== "number") {
       throw new Error("pdf: path not granted to this view");
     }
     const { renderPagePreviewPng: renderPagePreviewPng2 } = await Promise.resolve().then(() => (init_image_edit(), image_edit_exports));
-    return renderPagePreviewPng2(new Uint8Array(await (0, import_promises7.readFile)(path)), {
+    return renderPagePreviewPng2(new Uint8Array(await (0, import_promises8.readFile)(path)), {
       pageIndex,
       excludeRects,
       excludeAnnots,
@@ -43414,7 +43519,7 @@ function registerPdfIpc() {
       rotate
     });
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.validateTextEdits,
     async (e, request) => {
       const { path, edits } = request ?? {};
@@ -43422,14 +43527,14 @@ function registerPdfIpc() {
         throw new Error("pdf: path not granted to this view");
       }
       const { validateTextEdits: validateTextEdits2 } = await Promise.resolve().then(() => (init_text_edit(), text_edit_exports));
-      return validateTextEdits2(new Uint8Array(await (0, import_promises7.readFile)(path)), edits);
+      return validateTextEdits2(new Uint8Array(await (0, import_promises8.readFile)(path)), edits);
     }
   );
-  import_electron4.ipcMain.handle(PDF_CHANNELS.listEditFonts, async () => {
+  import_electron6.ipcMain.handle(PDF_CHANNELS.listEditFonts, async () => {
     const { listEditFonts: listEditFonts2 } = await Promise.resolve().then(() => (init_text_edit(), text_edit_exports));
     return listEditFonts2();
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.canDrawText,
     async (_e, text, font, bold, italic) => {
       if (typeof text !== "string") return false;
@@ -43442,7 +43547,7 @@ function registerPdfIpc() {
       );
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.extractPages,
     async (e, request) => {
       const { path, pages, suggestedName } = request ?? {};
@@ -43450,12 +43555,12 @@ function registerPdfIpc() {
         return { ok: false, error: "pdf: path not granted to this view" };
       }
       try {
-        const bytes = await extractPagesBytes(new Uint8Array(await (0, import_promises7.readFile)(path)), pages);
+        const bytes = await extractPagesBytes(new Uint8Array(await (0, import_promises8.readFile)(path)), pages);
         const targetPath = uniqueGeneratedPdfPath(
-          configuredDefaultSaveDir(import_electron4.app),
+          configuredDefaultSaveDir(import_electron6.app),
           String(suggestedName || "pages.pdf")
         );
-        await (0, import_promises7.writeFile)(targetPath, bytes);
+        await (0, import_promises8.writeFile)(targetPath, bytes);
         openGeneratedPdf(targetPath);
         return { ok: true, savedPath: targetPath };
       } catch (err) {
@@ -43463,15 +43568,15 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.insertPdf,
     async (e, request) => {
       const { path, afterPageIndex } = request ?? {};
       if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
         return { ok: false, error: "pdf: path not granted to this view" };
       }
-      const win = import_electron4.BrowserWindow.fromWebContents(e.sender) ?? import_electron4.BrowserWindow.getFocusedWindow() ?? void 0;
-      const picked = await showOpenDialogWithMemory(import_electron4.dialog, win, {
+      const win = import_electron6.BrowserWindow.fromWebContents(e.sender) ?? import_electron6.BrowserWindow.getFocusedWindow() ?? void 0;
+      const picked = await showOpenDialogWithMemory(import_electron6.dialog, win, {
         title: tm("dlgInsert"),
         filters: [{ name: tm("filterPdf"), extensions: ["pdf"] }],
         properties: ["openFile"]
@@ -43480,8 +43585,8 @@ function registerPdfIpc() {
       if (picked.canceled || !other) return { ok: true, canceled: true };
       try {
         const { merged, count } = await insertPdfBytes(
-          new Uint8Array(await (0, import_promises7.readFile)(path)),
-          new Uint8Array(await (0, import_promises7.readFile)(other)),
+          new Uint8Array(await (0, import_promises8.readFile)(path)),
+          new Uint8Array(await (0, import_promises8.readFile)(other)),
           typeof afterPageIndex === "number" ? afterPageIndex : -1
         );
         await writePdfAtomically(path, merged);
@@ -43491,7 +43596,7 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.insertBlankPage,
     async (e, request) => {
       const { path, afterPageIndex } = request ?? {};
@@ -43500,7 +43605,7 @@ function registerPdfIpc() {
       }
       try {
         const bytes = await insertBlankPageBytes(
-          new Uint8Array(await (0, import_promises7.readFile)(path)),
+          new Uint8Array(await (0, import_promises8.readFile)(path)),
           typeof afterPageIndex === "number" ? afterPageIndex : -1
         );
         await writePdfAtomically(path, bytes);
@@ -43510,15 +43615,15 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.splitPdf,
     async (e, request) => {
       const { path, chunkSize, baseName } = request ?? {};
       if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
         return { ok: false, error: "pdf: path not granted to this view" };
       }
-      const win = import_electron4.BrowserWindow.fromWebContents(e.sender) ?? import_electron4.BrowserWindow.getFocusedWindow() ?? void 0;
-      const picked = await showOpenDialogWithMemory(import_electron4.dialog, win, {
+      const win = import_electron6.BrowserWindow.fromWebContents(e.sender) ?? import_electron6.BrowserWindow.getFocusedWindow() ?? void 0;
+      const picked = await showOpenDialogWithMemory(import_electron6.dialog, win, {
         title: tm("dlgSplit"),
         properties: ["openDirectory", "createDirectory"]
       });
@@ -43526,29 +43631,29 @@ function registerPdfIpc() {
       if (picked.canceled || !dir) return { ok: true, canceled: true };
       try {
         const parts = await splitPdfBytes(
-          new Uint8Array(await (0, import_promises7.readFile)(path)),
+          new Uint8Array(await (0, import_promises8.readFile)(path)),
           typeof chunkSize === "number" ? chunkSize : 1
         );
         const safeBase = String(baseName || "split").replace(/[/\\:*?"<>|]/g, "_");
         for (const [i, bytes] of parts.entries()) {
-          await (0, import_promises7.writeFile)((0, import_node_path14.join)(dir, `${safeBase}-${i + 1}.pdf`), bytes);
+          await (0, import_promises8.writeFile)((0, import_node_path15.join)(dir, `${safeBase}-${i + 1}.pdf`), bytes);
         }
-        import_electron4.shell.showItemInFolder((0, import_node_path14.join)(dir, `${safeBase}-1.pdf`));
+        import_electron6.shell.showItemInFolder((0, import_node_path15.join)(dir, `${safeBase}-1.pdf`));
         return { ok: true, savedDir: dir, count: parts.length };
       } catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : String(err) };
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.mergePdf,
     async (e, request) => {
       const { path, suggestedName } = request ?? {};
       if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path)) {
         return { ok: false, error: "pdf: path not granted to this view" };
       }
-      const win = import_electron4.BrowserWindow.fromWebContents(e.sender) ?? import_electron4.BrowserWindow.getFocusedWindow() ?? void 0;
-      const picked = await showOpenDialogWithMemory(import_electron4.dialog, win, {
+      const win = import_electron6.BrowserWindow.fromWebContents(e.sender) ?? import_electron6.BrowserWindow.getFocusedWindow() ?? void 0;
+      const picked = await showOpenDialogWithMemory(import_electron6.dialog, win, {
         title: tm("dlgMerge"),
         filters: [{ name: tm("filterPdf"), extensions: ["pdf"] }],
         properties: ["openFile", "multiSelections"]
@@ -43556,17 +43661,17 @@ function registerPdfIpc() {
       if (picked.canceled || picked.filePaths.length === 0) return { ok: true, canceled: true };
       try {
         const others = await Promise.all(
-          picked.filePaths.map(async (p) => new Uint8Array(await (0, import_promises7.readFile)(p)))
+          picked.filePaths.map(async (p) => new Uint8Array(await (0, import_promises8.readFile)(p)))
         );
         const { merged, appended } = await mergePdfBytes(
-          new Uint8Array(await (0, import_promises7.readFile)(path)),
+          new Uint8Array(await (0, import_promises8.readFile)(path)),
           others
         );
         const targetPath = uniqueGeneratedPdfPath(
-          configuredDefaultSaveDir(import_electron4.app),
+          configuredDefaultSaveDir(import_electron6.app),
           String(suggestedName || "merged.pdf")
         );
-        await (0, import_promises7.writeFile)(targetPath, merged);
+        await (0, import_promises8.writeFile)(targetPath, merged);
         openGeneratedPdf(targetPath);
         return { ok: true, savedPath: targetPath, appendedCount: appended };
       } catch (err) {
@@ -43574,7 +43679,7 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.mergePages,
     async (e, request) => {
       const { path, perSheet, direction, separator, suggestedName } = request ?? {};
@@ -43585,16 +43690,16 @@ function registerPdfIpc() {
         return { ok: false, error: "pdf: pages-per-sheet must be 2-16" };
       }
       try {
-        const bytes = await mergePagesBytes(new Uint8Array(await (0, import_promises7.readFile)(path)), {
+        const bytes = await mergePagesBytes(new Uint8Array(await (0, import_promises8.readFile)(path)), {
           perSheet,
           direction: direction === "horizontal" ? "horizontal" : "vertical",
           separator: separator === true
         });
         const targetPath = uniqueGeneratedPdfPath(
-          configuredDefaultSaveDir(import_electron4.app),
+          configuredDefaultSaveDir(import_electron6.app),
           String(suggestedName || "merged-pages.pdf")
         );
-        await (0, import_promises7.writeFile)(targetPath, bytes);
+        await (0, import_promises8.writeFile)(targetPath, bytes);
         openGeneratedPdf(targetPath);
         return { ok: true, savedPath: targetPath };
       } catch (err) {
@@ -43602,15 +43707,15 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.replacePages,
     async (e, request) => {
       const { path, pages } = request ?? {};
       if (typeof path !== "string" || !allowedByWc.get(e.sender.id)?.has(path) || !Array.isArray(pages) || pages.length === 0) {
         return { ok: false, error: "pdf: path not granted to this view" };
       }
-      const win = import_electron4.BrowserWindow.fromWebContents(e.sender) ?? import_electron4.BrowserWindow.getFocusedWindow() ?? void 0;
-      const picked = await showOpenDialogWithMemory(import_electron4.dialog, win, {
+      const win = import_electron6.BrowserWindow.fromWebContents(e.sender) ?? import_electron6.BrowserWindow.getFocusedWindow() ?? void 0;
+      const picked = await showOpenDialogWithMemory(import_electron6.dialog, win, {
         title: tm("dlgReplace"),
         filters: [{ name: tm("filterPdf"), extensions: ["pdf"] }],
         properties: ["openFile"]
@@ -43619,8 +43724,8 @@ function registerPdfIpc() {
       if (picked.canceled || !other) return { ok: true, canceled: true };
       try {
         const { merged, removed, inserted } = await replacePagesBytes(
-          new Uint8Array(await (0, import_promises7.readFile)(path)),
-          new Uint8Array(await (0, import_promises7.readFile)(other)),
+          new Uint8Array(await (0, import_promises8.readFile)(path)),
+          new Uint8Array(await (0, import_promises8.readFile)(other)),
           pages
         );
         await writePdfAtomically(path, merged);
@@ -43630,7 +43735,7 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.setPageSize,
     async (e, request) => {
       const { path, width, height } = request ?? {};
@@ -43641,7 +43746,7 @@ function registerPdfIpc() {
         return { ok: false, error: "pdf: invalid page size" };
       }
       try {
-        const bytes = await setPageSizeBytes(new Uint8Array(await (0, import_promises7.readFile)(path)), width, height);
+        const bytes = await setPageSizeBytes(new Uint8Array(await (0, import_promises8.readFile)(path)), width, height);
         await writePdfAtomically(path, bytes);
         return { ok: true };
       } catch (err) {
@@ -43649,7 +43754,7 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.splitPages,
     async (e, request) => {
       const { path, perPage, suggestedName } = request ?? {};
@@ -43660,12 +43765,12 @@ function registerPdfIpc() {
         return { ok: false, error: "pdf: unsupported split grid" };
       }
       try {
-        const bytes = await splitPagesBytes(new Uint8Array(await (0, import_promises7.readFile)(path)), perPage);
+        const bytes = await splitPagesBytes(new Uint8Array(await (0, import_promises8.readFile)(path)), perPage);
         const targetPath = uniqueGeneratedPdfPath(
-          configuredDefaultSaveDir(import_electron4.app),
+          configuredDefaultSaveDir(import_electron6.app),
           String(suggestedName || "split-pages.pdf")
         );
-        await (0, import_promises7.writeFile)(targetPath, bytes);
+        await (0, import_promises8.writeFile)(targetPath, bytes);
         openGeneratedPdf(targetPath);
         return { ok: true, savedPath: targetPath };
       } catch (err) {
@@ -43673,7 +43778,7 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.cropPages,
     async (e, request) => {
       const { path, pages, rect } = request ?? {};
@@ -43681,7 +43786,7 @@ function registerPdfIpc() {
         return { ok: false, error: "pdf: path not granted to this view" };
       }
       try {
-        const bytes = await cropPagesBytes(new Uint8Array(await (0, import_promises7.readFile)(path)), pages, rect);
+        const bytes = await cropPagesBytes(new Uint8Array(await (0, import_promises8.readFile)(path)), pages, rect);
         await writePdfAtomically(path, bytes);
         return { ok: true };
       } catch (err) {
@@ -43689,14 +43794,14 @@ function registerPdfIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.exportImages,
     async (e, request) => {
       const { images, pageNumbers, baseName } = request ?? {};
       if (!Array.isArray(images) || images.length === 0)
         return { ok: false, error: "pdf: no images" };
-      const win = import_electron4.BrowserWindow.fromWebContents(e.sender) ?? import_electron4.BrowserWindow.getFocusedWindow() ?? void 0;
-      const picked = await showOpenDialogWithMemory(import_electron4.dialog, win, {
+      const win = import_electron6.BrowserWindow.fromWebContents(e.sender) ?? import_electron6.BrowserWindow.getFocusedWindow() ?? void 0;
+      const picked = await showOpenDialogWithMemory(import_electron6.dialog, win, {
         title: tm("dlgExportImages"),
         properties: ["openDirectory", "createDirectory"]
       });
@@ -43706,24 +43811,24 @@ function registerPdfIpc() {
         const safeBase = String(baseName || "page").replace(/[/\\:*?"<>|]/g, "_");
         for (const [i, b64] of images.entries()) {
           const no = pageNumbers?.[i] ?? i + 1;
-          await (0, import_promises7.writeFile)((0, import_node_path14.join)(dir, `${safeBase}-p${no}.png`), Buffer.from(b64, "base64"));
+          await (0, import_promises8.writeFile)((0, import_node_path15.join)(dir, `${safeBase}-p${no}.png`), Buffer.from(b64, "base64"));
         }
-        import_electron4.shell.showItemInFolder((0, import_node_path14.join)(dir, `${safeBase}-p${pageNumbers?.[0] ?? 1}.png`));
+        import_electron6.shell.showItemInFolder((0, import_node_path15.join)(dir, `${safeBase}-p${pageNumbers?.[0] ?? 1}.png`));
         return { ok: true, savedDir: dir, count: images.length };
       } catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : String(err) };
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.generateImage,
-    (_e, op) => generateImageTool((0, import_node_path14.join)(import_electron4.app.getPath("userData"), "ai-settings.json"), {
+    (_e, op) => generateImageTool((0, import_node_path15.join)(import_electron6.app.getPath("userData"), "ai-settings.json"), {
       prompt: String(op?.prompt ?? ""),
       aspectRatio: op?.aspectRatio ? String(op.aspectRatio) : void 0
     })
   );
-  import_electron4.ipcMain.handle(PDF_CHANNELS.listSignatures, () => withSignatures(async (list) => list));
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(PDF_CHANNELS.listSignatures, () => withSignatures(async (list) => list));
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.addSignature,
     (_e, data) => withSignatures(async (list) => {
       if (!isSignatureData(data)) return list;
@@ -43732,7 +43837,7 @@ function registerPdfIpc() {
       return next;
     })
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     PDF_CHANNELS.removeSignature,
     (_e, id) => withSignatures(async (list) => {
       if (typeof id !== "string") return list;
@@ -43741,34 +43846,34 @@ function registerPdfIpc() {
       return next;
     })
   );
-  import_electron4.ipcMain.on(PDF_CHANNELS.dirtyChanged, (e, dirty) => {
+  import_electron6.ipcMain.on(PDF_CHANNELS.dirtyChanged, (e, dirty) => {
     if (dirty === true) dirtyByWc.add(e.sender.id);
     else dirtyByWc.delete(e.sender.id);
   });
-  import_electron4.ipcMain.on(PDF_CHANNELS.closeSaveResult, (e, ok) => {
+  import_electron6.ipcMain.on(PDF_CHANNELS.closeSaveResult, (e, ok) => {
     const waiter = closeSaveWaiters.get(e.sender.id);
     closeSaveWaiters.delete(e.sender.id);
     waiter?.(ok === true);
   });
-  import_electron4.ipcMain.on(PDF_CHANNELS.saveAsResult, (e, ok) => {
+  import_electron6.ipcMain.on(PDF_CHANNELS.saveAsResult, (e, ok) => {
     const waiter = saveAsWaiters.get(e.sender.id);
     saveAsWaiters.delete(e.sender.id);
     waiter?.(ok === true);
   });
-  import_electron4.ipcMain.removeHandler(PDF_CHANNELS.getLanguage);
-  import_electron4.ipcMain.handle(PDF_CHANNELS.getLanguage, () => getUiLang());
+  import_electron6.ipcMain.removeHandler(PDF_CHANNELS.getLanguage);
+  import_electron6.ipcMain.handle(PDF_CHANNELS.getLanguage, () => getUiLang());
 }
 function grantAndTrack(wc, openPath) {
   const wcId = wc.id;
   const allowedPaths = /* @__PURE__ */ new Set();
   allowedByWc.set(wcId, allowedPaths);
-  if (openPath && (0, import_node_fs13.existsSync)(openPath)) {
+  if (openPath && (0, import_node_fs14.existsSync)(openPath)) {
     openPathByWc.set(wcId, openPath);
     allowedPaths.add(openPath);
   }
   wc.setWindowOpenHandler(({ url }) => {
     const target = safeExternalUrl(url, { allowedProtocols: ["http:", "https:", "mailto:"] });
-    if (target) void import_electron4.shell.openExternal(target);
+    if (target) void import_electron6.shell.openExternal(target);
     return { action: "deny" };
   });
   wc.once("destroyed", () => {
@@ -43787,7 +43892,7 @@ function grantAndTrack(wc, openPath) {
 }
 function createPdfView(openPath) {
   registerPdfIpc();
-  const view = new import_electron4.WebContentsView({
+  const view = new import_electron6.WebContentsView({
     webPreferences: {
       preload: runtime.preloadPath,
       contextIsolation: true,
@@ -43801,18 +43906,18 @@ function createPdfView(openPath) {
 }
 function startPdfStandalone() {
   registerRendererScheme();
-  installNavigationGuard(import_electron4.app);
-  installContextMenu(import_electron4.app, () => contextMenuLabels(getUiLang()));
+  installNavigationGuard(import_electron6.app);
+  installContextMenu(import_electron6.app, () => contextMenuLabels(getUiLang()));
   configurePdfRuntime({
-    preloadPath: (0, import_node_path14.join)(__dirname, "../preload/index.js"),
+    preloadPath: (0, import_node_path15.join)(__dirname, "../preload/index.js"),
     rendererUrl: process.env.ELECTRON_RENDERER_URL,
-    rendererFile: (0, import_node_path14.join)(__dirname, "../renderer/index.html"),
+    rendererFile: (0, import_node_path15.join)(__dirname, "../renderer/index.html"),
     createDocument: createStandaloneDocument
   });
-  void import_electron4.app.whenReady().then(() => {
-    installRendererProtocol({ pdf: (0, import_node_path14.join)(__dirname, "../renderer") });
+  void import_electron6.app.whenReady().then(() => {
+    installRendererProtocol({ pdf: (0, import_node_path15.join)(__dirname, "../renderer") });
     registerPdfIpc();
-    const win = new import_electron4.BrowserWindow({
+    const win = new import_electron6.BrowserWindow({
       width: 1200,
       height: 850,
       webPreferences: {
@@ -43822,12 +43927,15 @@ function startPdfStandalone() {
         sandbox: true
       }
     });
-    const argPath = process.argv.slice(1).find((a) => /\.pdf$/i.test(a) && (0, import_node_fs13.existsSync)(a));
+    const argPath = process.argv.slice(1).find((a) => /\.pdf$/i.test(a) && (0, import_node_fs14.existsSync)(a));
     grantAndTrack(win.webContents, argPath);
     void win.loadURL(rendererUrl(runtime.rendererUrl, "pdf"));
   });
-  import_electron4.app.on("window-all-closed", () => import_electron4.app.quit());
+  import_electron6.app.on("window-all-closed", () => import_electron6.app.quit());
 }
+
+// scripts/office/entries/pdf.ts
+init_ocr();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   clearPdfDirty,
@@ -43838,6 +43946,7 @@ function startPdfStandalone() {
   movePdfFileNoClobber,
   pdfFileRenamed,
   pdfIsDirty,
+  recognizePdfPage,
   requestPdfClose,
   requestPdfSaveAs,
   sendPdfPrintRequest,

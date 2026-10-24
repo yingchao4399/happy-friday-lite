@@ -1574,12 +1574,10 @@ const handleAddContent = () => {
 const handleKbDirConfirm = async ({ path: destDir, name: kbName }) => {
   if (!editor.value) return;
   try {
-    const html = editor.value.getHTML();
-    const title = extractTitleFromContent(html);
+    await noteStore.flushPendingSave();
 
     const result = await electronService.invoke('kb-save-note', {
       noteId: props.noteId,
-      title,
       destDir
     });
 
@@ -2525,6 +2523,7 @@ const editor = useEditor({
       multicolor: true,
     }),
     Image.configure({
+      allowBase64: true,
       HTMLAttributes: {
         class: 'editor-image',
       },

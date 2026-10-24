@@ -28,5 +28,6 @@ test('does nothing when the writer lock does not exist', t => {
 test('does not hide errors other than a missing lock', t => {
   const { filename, lockPath } = fixture(t)
   fs.mkdirSync(lockPath)
-  assert.throws(() => clearHarnessCredentialLock(filename), error => error?.code === 'EISDIR')
+  // Windows unlink(directory) 返回 EPERM，POSIX 返回 EISDIR；两者都必须保留。
+  assert.throws(() => clearHarnessCredentialLock(filename), error => ['EISDIR', 'EPERM'].includes(error?.code))
 })

@@ -10,6 +10,50 @@
     <p class="page-desc">{{ t('settings.sidebarModulesDesc') }}</p>
 
     <div class="settings-content">
+      <section class="behavior-panel module-order-panel">
+        <div class="setting-row module-order-heading">
+          <div class="setting-text">
+            <h2 class="setting-label">{{ t('settings.moduleOrderTitle') }}</h2>
+            <p class="setting-hint">{{ t('settings.moduleOrderHint') }}</p>
+          </div>
+          <FridayButton compact variant="text" :disabled="orderSaving" @click="persistOrder([])">
+            <RotateCcw :size="14" />{{ t('settings.resetModuleOrder') }}
+          </FridayButton>
+        </div>
+        <div
+          v-for="(item, index) in orderedModules"
+          :key="item.key"
+          class="setting-row module-order-row"
+          :class="{ dragging: draggedModule === item.key }"
+          @dragover.prevent
+          @drop.prevent="dropModule(item.key)"
+        >
+          <span
+            class="drag-handle"
+            :draggable="!orderSaving"
+            aria-hidden="true"
+            @dragstart="startModuleDrag($event, item.key)"
+            @dragend="draggedModule = ''"
+          ><GripVertical :size="16" /></span>
+          <component :is="item.iconComponent" :size="17" :stroke-width="1.7" class="module-order-icon" />
+          <span class="module-order-label">{{ t(item.i18nKey) }}</span>
+          <label class="toggle-switch module-order-toggle" :title="t(`settings.${item.key}Module`)">
+            <input
+              type="checkbox"
+              :checked="isEnabled(item.key)"
+              :aria-label="t(`settings.${item.key}Module`)"
+              @change="toggleModule(item.key, $event.target.checked)"
+            />
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="module-order-actions">
+            <FridayButton icon-only variant="text" :disabled="index === 0 || orderSaving" :aria-label="t('settings.moveModuleUp') + ' · ' + t(item.i18nKey)" :title="t('settings.moveModuleUp')" @click="moveModule(item.key, -1)"><ArrowUp :size="16" /></FridayButton>
+            <FridayButton icon-only variant="text" :disabled="index === orderedModules.length - 1 || orderSaving" :aria-label="t('settings.moveModuleDown') + ' · ' + t(item.i18nKey)" :title="t('settings.moveModuleDown')" @click="moveModule(item.key, 1)"><ArrowDown :size="16" /></FridayButton>
+          </div>
+        </div>
+        <p v-if="orderError" class="order-error" role="alert">{{ orderError }}</p>
+      </section>
+
       <section class="preview-panel">
         <div class="preview-rail">
           <div class="preview-avatar">
@@ -17,7 +61,7 @@
           </div>
           <div class="preview-menu">
             <button
-              v-for="item in sidebarMenuConfig"
+              v-for="item in orderedModules"
               :key="item.key"
               type="button"
               class="preview-item"
@@ -62,7 +106,7 @@
           <p class="preview-hint">{{ t('settings.sidebarPreviewHint') }}</p>
           <div class="preview-chips">
             <button
-              v-for="item in sidebarModuleConfig"
+              v-for="item in utilityItems"
               :key="item.key"
               type="button"
               class="module-chip"
@@ -135,7 +179,8 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Check, Settings } from 'lucide-vue-next';
+import { ArrowDown, ArrowUp, Check, GripVertical, RotateCcw, Settings } from 'lucide-vue-next';
+import FridayButton from '@/components/ui/FridayButton.vue';
 import { useAppStore } from '@/store';
 import { fridayMenuConfig, sidebarMenuConfig, sidebarBottomMenuConfig, sidebarModuleConfig } from '@/config/menu';
 import { electronService } from '@/services/electron';
@@ -149,9 +194,46 @@ const avatarSrc = `${import.meta.env.BASE_URL}images/icon.png`;
 const utilityItems = sidebarBottomMenuConfig.filter((item) => item.key !== 'settings');
 const sidebarModuleCount = sidebarModuleConfig.length;
 
-const enabledModuleCount = computed(() => Object.values(appStore.sidebarModules).filter(Boolean).length);
-const hasHiddenModules = computed(() => Object.values(appStore.sidebarModules).some((enabled) => !enabled));
+const enabledModuleCount = computed(() => sidebarModuleConfig.filter(item => appStore.sidebarModules[item.key] !== false).length);
+const hasHiddenModules = computed(() => sidebarModuleConfig.some(item => appStore.sidebarModules[item.key] === false));
 const isEnabled = (key) => appStore.sidebarModules[key] !== false;
+const draggedModule = ref('');
+const orderError = ref('');
+const orderSaving = ref(false);
+const orderedModules = computed(() => {
+  const ids = [...new Set([...appStore.moduleOrder, ...sidebarMenuConfig.map(item => item.key)])];
+  return ids.map(id => sidebarMenuConfig.find(item => item.key === id)).filter(Boolean);
+});
+const startModuleDrag = (event, id) => {
+  draggedModule.value = id;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', id);
+};
+const persistOrder = async ids => {
+  if (orderSaving.value) return;
+  orderSaving.value = true;
+  const previous = [...appStore.moduleOrder];
+  orderError.value = '';
+  try {
+    await electronService.request('module-order-save', { ids });
+    appStore.setModuleOrder(ids);
+  } catch (_error) { appStore.setModuleOrder(previous); orderError.value = t('settings.moduleOrderFailed'); }
+  finally { orderSaving.value = false; }
+};
+const moveModule = (id, offset) => {
+  const ids = orderedModules.value.map(item => item.key);
+  const from = ids.indexOf(id); const to = from + offset;
+  if (from < 0 || to < 0 || to >= ids.length) return;
+  ids.splice(to, 0, ids.splice(from, 1)[0]);
+  persistOrder(ids);
+};
+const dropModule = target => {
+  const ids = orderedModules.value.map(item => item.key);
+  const from = ids.indexOf(draggedModule.value); const to = ids.indexOf(target);
+  draggedModule.value = '';
+  if (from < 0 || to < 0 || from === to) return;
+  ids.splice(to, 0, ids.splice(from, 1)[0]); persistOrder(ids);
+};
 
 // ========== 启动行为设置：首页 + 启动时收起侧边栏 ==========
 const homeSelectRef = ref(null);
@@ -248,6 +330,74 @@ const goBack = () => router.push('/settings');
 </script>
 
 <style scoped>
+.module-order-heading {
+  padding: 9px 0;
+}
+
+.module-order-heading .setting-label,
+.module-order-heading .setting-hint {
+  margin: 0;
+}
+
+.module-order-row {
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 5px 0;
+  transition: opacity 0.18s ease;
+}
+
+.module-order-row.dragging {
+  opacity: 0.45;
+}
+
+.drag-handle {
+  width: 18px;
+  height: 28px;
+  flex: 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  cursor: grab;
+  user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.module-order-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.module-order-label {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.module-order-toggle {
+  margin-left: auto;
+}
+
+.module-order-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+}
+
+.order-error {
+  margin: 0;
+  padding: 8px 0;
+  color: #d9544d;
+  font-size: 12px;
+}
+
 .module-settings-page {
   width: 100%;
   display: flex;
@@ -255,6 +405,10 @@ const goBack = () => router.push('/settings');
   align-items: center;
   padding: 32px 40px 48px;
   position: relative;
+}
+
+:global([data-theme='dark'] .module-settings-page) {
+  --text-tertiary: #9b9ba1;
 }
 
 .back-btn {
@@ -306,11 +460,11 @@ const goBack = () => router.push('/settings');
 
 .preview-panel {
   display: flex;
-  align-items: stretch;
-  gap: 18px;
+  flex-direction: column;
+  gap: 10px;
   padding: 16px;
   background: var(--bg-secondary);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .behavior-panel {
@@ -318,7 +472,7 @@ const goBack = () => router.push('/settings');
   flex-direction: column;
   padding: 6px 16px;
   background: var(--bg-secondary);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .setting-row {
@@ -473,22 +627,30 @@ const goBack = () => router.push('/settings');
   transform: translateX(20px);
 }
 
+.toggle-switch input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
 .preview-rail {
-  width: 52px;
-  flex: 0 0 52px;
+  width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 10px 0;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  padding: 6px 8px;
   background: var(--bg-primary);
-  border-radius: 12px;
-  box-shadow: inset 0 0 0 1px var(--border-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
 }
 
 .preview-avatar {
   width: 26px;
   height: 26px;
-  margin-bottom: 12px;
+  flex: 0 0 26px;
+  margin-right: 6px;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -503,23 +665,20 @@ const goBack = () => router.push('/settings');
 .preview-menu,
 .preview-bottom {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  width: 100%;
-}
-
-.preview-menu {
-  flex: 1;
+  flex: 0 0 auto;
+  gap: 3px;
 }
 
 .preview-bottom {
-  padding-top: 8px;
+  padding-left: 7px;
+  border-left: 1px solid var(--border-color);
 }
 
 .preview-item {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -569,12 +728,9 @@ const goBack = () => router.push('/settings');
 
 .preview-meta {
   min-width: 0;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  padding: 4px 4px 4px 0;
+  gap: 7px;
 }
 
 .preview-meta-top {
@@ -672,6 +828,17 @@ const goBack = () => router.push('/settings');
   font-weight: 500;
 }
 
+.back-btn:focus-visible,
+.preview-item:focus-visible,
+.module-chip:focus-visible,
+.action-btn:focus-visible,
+.home-select-trigger:focus-visible,
+.home-dropdown-item:focus-visible,
+.module-order-panel :deep(.friday-button:focus-visible) {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
 @media (max-width: 620px) {
   .module-settings-page {
     padding: 28px 20px 40px;
@@ -682,7 +849,7 @@ const goBack = () => router.push('/settings');
   }
 
   .preview-panel {
-    gap: 14px;
+    gap: 10px;
     padding: 12px;
   }
 
@@ -690,6 +857,22 @@ const goBack = () => router.push('/settings');
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+  }
+}
+
+@media (max-width: 420px) {
+  .module-order-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .module-order-heading :deep(.friday-button) {
+    align-self: flex-end;
+  }
+
+  .module-order-row {
+    gap: 6px;
   }
 }
 </style>

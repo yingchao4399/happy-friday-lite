@@ -16,6 +16,15 @@ let logFilePath = null
 let originalConsole = null
 let initialized = false
 let loggingEnabled = false
+let consoleAvailable = true
+
+// 启动器退出后 stdout/stderr 管道可能失效；日志不能再次触发异常处理。
+function mirrorConsole(method, args) {
+  if (!consoleAvailable) return
+  try { method(...args) } catch {
+    consoleAvailable = false
+  }
+}
 
 // 单个日志文件最大体积，超过则滚动
 const MAX_LOG_SIZE = 5 * 1024 * 1024 // 5 MB
@@ -54,6 +63,7 @@ function writeLine(level, args) {
   const line = `[${formatTimestamp()}] [${level}] ${formatArgs(args)}\n`
   try {
     fs.appendFileSync(logFilePath, line, 'utf-8')
+    rotateIfNeeded()
   } catch (_e) {
     // 写入失败时静默忽略，避免日志逻辑本身导致崩溃
   }
@@ -168,11 +178,19 @@ export function initLogger(baseDir, enabled = true) {
     debug: (console.debug ? console.debug : console.log).bind(console)
   }
 
+  for (const stream of [process.stdout, process.stderr]) {
+    stream?.on('error', error => {
+      consoleAvailable = false
+      if (!['EPIPE', 'ERR_STREAM_DESTROYED'].includes(error?.code)) {
+        writeLine('ERROR', ['控制台输出不可用:', error])
+      }
+    })
+  }
+
   const wrap = (level, original) => {
     return (...args) => {
-      original(...args)
       writeLine(level, args)
-      rotateIfNeeded()
+      mirrorConsole(original, args)
     }
   }
 
@@ -185,15 +203,15 @@ export function initLogger(baseDir, enabled = true) {
   // 捕获未捕获异常：同步写盘保证崩溃前日志已落盘
   process.on('uncaughtException', (err) => {
     writeLine('FATAL', ['Uncaught Exception:', err])
-    if (originalConsole) originalConsole.error('Uncaught Exception:', err)
+    if (originalConsole) mirrorConsole(originalConsole.error, ['Uncaught Exception:', err])
   })
   process.on('unhandledRejection', (reason) => {
     writeLine('ERROR', ['Unhandled Rejection:', reason])
-    if (originalConsole) originalConsole.error('Unhandled Rejection:', reason)
+    if (originalConsole) mirrorConsole(originalConsole.error, ['Unhandled Rejection:', reason])
   })
 
   initialized = true
-  if (loggingEnabled) originalConsole.log('[Logger] Initialized, log file:', logFilePath)
+  if (loggingEnabled) mirrorConsole(originalConsole.log, ['[Logger] Initialized, log file:', logFilePath])
 }
 
 /**

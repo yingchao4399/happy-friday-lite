@@ -25,7 +25,7 @@ import { app } from 'electron'
 import { z } from 'zod'
 import { registerTool, isValidRiskAssessment, riskAssessmentSchema } from '../agent/tools/registry.js'
 import { waitForApproval } from '../agent/humanInTheLoop.js'
-import { openOfficeFile, getOfficeState, isOfficeAvailable } from './office-host.js'
+import { openOfficeFile, getOfficeState, getOfficeDocumentSelection, isOfficeAvailable } from './office-host.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -157,6 +157,18 @@ registerTool({
     )
   },
   meta: { requireApproval: false },
+})
+
+registerTool({
+  name: 'office_get_selection',
+  description: '读取用户当前或刚从 Office 切回 Friday 时保留的选区，返回文档类型、页码/段落/单元格/形状定位、选中文本和可用操作。仅读取当前工作区已经打开的文件，不切换文件、不修改内容；没有有效选区时会如实返回。',
+  schema: z.object({}),
+  async handler() {
+    if (!isOfficeAvailable()) return '错误：Office 模块当前不可用。'
+    const selection = await getOfficeDocumentSelection()
+    return selection ? JSON.stringify(selection) : JSON.stringify({ available: false, reason: '当前没有可读取的 Office 编辑器选区。' })
+  },
+  meta: { requireApproval: false, exposedViaMcp: true, capabilityType: 'read' },
 })
 
 // ---- office_inspect ----------------------------------------------------------

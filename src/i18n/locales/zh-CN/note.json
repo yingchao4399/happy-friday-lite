@@ -1,5 +1,8 @@
 {
   "title": "笔记",
+  "pin": "置顶笔记",
+  "unpin": "取消置顶",
+  "openOriginal": "打开原笔记",
   "placeholder": "开始书写你的笔记...",
   "titlePlaceholder": "请输入标题",
   "back": "返回",
@@ -52,6 +55,18 @@
     "noNotebooks": "暂无笔记本",
     "duplicate": "创建副本",
     "delete": "删除"
+  },
+  "selection": {
+    "start": "多选笔记",
+    "count": "已选 {count} 篇",
+    "cancel": "取消多选",
+    "selectAll": "全选或取消全选",
+    "selectNote": "选择笔记：{name}",
+    "pin": "置顶或取消置顶选中笔记",
+    "delete": "删除选中笔记",
+    "deleteConfirm": "确定将选中的 {count} 篇笔记移至最近删除吗？",
+    "addedToKb": "已将 {count} 篇笔记加入「{name}」知识库",
+    "actionFailed": "批量操作失败：{error}"
   },
   "toc": {
     "title": "目录",
@@ -264,6 +279,7 @@
   },
   "toast": {
     "savedToKb": "已保存到「{name}」知识库",
+    "alreadyInKb": "这篇笔记已在「{name}」知识库中",
     "saveFailed": "保存失败",
     "saveFailedWithError": "保存失败: {error}",
     "saveFailedShort": "保存失败",

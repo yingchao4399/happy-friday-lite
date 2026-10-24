@@ -76,7 +76,9 @@ export const useNoteStore = defineStore('note', {
     },
 
     async deleteNote(noteId) {
-      await electronService.invoke('delete_note', { noteId })
+      await this.flushPendingSave()
+      const deleted = await electronService.request('delete_note', { noteId })
+      if (!deleted) throw new Error('Note was not deleted')
       this.notes = this.notes.filter(n => n.id !== noteId)
       if (this.currentNoteId === noteId) {
         this.currentNoteId = this.notes.length > 0 ? this.notes[0].id : null

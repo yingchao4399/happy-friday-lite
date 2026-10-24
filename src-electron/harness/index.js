@@ -10,8 +10,11 @@ import yaml from 'js-yaml'
 import { getDataDir, loadConfig } from '../config.js'
 import { normalizeOpenAIBaseUrl } from '../openaiUrl.js'
 import { clearHarnessCredentialLock } from './lockRecovery.js'
+import { resolveDshRuntimeEntry } from './runtime.js'
+import { getLogDir } from '../logger.js'
 import {
   acquireLocalMcpServer,
+  getLocalMcpAuthHeaders,
   getLocalMcpStatus,
   releaseLocalMcpServer
 } from '../agent/mcp.js'
@@ -33,6 +36,8 @@ let startPromise = null
 let generation = 0
 let activeModelSignature = null
 let recentOutput = []
+let phaseStartedAt = 0
+let startupTimings = {}
 let state = {
   status: 'idle',
   url: null,
@@ -40,6 +45,24 @@ let state = {
   model: null,
   toolCount: 0,
   error: null
+}
+
+function startupPhase(stage) {
+  const now = Date.now()
+  if (phaseStartedAt && state.stage) startupTimings[state.stage] = now - phaseStartedAt
+  phaseStartedAt = now
+  console.info(`[Harness] 启动阶段: ${stage}`)
+  updateState({ stage, timings: { ...startupTimings }, logPath: getLogDir() })
+}
+
+async function checkRuntimeDependencies() {
+  for (const name of ['@deepseek-ai/dsh', '@deepseek-ai/dsh-llm-pi-ai', '@deepseek-ai/dsh-mcp-client', '@deepseek-ai/dsh-acp']) {
+    const manifest = require.resolve(`${name}/package.json`)
+    const pkg = JSON.parse(fs.readFileSync(manifest, 'utf8'))
+    const entry = resolveDshRuntimeEntry(name, pkg, path.dirname(manifest))
+    if (!fs.existsSync(entry)) throw new Error(`DSH 依赖入口缺失: ${entry}`)
+    if (name !== '@deepseek-ai/dsh') await import(pathToFileURL(entry).href)
+  }
 }
 
 function publicStatus() {
@@ -214,7 +237,7 @@ function mcpToolConfiguration() {
   }
 }
 
-function syncConfiguration(model, mcpUrl) {
+function syncConfiguration(model, mcpUrl, mcpHeaders) {
   const paths = harnessPaths()
   ensureHarnessDirectories(paths)
   const theme = themePreference()
@@ -283,6 +306,7 @@ function syncConfiguration(model, mcpUrl) {
             serverName: MCP_SERVER_NAME,
             transport: 'streamable-http',
             url: mcpUrl,
+            headers: mcpHeaders,
             toolCallTimeoutMs: 300000,
             failOnStartupError: true
           }
@@ -438,26 +462,32 @@ function captureOutput(stream) {
 
 async function bootHarness() {
   const expectedGeneration = ++generation
+  startupTimings = {}
+  phaseStartedAt = 0
   updateState({ status: 'starting', error: null, url: null, port: null, model: null, toolCount: 0 })
 
   let model
   try {
+    startupPhase('dependencies')
+    await checkRuntimeDependencies()
+    startupPhase('configuration')
     model = selectedModel()
   } catch (error) {
-    updateState({ status: 'config-required', model: null, error: error.message })
+    updateState({ status: error.code === 'HARNESS_MODEL_REQUIRED' ? 'config-required' : 'error', model: null, error: error.message, recoverable: true, nextStep: error.code === 'HARNESS_MODEL_REQUIRED' ? 'configure-model' : 'repair-installation' })
     return publicStatus()
   }
 
   let acquiredMcp = false
   let launchedChild = null
   try {
+    startupPhase('mcp')
     const mcp = await acquireLocalMcpServer(HARNESS_CONSUMER)
     acquiredMcp = true
     const mcpStatus = getLocalMcpStatus()
     if (!mcp.success || !mcpStatus.url) throw new Error('Happy Friday MCP server failed to start')
     if (expectedGeneration !== generation) throw new Error('Harness startup was superseded')
 
-    const { paths, toolCount } = syncConfiguration(model, mcpStatus.url)
+    const { paths, toolCount } = syncConfiguration(model, mcpStatus.url, getLocalMcpAuthHeaders())
     clearStaleAppImageModuleLinks(paths)
     const port = await findOpenPort()
     if (expectedGeneration !== generation) throw new Error('Harness startup was superseded')
@@ -467,6 +497,7 @@ async function bootHarness() {
       console.warn(`[Harness] Removed stale writer lock at ${paths.credentials}.lock`)
     }
 
+    startupPhase('plugins')
     const child = spawn(
       process.execPath,
       ['--expose-internals', cli, 'web', '--patch', paths.patch, '--host', '127.0.0.1', '--port', String(port), '--no-open'],
@@ -514,6 +545,7 @@ async function bootHarness() {
     })
 
     const authenticatedUrl = await waitUntilReady(child, expectedGeneration)
+    startupPhase('ready')
     activeModelSignature = harnessSignature(model, themePreference(), localePreference())
     return updateState({
       status: 'ready',
@@ -535,7 +567,11 @@ async function bootHarness() {
         port: null,
         model: null,
         toolCount: 0,
-        error: error.message || String(error)
+        error: error.message || String(error),
+        recoverable: true,
+        nextStep: 'inspect-log-and-retry',
+        logPath: getLogDir(),
+        timings: { ...startupTimings, [state.stage]: Date.now() - phaseStartedAt }
       })
       console.error(`[Harness] Startup failed: ${error.message || String(error)}`)
     }

@@ -3,6 +3,7 @@ import http from 'http'
 import fs from 'fs'
 import path from 'path'
 import { loadConfig, getDataDir } from '../config.js'
+import { removePathNoFollowSync } from '../fs-safe.js'
 
 let cachedEmbeddings = null
 let cachedModelId = null
@@ -266,7 +267,7 @@ async function checkModelChangeAndCleanIndex(modelConfig) {
     // 删除 Zvec 索引目录（所有知识库共用一个 collection）
     const zvecDir = path.join(dataDir, 'rag', 'zvec_index')
     if (fs.existsSync(zvecDir)) {
-      fs.rmSync(zvecDir, { recursive: true, force: true })
+      removePathNoFollowSync(zvecDir, { root: dataDir })
       console.log(`[RAG] Deleted old zvec index: ${zvecDir}`)
     }
 
@@ -274,7 +275,7 @@ async function checkModelChangeAndCleanIndex(modelConfig) {
     for (const kbType of ['personal', 'local']) {
       const oldFaissDir = path.join(dataDir, 'rag', kbType, 'faiss_index')
       if (fs.existsSync(oldFaissDir)) {
-        fs.rmSync(oldFaissDir, { recursive: true, force: true })
+        removePathNoFollowSync(oldFaissDir, { root: dataDir })
         console.log(`[RAG] Deleted legacy faiss index: ${oldFaissDir}`)
       }
     }

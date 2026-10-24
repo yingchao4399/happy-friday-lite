@@ -441,7 +441,7 @@
           </button>
           <div class="about-modal-body">
             <div class="about-logo">
-              <img :src="aboutLogo" alt="Happy Friday" class="about-logo-img" />
+              <img :src="aboutLogo" alt="Happy Friday" :class="['about-logo-img', { 'dark-logo': appliedTheme === 'dark' }]" />
             </div>
             <h2 class="about-title">Happy Friday</h2>
             <p class="about-version">{{ t('settings.version') }} {{ appVersion }}</p>
@@ -639,6 +639,7 @@ import { useTheme } from '@/utils/theme';
 import { electronService } from '@/services/electron';
 import { setI18nLanguage } from '@/i18n';
 import { sidebarModuleConfig } from '@/config/menu';
+import fridayLogo from '@/assets/images/friday-w.webp';
 import packageJson from '../../../package.json';
 
 const { t } = useI18n();
@@ -1511,11 +1512,7 @@ const showAuthorModal = ref(false);
 
 const appVersion = packageJson.version;
 
-const aboutLogo = computed(() => {
-  return appliedTheme.value === 'dark'
-    ? new URL('@/assets/images/friday-b.png', import.meta.url).href
-    : new URL('@/assets/images/friday-w.webp', import.meta.url).href;
-});
+const aboutLogo = computed(() => fridayLogo);
 
 const features = computed(() => [
   {
@@ -2348,6 +2345,10 @@ const openAuthorEmail = () => {
   height: 72px;
   object-fit: contain;
   border-radius: 16px;
+}
+
+.about-logo-img.dark-logo {
+  filter: invert(1);
 }
 
 .about-title {

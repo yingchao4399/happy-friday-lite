@@ -24,7 +24,7 @@ const truncateForLlm = (content) => {
 // 读取附件内容
 // - note: 通过 noteId 从数据库读取 contentText
 // - file: 通过 path 从磁盘读取
-const readAttachmentContent = (att) => {
+const readAttachmentContent = async (att) => {
   if (att.kind === 'note') {
     if (!att.noteId) return ''
     const note = db.getNote(att.noteId)
@@ -33,7 +33,9 @@ const readAttachmentContent = (att) => {
   if (att.kind === 'file') {
     if (!att.path || !fs.existsSync(att.path)) return '(文件不存在)'
     try {
-      return fs.readFileSync(att.path, 'utf-8')
+      const { loadDocument } = await import('./rag/loaders.js')
+      const docs = await loadDocument(att.path, db)
+      return docs.map(doc => doc.pageContent).join('\n\n')
     } catch (e) {
       return `(读取失败: ${e.message})`
     }
@@ -49,7 +51,7 @@ const readAttachmentContent = (att) => {
  * @param {string} mode - 对话模式：'agent' | 'chat' | 'memoryless'
  * @returns {string} LLM 消息（含完整引用提示）
  */
-export const buildLlmMessage = (userMessage, attachments, mode) => {
+export const buildLlmMessage = async (userMessage, attachments, mode) => {
   if (!attachments || attachments.length === 0) return userMessage
 
   // 提取 --- 之前的文本部分
@@ -71,7 +73,7 @@ export const buildLlmMessage = (userMessage, attachments, mode) => {
       parts.push(label)
     } else {
       // chat/memoryless 模式：读取完整内容注入 LLM（≤ 2,500 字符）
-      const content = readAttachmentContent(att)
+      const content = await readAttachmentContent(att)
       parts.push(`${label}\n${truncateForLlm(content)}`)
     }
   }

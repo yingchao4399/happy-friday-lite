@@ -4,6 +4,19 @@ import { Worker } from 'worker_threads'
 import AdmZip from 'adm-zip'
 import { flushDb, closeDb, initDb } from './db.js'
 import { loadConfig, saveConfig, getDataDir } from './config.js'
+import { isBackupEntry } from './backupEntries.js'
+import initSqlJs from 'sql.js'
+import { removePathNoFollowSync } from './fs-safe.js'
+
+let restoreLifecycle = {}
+export function setRestoreLifecycle(hooks = {}) {
+  restoreLifecycle = hooks
+}
+
+function removeRestoreTemporaryDirectory(directory) {
+  try { removePathNoFollowSync(directory, { root: path.dirname(getDataDir()) }) }
+  catch (error) { console.warn('[Backup] 恢复临时目录暂未清理:', directory, error.message) }
+}
 
 // 生成带时间戳的备份文件名
 function generateBackupName() {
@@ -48,6 +61,29 @@ function runBackupWorker(dataDir, zipPath, onProgress) {
       if (code !== 0) finish({ success: false, error: `worker exited with code ${code}` })
     })
   })
+}
+
+/** 首次运行新版时，在迁移前保存整套用户数据；备份存于数据目录外，避免被再次打包。 */
+export async function createUpgradeSnapshot(dataDir, releaseId) {
+  if (!fs.existsSync(path.join(dataDir, 'friday.db'))) return null
+  const safeId = String(releaseId).replace(/[^a-zA-Z0-9._-]/g, '_')
+  const backupDir = path.join(path.dirname(dataDir), `${path.basename(dataDir)}-upgrade-backups`)
+  fs.mkdirSync(backupDir, { recursive: true })
+  const marker = path.join(dataDir, `.upgrade-snapshot-${safeId}.json`)
+  try {
+    const previous = JSON.parse(fs.readFileSync(marker, 'utf8'))
+    if (previous.path && fs.existsSync(previous.path)) return previous.path
+  } catch { /* first run or missing backup */ }
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const zipPath = path.join(backupDir, `friday-before-${safeId}-${stamp}.zip`)
+  const result = await runBackupWorker(dataDir, zipPath)
+  if (!result.success) throw new Error(`升级前备份失败: ${result.error}`)
+  const zip = new AdmZip(zipPath)
+  if (!zip.getEntries().some(entry => entry.entryName === 'friday.db')) {
+    throw new Error('升级前备份缺少 friday.db，已停止迁移')
+  }
+  fs.writeFileSync(marker, JSON.stringify({ releaseId, path: zipPath, createdAt: new Date().toISOString() }, null, 2), 'utf8')
+  return zipPath
 }
 
 /**
@@ -107,7 +143,13 @@ export async function createBackup(destPath, isAutoDir = false, onProgress = nul
 export async function restoreBackup(zipPath) {
   const dataDir = getDataDir()
   if (!dataDir) return { success: false, error: '数据目录未初始化' }
-
+  const tmpDir = fs.mkdtempSync(path.join(path.dirname(dataDir), '.friday-restore-'))
+  const rollbackDir = fs.mkdtempSync(path.join(path.dirname(dataDir), '.friday-rollback-'))
+  const replaced = []
+  const moved = []
+  let replacing = false
+  let rollbackSafeToRemove = true
+  let prepared = false
   try {
     if (!fs.existsSync(zipPath)) {
       return { success: false, error: '备份文件不存在' }
@@ -122,15 +164,6 @@ export async function restoreBackup(zipPath) {
       return { success: false, error: '备份文件无效：缺少 friday.db' }
     }
 
-    // 关闭数据库连接
-    closeDb()
-
-    // 解压到临时目录
-    const tmpDir = path.join(dataDir, '..', '.friday-restore-tmp')
-    if (fs.existsSync(tmpDir)) {
-      fs.rmSync(tmpDir, { recursive: true, force: true })
-    }
-    fs.mkdirSync(tmpDir, { recursive: true })
     zip.extractAllTo(tmpDir, true)
 
     // 如果解压出来有一层根目录（如 friday-backup-xxx/），进入它
@@ -144,23 +177,39 @@ export async function restoreBackup(zipPath) {
       }
     }
 
-    // 清空当前 dataDir（保留目录本身）
+    // 在接触现存数据前验证数据库和配置，损坏备份不能覆盖可用数据。
+    const SQL = await initSqlJs()
+    const validationDb = new SQL.Database(fs.readFileSync(path.join(restoreRoot, 'friday.db')))
+    try {
+      const result = validationDb.exec('PRAGMA integrity_check')
+      if (result[0]?.values[0]?.[0] !== 'ok') throw new Error('备份数据库校验失败')
+    } finally { validationDb.close() }
+    const configFile = path.join(restoreRoot, 'config.json')
+    if (fs.existsSync(configFile)) JSON.parse(fs.readFileSync(configFile, 'utf8'))
+    // Windows 的目录监听与向量库会持有业务目录句柄，替换前释放，完成后重新打开。
+    prepared = true
+    await restoreLifecycle.beforeRestore?.()
+    closeDb()
+    replacing = true
+
+    // 业务数据先移到可回滚目录，保留 Chromium 当前正在使用的运行文件。
     const currentEntries = fs.readdirSync(dataDir, { withFileTypes: true })
     for (const entry of currentEntries) {
+      if (!isBackupEntry(entry.name)) continue
       const fullPath = path.join(dataDir, entry.name)
-      fs.rmSync(fullPath, { recursive: true, force: true })
+      fs.renameSync(fullPath, path.join(rollbackDir, entry.name))
+      moved.push(entry.name)
     }
 
     // 将恢复内容复制到 dataDir
     const restoreEntries = fs.readdirSync(restoreRoot, { withFileTypes: true })
     for (const entry of restoreEntries) {
+      if (!isBackupEntry(entry.name)) continue
       const src = path.join(restoreRoot, entry.name)
       const dst = path.join(dataDir, entry.name)
+      replaced.push(entry.name)
       fs.cpSync(src, dst, { recursive: true })
     }
-
-    // 清理临时目录
-    fs.rmSync(tmpDir, { recursive: true, force: true })
 
     // 重新初始化数据库
     await initDb()
@@ -168,9 +217,28 @@ export async function restoreBackup(zipPath) {
     return { success: true }
   } catch (e) {
     console.error('[Backup] restoreBackup error:', e)
-    // 尝试重新打开数据库
-    try { await initDb() } catch (_) {}
+    if (replacing) {
+      try {
+      closeDb()
+      for (const name of replaced) removePathNoFollowSync(path.join(dataDir, name), { root: dataDir })
+      for (const name of moved) {
+        const target = path.join(dataDir, name)
+        removePathNoFollowSync(target, { root: dataDir })
+        fs.renameSync(path.join(rollbackDir, name), target)
+      }
+      } catch (rollbackError) {
+        rollbackSafeToRemove = false
+        return { success: false, error: `${e.message}; 回滚未完成: ${rollbackError.message}`, rollbackPath: rollbackDir }
+      }
+    }
+    // 验证失败时当前实例仍持有尚未落盘的编辑，不能重开旧磁盘副本。
+    // 只有进入替换流程、关闭过数据库时，才从已回滚的数据重新打开。
+    if (replacing) { try { await initDb() } catch (_) {} }
     return { success: false, error: e.message }
+  } finally {
+    removeRestoreTemporaryDirectory(tmpDir)
+    if (rollbackSafeToRemove) removeRestoreTemporaryDirectory(rollbackDir)
+    if (prepared) await restoreLifecycle.afterRestore?.()
   }
 }
 

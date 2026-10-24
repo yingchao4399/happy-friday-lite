@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useAppStore = defineStore('app', {
   state: () => ({
     sidebarVisible: true,
+    moduleOrder: [],
     language: 'zh-CN',
     theme: 'light',
     loading: false,
@@ -16,9 +17,13 @@ export const useAppStore = defineStore('app', {
       ppt: 'internal'
     },
     sidebarModules: {
+      trash: true,
+      clipboard: true,
+      recitation: true,
       note: true,
       drawing: true,
       knowledge: true,
+      office: true,
       schedule: true,
       automation: true,
       harness: true,
@@ -26,6 +31,9 @@ export const useAppStore = defineStore('app', {
     },
   }),
   actions: {
+    setModuleOrder(order = []) {
+      this.moduleOrder = [...new Set(Array.isArray(order) ? order.filter(id => typeof id === 'string') : [])]
+    },
     toggleSidebar() {
       this.sidebarVisible = !this.sidebarVisible
     },
@@ -54,9 +62,13 @@ export const useAppStore = defineStore('app', {
     },
     setSidebarModules(modules = {}) {
       this.sidebarModules = {
+        trash: modules.trash !== false,
+        clipboard: modules.clipboard !== false,
+        recitation: modules.recitation !== false,
         note: modules.note !== false,
         drawing: modules.drawing !== false,
         knowledge: modules.knowledge !== false,
+        office: modules.office !== false,
         schedule: modules.schedule !== false,
         automation: modules.automation !== false,
         harness: modules.harness !== false,

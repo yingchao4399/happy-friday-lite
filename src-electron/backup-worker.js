@@ -10,17 +10,16 @@ import { parentPort, workerData } from 'worker_threads'
 import fs from 'fs'
 import path from 'path'
 import AdmZip from 'adm-zip'
+import { isBackupEntry } from './backupEntries.js'
 
 // 递归收集目录下所有文件（仅文件，跳过目录条目）
 function collectFiles(dir, baseDir) {
   const results = []
-  let entries
-  try {
-    entries = fs.readdirSync(dir, { withFileTypes: true })
-  } catch (e) {
-    return results
-  }
+  // 无法读取业务目录时整个备份失败，不能把缺失文件的压缩包标记为完整备份。
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
   for (const entry of entries) {
+    if (dir === baseDir && !isBackupEntry(entry.name)) continue
+    if (entry.isSymbolicLink()) continue
     const fullPath = path.join(dir, entry.name)
     const relPath = path.relative(baseDir, fullPath)
     if (entry.isDirectory()) {

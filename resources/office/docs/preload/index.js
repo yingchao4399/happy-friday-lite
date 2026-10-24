@@ -1,5 +1,15 @@
 "use strict";
 const electron = require("electron");
+function installOfficeFileBridge(bridge, ipc) {
+  bridge.exposeInMainWorld("fridayOffice", {
+    exportSelectionText: (request) => ipc.invoke("office-file-export-selection-text", request),
+    snapshot: (request) => ipc.invoke("office-file-current-snapshot", request),
+    exportSnapshot: (request) => ipc.invoke("office-file-export-snapshot", request),
+    cancelExport: () => ipc.invoke("office-file-cancel-export"),
+    command: (command) => ipc.invoke("office-file-command", command),
+    preferences: (patch) => ipc.invoke("office-file-preferences", patch)
+  });
+}
 const AI_PROVIDERS = [
   {
     id: "genspark",
@@ -359,6 +369,7 @@ function installDropOpenBridge() {
     electron.ipcRenderer.send(DROP_OPEN_CHANNEL, payload.slice(0, MAX_DROPPED_FILES));
   });
 }
+installOfficeFileBridge(electron.contextBridge, electron.ipcRenderer);
 const api = {
   getLanguage: () => electron.ipcRenderer.invoke("app:get-language"),
   onLanguageChanged: (handler) => {
@@ -445,7 +456,7 @@ const api = {
   getRecentFiles: () => electron.ipcRenderer.invoke("docs:recent"),
   pickImage: () => electron.ipcRenderer.invoke("docs:pick-image"),
   fontMetrics: (family) => electron.ipcRenderer.invoke("docs:font-metrics", family),
-  print: (scale) => electron.ipcRenderer.invoke("docs:print", scale),
+  print: (scale, job) => electron.ipcRenderer.invoke("docs:print", scale, job),
   exportPdf: (defaultName, pageWidthTwips, pageHeightTwips, outPath, scale) => electron.ipcRenderer.invoke(
     "docs:export-pdf",
     defaultName,

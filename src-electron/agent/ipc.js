@@ -38,6 +38,9 @@ import {
   refreshMcpServer,
   getLocalMcpConfig,
   getLocalMcpStatus,
+  pairLocalMcpClient,
+  listLocalMcpClients,
+  revokeLocalMcpClient,
   startLocalMcpServer,
   stopLocalMcpServer
 } from './mcp.js'
@@ -124,7 +127,7 @@ export function registerAgentCommands(mainWindow) {
       // 4. 构造 LLM 输入：如果有 @ 引用附件，替换为 LLM 完整格式
       //    Agent 模式只列名称，由 Agent 自主调用工具读取内容
       const userContent = (attachments && attachments.length > 0)
-        ? buildLlmMessage(message, attachments, 'agent')
+        ? await buildLlmMessage(message, attachments, 'agent')
         : message
 
       // 4. 创建带上下文的 Agent
@@ -367,6 +370,10 @@ export function registerAgentCommands(mainWindow) {
   ipcMain.handle('mcp-get-local-config', async () => {
     return getLocalMcpConfig()
   })
+
+  ipcMain.handle('mcp-pair-client', async (_event, args) => pairLocalMcpClient(args))
+  ipcMain.handle('mcp-list-clients', async () => listLocalMcpClients())
+  ipcMain.handle('mcp-revoke-client', async (_event, args) => revokeLocalMcpClient(args?.id))
 
   ipcMain.handle('mcp-local-toggle', async (_event, args) => {
     const enabled = !!args?.enabled

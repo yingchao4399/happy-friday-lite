@@ -124,7 +124,7 @@ registerTool({
   description: '创建一条新的日程事件。',
   schema: createEventSchema,
   handler: createEventHandler,
-  meta: { requireApproval: false, exposedViaMcp: true } // 创建日程免审批，避免审批超时拒绝
+  meta: { requireApproval: false, exposedViaMcp: true, capabilityType: 'write' } // Friday 内免逐次审批，外部主体仍需写入授权
 })
 
 // ========== update_event ==========

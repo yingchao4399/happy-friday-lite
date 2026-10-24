@@ -60,6 +60,15 @@ function writePointer(dataDir, migrated) {
  * @returns {{ dataDir: string, isCustom: boolean, defaultDir: string, pendingMigration: boolean }}
  */
 export function resolveDataDir() {
+  // 显式启动目录用于便携运行和隔离验证；不修改用户保存的目录指针。
+  const launchDirectory = app.commandLine.getSwitchValue('friday-data-dir')
+  if (launchDirectory) {
+    if (!path.isAbsolute(launchDirectory)) throw AppError.config('--friday-data-dir must be an absolute path')
+    const dataDir = path.resolve(launchDirectory)
+    fs.mkdirSync(dataDir, { recursive: true })
+    fs.accessSync(dataDir, fs.constants.R_OK | fs.constants.W_OK)
+    return { dataDir, isCustom: true, defaultDir: defaultDataDir, pendingMigration: false }
+  }
   const pointer = readPointer()
   if (pointer) {
     const custom = pointer.dataDir
@@ -87,7 +96,7 @@ export function resolveDataDir() {
 
 /** 生产环境且使用自定义目录时，重定向 userData（须在 requestSingleInstanceLock 之前调用） */
 export function applyUserDataRedirect(dataDir, isCustom) {
-  if (!isDev && isCustom && dataDir !== app.getPath('userData')) {
+  if ((!isDev || app.commandLine.hasSwitch('friday-data-dir')) && isCustom && dataDir !== app.getPath('userData')) {
     app.setPath('userData', dataDir)
   }
 }

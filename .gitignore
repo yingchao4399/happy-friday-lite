@@ -55,4 +55,11 @@ release/
 !README.md
 !README.zh-CN.md
 !AGENTS.md
+!docs/clipboard-creation-acceptance-2026-10-23.md
+!docs/Friday-3.0.6-preview.1-UI-UX-parity-audit.md
+!docs/Friday-preview-delivery-status.md
+!docs/Data-trash-module-order-acceptance-2026-10-24.md
+!docs/*-acceptance-2026-10-24.md
+!docs/DSH-runtime-root-cause-2026-10-24.md
+!docs/Delivery-readiness-audit-2026-10-24.md
 .codegraph/

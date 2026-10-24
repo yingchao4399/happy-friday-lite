@@ -33,6 +33,7 @@ import { useTheme } from '@/utils/theme';
 import { resolveFridayTabPath } from '@/utils/fridayNavigation';
 import { openMarkdownAsNotePage } from '@/utils/markdownImport';
 import { restoreSession, scheduleSessionSave, flushSessionSave } from '@/utils/tabSession';
+import { routeHorizontalWheel } from '@/utils/tabNavigation';
 import { useKnowledgeStore } from '@/store';
 
 const appStore = useAppStore();
@@ -58,8 +59,10 @@ const routerViewKey = computed(() => {
 let unlistenConfig = null;
 let unlistenOfficeOpened = null;
 let unlistenOpenFileRequest = null;
+let unlistenClipboardHotkey = null;
 let sessionSaveUnwatch = null;
 let unlistenBeforeUnload = null;
+const onHorizontalWheel = (event) => routeHorizontalWheel(event);
 
 /** 系统打开文件请求 → 路由到应用内对应查看器/编辑器 */
 async function handleOsOpenFile(filePath) {
@@ -185,6 +188,10 @@ watch(
 
 onMounted(async () => {
   initTheme();
+  // 统一处理应用内所有横向溢出区域（笔记表格、代码、Markdown 预览等）。
+  // TabBar 自己管理选项卡滚轮，工具函数会跳过该区域。
+  document.addEventListener('wheel', onHorizontalWheel, { capture: true, passive: false });
+  if (isElectronEnvironment()) unlistenClipboardHotkey = electronService.listen('clipboard-hotkey', ({ payload }) => router.push(payload?.noteId ? '/note/' + encodeURIComponent(payload.noteId) : '/clipboard'));
 
   if (isElectronEnvironment()) {
     let config = null;
@@ -216,6 +223,7 @@ onMounted(async () => {
           appStore.setDocOpenModes(config.docOpenModes);
         }
         appStore.setSidebarModules(config.sidebarModules);
+        appStore.setModuleOrder(config.moduleOrder);
         // 启动时默认收起侧边栏
         if (config.collapseSidebarOnLaunch) {
           appStore.setSidebarVisible(false);
@@ -311,6 +319,7 @@ onMounted(async () => {
       if (data.sidebarModules !== undefined) {
         appStore.setSidebarModules(data.sidebarModules);
       }
+      if (data.moduleOrder !== undefined) appStore.setModuleOrder(data.moduleOrder);
     });
   } else {
     console.log('Running in browser mode, Electron APIs are disabled.');
@@ -318,6 +327,8 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  document.removeEventListener('wheel', onHorizontalWheel, true);
+  unlistenClipboardHotkey?.();
   if (unlistenConfig) {
     unlistenConfig();
     unlistenConfig = null;

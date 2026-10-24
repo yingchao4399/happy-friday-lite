@@ -1,5 +1,8 @@
 {
   "title": "DeepSeek Harness",
+  "failedStage": "Failed stage",
+  "logLocation": "Log directory",
+  "phase": { "dependencies": "Checking runtime dependencies", "configuration": "Loading model configuration", "mcp": "Initializing MCP", "plugins": "Loading plugin tree and waiting for service", "ready": "Service ready" },
   "starting": "Starting DeepSeek Harness",
   "startingDetail": "Syncing the shared model configuration and connecting Happy Friday tools.",
   "modelRequired": "Model configuration required",

@@ -43,6 +43,10 @@ import {
   runAutomationTaskNow
 } from './automation.js'
 import { registerObsidianCommands } from './obsidian/ipc.js'
+import { registerRecitationCommands } from './recitation-ipc.js'
+import { deleteNoteToTrash, deleteResourceToTrash, listTrashEntries, restoreTrashEntry, exportTrashEntry, permanentlyDeleteTrashEntry } from './trash.js'
+import { saveKnowledgeNoteReference } from './knowledge-note-reference.js'
+import { listKnowledgeCategories, createKnowledgeCategory, renameKnowledgeCategory, moveKnowledgeCategory, deleteKnowledgeCategory, moveKnowledgeBase, validateKnowledgeName } from './knowledge-categories.js'
 
 const cancelTokens = new CancellationTokens()
 
@@ -159,6 +163,19 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('get-config', () => {
     return loadConfig()
+  })
+
+  ipcMain.handle('module-order-save', (_event, args) => {
+    const allowed = new Set(['clipboard', 'recitation', 'note', 'drawing', 'knowledge', 'office', 'schedule', 'automation', 'harness'])
+    if (!Array.isArray(args?.ids) || args.ids.some(id => !allowed.has(id))) throw new Error('模块排序参数无效')
+    const ids = [...new Set(args.ids)]
+    const config = loadConfig()
+    config.moduleOrder = ids
+    saveConfig(config)
+    db.queryAllRaw('DELETE FROM module_order')
+    ids.forEach((id, index) => db.queryAllRaw('INSERT INTO module_order VALUES (?, ?)', [id, index]))
+    mainWindow.webContents.send(CONFIG_CHANGED, config)
+    return { ok: true, data: ids, warnings: [], error: null, affectedResources: ['settings:module-order'], undo: null }
   })
 
   ipcMain.handle('save-config', (_event, config) => {
@@ -410,7 +427,7 @@ export function registerCommands(mainWindow) {
       // 如果有 @ 引用附件，将最后一条用户消息替换为 LLM 完整格式（含引用内容）
       // 数据库仍存储简洁格式，仅 LLM 输入使用完整格式
       if (attachments && attachments.length > 0) {
-        const llmContent = buildLlmMessage(message, attachments, 'chat')
+        const llmContent = await buildLlmMessage(message, attachments, 'chat')
         historyMessages = historyMessages.slice(0, -1)
         historyMessages.push({ role: 'user', content: llmContent })
       }
@@ -494,7 +511,7 @@ export function registerCommands(mainWindow) {
       const appConfig = loadConfig()
       // 如果有 @ 引用附件，将用户消息替换为 LLM 完整格式（含引用内容）
       const userContent = (attachments && attachments.length > 0)
-        ? buildLlmMessage(message, attachments, 'memoryless')
+        ? await buildLlmMessage(message, attachments, 'memoryless')
         : message
       const messages = [
         { role: 'system', content: appConfig.systemPrompt },
@@ -564,6 +581,11 @@ export function registerCommands(mainWindow) {
     return db.getNote(args.noteId)
   })
 
+  ipcMain.handle('toggle_note_pinned', (_event, args) => {
+    if (typeof args?.isPinned !== 'boolean') throw new Error('置顶参数无效')
+    return db.setNotePinned(args.noteId, args.isPinned)
+  })
+
   ipcMain.handle('create_note', (_event, args) => {
     return db.createNote(args?.knowledgeBaseId, args?.notebookId, args?.title)
   })
@@ -583,17 +605,51 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('delete_note', (_event, args) => {
-    const result = db.softDeleteNote(args.noteId)
-    // 笔记删除时同步删除关联的 .note 文件
-    if (result) {
-      syncNoteRefOnDelete(args.noteId)
-    }
+    const result = deleteNoteToTrash(args.noteId)
+    if (result) mainWindow.webContents.send('trash-changed', { kind: 'note' })
     return result
+  })
+
+  ipcMain.handle('trash-list', (_event, args) => listTrashEntries(args || {}))
+  ipcMain.handle('trash-restore', async (_event, args) => {
+    let targetDir
+    if (args?.chooseLocation) {
+      const picked = await dialog.showOpenDialog(mainWindow, { title: args.dialogTitle, properties: ['openDirectory', 'createDirectory'] })
+      if (picked.canceled || !picked.filePaths[0]) return { ok: true, canceled: true }
+      targetDir = picked.filePaths[0]
+    }
+    if (!Array.isArray(args?.ids) || !args.ids.length || args.ids.length > 1000) throw new Error('Invalid trash selection')
+    const results = args.ids.map(id => {
+      try { return { id, ...restoreTrashEntry(id, { targetDir, withoutNotebook: args.withoutNotebook === true }) } }
+      catch (error) { return { id, ok: false, code: error.code || 'TRASH_RESTORE_FAILED' } }
+    })
+    mainWindow.webContents.send('trash-changed', {})
+    mainWindow.webContents.send('resource-changed', { action: 'restore', results })
+    return { ok: true, results }
+  })
+  ipcMain.handle('trash-export', async (_event, args) => {
+    const entry = listTrashEntries().find(item => item.id === args?.id)
+    if (!entry) throw new Error('TRASH_NOT_FOUND')
+    const picked = await dialog.showOpenDialog(mainWindow, { title: args.dialogTitle, properties: ['openDirectory', 'createDirectory'] })
+    if (picked.canceled || !picked.filePaths[0]) return { ok: true, canceled: true }
+    const fileName = (entry.kind === 'note' ? entry.title + '.txt' : entry.title).replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').replace(/[. ]+$/g, '') || entry.id
+    return exportTrashEntry(entry.id, path.join(picked.filePaths[0], fileName))
+  })
+  ipcMain.handle('trash-delete-permanent', (_event, args) => {
+    if (args?.confirmed !== true || !Array.isArray(args.ids) || !args.ids.length || args.ids.length > 1000) throw new Error('Invalid confirmed trash selection')
+    const results = args.ids.map(id => {
+      try { return { id, ...permanentlyDeleteTrashEntry(id) } }
+      catch (error) { return { id, ok: false, code: error.code || 'TRASH_DELETE_FAILED' } }
+    })
+    mainWindow.webContents.send('trash-changed', {})
+    return { ok: true, results }
   })
 
   ipcMain.handle('search_notes', (_event, args) => {
     return db.searchNotes(args.query)
   })
+
+  registerRecitationCommands(ipcMain)
 
   ipcMain.handle('get_schedule_events', () => {
     return db.getScheduleEvents()
@@ -790,6 +846,22 @@ export function registerCommands(mainWindow) {
   })
 
   // ========== 知识库文件系统命令 ==========
+
+  const knowledgeResult = action => {
+    try {
+      const data = action()
+      mainWindow.webContents.send('resource-changed', { kind: 'knowledge', action: 'category-changed' })
+      return { success: true, data }
+    }
+    catch (error) { return { success: false, error: error.message } }
+  }
+
+  ipcMain.handle('kb-list-categories', () => ({ success: true, data: listKnowledgeCategories(getDataDir()) }))
+  ipcMain.handle('kb-create-category', (_event, args) => knowledgeResult(() => createKnowledgeCategory(getDataDir(), args?.name)))
+  ipcMain.handle('kb-rename-category', (_event, args) => knowledgeResult(() => renameKnowledgeCategory(getDataDir(), args?.id, args?.name)))
+  ipcMain.handle('kb-move-category', (_event, args) => knowledgeResult(() => moveKnowledgeCategory(getDataDir(), args?.id, args?.direction)))
+  ipcMain.handle('kb-delete-category', (_event, args) => knowledgeResult(() => deleteKnowledgeCategory(getDataDir(), args?.id)))
+  ipcMain.handle('kb-move-knowledge-base', (_event, args) => knowledgeResult(() => moveKnowledgeBase(getDataDir(), args?.sourceCategoryId, args?.targetCategoryId, args?.name)))
 
   ipcMain.handle('kb-get-data-dir', () => {
     return getDataDir()
@@ -1101,23 +1173,12 @@ export function registerCommands(mainWindow) {
   // 将笔记作为 .note 元数据文件保存到指定目录（实时引用，非快照）
   // 文件名使用 noteId（永不变），显示名从 JSON 的 title 读取
   ipcMain.handle('kb-save-note', async (_event, args) => {
-    const { noteId, title, destDir } = args
-    if (!destDir) return { success: false, error: 'Missing destDir' }
-    if (!noteId) return { success: false, error: 'Missing noteId' }
     try {
-      const fileName = `${noteId}.note`
-      const filePath = path.join(destDir, fileName)
-
-      const meta = {
-        type: 'note-ref',
-        noteId,
-        title: title || '未命名笔记',
-        exportedAt: new Date().toISOString()
-      }
-      fs.writeFileSync(filePath, JSON.stringify(meta, null, 2), 'utf-8')
-      return { success: true, path: filePath, fileName }
+      const result = saveKnowledgeNoteReference({ noteId: args?.noteId, destDir: args?.destDir, dataDir: getDataDir() })
+      mainWindow.webContents.send('resource-changed', { kind: 'knowledge', action: 'note-added', noteId: args.noteId, path: result.path })
+      return result
     } catch (e) {
-      return { success: false, error: e.message }
+      return { success: false, code: e.code || 'KB_NOTE_SAVE_FAILED', error: e.message }
     }
   })
 
@@ -1125,10 +1186,9 @@ export function registerCommands(mainWindow) {
     const dirPath = args.dirPath
     if (!dirPath) return { success: false, error: 'No path provided' }
     try {
-      if (fs.existsSync(dirPath)) {
-        fs.rmSync(dirPath, { recursive: true, force: true })
-      }
-      return { success: true }
+      const result = deleteResourceToTrash(dirPath)
+      mainWindow.webContents.send('trash-changed', { kind: 'knowledge' })
+      return result
     } catch (e) {
       return { success: false, error: e.message }
     }
@@ -1138,9 +1198,10 @@ export function registerCommands(mainWindow) {
     const { oldPath, newPath } = args
     if (!oldPath || !newPath) return { success: false, error: 'Missing parameters' }
     try {
-      if (fs.existsSync(oldPath)) {
-        fs.renameSync(oldPath, newPath)
-      }
+      if (!fs.existsSync(oldPath)) return { success: false, error: '原文件或目录不存在' }
+      validateKnowledgeName(path.basename(newPath))
+      if (fs.existsSync(newPath)) return { success: false, error: '目标名称已存在' }
+      fs.renameSync(oldPath, newPath)
       return { success: true }
     } catch (e) {
       return { success: false, error: e.message }
@@ -1194,6 +1255,20 @@ export function registerCommands(mainWindow) {
     } catch (e) {
       return { success: false, error: e.message }
     }
+  })
+
+  ipcMain.handle('get-resource-preview', async (_event, args) => {
+    const { pathToFileURL } = await import('node:url')
+    const { readResource } = await import('./agent/resources.js')
+    return readResource(pathToFileURL(args.filePath).href)
+  })
+
+  ipcMain.handle('transcribe-resource-local', async (_event, args) => {
+    const { pathToFileURL } = await import('node:url')
+    const { getResource } = await import('./agent/resources.js')
+    const { transcribeMedia } = await import('./rag/mediaTranscription.js')
+    const resource = getResource(pathToFileURL(args.filePath).href)
+    return transcribeMedia(resource.path, 'windows-local')
   })
 
   ipcMain.handle('kb-open-file-external', async (_event, args) => {

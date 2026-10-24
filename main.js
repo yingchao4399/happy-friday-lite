@@ -5,7 +5,7 @@ import fs from 'fs'
 import { setDataDir as setConfigDataDir } from './src-electron/config.js'
 import { setDataDir as setDbDataDir, initDb, closeDb } from './src-electron/db.js'
 import { registerCommands } from './src-electron/commands.js'
-import { checkAutoBackup } from './src-electron/backup.js'
+import { checkAutoBackup, createUpgradeSnapshot, setRestoreLifecycle } from './src-electron/backup.js'
 import { checkAutoCleanHistory } from './src-electron/historyClean.js'
 import { initPythonEnv } from './src-electron/python-env.js'
 import { startKnowledgeWatcher } from './src-electron/fileWatcher.js'
@@ -20,6 +20,8 @@ import { isHeadlessExportRun, runHeadlessExportEntry } from './src-electron/offi
 import { startObsidianScheduler, stopObsidianScheduler } from './src-electron/obsidian/scheduler.js'
 import { resolveDataDir, applyUserDataRedirect, migrateDataIfNeeded } from './src-electron/data-dir.js'
 import { initSession, registerSessionIpc } from './src-electron/session.js'
+import { registerClipboardCommands, startClipboardCapture, stopClipboardCapture } from './src-electron/clipboard.js'
+import { installIpcCapabilityGateway } from './src-electron/agent/ipcGateway.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -71,6 +73,19 @@ let mainWindow = null
 let kbWatcherHandle = null
 let powerBlockerId = null
 let shutdownStarted = false
+setRestoreLifecycle({
+  async beforeRestore() {
+    kbWatcherHandle?.close()
+    kbWatcherHandle = null
+    const { clearStoreCache } = await import('./src-electron/rag/vectorstore.js')
+    clearStoreCache()
+    await new Promise(resolve => setImmediate(resolve))
+  },
+  afterRestore() {
+    if (mainWindow && !mainWindow.isDestroyed()) kbWatcherHandle = startKnowledgeWatcher(mainWindow, resolvedDataDir.dataDir)
+  }
+})
+installIpcCapabilityGateway(ipcMain, () => mainWindow)
 
 if (!headlessExportRun) {
   // 系统打开文件请求：macOS open-file 事件 / Windows、Linux second-instance argv。
@@ -154,6 +169,10 @@ async function ensureDataDir() {
   setDbDataDir(dataDir)
   initSession(dataDir)
   registerSessionIpc()
+  if (app.isPackaged) {
+    const snapshot = await createUpgradeSnapshot(dataDir, app.getVersion())
+    if (snapshot) console.log(`[Main] Upgrade snapshot: ${snapshot}`)
+  }
   await initDb()
 
   return dataDir
@@ -179,8 +198,17 @@ function createWindow() {
   })
 
   mainWindow.once('ready-to-show', () => {
+    console.log('[Main] 主窗口 ready-to-show')
     mainWindow.show()
   })
+  mainWindow.webContents.on('did-finish-load', () => console.log('[Main] 主窗口页面加载完成'))
+  mainWindow.webContents.on('did-fail-load', (_event, code, description, _url, isMainFrame) => {
+    if (isMainFrame) console.error('[Main] 主窗口页面加载失败:', code, description)
+  })
+  mainWindow.webContents.on('render-process-gone', (_event, details) => console.error('[Main] 主窗口渲染进程退出:', details.reason, details.exitCode))
+  // 隐藏浮窗也属于 BrowserWindow；主窗口真正关闭时仍应完成 Windows 退出流程。
+  mainWindow.once('closed', () => { mainWindow = null; if (process.platform !== 'darwin') app.quit() })
+  mainWindow.on('unresponsive', () => console.error('[Main] 主窗口无响应，请检查日志并重启应用'))
 
   Menu.setApplicationMenu(null)
 
@@ -195,10 +223,10 @@ function createWindow() {
   })
 
   if (isDev) {
-    mainWindow.loadURL('http://localhost:5173')
-    mainWindow.webContents.openDevTools()
+    mainWindow.loadURL('http://localhost:5173').catch(error => console.error('[Main] 开发页面加载失败:', error.message))
+    if (process.env.FRIDAY_DEVTOOLS === '1') mainWindow.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(path.join(__dirname, 'dist/index.html'))
+    mainWindow.loadFile(path.join(__dirname, 'dist/index.html')).catch(error => console.error('[Main] 安装页面加载失败:', error.message))
   }
 }
 
@@ -240,6 +268,8 @@ app.whenReady().then(async () => {
   console.log('[Main] Registering IPC commands...')
   try {
     registerCommands(mainWindow)
+    registerClipboardCommands(mainWindow)
+    startClipboardCapture(mainWindow)
     console.log('[Main] ✅ IPC commands registered successfully')
   } catch (error) {
     console.error('[Main] ❌ Failed to register IPC commands:', error)
@@ -341,6 +371,7 @@ app.on('window-all-closed', function () {
   stopAutomationScheduler()
   stopObsidianScheduler()
   stopReminderScheduler()
+  stopClipboardCapture()
   closeDb()
   if (process.platform !== 'darwin') {
     app.quit()

@@ -27,6 +27,7 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
   const currentCategoryName = ref('');
   const kbNameInputRef = ref(null);
   const editingKBId = ref(null);
+  const operationError = ref('');
 
   const newKB = reactive({
     name: '',
@@ -37,19 +38,41 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
   // 从磁盘目录扫描知识库列表
   async function loadCategoriesFromDisk() {
     if (!api || !fileSystem.dataDir.value) return;
+    const custom = await api.invoke('kb-list-categories');
+    if (custom?.success) {
+      const ids = new Set(custom.data.map(item => item.id));
+      for (let i = categories.length - 1; i >= 0; i--) {
+        if (!DEFAULT_CATEGORIES.some(item => item.id === categories[i].id) && !ids.has(categories[i].id)) categories.splice(i, 1);
+      }
+      custom.data.forEach((item, index) => {
+        const existing = categories.find(category => category.id === item.id);
+        if (existing) {
+          existing.name = item.name;
+          const oldIndex = categories.indexOf(existing);
+          categories.splice(oldIndex, 1);
+          categories.splice(DEFAULT_CATEGORIES.length + index, 0, existing);
+        } else categories.splice(DEFAULT_CATEGORIES.length + index, 0, { ...item, expanded: true, items: [] });
+      });
+    }
     const baseDir = fileSystem.dataDir.value + '/knowledge';
     for (const category of categories) {
       const catDir = baseDir + '/' + category.id;
       try {
-        await api.invoke('kb-create-dir', { dirPath: catDir });
+        const isDefaultCategory = DEFAULT_CATEGORIES.some(item => item.id === category.id);
+        const isFirstLoad = isDefaultCategory && !(await api.invoke('kb-path-exists', { path: catDir }));
+        if (isDefaultCategory) {
+          const result = await api.invoke('kb-create-dir', { dirPath: catDir });
+          if (!result?.success) throw new Error(result?.error || '创建分类目录失败');
+        }
 
         // 确保默认知识库文件夹存在于磁盘上
-        for (const item of category.items) {
+        for (const item of isFirstLoad ? category.items.filter(item => DEFAULT_CATEGORIES.some(defaultCategory => defaultCategory.id === category.id && defaultCategory.items.some(defaultItem => defaultItem.id === item.id))) : []) {
           const kbDir = catDir + '/' + item.name;
           await api.invoke('kb-create-dir', { dirPath: kbDir });
         }
 
         const entries = await api.invoke('kb-read-dir', { dirPath: catDir });
+        category.items.splice(0, category.items.length, ...category.items.filter(item => item.protected || entries.some(entry => entry.isDirectory && entry.name === item.name)));
         // 只添加磁盘上存在但列表中没有的文件夹
         for (const entry of entries) {
           if (entry.isDirectory && !category.items.some(i => i.name === entry.name)) {
@@ -158,10 +181,14 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
 
   async function confirmCreateKB() {
     if (!newKB.name.trim()) return;
+    operationError.value = '';
 
     const category = categories.find(c => c.id === currentCategoryId.value);
     if (!category) return;
 
+    try {
+    if (/[<>:"/\\|?*\x00-\x1f]/.test(newKB.name) || /[. ]$/.test(newKB.name.trim()) || newKB.name.trim().length > 80) throw new Error('知识库名称无效');
+    if (category.items.some(item => item.id !== editingKBId.value && item.name.toLocaleLowerCase() === newKB.name.trim().toLocaleLowerCase())) throw new Error('同一分类中已存在同名知识库');
     if (editingKBId.value) {
       const item = category.items.find(i => i.id === editingKBId.value);
       if (item) {
@@ -173,7 +200,8 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
           const oldPath = fileSystem.dataDir.value + '/knowledge/' + currentCategoryId.value + '/' + oldName;
           const newPath = fileSystem.dataDir.value + '/knowledge/' + currentCategoryId.value + '/' + newName;
           try {
-            await api.invoke('kb-rename-dir', { oldPath, newPath });
+            const result = await api.invoke('kb-rename-dir', { oldPath, newPath });
+            if (!result?.success) throw new Error(result?.error || '重命名失败');
             // 如果当前正在浏览该知识库，更新路径
             if (selectedKB.value === item.id) {
               const newKbDir = newPath;
@@ -182,9 +210,7 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
                 fileSystem.currentPath.value = fileSystem.currentPath.value.replace(oldPath, newPath);
               }
             }
-          } catch (e) {
-            console.error('Failed to rename kb dir:', e);
-          }
+          } catch (e) { throw e; }
         }
 
         item.name = newName;
@@ -202,22 +228,20 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
         description: newKB.description.trim(),
         coverIndex: newKB.coverIndex
       };
-      category.items.push(newItem);
-      selectedKB.value = newId;
-      currentTitle.value = newKB.name.trim();
-
       if (window.electronAPI && fileSystem.dataDir.value) {
         const kbDir = fileSystem.dataDir.value + '/knowledge/' + currentCategoryId.value + '/' + newItem.name;
+        if (await api.invoke('kb-path-exists', { path: kbDir })) throw new Error('同名知识库目录已存在');
+        const result = await api.invoke('kb-create-dir', { dirPath: kbDir });
+        if (!result?.success) throw new Error(result?.error || '创建失败');
         fileSystem.kbRootPath.value = kbDir;
-        try {
-          await window.electronAPI.invoke('kb-create-dir', { dirPath: kbDir });
-        } catch (e) {
-          console.error('Failed to create kb dir:', e);
-        }
         await fileSystem.navigateTo(kbDir);
       }
+      category.items.push(newItem);
+      selectedKB.value = newId;
+      currentTitle.value = newItem.name;
     }
     closeCreateDialog();
+    } catch (error) { operationError.value = error.message; }
   }
 
   function editKnowledgeBase(contextMenu) {
@@ -259,9 +283,11 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
       if (api && fileSystem.dataDir.value) {
         const kbDir = fileSystem.dataDir.value + '/knowledge/' + categoryId + '/' + contextMenu.item.name;
         try {
-          await api.invoke('kb-delete-dir', { dirPath: kbDir });
+          const result = await api.invoke('kb-delete-dir', { dirPath: kbDir });
+          if (!result?.success) throw new Error(result?.error || '删除失败');
         } catch (e) {
-          console.error('Failed to delete kb dir:', e);
+          operationError.value = e.message;
+          return;
         }
       }
 
@@ -272,6 +298,43 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
         fileSystem.resetNavigation();
       }
     }
+  }
+
+  async function changeCategory(action, args) {
+    operationError.value = '';
+    const result = await api.invoke(`kb-${action}-category`, args);
+    if (!result?.success || result.data?.success === false) {
+      operationError.value = result?.error || result.data?.error || '分类操作失败';
+      return false;
+    }
+    if (action === 'delete' && currentCategoryId.value === args.id) {
+      selectedKB.value = '';
+      currentCategoryId.value = '';
+      currentTitle.value = '知识库';
+      fileSystem.resetNavigation();
+    }
+    await loadCategoriesFromDisk();
+    return true;
+  }
+
+  async function moveKnowledgeBaseTo(item, sourceCategoryId, targetCategoryId) {
+    operationError.value = '';
+    const result = await api.invoke('kb-move-knowledge-base', { name: item.name, sourceCategoryId, targetCategoryId });
+    if (!result?.success) {
+      operationError.value = result?.error || '移动失败';
+      return false;
+    }
+    const wasSelected = selectedKB.value === item.id;
+    if (wasSelected) {
+      selectedKB.value = '';
+      fileSystem.resetNavigation();
+    }
+    await loadCategoriesFromDisk();
+    if (wasSelected) {
+      const moved = categories.find(category => category.id === targetCategoryId)?.items.find(entry => entry.name === item.name);
+      if (moved) await selectKnowledgeBase(moved.id, moved.name, targetCategoryId);
+    }
+    return true;
   }
 
   return {
@@ -294,6 +357,9 @@ export function useKnowledgeBase(fileSystem, sidebar, t = key => key) {
     closeCreateDialog,
     confirmCreateKB,
     editKnowledgeBase,
-    deleteKnowledgeBase
+    deleteKnowledgeBase,
+    changeCategory,
+    moveKnowledgeBaseTo,
+    operationError
   };
 }

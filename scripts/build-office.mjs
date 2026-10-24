@@ -30,11 +30,19 @@ const SKIP_NATIVE = process.argv.includes('--skip-native')
 const SKIP_CLI = process.argv.includes('--skip-cli')
 
 function run(cmd, args, opts = {}) {
+  // Do not use a shell for direct process launches on Windows.  The previous
+  // shell based invocation let cmd.exe split a quoted manifest path at the
+  // spaces in the workspace name ("Happy Friday"), so cargo received a
+  // stray `Friday` argument and the Office build failed before compiling.
+  // npm/npx are .cmd shims on Windows and need shell dispatch. Native
+  // executables such as cargo stay shell-free so arguments containing spaces
+  // remain a single argument.
+  const shell = process.platform === 'win32' && ['npm', 'npx'].includes(cmd)
   const res = spawnSync(cmd, args, {
     stdio: 'inherit',
     cwd: opts.cwd || ROOT,
     env: { ...process.env, ...(opts.env || {}) },
-    shell: process.platform === 'win32',
+    shell,
   })
   if (res.status !== 0) {
     throw new Error(`${cmd} ${args.join(' ')} failed with code ${res.status}`)
@@ -58,7 +66,12 @@ function copyDir(src, dest) {
 // ---- 1. Rust sidecar -------------------------------------------------------
 
 function buildSidecar() {
-  if (SKIP_NATIVE) return null
+  // 跳过编译仍需保留已构建的引擎，stage 会重建 sheets 目录。
+  // 否则一次只改 UI 的构建会静默移除表格运行必需的 sidecar。
+  if (SKIP_NATIVE) {
+    const existing = path.join(OFFICE_ROOT, 'native', process.platform === 'win32' ? 'xlsx-sidecar.exe' : 'xlsx-sidecar')
+    return fs.existsSync(existing) ? existing : null
+  }
   const cargoManifest = path.join(VENDOR, 'apps', 'sheets', 'native', 'xlsx-engine', 'Cargo.toml')
   if (!fs.existsSync(cargoManifest)) return null
   const cargo = spawnSync('cargo', ['--version'], { encoding: 'utf8' })
@@ -184,10 +197,10 @@ async function buildMainBundles() {
       format: 'cjs',
       target: 'node22',
       outfile: path.join(outDir, editor === 'office-utils' ? 'office-utils.cjs' : `${editor}-main.cjs`),
-      // pdf ocr.ts / wasm-path.ts 依赖 import.meta.url（CJS 输出下退化为空），
-      // 用 bundle 自身的 file URL 替代，使 createRequire 仍指向 bundle 位置
+      // CJS 的位置必须运行时计算；写死开发目录会让安装版及目录迁移失效。
+      banner: { js: "const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;" },
       define: {
-        'import.meta.url': JSON.stringify(`file://${path.join(outDir, `${editor}-main.cjs`)}`),
+        'import.meta.url': '__fridayBundleUrl',
       },
       external: ['electron'],
       alias: {
@@ -216,7 +229,7 @@ function buildCli() {
 
 // ---- 4. Stage artifacts ------------------------------------------------------
 
-function stage(sidecarBin) {
+function stage(sidecarBin, ocrHelper, printHelper) {
   console.log('[office] Staging artifacts into resources/office…')
   for (const editor of EDITORS) {
     const out = path.join(VENDOR, 'apps', editor, 'out')
@@ -226,6 +239,16 @@ function stage(sidecarBin) {
     copyDir(path.join(out, 'preload'), path.join(dest, 'preload'))
     copyDir(path.join(out, 'renderer'), path.join(dest, 'renderer'))
   }
+  if (ocrHelper) {
+    const ocrDir = path.join(OFFICE_ROOT, 'ocr')
+    fs.mkdirSync(ocrDir, { recursive: true })
+    fs.copyFileSync(ocrHelper, path.join(ocrDir, path.basename(ocrHelper)))
+  }
+  if (printHelper) {
+    const nativeDir = path.join(OFFICE_ROOT, 'native')
+    fs.mkdirSync(nativeDir, { recursive: true })
+    fs.copyFileSync(printHelper, path.join(nativeDir, path.basename(printHelper)))
+  }
   if (sidecarBin) {
     const sidecarDir = path.join(OFFICE_ROOT, 'sheets', 'sidecar')
     fs.mkdirSync(sidecarDir, { recursive: true })
@@ -234,6 +257,8 @@ function stage(sidecarBin) {
     const nativeDir = path.join(OFFICE_ROOT, 'native')
     fs.mkdirSync(nativeDir, { recursive: true })
     fs.copyFileSync(sidecarBin, path.join(nativeDir, path.basename(sidecarBin)))
+    const foreignSidecar = path.join(nativeDir, process.platform === 'win32' ? 'xlsx-sidecar' : 'xlsx-sidecar.exe')
+    if (fs.existsSync(foreignSidecar)) fs.unlinkSync(foreignSidecar)
   }
   // happyfriday-office CLI：单 CJS bundle + 旁置 jsdom 依赖树
   if (!SKIP_CLI) {
@@ -300,19 +325,30 @@ function stageSkill() {
 
 // ---- Main -------------------------------------------------------------------
 
-function main() {
+async function main() {
   if (!fs.existsSync(path.join(VENDOR, 'apps'))) {
     console.error('[office] vendor/happyoffice is missing. Run: git submodule update --init vendor/happyoffice')
     process.exit(1)
   }
   ensureVendorDeps()
   const sidecarBin = buildSidecar()
+  let ocrHelper = null
+  let printHelper = null
+  if (process.platform === 'win32') {
+    // 本产品不执行上游 shell 的打包钩子，必须在自己的构建链内生成 OCR 引擎。
+    run(process.execPath, [path.join(VENDOR, 'packages', 'pdf2docx', 'ocr-helper', 'build-win.mjs')])
+    ocrHelper = path.join(VENDOR, 'packages', 'pdf2docx', 'ocr-helper', 'win-ocr.exe')
+    if (!fs.existsSync(ocrHelper)) throw new Error('Windows OCR helper missing')
+    run(process.execPath, [path.join(VENDOR, 'packages', 'electron-utils', 'native', 'build-win.mjs')])
+    printHelper = path.join(VENDOR, 'packages', 'electron-utils', 'native', 'system-print.exe')
+    if (!fs.existsSync(printHelper)) throw new Error('Windows print helper missing')
+  }
   buildEditorApps()
-  buildMainBundles()
+  await buildMainBundles()
   buildCli()
-  stage(sidecarBin)
+  stage(sidecarBin, ocrHelper, printHelper)
   stageSkill()
   console.log('[office] Done. Artifacts staged in resources/office')
 }
 
-main()
+main().catch(error => { console.error(error); process.exitCode = 1 })

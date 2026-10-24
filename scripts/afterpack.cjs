@@ -6,8 +6,7 @@
 //      optionalDependencies for the BUILD machine but never used at runtime
 //      on the target (e.g. @zvec/bindings-darwin-arm64 inside a Linux build,
 //      ~41-94MB of dead weight; same for @img/sharp-* and @img/libvips-*).
-//   2. LICENSES.chromium.html (~19MB, Electron ships it at the app root).
-//   3. Restores manually-hoisted nested modules (see dedupe-nested-deps.mjs):
+//   2. Restores manually-hoisted nested modules (see dedupe-nested-deps.mjs):
 //      electron-builder's dependency collector resolves deps against its own
 //      computed tree and skips our `node_modules/<scope>/node_modules/<name>`
 //      hoisted copies, which would break resolution at runtime (e.g. dsh
@@ -17,6 +16,8 @@
 // the asar-contained parts must be handled differently.
 const fs = require("node:fs");
 const path = require("node:path");
+const { spawnSync } = require("node:child_process");
+const { stageThirdPartyNotices } = require("./third-party-notices.cjs");
 const { verifyKoffiNative } = require("./koffi-native.cjs");
 const { restoreSharpNative, verifySharpNative } = require("./sharp-native.cjs");
 const {
@@ -388,12 +389,24 @@ exports.default = async function afterPack(context) {
   // Fail before producing installers if Koffi JS and native packages disagree.
   verifyKoffiNative(packagedNodeModules, platform, arch);
 
-  // 2. Chromium license file at app root (linux/win) — mac keeps it inside
-  //    the framework, which we do not touch.
-  const licenses = path.join(appBundleDir, "LICENSES.chromium.html");
-  if (fs.existsSync(licenses)) {
-    rmrf(licenses);
-    stats.push("LICENSES.chromium.html");
+  // 保留 Electron 自带 notices，并以当前 Office 源码重新生成聚合文件。
+  const projectDir = path.join(__dirname, "..");
+  const officeRoot = path.join(projectDir, "vendor", "happyoffice");
+  const noticeGeneration = spawnSync(process.execPath, [path.join(officeRoot, "tools", "gen-third-party-notices.mjs")], {
+    cwd: officeRoot,
+    stdio: "inherit",
+    timeout: 120000,
+  });
+  if (noticeGeneration.error || noticeGeneration.status !== 0) {
+    throw new Error(`[notices] Office notices generation failed: ${noticeGeneration.error || noticeGeneration.status}`);
+  }
+  const notices = stageThirdPartyNotices({
+    projectDir, resourcesDir, appBundleDir, platform,
+    officeNoticesFile: path.join(officeRoot, "apps", "shell", "build", "THIRD-PARTY-NOTICES.txt"),
+  });
+  console.log(`[notices] collected ${notices.npmPackages} packaged npm components`);
+  if (notices.missingTexts.length) {
+    console.warn(`[notices] ${notices.missingTexts.length} components need license-text review; see resources/third-party-notices-audit.json`);
   }
 
   if (stats.length) {

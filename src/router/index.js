@@ -3,8 +3,23 @@ import DeepSeekHarness from '@/views/harness/DeepSeekHarness.vue'
 
 export const routes = [
   {
+    path: '/trash',
+    name: 'trash',
+    component: () => import('@/views/trash/TrashView.vue')
+  },
+  {
     path: '/',
     redirect: '/friday'
+  },
+  {
+    path: '/recitation',
+    name: 'recitation',
+    component: () => import('@/views/recitation/RecitationView.vue')
+  },
+  {
+    path: '/clipboard',
+    name: 'clipboard',
+    component: () => import('@/views/clipboard/ClipboardView.vue')
   },
   {
     path: '/knowledge',

@@ -1,5 +1,15 @@
 "use strict";
 const electron = require("electron");
+function installOfficeFileBridge(bridge, ipc) {
+  bridge.exposeInMainWorld("fridayOffice", {
+    exportSelectionText: (request) => ipc.invoke("office-file-export-selection-text", request),
+    snapshot: (request) => ipc.invoke("office-file-current-snapshot", request),
+    exportSnapshot: (request) => ipc.invoke("office-file-export-snapshot", request),
+    cancelExport: () => ipc.invoke("office-file-cancel-export"),
+    command: (command) => ipc.invoke("office-file-command", command),
+    preferences: (patch) => ipc.invoke("office-file-preferences", patch)
+  });
+}
 const DROP_OPEN_CHANNEL = "app:open-dropped-files";
 const OPENABLE_DOC_RE = /\.(docx|xlsx|xlsm|xls|csv|pptx|pdf|md|markdown|html|htm)$/i;
 const KNOWN_UNSUPPORTED_DOC_RE = /\.(doc|rtf|odt|ppt|pps|odp|ods|xlsb|pages|key|numbers)$/i;
@@ -41,6 +51,7 @@ function installDropOpenBridge() {
     electron.ipcRenderer.send(DROP_OPEN_CHANNEL, payload.slice(0, MAX_DROPPED_FILES));
   });
 }
+installOfficeFileBridge(electron.contextBridge, electron.ipcRenderer);
 const api = {
   getLanguage: () => electron.ipcRenderer.invoke("app:get-language"),
   onLanguageChanged: (handler) => {

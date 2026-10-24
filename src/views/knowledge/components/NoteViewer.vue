@@ -14,7 +14,12 @@
     </div>
     <div v-else class="note-content">
       <div class="note-header">
-        <h1 class="note-title">{{ note.title || '未命名笔记' }}</h1>
+        <div class="note-title-row">
+          <h1 class="note-title">{{ note.title || '未命名笔记' }}</h1>
+          <button class="open-note" type="button" :title="t('note.openOriginal')" :aria-label="t('note.openOriginal')" @click="openOriginalNote">
+            <ExternalLink :size="16" />
+          </button>
+        </div>
         <div class="note-meta">
           <span v-if="note.updatedAt">更新于 {{ formatTime(note.updatedAt) }}</span>
         </div>
@@ -26,6 +31,9 @@
 
 <script setup>
 import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { ExternalLink } from 'lucide-vue-next';
 import { formatRelativeTime as formatTime } from '../utils';
 
 const props = defineProps({
@@ -35,6 +43,8 @@ const props = defineProps({
 const loading = ref(true);
 const error = ref('');
 const note = ref({});
+const router = useRouter();
+const { t } = useI18n();
 const contentRef = ref(null);
 const emit = defineEmits(['toc-ready', 'active-section']);
 let headingObserver;
@@ -59,6 +69,10 @@ function buildToc() {
 }
 function scrollToSection(item) { contentRef.value?.querySelector(`#${CSS.escape(item.id)}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 defineExpose({ scrollToSection });
+
+function openOriginalNote() {
+  if (note.value?.id) router.push('/note/' + encodeURIComponent(note.value.id));
+}
 
 async function loadNote() {
   loading.value = true;
@@ -143,9 +157,14 @@ onBeforeUnmount(() => headingObserver?.disconnect());
 .note-title {
   font-size: 26px;
   font-weight: 700;
-  margin: 0 0 8px;
+  margin: 0;
   color: var(--text-primary);
 }
+
+.note-title-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.note-title-row .note-title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.open-note { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex: 0 0 30px; border: 0; border-radius: 6px; background: transparent; color: var(--text-secondary); cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+.open-note:hover, .open-note:focus-visible { background: var(--bg-hover); color: var(--text-primary); }
 
 .note-meta {
   font-size: 13px;

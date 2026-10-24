@@ -10,6 +10,7 @@ import HarnessIcon from '@/components/icons/HarnessIcon.vue'
 import AutomationIcon from '@/components/icons/AutomationIcon.vue'
 import HistoryIcon from '@/components/icons/HistoryIcon.vue'
 import SettingsIcon from '@/components/icons/SettingsIcon.vue'
+import { Clipboard, Headphones, Trash2 } from 'lucide-vue-next'
 
 export const sidebarMenuConfig = [
   { key: 'note', path: '/note', icon: 'NoteIcon', iconComponent: NoteIcon, i18nKey: 'note.title' },
@@ -18,10 +19,13 @@ export const sidebarMenuConfig = [
   { key: 'office', path: '/office', icon: 'OfficeIcon', iconComponent: OfficeIcon, i18nKey: 'office.title' },
   { key: 'schedule', path: '/schedule', icon: 'CalendarIcon', iconComponent: CalendarIcon, i18nKey: 'schedule.title' },
   { key: 'automation', path: '/automation', icon: 'AutomationIcon', iconComponent: AutomationIcon, i18nKey: 'automation.title' },
-  { key: 'harness', path: '/harness', icon: 'HarnessIcon', iconComponent: HarnessIcon, i18nKey: 'harness.title' }
+  { key: 'harness', path: '/harness', icon: 'HarnessIcon', iconComponent: HarnessIcon, i18nKey: 'harness.title' },
+  { key: 'recitation', path: '/recitation', icon: 'Headphones', iconComponent: Headphones, i18nKey: 'recitation.title' },
+  { key: 'clipboard', path: '/clipboard', icon: 'Clipboard', iconComponent: Clipboard, i18nKey: 'clipboard.title' }
 ]
 
 export const sidebarBottomMenuConfig = [
+  { key: 'trash', path: '/trash', icon: 'Trash2', iconComponent: Trash2, i18nKey: 'trash.title' },
   { key: 'history', path: '/history', icon: 'HistoryIcon', iconComponent: HistoryIcon, i18nKey: 'history.title' },
   { key: 'settings', path: '/settings', icon: 'SettingsIcon', iconComponent: SettingsIcon, i18nKey: 'settings.title' }
 ]

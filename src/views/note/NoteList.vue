@@ -33,6 +33,9 @@
             <button class="topbar-btn" @click="enterSearchMode">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
+            <button class="topbar-btn" type="button" :title="t('note.selection.start')" :aria-label="t('note.selection.start')" @click="selectionMode ? exitSelection() : (selectionMode = true)">
+              <ListChecks :size="18" />
+            </button>
           </div>
         </div>
 
@@ -99,15 +102,36 @@
 
       </div>
 
+      <div v-if="selectionMode" class="note-selection-toolbar">
+        <div class="selection-heading"><span>{{ t('note.selection.count', { count: selectedNoteIds.size }) }}</span><button type="button" @click="exitSelection">{{ t('note.selection.cancel') }}</button></div>
+        <div class="selection-actions">
+          <button type="button" :title="t('note.selection.selectAll')" :aria-label="t('note.selection.selectAll')" @click="selectAllNotes"><CheckCheck :size="16" /></button>
+          <button type="button" :disabled="!selectedNoteIds.size" :title="t('note.selection.pin')" :aria-label="t('note.selection.pin')" @click="pinSelectedNotes"><Pin :size="16" /></button>
+          <button type="button" :disabled="!selectedNoteIds.size" :title="t('note.contextMenu.addToKnowledge')" :aria-label="t('note.contextMenu.addToKnowledge')" @click="addSelectedToKnowledge"><FolderPlus :size="16" /></button>
+          <button type="button" :disabled="!selectedNoteIds.size" :title="t('note.selection.delete')" :aria-label="t('note.selection.delete')" @click="deleteSelection = [...selectedNoteIds]"><Trash2 :size="16" /></button>
+        </div>
+        <FridaySelect :model-value="''" :options="notebookMoveOptions" :label="t('note.contextMenu.moveToNotebook')" :disabled="!selectedNoteIds.size" @update:model-value="moveSelectedNotes" />
+      </div>
       <div class="note-items" @contextmenu.prevent>
         <div
           v-for="note in notes"
           :key="note.id"
-          :class="['note-item', { active: selectedNoteId === note.id }]"
-          @click="selectNote(note.id)"
+          :class="['note-item', { active: !selectionMode && selectedNoteId === note.id, 'multi-selected': selectionMode && selectedNoteIds.has(note.id) }]"
+          @click="onNoteClick(note.id)"
           @contextmenu.prevent="showContextMenu($event, note)"
+          @pointerdown="startNoteHold($event, note.id)"
+          @pointermove="moveNoteHold($event)"
+          @pointerup="cancelNoteHold"
+          @pointercancel="cancelNoteHold"
+          @pointerleave="cancelNoteHold"
         >
-          <div class="note-title">{{ note.title }}</div>
+          <div class="note-title-wrap">
+            <input v-if="selectionMode" type="checkbox" class="note-select-check" :checked="selectedNoteIds.has(note.id)" :aria-label="t('note.selection.selectNote', { name: note.title })" @click.stop="toggleSelectedNote(note.id)" />
+            <div class="note-title">{{ note.title }}</div>
+            <button class="note-pin-btn" type="button" :class="{ active: note.isPinned }" :title="note.isPinned ? t('note.unpin') : t('note.pin')" :aria-label="note.isPinned ? t('note.unpin') : t('note.pin')" :aria-pressed="note.isPinned" @click.stop="togglePinned(note)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5"></path><path d="M5 3h14l-2 7 2 3H5l2-3-2-7z"></path></svg>
+            </button>
+          </div>
           <div class="note-meta">
             <span class="note-time">{{ formatTime(note.updatedAt) }}</span>
             <span class="note-subtitle">
@@ -367,14 +391,22 @@
         </div>
       </div>
     </Teleport>
+    <KbDirSelectDialog :visible="knowledgeDialogVisible" @close="knowledgeDialogVisible = false" @confirm="confirmAddToKnowledge" />
+    <FridayConfirmDialog :visible="deleteSelection.length > 0" :title="t('note.selection.delete')" :message="t('note.selection.deleteConfirm', { count: deleteSelection.length })" :cancel-label="t('note.cancel')" :confirm-label="t('note.confirm')" @cancel="deleteSelection = []" @confirm="confirmDeleteSelection" />
+    <Transition name="chat-toast-fade">
+      <div v-if="knowledgeToast" class="knowledge-toast" role="status">{{ knowledgeToast }}</div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref, computed, onMounted, onBeforeUnmount, nextTick, onDeactivated, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-vue-next';
+import { CheckCheck, FolderPlus, ListChecks, PanelLeftClose, PanelLeftOpen, Pin, Trash2 } from 'lucide-vue-next';
 import NoteEditor from './NoteEditor.vue';
+import KbDirSelectDialog from '@/views/knowledge/components/KbDirSelectDialog.vue';
+import FridaySelect from '@/components/ui/FridaySelect.vue';
+import FridayConfirmDialog from '@/components/ui/FridayConfirmDialog.vue';
 import { useNoteStore } from '@/store/modules/note';
 import { useNotebookStore } from '@/store/modules/notebook';
 import { electronService } from '@/services/electron';
@@ -396,6 +428,7 @@ const currentFolder = ref('all');
 // Agent 写笔记工具完成后需要刷新列表
 const NOTE_WRITE_TOOLS = ['create_note', 'update_note'];
 let unlistenAgentToolResult = null;
+let unlistenResourceChanged = null;
 const folderMenuVisible = ref(false);
 const folderTriggerRef = ref(null);
 const tocVisible = ref(false);
@@ -409,6 +442,17 @@ let newNoteMenuStyle = reactive({ left: '0px', top: '0px' });
 const notebookSubmenuVisible = ref(false);
 let notebookSubmenuStyle = reactive({ left: '0px', top: '0px' });
 const contextMenuRef = ref(null);
+const knowledgeDialogVisible = ref(false);
+const knowledgeTargetNoteId = ref(null);
+const knowledgeTargetNoteIds = ref([]);
+const knowledgeToast = ref('');
+let knowledgeToastTimer = null;
+const selectionMode = ref(false);
+const selectedNoteIds = ref(new Set());
+const deleteSelection = ref([]);
+let noteHoldTimer = null;
+let noteHoldStart = null;
+let suppressClickId = null;
 const notebookSubmenuRef = ref(null);
 const createNotebookDialogVisible = ref(false);
 const newNotebookName = ref('');
@@ -509,7 +553,16 @@ const currentFolderName = computed(() => {
   return f ? f.name : t('note.sidebar.all');
 });
 
-const notes = computed(() => noteStore.notes);
+const notes = computed(() => [...noteStore.notes].sort((a, b) => Number(!!b.isPinned) - Number(!!a.isPinned) || new Date(b.updatedAt) - new Date(a.updatedAt)));
+watch(() => notes.value.map(note => note.id).join('|'), () => {
+  if (!selectionMode.value) return;
+  const visible = new Set(notes.value.map(note => note.id));
+  selectedNoteIds.value = new Set([...selectedNoteIds.value].filter(id => visible.has(id)));
+});
+const notebookMoveOptions = computed(() => [
+  { value: '__uncategorized__', label: t('note.sidebar.uncategorized') },
+  ...notebookStore.notebooks.map(notebook => ({ value: notebook.id, label: notebook.name }))
+]);
 const selectedNoteId = computed(() => noteStore.currentNoteId);
 const selectedNote = computed(() => noteStore.currentNote);
 
@@ -582,6 +635,101 @@ const getNotebookName = (notebookId) => {
 const selectNote = (id) => {
   noteStore.selectNote(id);
 };
+
+const toggleSelectedNote = (id) => {
+  const next = new Set(selectedNoteIds.value);
+  if (next.has(id)) next.delete(id);
+  else next.add(id);
+  selectedNoteIds.value = next;
+};
+
+const exitSelection = () => {
+  selectionMode.value = false;
+  selectedNoteIds.value = new Set();
+  cancelNoteHold();
+};
+
+const selectAllNotes = () => {
+  const ids = notes.value.map(note => note.id);
+  selectedNoteIds.value = selectedNoteIds.value.size === ids.length ? new Set() : new Set(ids);
+};
+
+const onNoteClick = (id) => {
+  if (suppressClickId === id) { suppressClickId = null; return; }
+  if (selectionMode.value) toggleSelectedNote(id);
+  else selectNote(id);
+};
+
+const cancelNoteHold = () => {
+  if (noteHoldTimer) clearTimeout(noteHoldTimer);
+  noteHoldTimer = null;
+  noteHoldStart = null;
+};
+
+const startNoteHold = (event, id) => {
+  if (selectionMode.value || event.button !== 0 || event.target.closest('button, input')) return;
+  cancelNoteHold();
+  noteHoldStart = { x: event.clientX, y: event.clientY };
+  noteHoldTimer = setTimeout(() => {
+    selectionMode.value = true;
+    selectedNoteIds.value = new Set([id]);
+    suppressClickId = id;
+    setTimeout(() => { if (suppressClickId === id) suppressClickId = null; }, 800);
+    cancelNoteHold();
+  }, 550);
+};
+
+const moveNoteHold = (event) => {
+  if (noteHoldStart && Math.hypot(event.clientX - noteHoldStart.x, event.clientY - noteHoldStart.y) > 8) cancelNoteHold();
+};
+
+const selectedNotes = () => notes.value.filter(note => selectedNoteIds.value.has(note.id));
+
+const pinSelectedNotes = async () => {
+  const targets = selectedNotes();
+  if (!targets.length) return;
+  const isPinned = targets.some(note => !note.isPinned);
+  try {
+    for (const note of targets) {
+      const updated = await electronService.invoke('toggle_note_pinned', { noteId: note.id, isPinned });
+      note.isPinned = updated.isPinned;
+      note.updatedAt = updated.updatedAt;
+    }
+    noteStore.notes = [...noteStore.notes];
+  } catch (error) { showKnowledgeToast(t('note.selection.actionFailed', { error: error.message || String(error) })); }
+};
+
+const moveSelectedNotes = async (notebookId) => {
+  const targets = selectedNotes();
+  if (!targets.length) return;
+  try {
+    await noteStore.flushPendingSave();
+    for (const note of targets) await moveNoteToNotebook(note.id, notebookId === '__uncategorized__' ? null : notebookId);
+    exitSelection();
+  } catch (error) { showKnowledgeToast(t('note.selection.actionFailed', { error: error.message || String(error) })); }
+};
+
+const addSelectedToKnowledge = () => {
+  knowledgeTargetNoteIds.value = [...selectedNoteIds.value];
+  knowledgeTargetNoteId.value = null;
+  knowledgeDialogVisible.value = true;
+};
+
+const confirmDeleteSelection = async () => {
+  const ids = [...deleteSelection.value];
+  deleteSelection.value = [];
+  try {
+    await noteStore.flushPendingSave();
+    for (const id of ids) await noteStore.deleteNote(id);
+    exitSelection();
+  } catch (error) { showKnowledgeToast(t('note.selection.actionFailed', { error: error.message || String(error) })); }
+};
+
+function showKnowledgeToast(message) {
+  knowledgeToast.value = message;
+  if (knowledgeToastTimer) clearTimeout(knowledgeToastTimer);
+  knowledgeToastTimer = setTimeout(() => { knowledgeToast.value = ''; }, 3000);
+}
 
 const createNewNote = async () => {
   newNoteMenuVisible.value = false;
@@ -860,6 +1008,8 @@ const MENU_VIEWPORT_GAP = 8;
 const CONTEXT_MENU_ESTIMATED_HEIGHT = 180;
 
 const showContextMenu = async (e, note) => {
+  if (selectionMode.value) return;
+  cancelNoteHold();
   contextMenu.visible = true;
   contextMenu.x = e.clientX;
   contextMenu.y = e.clientY;
@@ -1008,6 +1158,15 @@ const moveNoteToNotebook = async (noteId, notebookId) => {
   }
 };
 
+const togglePinned = async (note) => {
+  const updated = await electronService.invoke('toggle_note_pinned', { noteId: note.id, isPinned: !note.isPinned });
+  if (updated) {
+    note.isPinned = updated.isPinned;
+    note.updatedAt = updated.updatedAt;
+    noteStore.notes = [...noteStore.notes].sort((a, b) => Number(b.isPinned) - Number(a.isPinned) || new Date(b.updatedAt) - new Date(a.updatedAt));
+  }
+};
+
 const duplicateNote = async () => {
   if (!contextMenu.targetNoteId) return;
 
@@ -1037,13 +1196,36 @@ const handleAction = async (action) => {
   if (action === 'delete' && contextMenu.targetNoteId) {
     await noteStore.deleteNote(contextMenu.targetNoteId);
   } else if (action === 'addToKnowledge') {
-    // 暂未实现
+    knowledgeTargetNoteId.value = contextMenu.targetNoteId;
+    knowledgeTargetNoteIds.value = [];
+    knowledgeDialogVisible.value = true;
   } else if (action === 'createNewNotebook') {
     openCreateNotebookDialog();
   } else if (action === 'duplicate') {
     await duplicateNote();
   }
   hideContextMenu();
+};
+
+const confirmAddToKnowledge = async ({ path: destDir, name }) => {
+  const ids = knowledgeTargetNoteIds.value.length ? knowledgeTargetNoteIds.value : [knowledgeTargetNoteId.value].filter(Boolean);
+  if (!ids.length) return;
+  try {
+    await noteStore.flushPendingSave();
+    let alreadyCount = 0;
+    for (const noteId of ids) {
+      const result = await electronService.invoke('kb-save-note', { noteId, destDir });
+      if (!result?.success) throw new Error(result?.error || t('note.toast.saveFailed'));
+      if (result.alreadyExists) alreadyCount++;
+    }
+    knowledgeDialogVisible.value = false;
+    showKnowledgeToast(ids.length === 1
+      ? t(alreadyCount ? 'note.toast.alreadyInKb' : 'note.toast.savedToKb', { name })
+      : t('note.selection.addedToKb', { count: ids.length - alreadyCount, name }));
+    if (selectionMode.value) exitSelection();
+  } catch (error) {
+    showKnowledgeToast(t('note.toast.saveFailedWithError', { error: error.message || String(error) }));
+  }
 };
 
 const handleClickOutside = () => {
@@ -1058,6 +1240,11 @@ const handleClickOutside = () => {
 
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside);
+  unlistenResourceChanged = electronService.listen('resource-changed', async () => {
+    if (currentFolder.value === 'all') await noteStore.fetchNotes();
+    else await noteStore.fetchNotes(null, currentFolder.value);
+    await notebookStore.fetchNotebooks();
+  });
   await noteStore.fetchNotes();
   await notebookStore.fetchNotebooks();
   if (noteStore.notes.length > 0 && !noteStore.currentNoteId) {
@@ -1079,6 +1266,9 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(async () => {
+  cancelNoteHold();
+  if (knowledgeToastTimer) clearTimeout(knowledgeToastTimer);
+  unlistenResourceChanged?.();
   document.removeEventListener('click', handleClickOutside);
   if (unlistenAgentToolResult) {
     unlistenAgentToolResult();
@@ -1098,10 +1288,12 @@ watch(hasNoteTab, (newVal, oldVal) => {
 });
 
 onDeactivated(() => {
+  exitSelection();
   folderMenuVisible.value = false;
   contextMenu.visible = false;
   notebookSubmenuVisible.value = false;
   createNotebookDialogVisible.value = false;
+  knowledgeDialogVisible.value = false;
 });
 </script>
 
@@ -1414,6 +1606,46 @@ onDeactivated(() => {
   color: var(--text-primary);
   margin-bottom: 1px;
   line-height: 1.35;
+}
+
+.note-title-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.note-title-wrap .note-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-pin-btn {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease, background-color 0.12s ease;
+  border-radius: 5px;
+}
+
+.note-item:hover .note-pin-btn,
+.note-pin-btn:focus-visible,
+.note-pin-btn.active {
+  opacity: 1;
+}
+
+.note-pin-btn:hover { background: var(--bg-hover); }
+
+.note-pin-btn.active {
+  color: var(--accent-color);
 }
 
 .note-meta {
@@ -2222,4 +2454,37 @@ onDeactivated(() => {
   font-size: 12px;
   color: var(--text-tertiary);
 }
+
+.knowledge-toast {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 10001;
+  pointer-events: none;
+}
+
+.note-selection-toolbar { flex-shrink: 0; display: flex; flex-direction: column; gap: 7px; padding: 8px 12px 12px; border-bottom: 1px solid var(--border-color); }
+.selection-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--text-primary); font-size: 12px; font-weight: 600; }
+.selection-heading button { padding: 3px 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; font-weight: 400; cursor: pointer; }
+.selection-heading button:hover { color: var(--text-primary); }
+.selection-actions { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.selection-actions button { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--text-primary); cursor: pointer; transition: background-color .12s ease; }
+.selection-actions button:hover:not(:disabled), .selection-actions button:focus-visible { background: var(--bg-hover); }
+.selection-actions button:disabled { opacity: .4; cursor: default; }
+.note-selection-toolbar :deep(.friday-select) { width: 100%; min-width: 0; height: 32px; }
+.note-item.multi-selected { background: var(--bg-hover); }
+.note-select-check { flex: 0 0 15px; width: 15px; height: 15px; margin: 1px 5px 0 0; accent-color: var(--accent-color); cursor: pointer; }
+.note-title-wrap { min-width: 0; }
+
+.chat-toast-fade-enter-active { transition: opacity 0.25s ease-out; }
+.chat-toast-fade-leave-active { transition: opacity 0.2s ease-in; }
+.chat-toast-fade-enter-from, .chat-toast-fade-leave-to { opacity: 0; }
 </style>

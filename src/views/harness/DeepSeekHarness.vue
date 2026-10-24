@@ -14,6 +14,7 @@
         <LoaderCircle class="state-spinner" :size="30" :stroke-width="1.8" />
         <h1>{{ t('harness.starting') }}</h1>
         <p>{{ t('harness.startingDetail') }}</p>
+        <p v-if="status.stage">{{ t(`harness.phase.${status.stage}`) }}</p>
       </div>
 
       <div v-else-if="status.status === 'config-required'" class="state-content">
@@ -30,6 +31,8 @@
         <CircleAlert :size="32" :stroke-width="1.5" />
         <h1>{{ t('harness.startFailed') }}</h1>
         <p class="error-message">{{ status.error || t('harness.unknownError') }}</p>
+        <p v-if="status.stage">{{ t('harness.failedStage') }}: {{ t(`harness.phase.${status.stage}`) }}</p>
+        <p v-if="status.logPath">{{ t('harness.logLocation') }}: {{ status.logPath }}</p>
         <button class="command-button" @click="restartHarness">
           <RotateCcw :size="16" :stroke-width="1.8" />
           {{ t('harness.retry') }}

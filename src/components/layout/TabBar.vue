@@ -9,13 +9,15 @@
     </div>
 
     <div class="tabs-area" ref="tabsAreaRef">
-      <div class="tabs-scroll" ref="tabsScrollRef" @wheel.prevent="onWheel">
+      <div class="tabs-scroll" ref="tabsScrollRef" role="tablist" @wheel.prevent="onWheel">
         <template v-for="(tab, index) in tabStore.openedTabs" :key="tab.id">
           <span v-if="index > 0" :class="['tab-divider', { hidden: tabStore.activeTabId === tab.id || tabStore.openedTabs[index - 1]?.id === tabStore.activeTabId }]"></span>
           <div
             :class="['tab-item', { active: tabStore.activeTabId === tab.id, dragging: dragTabId === tab.id }]"
             :style="{ width: tabWidth + 'px' }"
             role="tab"
+            :tabindex="tabStore.activeTabId === tab.id ? 0 : -1"
+            :aria-selected="tabStore.activeTabId === tab.id"
             draggable="true"
             @click="switchTab(tab)"
             @dblclick.stop="handleTabDoubleClick(tab)"
@@ -114,10 +116,14 @@ import {
   ArrowRight,
   Layers,
   FileText,
-  Bot
+  Bot,
+  Clipboard,
+  Trash2,
+  Headphones
 } from 'lucide-vue-next';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { electronService } from '@/services/electron';
+import { wheelIntent } from '@/utils/tabNavigation';
 import OfficeIcon from '@/components/icons/OfficeIcon.vue';
 import CalendarIcon from '@/components/icons/CalendarIcon.vue';
 import KnowledgeIcon from '@/components/icons/KnowledgeIcon.vue';
@@ -148,7 +154,10 @@ const iconMap = {
   CalendarIcon,
   Bot,
   HistoryIcon,
-  SettingsIcon
+  SettingsIcon,
+  Clipboard,
+  Trash2,
+  Headphones
 };
 
 const tabsAreaRef = ref(null);
@@ -359,6 +368,21 @@ const onDragEnd = () => {
 
 const handleKeydown = (event) => {
   if (event.key === 'Escape') hideContextMenu();
+  const onTabs = tabsScrollRef.value?.contains(event.target);
+  const direction = (event.ctrlKey && event.key === 'Tab') ? (event.shiftKey ? -1 : 1)
+    : onTabs && ['ArrowLeft', 'ArrowRight'].includes(event.key) ? (event.key === 'ArrowLeft' ? -1 : 1) : 0;
+  if (direction) {
+    event.preventDefault();
+    stepTab(direction, true);
+  }
+};
+
+const stepTab = (direction, focus = false) => {
+  const tabs = tabStore.openedTabs;
+  if (!tabs.length) return;
+  const index = tabs.findIndex(tab => tab.id === tabStore.activeTabId);
+  switchTab(tabs[(index + direction + tabs.length) % tabs.length]);
+  if (focus) nextTick(() => tabsScrollRef.value?.querySelector('.tab-item.active')?.focus());
 };
 
 const addFridayTab = () => {
@@ -366,9 +390,12 @@ const addFridayTab = () => {
   router.push(tab.fullPath);
 };
 
+let lastWheelSwitch = -Infinity;
 const onWheel = (e) => {
   if (!tabsScrollRef.value) return;
-  tabsScrollRef.value.scrollBy({ left: e.deltaY, behavior: 'auto' });
+  const intent = wheelIntent({ scrollWidth: tabsScrollRef.value.scrollWidth, clientWidth: tabsScrollRef.value.clientWidth, deltaX: e.deltaX, deltaY: e.deltaY, lastSwitchAt: lastWheelSwitch });
+  if (intent.scroll) tabsScrollRef.value.scrollBy({ left: intent.scroll, behavior: 'auto' });
+  if (intent.switchBy) { lastWheelSwitch = Date.now(); stepTab(intent.switchBy); }
 };
 
 const handleMinimize = () => {

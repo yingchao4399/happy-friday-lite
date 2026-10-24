@@ -1,5 +1,19 @@
 {
   "title": "知识库",
   "placeholder": "这是知识库页面的占位内容",
-  "categories": { "personal": "个人知识库", "local": "本地知识库", "agent": "Agent 智能体" }
+  "categories": { "personal": "个人知识库", "local": "本地知识库", "agent": "Agent 智能体" },
+  "actions": {
+    "newCategory": "新建分类",
+    "renameCategory": "重命名分类",
+    "manageCategory": "管理分类",
+    "moveUp": "上移分类",
+    "moveDown": "下移分类",
+    "deleteCategory": "删除分类",
+    "deleteCategoryConfirm": "删除「{name}」及其中的知识库？内容将进入最近删除。",
+    "categoryName": "分类名称",
+    "moveToCategory": "移动到分类",
+    "cancel": "取消",
+    "confirm": "确认",
+    "dismiss": "关闭提示"
+  }
 }

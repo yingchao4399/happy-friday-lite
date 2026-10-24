@@ -1,3 +1,4 @@
+const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -4939,7 +4940,7 @@ var require_BufferList = __commonJS({
         this.head = this.tail = null;
         this.length = 0;
       };
-      BufferList.prototype.join = function join15(s) {
+      BufferList.prototype.join = function join16(s) {
         if (this.length === 0) return "";
         var p = this.head;
         var ret = "" + p.data;
@@ -19671,7 +19672,7 @@ async function JBig2(moduleArg = {}) {
   var quit_ = (status, toThrow) => {
     throw toThrow;
   };
-  var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs";
+  var _scriptName = __fridayBundleUrl;
   var scriptDirectory = "";
   var readAsync, readBinary;
   if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -19973,7 +19974,7 @@ async function OpenJPEG(moduleArg = {}) {
   var quit_ = (status, toThrow) => {
     throw toThrow;
   };
-  var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs";
+  var _scriptName = __fridayBundleUrl;
   var scriptDirectory = "";
   var readAsync, readBinary;
   if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -27731,7 +27732,7 @@ var init_pdf_worker = __esm({
         var defineProperty = Object.defineProperty;
         var stringSlice = uncurryThis("".slice);
         var replace = uncurryThis("".replace);
-        var join15 = uncurryThis([].join);
+        var join16 = uncurryThis([].join);
         var CONFIGURABLE_LENGTH = DESCRIPTORS && !fails(function() {
           return defineProperty(function() {
           }, "length", { value: 8 }).length !== 8;
@@ -27758,7 +27759,7 @@ var init_pdf_worker = __esm({
           }
           var state = enforceInternalState(value);
           if (!hasOwn(state, "source")) {
-            state.source = join15(TEMPLATE, typeof name == "string" ? name : "");
+            state.source = join16(TEMPLATE, typeof name == "string" ? name : "");
           }
           return value;
         };
@@ -29837,7 +29838,7 @@ var init_pdf_worker = __esm({
         var anUint8Array = __webpack_require__3(4154);
         var notDetached = __webpack_require__3(5169);
         var numberToString2 = uncurryThis(1.1.toString);
-        var join15 = uncurryThis([].join);
+        var join16 = uncurryThis([].join);
         var $Array = Array;
         var Uint8Array2 = globalThis2.Uint8Array;
         var INCORRECT_BEHAVIOR_OR_DOESNT_EXISTS = !Uint8Array2 || !Uint8Array2.prototype.toHex || !(function() {
@@ -29857,7 +29858,7 @@ var init_pdf_worker = __esm({
               var hex = numberToString2(this[i], 16);
               result[i] = hex.length === 1 ? "0" + hex : hex;
             }
-            return join15(result, "");
+            return join16(result, "");
           }
         });
       },
@@ -88420,7 +88421,7 @@ var init_pdf = __esm({
         var defineProperty = Object.defineProperty;
         var stringSlice = uncurryThis("".slice);
         var replace = uncurryThis("".replace);
-        var join15 = uncurryThis([].join);
+        var join16 = uncurryThis([].join);
         var CONFIGURABLE_LENGTH = DESCRIPTORS && !fails(function() {
           return defineProperty(function() {
           }, "length", { value: 8 }).length !== 8;
@@ -88447,7 +88448,7 @@ var init_pdf = __esm({
           }
           var state = enforceInternalState(value);
           if (!hasOwn(state, "source")) {
-            state.source = join15(TEMPLATE, typeof name == "string" ? name : "");
+            state.source = join16(TEMPLATE, typeof name == "string" ? name : "");
           }
           return value;
         };
@@ -90885,7 +90886,7 @@ var init_pdf = __esm({
         var anUint8Array = __webpack_require__3(4154);
         var notDetached = __webpack_require__3(5169);
         var numberToString2 = uncurryThis(1.1.toString);
-        var join15 = uncurryThis([].join);
+        var join16 = uncurryThis([].join);
         var $Array = Array;
         var Uint8Array2 = globalThis2.Uint8Array;
         var INCORRECT_BEHAVIOR_OR_DOESNT_EXISTS = !Uint8Array2 || !Uint8Array2.prototype.toHex || !(function() {
@@ -90905,7 +90906,7 @@ var init_pdf = __esm({
               var hex = numberToString2(this[i], 16);
               result[i] = hex.length === 1 ? "0" + hex : hex;
             }
-            return join15(result, "");
+            return join16(result, "");
           }
         });
       },
@@ -99709,7 +99710,7 @@ var init_pdf = __esm({
     if (isNodeJS2) {
       let canvas;
       try {
-        const require2 = process.getBuiltinModule("module").createRequire("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs");
+        const require2 = process.getBuiltinModule("module").createRequire(__fridayBundleUrl);
         try {
           canvas = require2("@napi-rs/canvas");
         } catch (ex) {
@@ -99744,7 +99745,7 @@ var init_pdf = __esm({
     };
     NodeCanvasFactory = class extends BaseCanvasFactory {
       _createCanvas(width, height) {
-        const require2 = process.getBuiltinModule("module").createRequire("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs");
+        const require2 = process.getBuiltinModule("module").createRequire(__fridayBundleUrl);
         const canvas = require2("@napi-rs/canvas");
         return canvas.createCanvas(width, height);
       }
@@ -117422,8 +117423,8 @@ var require_cfb = __commonJS({
         }
         return L.length - R.length;
       }
-      function dirname9(p) {
-        if (p.charAt(p.length - 1) == "/") return p.slice(0, -1).indexOf("/") === -1 ? p : dirname9(p.slice(0, -1));
+      function dirname10(p) {
+        if (p.charAt(p.length - 1) == "/") return p.slice(0, -1).indexOf("/") === -1 ? p : dirname10(p.slice(0, -1));
         var c = p.lastIndexOf("/");
         return c === -1 ? p : p.slice(0, c + 1);
       }
@@ -117844,10 +117845,10 @@ var require_cfb = __commonJS({
           data.push([cfb.FullPaths[i2], cfb.FileIndex[i2]]);
         }
         for (i2 = 0; i2 < data.length; ++i2) {
-          var dad = dirname9(data[i2][0]);
+          var dad = dirname10(data[i2][0]);
           s = fullPaths[dad];
           while (!s) {
-            while (dirname9(dad) && !fullPaths[dirname9(dad)]) dad = dirname9(dad);
+            while (dirname10(dad) && !fullPaths[dirname10(dad)]) dad = dirname10(dad);
             data.push([dad, {
               name: filename(dad).replace("/", ""),
               type: 1,
@@ -117857,7 +117858,7 @@ var require_cfb = __commonJS({
               content: null
             }]);
             fullPaths[dad] = true;
-            dad = dirname9(data[i2][0]);
+            dad = dirname10(data[i2][0]);
             s = fullPaths[dad];
           }
         }
@@ -117883,13 +117884,13 @@ var require_cfb = __commonJS({
             elt.size = 0;
             elt.type = 5;
           } else if (nm.slice(-1) == "/") {
-            for (j = i2 + 1; j < data.length; ++j) if (dirname9(cfb.FullPaths[j]) == nm) break;
+            for (j = i2 + 1; j < data.length; ++j) if (dirname10(cfb.FullPaths[j]) == nm) break;
             elt.C = j >= data.length ? -1 : j;
-            for (j = i2 + 1; j < data.length; ++j) if (dirname9(cfb.FullPaths[j]) == dirname9(nm)) break;
+            for (j = i2 + 1; j < data.length; ++j) if (dirname10(cfb.FullPaths[j]) == dirname10(nm)) break;
             elt.R = j >= data.length ? -1 : j;
             elt.type = 1;
           } else {
-            if (dirname9(cfb.FullPaths[i2 + 1] || "") == dirname9(nm)) elt.R = i2 + 1;
+            if (dirname10(cfb.FullPaths[i2 + 1] || "") == dirname10(nm)) elt.R = i2 + 1;
             elt.type = 2;
           }
         }
@@ -170004,12 +170005,26 @@ module.exports = __toCommonJS(docs_exports);
 
 // vendor/happyoffice/apps/docs/src/main/docs-main.ts
 var import_node_crypto7 = require("node:crypto");
-var import_node_fs10 = require("node:fs");
-var import_promises9 = require("node:fs/promises");
-var import_node_os7 = require("node:os");
-var import_node_path16 = require("node:path");
-var import_node_url3 = require("node:url");
-var import_electron7 = require("electron");
+
+// vendor/happyoffice/packages/electron-utils/src/print-job-settings.ts
+var DEFAULT_PRINT_JOB = { copies: 1, color: true, collate: true, duplexMode: "simplex" };
+function parsePrintJobSettings(value) {
+  if (value === void 0) return { ...DEFAULT_PRINT_JOB };
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("INVALID_PRINT_SETTINGS");
+  const input = value;
+  if (Object.keys(input).some((key) => !["copies", "color", "collate", "duplexMode"].includes(key))) throw new Error("INVALID_PRINT_SETTINGS");
+  const result = { ...DEFAULT_PRINT_JOB, ...input };
+  if (!Number.isInteger(result.copies) || result.copies < 1 || result.copies > 999 || typeof result.color !== "boolean" || typeof result.collate !== "boolean" || !["simplex", "longEdge", "shortEdge"].includes(result.duplexMode)) throw new Error("INVALID_PRINT_SETTINGS");
+  return result;
+}
+
+// vendor/happyoffice/apps/docs/src/main/docs-main.ts
+var import_node_fs11 = require("node:fs");
+var import_promises10 = require("node:fs/promises");
+var import_node_os8 = require("node:os");
+var import_node_path17 = require("node:path");
+var import_node_url4 = require("node:url");
+var import_electron9 = require("electron");
 
 // vendor/happyoffice/packages/electron-utils/src/save-image.ts
 var import_promises = require("node:fs/promises");
@@ -170373,8 +170388,8 @@ async function popupMenu(contents, params, labels) {
       return {
         label: item.label,
         click: async () => {
-          const { BrowserWindow: BrowserWindow3 } = await import("electron");
-          await saveImageFromUrl(BrowserWindow3.fromWebContents(contents), params.srcURL, {
+          const { BrowserWindow: BrowserWindow5 } = await import("electron");
+          await saveImageFromUrl(BrowserWindow5.fromWebContents(contents), params.srcURL, {
             title: item.label.replace(/…$/, "")
           });
         }
@@ -179293,8 +179308,133 @@ function isHeadlessMode() {
   return headless;
 }
 
-// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+// vendor/happyoffice/packages/electron-utils/src/system-print-window.ts
+var import_electron2 = require("electron");
+var ownerLocks = /* @__PURE__ */ new WeakMap();
+function lockSystemPrintOwner(owner) {
+  if (!owner || owner.isDestroyed()) return () => {
+  };
+  let lock = ownerLocks.get(owner);
+  if (!lock) {
+    lock = { count: 0, wasEnabled: owner.isEnabled() };
+    ownerLocks.set(owner, lock);
+  }
+  lock.count++;
+  owner.setEnabled(false);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--lock.count > 0) return;
+    ownerLocks.delete(owner);
+    if (!owner.isDestroyed() && lock.wasEnabled) {
+      owner.setEnabled(true);
+      owner.focus();
+    }
+  };
+}
+
+// vendor/happyoffice/packages/electron-utils/src/system-print.ts
+var import_electron3 = require("electron");
+var import_node_child_process = require("node:child_process");
+var import_node_fs3 = require("node:fs");
+var import_promises4 = require("node:fs/promises");
+var import_node_os3 = require("node:os");
 var import_node_path5 = require("node:path");
+var import_node_url2 = require("node:url");
+function helperPath() {
+  const here = (0, import_node_path5.dirname)((0, import_node_url2.fileURLToPath)(__fridayBundleUrl));
+  return [
+    (0, import_node_path5.join)(here, "../native/system-print.exe"),
+    (0, import_node_path5.join)(here, "../../../../packages/electron-utils/native/system-print.exe"),
+    ...process.resourcesPath ? [(0, import_node_path5.join)(process.resourcesPath, "office/native/system-print.exe"), (0, import_node_path5.join)(process.resourcesPath, "native/system-print.exe")] : []
+  ].find((candidate) => (0, import_node_fs3.existsSync)(candidate));
+}
+var paperSizes = {
+  A0: [841e3, 1189e3],
+  A1: [594e3, 841e3],
+  A2: [42e4, 594e3],
+  A3: [297e3, 42e4],
+  A4: [21e4, 297e3],
+  A5: [148e3, 21e4],
+  A6: [105e3, 148e3],
+  Letter: [215900, 279400],
+  Legal: [215900, 355600],
+  Tabloid: [279400, 431800],
+  Ledger: [279400, 431800]
+};
+function systemPrintPaperSize(size) {
+  if (!size) return void 0;
+  const pair = typeof size === "string" ? paperSizes[size] : [size.width, size.height];
+  if (!pair || pair.some((n) => !Number.isFinite(n) || n <= 0)) throw new Error("INVALID_PRINT_PAGE_SIZE");
+  return { width: Math.round(Math.min(...pair)), height: Math.round(Math.max(...pair)) };
+}
+async function printPdfFileWithSystemDialog(pdfPath, options = {}, owner) {
+  if (process.platform !== "win32") return { success: false, failureReason: "WINDOWS_PRINT_UNAVAILABLE" };
+  if (owner?.isDestroyed()) return { success: false, failureReason: "Print job canceled" };
+  const helper = helperPath();
+  if (!helper) return { success: false, failureReason: "WINDOWS_PRINT_HELPER_MISSING" };
+  const size = systemPrintPaperSize(options.pageSize);
+  return new Promise((resolve4) => {
+    const release = lockSystemPrintOwner(owner);
+    const closed = () => child2.kill();
+    const child2 = (0, import_node_child_process.execFile)(helper, [], { windowsHide: false, timeout: 15 * 60 * 1e3, maxBuffer: 64 * 1024, encoding: "utf8" }, (error, stdout) => {
+      owner?.removeListener("closed", closed);
+      release();
+      try {
+        const result = JSON.parse(stdout.trim());
+        if (typeof result.success === "boolean" && typeof result.failureReason === "string") {
+          resolve4(result);
+          return;
+        }
+      } catch {
+      }
+      resolve4({ success: false, failureReason: owner?.isDestroyed() ? "Print job canceled" : error?.killed ? "WINDOWS_PRINT_TIMEOUT" : "WINDOWS_PRINT_FAILED" });
+    });
+    owner?.once("closed", closed);
+    child2.stdin?.on("error", () => {
+    });
+    child2.stdin?.end(JSON.stringify({
+      pdfPath,
+      title: owner && !owner.isDestroyed() ? owner.getTitle() : "Friday",
+      landscape: options.landscape,
+      color: options.color,
+      copies: options.copies ?? 1,
+      collate: options.collate,
+      pageRanges: options.pageRanges,
+      duplexMode: options.duplexMode,
+      paperWidth: size?.width,
+      paperHeight: size?.height
+    }));
+  });
+}
+async function printWithSystemDialog(contents, options = {}, owner = import_electron3.BrowserWindow.fromWebContents(contents)) {
+  if (process.platform !== "win32") return new Promise((resolve4) => contents.print(options, (success, failureReason) => resolve4({ success, failureReason })));
+  const workDir = await (0, import_promises4.mkdtemp)((0, import_node_path5.join)((0, import_node_os3.tmpdir)(), "friday-system-print-"));
+  const pdfPath = (0, import_node_path5.join)(workDir, "print.pdf");
+  try {
+    const size = systemPrintPaperSize(options.pageSize);
+    const margins = options.margins;
+    const pdf = await contents.printToPDF({
+      printBackground: options.printBackground ?? true,
+      preferCSSPageSize: true,
+      ...options.landscape !== void 0 ? { landscape: options.landscape } : {},
+      ...size ? { pageSize: { width: size.width / 25400, height: size.height / 25400 } } : {},
+      ...options.scaleFactor ? { scale: options.scaleFactor / 100 } : {},
+      ...margins ? { margins: margins.marginType === "none" ? { top: 0, bottom: 0, left: 0, right: 0 } : { top: (margins.top ?? 0) / 96, bottom: (margins.bottom ?? 0) / 96, left: (margins.left ?? 0) / 96, right: (margins.right ?? 0) / 96 } } : {}
+    });
+    await (0, import_promises4.writeFile)(pdfPath, pdf);
+    return await printPdfFileWithSystemDialog(pdfPath, options, owner);
+  } finally {
+    await (0, import_promises4.unlink)(pdfPath).catch(() => {
+    });
+    await (0, import_promises4.rmdir)(workDir).catch(() => {
+    });
+  }
+}
+
+// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+var import_node_path6 = require("node:path");
 var RENDERER_SCHEME = "genoffice-app";
 var RENDERER_SCHEME_PRIVILEGE = {
   scheme: RENDERER_SCHEME,
@@ -179337,29 +179477,29 @@ function resolveRendererFile(roots, requestUrl) {
   } catch {
     return null;
   }
-  const file = (0, import_node_path5.resolve)(root, pathname.replace(/^\/+/, ""));
-  return file === root || file.startsWith(root + import_node_path5.sep) ? file : null;
+  const file = (0, import_node_path6.resolve)(root, pathname.replace(/^\/+/, ""));
+  return file === root || file.startsWith(root + import_node_path6.sep) ? file : null;
 }
 
 // vendor/happyoffice/packages/electron-utils/src/renderer-protocol.ts
-var import_electron2 = require("electron");
-var import_node_url2 = require("node:url");
+var import_electron4 = require("electron");
+var import_node_url3 = require("node:url");
 function registerRendererScheme() {
-  import_electron2.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
+  import_electron4.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
 }
 function installRendererProtocol(roots) {
   const table = new Map(Object.entries(roots));
-  import_electron2.protocol.handle(RENDERER_SCHEME, (request) => {
+  import_electron4.protocol.handle(RENDERER_SCHEME, (request) => {
     const file = resolveRendererFile(table, request.url);
     if (!file) return new Response(null, { status: 404 });
-    return import_electron2.net.fetch((0, import_node_url2.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
+    return import_electron4.net.fetch((0, import_node_url3.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
   });
 }
 
 // vendor/happyoffice/packages/font-metrics/src/sfnt.ts
-var import_node_fs3 = require("node:fs");
-var import_node_os3 = require("node:os");
-var import_node_path6 = require("node:path");
+var import_node_fs4 = require("node:fs");
+var import_node_os4 = require("node:os");
+var import_node_path7 = require("node:path");
 var norm = (s) => s.normalize("NFKC").toLowerCase().replace(/[\s\-_]/g, "");
 function fontDirs() {
   switch (process.platform) {
@@ -179368,16 +179508,16 @@ function fontDirs() {
         "/System/Library/Fonts",
         "/System/Library/Fonts/Supplemental",
         "/Library/Fonts",
-        (0, import_node_path6.join)((0, import_node_os3.homedir)(), "Library/Fonts"),
+        (0, import_node_path7.join)((0, import_node_os4.homedir)(), "Library/Fonts"),
         // On-demand system font assets: PingFang and other CJK faces live here on
         // recent macOS ( <hash>.asset/AssetData/*.ttc ), not under /System/Library/Fonts
         "/System/Library/AssetsV2/com_apple_MobileAsset_Font7",
         "/System/Library/AssetsV2/com_apple_MobileAsset_Font6"
       ];
     case "win32":
-      return ["C:\\Windows\\Fonts", (0, import_node_path6.join)((0, import_node_os3.homedir)(), "AppData/Local/Microsoft/Windows/Fonts")];
+      return ["C:\\Windows\\Fonts", (0, import_node_path7.join)((0, import_node_os4.homedir)(), "AppData/Local/Microsoft/Windows/Fonts")];
     default:
-      return ["/usr/share/fonts", "/usr/local/share/fonts", (0, import_node_path6.join)((0, import_node_os3.homedir)(), ".fonts")];
+      return ["/usr/share/fonts", "/usr/local/share/fonts", (0, import_node_path7.join)((0, import_node_os4.homedir)(), ".fonts")];
   }
 }
 var TTC_TAG = 1953784678;
@@ -179385,7 +179525,7 @@ var OTTO_TAG = 1330926671;
 var SFNT_FLAVORS = /* @__PURE__ */ new Set([65536, 1953658213, OTTO_TAG]);
 function readAt(fd, pos, len) {
   const buf = Buffer.alloc(len);
-  if ((0, import_node_fs3.readSync)(fd, buf, 0, len, pos) !== len) throw new Error("short read");
+  if ((0, import_node_fs4.readSync)(fd, buf, 0, len, pos) !== len) throw new Error("short read");
   return buf;
 }
 function parseNames(buf) {
@@ -179444,17 +179584,17 @@ function readFaceNames(fd, offset) {
 function* fontFiles(dir, depth) {
   let entries;
   try {
-    entries = (0, import_node_fs3.readdirSync)(dir, { withFileTypes: true });
+    entries = (0, import_node_fs4.readdirSync)(dir, { withFileTypes: true });
   } catch {
     return;
   }
   for (const e of entries) {
-    const full = (0, import_node_path6.join)(dir, e.name);
+    const full = (0, import_node_path7.join)(dir, e.name);
     let isDir = e.isDirectory();
     let isFile = e.isFile();
     if (e.isSymbolicLink()) {
       try {
-        const st = (0, import_node_fs3.statSync)(full);
+        const st = (0, import_node_fs4.statSync)(full);
         isDir = st.isDirectory();
         isFile = st.isFile();
       } catch {
@@ -179475,7 +179615,7 @@ function faceOffsets(fd) {
 function indexFile(path, index2) {
   let fd;
   try {
-    fd = (0, import_node_fs3.openSync)(path, "r");
+    fd = (0, import_node_fs4.openSync)(path, "r");
   } catch {
     return;
   }
@@ -179501,7 +179641,7 @@ function indexFile(path, index2) {
     }
   } catch {
   } finally {
-    (0, import_node_fs3.closeSync)(fd);
+    (0, import_node_fs4.closeSync)(fd);
   }
 }
 var index = null;
@@ -179530,8 +179670,8 @@ var HMTX_MAX = 1 << 19;
 var CMAP_MAX = 1 << 20;
 
 // vendor/happyoffice/packages/font-metrics/src/metrics.ts
-var import_node_fs4 = require("node:fs");
-var import_node_path7 = require("node:path");
+var import_node_fs5 = require("node:fs");
+var import_node_path8 = require("node:path");
 function parseFaceMetrics(fd, offset) {
   const tables = readTableDir(fd, offset);
   if (!tables) return null;
@@ -179560,7 +179700,7 @@ var cacheFile = null;
 var persisted = null;
 var misses = /* @__PURE__ */ new Set();
 function configureMetricsCache(dir) {
-  cacheFile = (0, import_node_path7.join)(dir, "font-vertical-metrics.json");
+  cacheFile = (0, import_node_path8.join)(dir, "font-vertical-metrics.json");
   persisted = null;
   misses.clear();
 }
@@ -179569,7 +179709,7 @@ function loadCache() {
   persisted = {};
   if (cacheFile) {
     try {
-      const parsed = JSON.parse((0, import_node_fs4.readFileSync)(cacheFile, "utf8"));
+      const parsed = JSON.parse((0, import_node_fs5.readFileSync)(cacheFile, "utf8"));
       if (parsed && typeof parsed === "object") persisted = parsed;
     } catch {
     }
@@ -179579,14 +179719,14 @@ function loadCache() {
 function saveCache() {
   if (!cacheFile || !persisted) return;
   try {
-    (0, import_node_fs4.mkdirSync)((0, import_node_path7.dirname)(cacheFile), { recursive: true });
-    (0, import_node_fs4.writeFileSync)(cacheFile, JSON.stringify(persisted));
+    (0, import_node_fs5.mkdirSync)((0, import_node_path8.dirname)(cacheFile), { recursive: true });
+    (0, import_node_fs5.writeFileSync)(cacheFile, JSON.stringify(persisted));
   } catch {
   }
 }
 function cacheValid(entry) {
   try {
-    const st = (0, import_node_fs4.statSync)(entry.path);
+    const st = (0, import_node_fs5.statSync)(entry.path);
     return st.mtimeMs === entry.mtimeMs && st.size === entry.size;
   } catch {
     return false;
@@ -179613,13 +179753,13 @@ function familyVerticalMetrics(family) {
   let st = null;
   let parsed = false;
   try {
-    st = (0, import_node_fs4.statSync)(face.path);
-    const fd = (0, import_node_fs4.openSync)(face.path, "r");
+    st = (0, import_node_fs5.statSync)(face.path);
+    const fd = (0, import_node_fs5.openSync)(face.path, "r");
     try {
       metrics = parseFaceMetrics(fd, face.offset);
       parsed = true;
     } finally {
-      (0, import_node_fs4.closeSync)(fd);
+      (0, import_node_fs5.closeSync)(fd);
     }
   } catch {
   }
@@ -179724,8 +179864,8 @@ function createI18n(dicts) {
 
 // vendor/happyoffice/packages/project-store/src/store.ts
 var import_node_crypto2 = require("node:crypto");
-var import_node_fs5 = require("node:fs");
-var import_node_path8 = require("node:path");
+var import_node_fs6 = require("node:fs");
+var import_node_path9 = require("node:path");
 var TOOL_FIELD_MAX_CHARS = 16e3;
 var TEXT_MAX_CHARS = 32e3;
 var SCOPE_TEXT_MAX_CHARS = 400;
@@ -179734,42 +179874,42 @@ function nowIso() {
   return (/* @__PURE__ */ new Date()).toISOString();
 }
 function ensureDir(dir) {
-  if (!(0, import_node_fs5.existsSync)(dir)) (0, import_node_fs5.mkdirSync)(dir, { recursive: true });
+  if (!(0, import_node_fs6.existsSync)(dir)) (0, import_node_fs6.mkdirSync)(dir, { recursive: true });
 }
 function readJson(filePath) {
   try {
-    if (!(0, import_node_fs5.existsSync)(filePath)) return null;
-    return JSON.parse((0, import_node_fs5.readFileSync)(filePath, "utf8"));
+    if (!(0, import_node_fs6.existsSync)(filePath)) return null;
+    return JSON.parse((0, import_node_fs6.readFileSync)(filePath, "utf8"));
   } catch {
     return null;
   }
 }
 function writeJson(filePath, data) {
-  ensureDir((0, import_node_path8.dirname)(filePath));
+  ensureDir((0, import_node_path9.dirname)(filePath));
   const tmpPath = `${filePath}.tmp`;
-  (0, import_node_fs5.writeFileSync)(tmpPath, JSON.stringify(data, null, 2), "utf8");
-  (0, import_node_fs5.renameSync)(tmpPath, filePath);
+  (0, import_node_fs6.writeFileSync)(tmpPath, JSON.stringify(data, null, 2), "utf8");
+  (0, import_node_fs6.renameSync)(tmpPath, filePath);
 }
 var ProjectStore = class _ProjectStore {
   baseDir;
   constructor(userDataPath2) {
-    this.baseDir = (0, import_node_path8.join)(userDataPath2, "projects");
+    this.baseDir = (0, import_node_path9.join)(userDataPath2, "projects");
   }
   // ── Path helpers ──────────────────────────────────────────
   indexPath() {
-    return (0, import_node_path8.join)(this.baseDir, "index.json");
+    return (0, import_node_path9.join)(this.baseDir, "index.json");
   }
   projectDir(projectId) {
-    return (0, import_node_path8.join)(this.baseDir, projectId);
+    return (0, import_node_path9.join)(this.baseDir, projectId);
   }
   projectJsonPath(projectId) {
-    return (0, import_node_path8.join)(this.projectDir(projectId), "project.json");
+    return (0, import_node_path9.join)(this.projectDir(projectId), "project.json");
   }
   chatsDir(projectId) {
-    return (0, import_node_path8.join)(this.projectDir(projectId), "chats");
+    return (0, import_node_path9.join)(this.projectDir(projectId), "chats");
   }
   chatPath(projectId, chatId) {
-    return (0, import_node_path8.join)(this.chatsDir(projectId), `${chatId}.jsonl`);
+    return (0, import_node_path9.join)(this.chatsDir(projectId), `${chatId}.jsonl`);
   }
   // ── seq counters (in-memory cache, initialized from JSONL line count on first read) ──
   /** projectId:chatId → current max seq */
@@ -179922,7 +180062,7 @@ var ProjectStore = class _ProjectStore {
     try {
       ensureDir(this.chatsDir(projectId));
       const lines = buf.map((r) => JSON.stringify(r) + "\n").join("");
-      (0, import_node_fs5.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
+      (0, import_node_fs6.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
     } catch (err) {
       console.warn("[project-store] flushPending failed:", err);
     }
@@ -179955,7 +180095,7 @@ var ProjectStore = class _ProjectStore {
         };
       }
       const key = this.seqKey(projectId, chatId);
-      if (msg.role !== "assistant" && !(0, import_node_fs5.existsSync)(this.chatPath(projectId, chatId))) {
+      if (msg.role !== "assistant" && !(0, import_node_fs6.existsSync)(this.chatPath(projectId, chatId))) {
         const buf2 = this.pendingFirstWrite.get(key) ?? [];
         buf2.push(record);
         this.pendingFirstWrite.set(key, buf2);
@@ -179965,7 +180105,7 @@ var ProjectStore = class _ProjectStore {
       const buf = this.pendingFirstWrite.get(key) ?? [];
       this.pendingFirstWrite.delete(key);
       const lines = [...buf, record].map((r) => JSON.stringify(r) + "\n").join("");
-      (0, import_node_fs5.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
+      (0, import_node_fs6.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
     } catch (err) {
       console.warn("[project-store] appendChatMessage failed:", err);
     }
@@ -179979,8 +180119,8 @@ var ProjectStore = class _ProjectStore {
     const filePath = this.chatPath(projectId, chatId);
     const messages = [...pending2];
     try {
-      if ((0, import_node_fs5.existsSync)(filePath)) {
-        const raw = (0, import_node_fs5.readFileSync)(filePath, "utf8");
+      if ((0, import_node_fs6.existsSync)(filePath)) {
+        const raw = (0, import_node_fs6.readFileSync)(filePath, "utf8");
         const lines = raw.split("\n").filter((l) => l.trim());
         for (const line of lines) {
           try {
@@ -180003,16 +180143,16 @@ var ProjectStore = class _ProjectStore {
    */
   listChats(projectId) {
     const dir = this.chatsDir(projectId);
-    if (!(0, import_node_fs5.existsSync)(dir)) return [];
+    if (!(0, import_node_fs6.existsSync)(dir)) return [];
     try {
-      const files = (0, import_node_fs5.readdirSync)(dir).filter((f) => f.endsWith(".jsonl"));
+      const files = (0, import_node_fs6.readdirSync)(dir).filter((f) => f.endsWith(".jsonl"));
       return files.map((f) => {
         const chatId = f.replace(/\.jsonl$/, "");
-        const fullPath = (0, import_node_path8.join)(dir, f);
+        const fullPath = (0, import_node_path9.join)(dir, f);
         let updatedAt = nowIso();
         let approxCount = 0;
         try {
-          const st = (0, import_node_fs5.statSync)(fullPath);
+          const st = (0, import_node_fs6.statSync)(fullPath);
           updatedAt = st.mtime.toISOString();
           approxCount = Math.round(st.size / 120);
         } catch {
@@ -180035,17 +180175,17 @@ var ProjectStore = class _ProjectStore {
     const newPath = this.chatPath(toProjectId, toId);
     let mergedMaxSeq;
     try {
-      if ((0, import_node_fs5.existsSync)(oldPath)) {
-        ensureDir((0, import_node_path8.dirname)(newPath));
-        if (!(0, import_node_fs5.existsSync)(newPath)) {
-          (0, import_node_fs5.renameSync)(oldPath, newPath);
+      if ((0, import_node_fs6.existsSync)(oldPath)) {
+        ensureDir((0, import_node_path9.dirname)(newPath));
+        if (!(0, import_node_fs6.existsSync)(newPath)) {
+          (0, import_node_fs6.renameSync)(oldPath, newPath);
         } else {
           const existing = this.loadChat(toProjectId, toId, 1e4);
           let seq = existing.reduce((m, msg) => Math.max(m, msg.seq), -1) + 1;
           const moved = this.loadChat(fromProjectId, fromId, 1e4);
           const lines = moved.map((m) => JSON.stringify({ ...m, seq: seq++ }) + "\n").join("");
-          if (lines) (0, import_node_fs5.appendFileSync)(newPath, lines, "utf8");
-          (0, import_node_fs5.unlinkSync)(oldPath);
+          if (lines) (0, import_node_fs6.appendFileSync)(newPath, lines, "utf8");
+          (0, import_node_fs6.unlinkSync)(oldPath);
           mergedMaxSeq = seq - 1;
         }
       }
@@ -180119,7 +180259,7 @@ var ProjectStore = class _ProjectStore {
   listProjectFiles(projectId) {
     const proj = this.readProject(projectId);
     if (!proj) return [];
-    return [...new Set(proj.files)].filter((filePath) => (0, import_node_fs5.existsSync)(filePath));
+    return [...new Set(proj.files)].filter((filePath) => (0, import_node_fs6.existsSync)(filePath));
   }
   /**
    * Creates a project (name must be non-empty; id is the first 12 hex chars of
@@ -180180,11 +180320,11 @@ var ProjectStore = class _ProjectStore {
     if (!proj) throw new Error(`Project does not exist: ${id}`);
     const src = this.projectDir(id);
     const ts = Date.now();
-    const trashDir = (0, import_node_path8.join)(this.baseDir, ".trash");
+    const trashDir = (0, import_node_path9.join)(this.baseDir, ".trash");
     ensureDir(trashDir);
-    const dst = (0, import_node_path8.join)(trashDir, `${id}-${ts}`);
+    const dst = (0, import_node_path9.join)(trashDir, `${id}-${ts}`);
     try {
-      if ((0, import_node_fs5.existsSync)(src)) (0, import_node_fs5.renameSync)(src, dst);
+      if ((0, import_node_fs6.existsSync)(src)) (0, import_node_fs6.renameSync)(src, dst);
     } catch (err) {
       console.warn("[project-store] deleteProject rename to trash failed:", err);
     }
@@ -180239,9 +180379,9 @@ var ProjectStore = class _ProjectStore {
     const srcChatPath = this.chatPath(fromProjectId, chatId);
     const dstChatPath = this.chatPath(targetProjectId, chatId);
     try {
-      if ((0, import_node_fs5.existsSync)(srcChatPath)) {
+      if ((0, import_node_fs6.existsSync)(srcChatPath)) {
         ensureDir(this.chatsDir(targetProjectId));
-        (0, import_node_fs5.renameSync)(srcChatPath, dstChatPath);
+        (0, import_node_fs6.renameSync)(srcChatPath, dstChatPath);
       }
     } catch (err) {
       console.warn("[project-store] moveFileToProject chat rename failed:", err);
@@ -180274,7 +180414,7 @@ var ProjectStore = class _ProjectStore {
       for (const msg of msgs) {
         entries.push({
           filePath,
-          fileName: filePath ? (0, import_node_path8.basename)(filePath) : chatId,
+          fileName: filePath ? (0, import_node_path9.basename)(filePath) : chatId,
           chatId,
           ts: msg.ts,
           role: msg.role,
@@ -180293,8 +180433,8 @@ var ProjectStore = class _ProjectStore {
 };
 
 // vendor/happyoffice/packages/file-parse/src/parse.ts
-var import_promises4 = require("node:fs/promises");
-var import_node_path10 = require("node:path");
+var import_promises5 = require("node:fs/promises");
+var import_node_path11 = require("node:path");
 
 // vendor/happyoffice/packages/file-parse/src/doc.ts
 var import_word_extractor = __toESM(require_word(), 1);
@@ -195311,7 +195451,7 @@ function run(text) {
     text
   };
 }
-function join8(pieces, sep5 = "") {
+function join9(pieces, sep5 = "") {
   return {
     omml: pieces.map((p) => p.omml).join(sep5 === "" ? "" : run(sep5).omml),
     text: pieces.map((p) => p.text).join(sep5)
@@ -195367,7 +195507,7 @@ function parseArgs(p) {
   for (; ; ) {
     const seq = parseSeq(p, true);
     if (!seq) return null;
-    args.push(join8(seq));
+    args.push(join9(seq));
     const ch2 = p.src[p.i];
     if (ch2 === ",") {
       p.i++;
@@ -195432,7 +195572,7 @@ function parseCommandInner(p) {
       const both = argOf("bc");
       const beg = both ?? argOf("lc") ?? "(";
       const end = both ? closingOf(both) : argOf("rc") ?? ")";
-      const body = join8(args, ",");
+      const body = join9(args, ",");
       return {
         omml: `<m:d><m:dPr>${val("begChr", beg)}${val("endChr", end)}</m:dPr>${slot("e", body)}</m:d>`,
         text: `${beg}${body.text}${end}`
@@ -195455,9 +195595,9 @@ function parseCommandInner(p) {
       };
     }
     case "l":
-      return join8(args, ",");
+      return join9(args, ",");
     case "o":
-      return join8(args);
+      return join9(args);
     case "r": {
       if (args.length >= 2) {
         const [deg, body2] = args;
@@ -195490,7 +195630,7 @@ function parseCommandInner(p) {
       const sides = { to: "hideTop", bo: "hideBot", le: "hideLeft", ri: "hideRight" };
       const named = Object.keys(sides).filter((k) => has(k));
       const hidden = named.length ? Object.entries(sides).filter(([k]) => !named.includes(k)).map(([, tag]) => val(tag, "1")).join("") : "";
-      const body = join8(args, ",");
+      const body = join9(args, ",");
       return {
         omml: `<m:borderBox><m:borderBoxPr>${hidden}</m:borderBoxPr>${slot("e", body)}</m:borderBox>`,
         text: body.text
@@ -195509,7 +195649,7 @@ function eqFieldToOmml(instr) {
   const p = { src: m[1].replace(/\\\*\s*[A-Za-z]+/g, "").trim(), i: 0, depth: 0 };
   const seq = parseSeq(p, false);
   if (!seq || p.i < p.src.length) return null;
-  const body = join8(seq);
+  const body = join9(seq);
   if (body.omml === "") return null;
   return { omml: `<m:oMath>${body.omml}</m:oMath>`, text: body.text };
 }
@@ -202899,12 +203039,12 @@ function runText(block) {
 
 // vendor/happyoffice/packages/file-parse/src/pdf.ts
 var import_node_module = require("node:module");
-var import_node_path9 = require("node:path");
+var import_node_path10 = require("node:path");
 function standardFontDataUrl() {
   try {
-    const require2 = (0, import_node_module.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs");
+    const require2 = (0, import_node_module.createRequire)(__fridayBundleUrl);
     const pdfPath = require2.resolve("pdfjs-dist/legacy/build/pdf.mjs");
-    return `${(0, import_node_path9.join)((0, import_node_path9.dirname)(pdfPath), "..", "..", "standard_fonts")}/`;
+    return `${(0, import_node_path10.join)((0, import_node_path10.dirname)(pdfPath), "..", "..", "standard_fonts")}/`;
   } catch {
     return void 0;
   }
@@ -203319,27 +203459,27 @@ var TEXT_EXTS = /* @__PURE__ */ new Set([
   "py"
 ]);
 async function parseFileToText(filePath) {
-  const ext = (0, import_node_path10.extname)(filePath).slice(1).toLowerCase();
+  const ext = (0, import_node_path11.extname)(filePath).slice(1).toLowerCase();
   const imageMime = IMAGE_MIMES[ext];
   if (imageMime) return { ok: true, kind: "image", mime: imageMime };
   try {
     if (TEXT_EXTS.has(ext)) {
-      return { ok: true, kind: "text", text: await (0, import_promises4.readFile)(filePath, "utf-8") };
+      return { ok: true, kind: "text", text: await (0, import_promises5.readFile)(filePath, "utf-8") };
     }
     switch (ext) {
       case "doc":
-        return { ok: true, kind: "text", text: await docToText(await (0, import_promises4.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await docToText(await (0, import_promises5.readFile)(filePath)) };
       case "docx":
-        return { ok: true, kind: "text", text: await docxToText(await (0, import_promises4.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await docxToText(await (0, import_promises5.readFile)(filePath)) };
       case "ppt":
-        return { ok: true, kind: "text", text: await pptToText(await (0, import_promises4.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await pptToText(await (0, import_promises5.readFile)(filePath)) };
       case "pptx":
-        return { ok: true, kind: "text", text: await pptxToText(await (0, import_promises4.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await pptxToText(await (0, import_promises5.readFile)(filePath)) };
       case "xlsx":
       case "xlsm":
-        return { ok: true, kind: "text", text: await xlsxToText(await (0, import_promises4.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await xlsxToText(await (0, import_promises5.readFile)(filePath)) };
       case "pdf":
-        return { ok: true, kind: "text", text: await pdfToText(await (0, import_promises4.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await pdfToText(await (0, import_promises5.readFile)(filePath)) };
     }
   } catch (e) {
     return { ok: false, kind: "text", error: e instanceof Error ? e.message : String(e) };
@@ -203347,10 +203487,10 @@ async function parseFileToText(filePath) {
   return { ok: false, kind: "unsupported", error: `Unsupported file type: .${ext || "unknown"}` };
 }
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/core/styles.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\core\styles.js?raw
 var styles_default = "  const SKIP_TAGS = new Set([\n    'SCRIPT', 'STYLE', 'LINK', 'META', 'NOSCRIPT', 'TEMPLATE', 'HEAD', 'TITLE',\n  ]);\n  let shotCounter = 0;\n\n  const styleCache = new WeakMap();\n  function cs(el) {\n    if (!styleCache.has(el)) styleCache.set(el, getComputedStyle(el));\n    return styleCache.get(el);\n  }\n\n  function isVisible(el) {\n    const s = cs(el);\n    if (s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) === 0) return false;\n    const r = el.getBoundingClientRect();\n    return r.width > 1 && r.height > 1;\n  }\n\n  function parseColor(colorStr) {\n    if (!colorStr) return null;\n    const m = colorStr.match(/rgba?\\(\\s*(\\d+)[,\\s]+(\\d+)[,\\s]+(\\d+)(?:[,\\s/]+([\\d.]+))?\\s*\\)/);\n    if (!m) return null;\n    return {\n      r: +m[1],\n      g: +m[2],\n      b: +m[3],\n      a: m[4] === undefined ? 1 : parseFloat(m[4]),\n    };\n  }\n\n  function compositeRgb(color, backdrop) {\n    const a = color.a;\n    return {\n      r: Math.round(color.r * a + backdrop.r * (1 - a)),\n      g: Math.round(color.g * a + backdrop.g * (1 - a)),\n      b: Math.round(color.b * a + backdrop.b * (1 - a)),\n      a: 1,\n    };\n  }\n\n  function backdropRgbOf(el) {\n    const ancestors = [];\n    for (let cur = el?.parentElement; cur; cur = cur.parentElement) ancestors.push(cur);\n    let backdrop = { r: 255, g: 255, b: 255, a: 1 };\n    for (const ancestor of ancestors.reverse()) {\n      let color = parseColor(cs(ancestor).backgroundColor);\n      // A gradient-painted ancestor (background-image, not backgroundColor)\n      // is invisible to this walk otherwise: a translucent white overlay\n      // nested inside it composites against the default white backdrop and\n      // reads as near-white, so paintedBgHex's white-preserve fallback then\n      // hardcodes opaque FFFFFF \u2014 white text on a white cell, content\n      // effectively invisible. Approximate with the first gradient stop,\n      // same fallback bgHex uses for the gradient element itself.\n      if (!color || color.a < 0.05) {\n        const stop = gradientBaseStop(cs(ancestor).backgroundImage);\n        if (stop) color = parseColor(stop);\n      }\n      if (color && color.a >= 0.05) backdrop = compositeRgb(color, backdrop);\n    }\n    return backdrop;\n  }\n\n  // 'rgb(a)' -> 'RRGGBB' hex, or null for transparent / near-white.\n  // Light documents retain white-backed tints; dark documents pass their\n  // resolved ancestor paint so alpha colors keep their authored contrast.\n  function toHex(colorStr, { dropWhite = false, backdrop = null } = {}) {\n    const color = parseColor(colorStr);\n    if (!color) return null;\n    let { r, g, b, a } = color;\n    if (a < 0.05) return null;\n    if (a < 1) {\n      ({ r, g, b } = compositeRgb(color, backdrop || { r: 255, g: 255, b: 255 }));\n    }\n    if (dropWhite && r > 250 && g > 250 && b > 250) return null;\n    const hex = (n) => n.toString(16).padStart(2, '0');\n    return (hex(r) + hex(g) + hex(b)).toUpperCase();\n  }\n\n  function hexLuminance(hex) {\n    if (!hex || hex.length < 6) return 0;\n    const n = parseInt(hex.slice(0, 6), 16);\n    if (Number.isNaN(n)) return 0;\n    const r = (n >> 16) & 255;\n    const g = (n >> 8) & 255;\n    const b = n & 255;\n    return 0.2126 * r + 0.7152 * g + 0.0722 * b;\n  }\n\n  // Representative paint of a (possibly multi-layer) gradient background:\n  // the first sufficiently-opaque stop of the BOTTOM layer. CSS paints the\n  // first listed layer on top, so decorative low-alpha radial accents come\n  // first and the base gradient last \u2014 grabbing the first color in the whole\n  // string painted a dark hero with its 0.18-alpha gold accent (near-white\n  // shading under white text) instead of its dark base.\n  function gradientBaseStop(bgImage) {\n    if (!bgImage || !bgImage.includes('gradient')) return null;\n    const lastLayerStart = bgImage.lastIndexOf('-gradient(');\n    const layer = lastLayerStart >= 0 ? bgImage.slice(lastLayerStart) : bgImage;\n    let first = null;\n    for (const match of layer.matchAll(/rgba?\\([^)]+\\)|#[0-9a-fA-F]{3,8}/g)) {\n      first = first || match[0];\n      const color = parseColor(match[0]);\n      // #hex tokens don't parse -> opaque; skip translucent overlay stops\n      if (!color || color.a >= 0.5) return match[0];\n    }\n    return first;\n  }\n\n  function bgHex(el) {\n    const solid = toHex(cs(el).backgroundColor, { dropWhite: true, backdrop: backdropRgbOf(el) });\n    if (solid) return solid;\n    // gradient-painted box with no solid backgroundColor: approximate with\n    // a representative stop, or light foreground text lands on a white page\n    const stop = gradientBaseStop(cs(el).backgroundImage);\n    if (stop) return toHex(stop, { dropWhite: true });\n    return null;\n  }\n\n  // True when el sits on a solid tint or a CSS background-image/gradient.\n  // White cards on those surfaces must keep FFFFFF or the backdrop shows through.\n  function hasTintedBackdrop(el) {\n    let anc = el.parentElement;\n    while (anc) {\n      if (bgHex(anc)) return true;\n      const s = cs(anc);\n      if (s.backgroundImage && s.backgroundImage !== 'none') return true;\n      if (anc === document.documentElement) break;\n      anc = anc.parentElement;\n    }\n    return false;\n  }\n\n  // Like bgHex, but keeps authored white/near-white paint when it covers a\n  // tinted or gradient backdrop (page wash, section band, etc.).\n  function paintedBgHex(el) {\n    const shaded = bgHex(el);\n    if (shaded) return shaded;\n    const raw = toHex(cs(el).backgroundColor);\n    if (!raw || !hasTintedBackdrop(el)) return null;\n    return 'FFFFFF';\n  }\n\n\n  // A compact painted pill/badge (inline-block, nowrap, own background):\n  // shared signal that a container's exact visual row must be screenshot.\n  function isCompactPaintedLabel(child) {\n    const childStyle = cs(child);\n    return (\n      childStyle.display === 'inline-block' &&\n      childStyle.whiteSpace === 'nowrap' &&\n      Boolean(bgHex(child)) &&\n      (child.innerText || '').trim().length <= 30 &&\n      child.getBoundingClientRect().height <= 50\n    );\n  }\n\n  function isMono(s) {\n    return /mono|consolas|courier|menlo|jetbrains/i.test(s.fontFamily);\n  }\n\n  const DOC_RTL =\n    getComputedStyle(document.body).direction === 'rtl' ||\n    getComputedStyle(document.documentElement).direction === 'rtl';\n\n  function isRTL(el) {\n    return cs(el).direction === 'rtl';\n  }\n\n  // Resolve text-align to a physical alignment, accounting for direction.\n  // In an RTL block, 'start' (the browser default) means the right side \u2014\n  // Word's w:bidi paragraphs already default to right, so return undefined\n  // and let the bidi default apply; an explicit left/end must survive as\n  // physical left.\n  function textAlignOf(el) {\n    const s = cs(el);\n    const ta = s.textAlign;\n    if (ta === 'center') return 'center';\n    if (ta.startsWith('justify')) return 'justify';\n    if (s.direction === 'rtl') {\n      if (ta === 'left' || ta === 'end') return 'left';\n      return undefined; // start / right == bidi paragraph default\n    }\n    if (ta === 'right' || ta === 'end') return 'right';\n    return undefined;\n  }\n\n  function borderLeftOf(el) {\n    const s = cs(el);\n    const w = parseFloat(s.borderLeftWidth);\n    if (w >= 2 && s.borderLeftStyle !== 'none') {\n      const color = toHex(s.borderLeftColor);\n      if (color) return { color, widthPx: w };\n    }\n    // ::before painted as a narrow vertical accent bar (\u258E section headings,\n    // timeline rails): visually a left border, but authored as a\n    // pseudo-element; gradient rails take their first color stop.\n    const before = getComputedStyle(el, '::before');\n    if (before && before.content === '\"\"') {\n      const bw = parseFloat(before.width);\n      const bh = parseFloat(before.height);\n      const gradientStop = before.backgroundImage.match(/rgba?\\([^)]+\\)|#[0-9a-fA-F]{3,8}/)?.[0];\n      const color = toHex(before.backgroundColor) || (gradientStop && toHex(gradientStop));\n      if (color && bw >= 2 && bw <= 10 && bh >= 10) {\n        return { color, widthPx: bw };\n      }\n    }\n    return null;\n  }\n\n  function borderRightOf(el) {\n    const s = cs(el);\n    const w = parseFloat(s.borderRightWidth);\n    if (w >= 2 && s.borderRightStyle !== 'none') {\n      const color = toHex(s.borderRightColor);\n      if (color) return { color, widthPx: w };\n    }\n    return null;\n  }\n\n  // ::before/::after painted as a full-width horizontal bar (decorative\n  // section rules). Not in the DOM, so probed via computed pseudo styles.\n  function pseudoBar(el, which) {\n    const s = getComputedStyle(el, which);\n    if (!s || s.content === 'none') return null;\n    if (s.position === 'fixed') return null;\n    const h = parseFloat(s.height);\n    if (!(h >= 1 && h <= 8)) return null;\n    const w = parseFloat(s.width);\n    const elW = el.getBoundingClientRect().width;\n    const fullRule = w >= elW * 0.5;\n    // absolute pseudos are usually dropped (not in flow), but a thin\n    // full-width bar hugging the element is a decorative underline that\n    // should survive (section-title::after { position:absolute; bottom:-5px })\n    if (s.position === 'absolute') {\n      const top = Math.abs(parseFloat(s.top));\n      const bottom = Math.abs(parseFloat(s.bottom));\n      const hugsEdge = Math.min(isNaN(top) ? 99 : top, isNaN(bottom) ? 99 : bottom) <= 12;\n      if (!fullRule || !hugsEdge) return null;\n    }\n    if (s.position !== 'absolute' && s.display !== 'block') return null;\n    const shortAccent = w >= 20 && w <= 120;\n    if (!(w > 0) || (!fullRule && !shortAccent)) return null;\n    const color = toHex(s.backgroundColor, { dropWhite: true });\n    if (!color) return null;\n    return {\n      type: 'hr',\n      color,\n      heightPx: h,\n      widthFrac: Math.min(1, w / elW),\n      short: shortAccent && !fullRule,\n      spacingBeforePx: Math.max(0, parseFloat(s.marginTop) || 0),\n      spacingAfterPx: Math.max(0, parseFloat(s.marginBottom) || 0),\n    };\n  }\n\n  function pseudoMarker(el) {\n    for (const which of ['::before', '::after']) {\n      const s = getComputedStyle(el, which);\n      if (!s || s.content === 'none' || s.content === 'normal') continue;\n      const content = s.content.replace(/^['\"]|['\"]$/g, '');\n      if (content.trim()) continue;\n      const width = parseFloat(s.width);\n      const height = parseFloat(s.height);\n      if (\n        width < 5 ||\n        width > 24 ||\n        height < 5 ||\n        height > 24 ||\n        Math.abs(width - height) > 6\n      ) {\n        continue;\n      }\n      const color =\n        toHex(s.backgroundColor, { dropWhite: true }) ||\n        toHex(s.borderTopColor, { dropWhite: true });\n      if (!color) continue;\n      return {\n        text: s.transform && s.transform !== 'none' ? '\\u25c6 ' : '\\u25a0 ',\n        color,\n        sizePx: Math.max(width, height),\n        bold: false,\n      };\n    }\n    return null;\n  }\n\n  // Timeline entry decorations: an absolutely positioned pseudo dot (round\n  // marker) and/or a thin vertical connector rail in the left padding gutter.\n  // Both are position:absolute, so the flow rules drop them; callers\n  // reproduce the rail as a paragraph left border and the dot as a colored\n  // disc run.\n  function timelineDecorOf(el) {\n    const s = cs(el);\n    if (s.position !== 'relative') return null;\n    const padL = parseFloat(s.paddingLeft) || 0;\n    if (padL < 12 || padL > 60) return null;\n    let dot = null;\n    let rail = null;\n    for (const which of ['::before', '::after']) {\n      const p = getComputedStyle(el, which);\n      if (!p || p.content === 'none' || p.content === 'normal') continue;\n      if (p.position !== 'absolute') continue;\n      if (p.content.replace(/^['\"]|['\"]$/g, '').trim()) continue;\n      const w = parseFloat(p.width);\n      const h = parseFloat(p.height);\n      const left = parseFloat(p.left);\n      if (!(left >= -2 && left < padL)) continue;\n      const color = toHex(p.backgroundColor, { dropWhite: true });\n      if (!color) continue;\n      if (w >= 5 && w <= 24 && h >= 5 && h <= 24 && Math.abs(w - h) <= 6) {\n        dot = { color, sizePx: Math.max(w, h) };\n      } else if (w >= 1 && w <= 4 && h > 30) {\n        rail = { color, widthPx: Math.max(1, Math.round(w)), leftPx: left };\n      }\n    }\n    return dot || rail ? { dot, rail, padL, railLeftPx: rail?.leftPx } : null;\n  }\n\n  function borderTopOf(el) {\n    const s = cs(el);\n    const w = parseFloat(s.borderTopWidth);\n    if (w >= 2 && s.borderTopStyle !== 'none') {\n      const color = toHex(s.borderTopColor);\n      if (color) return { color, widthPx: w };\n    }\n    return null;\n  }\n\n  function borderSideOf(el, side) {\n    const s = cs(el);\n    const cap = side[0].toUpperCase() + side.slice(1);\n    const width = parseFloat(s[`border${cap}Width`]);\n    if (width < 1 || s[`border${cap}Style`] === 'none') return null;\n    const color = toHex(s[`border${cap}Color`]);\n    return color ? { color, widthPx: width, style: s[`border${cap}Style`] } : null;\n  }\n\n  function bordersOf(el) {\n    const borders = {};\n    for (const side of ['top', 'bottom', 'left', 'right']) {\n      const border = borderSideOf(el, side);\n      if (border) borders[side] = border;\n    }\n    return Object.keys(borders).length ? borders : null;\n  }\n\n  function cellPaddingOf(el) {\n    const s = cs(el);\n    return {\n      top: Math.max(0, Math.round(parseFloat(s.paddingTop) || 0)),\n      bottom: Math.max(0, Math.round(parseFloat(s.paddingBottom) || 0)),\n      left: Math.max(0, Math.round(parseFloat(s.paddingLeft) || 0)),\n      right: Math.max(0, Math.round(parseFloat(s.paddingRight) || 0)),\n    };\n  }\n\n  // Background painted by an *inline* ancestor (text highlight). Block-level\n  // backgrounds are handled as paragraph/cell shading, so stop at the first\n  // non-inline ancestor to avoid double-painting.\n  // Marker-pen highlight: linear-gradient(transparent 60%, color 40%) on an\n  // inline span. Word has no partial-height run shading, so the marker color\n  // becomes a full-height run highlight.\n  function markerGradientHex(el) {\n    const bgImage = cs(el).backgroundImage;\n    if (!bgImage || !bgImage.startsWith('linear-gradient')) return null;\n    const stops = [...bgImage.matchAll(/rgba?\\(([\\d.\\s,]+)\\)/g)];\n    if (!stops.length) return null;\n    const last = stops[stops.length - 1][1].split(',').map(parseFloat);\n    const [r, g, b, a = 1] = last;\n    if (!(a >= 0.15)) return null;\n    const mix = (c) => Math.round(c * a + 255 * (1 - a));\n    return toHex(`rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`, { dropWhite: true });\n  }\n\n  function inlineBgHex(el) {\n    let cur = el;\n    while (cur && cur.nodeType === Node.ELEMENT_NODE) {\n      const d = cs(cur).display;\n      if (!(d === 'inline' || d.startsWith('inline-') || d === 'contents')) return null;\n      const bg = bgHex(cur) || markerGradientHex(cur);\n      if (bg) return bg;\n      cur = cur.parentElement;\n    }\n    return null;\n  }\n\n  function runStyleOf(el) {\n    const s = cs(el);\n    const style = {\n      bold: parseInt(s.fontWeight, 10) >= 600,\n      italic: s.fontStyle === 'italic',\n      underline: s.textDecorationLine.includes('underline'),\n      strike: s.textDecorationLine.includes('line-through'),\n      color: toHex(s.color) || '000000',\n      sizePx: parseFloat(s.fontSize),\n      mono: isMono(s),\n      letterSpacing: parseFloat(s.letterSpacing) || 0,\n      fontFamily: s.fontFamily,\n    };\n    // Inline(-block) span underlined via border-bottom (recipient names,\n    // signature lines): text-decoration never sees it, so map the lone\n    // bottom border to a run underline. Boxed chips (any other side) skip.\n    if (\n      !style.underline &&\n      (s.display || '').startsWith('inline') &&\n      s.borderBottomStyle !== 'none' &&\n      parseFloat(s.borderBottomWidth) >= 1 &&\n      s.borderTopStyle === 'none' &&\n      s.borderLeftStyle === 'none' &&\n      s.borderRightStyle === 'none'\n    ) {\n      style.underline = true;\n      if (s.borderBottomStyle === 'dotted' || s.borderBottomStyle === 'dashed') {\n        style.underlineStyle = s.borderBottomStyle;\n      }\n      const underlineHex = toHex(s.borderBottomColor);\n      if (underlineHex) style.underlineColor = underlineHex;\n    }\n    // Inline boxed chip (O/X answer labels, small tags): a same-color border\n    // on every side of a short inline element is a character box \u2014 map it to a\n    // run border (w:bdr). Word can't round the corners, but the frame survives.\n    // Restricted to short text so a bordered inline phrase isn't boxed whole.\n    if (\n      (s.display || '').startsWith('inline') &&\n      (el.innerText || '').trim().length <= 8 &&\n      parseFloat(s.borderTopWidth) >= 1 &&\n      s.borderTopStyle !== 'none'\n    ) {\n      const bc = toHex(s.borderTopColor);\n      if (\n        bc &&\n        toHex(s.borderRightColor) === bc &&\n        toHex(s.borderBottomColor) === bc &&\n        toHex(s.borderLeftColor) === bc\n      ) {\n        style.charBorder = { color: bc, widthPx: parseFloat(s.borderTopWidth) };\n      }\n    }\n    const hl = inlineBgHex(el);\n    if (hl) style.highlight = hl;\n    if (s.verticalAlign === 'super' || el.closest('sup')) style.superscript = true;\n    else if (s.verticalAlign === 'sub' || el.closest('sub')) style.subscript = true;\n    if (s.textTransform === 'uppercase') style.uppercase = true;\n    if (s.direction === 'rtl') style.rtl = true;\n    const a = el.closest('a[href]');\n    if (a) {\n      const href = a.getAttribute('href') || '';\n      if (href.startsWith('#') && href.length > 1) {\n        try {\n          style.anchor = decodeURIComponent(href.slice(1));\n        } catch {\n          style.anchor = href.slice(1);\n        }\n      } else if (href && !/^javascript:/i.test(href)) {\n        style.href = a.href;\n      }\n    }\n    return style;\n  }\n\n";
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/core/runs-screenshots.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\core\runs-screenshots.js?raw
 var runs_screenshots_default = `  // Regional_Indicator pairs (flag emoji \\uD83C\\uDDEC\\uD83C\\uDDE7) are not Extended_Pictographic, so
   // match them explicitly or they stay in the body-font run and render as the
   // bare letters ("GB").
@@ -204098,16 +204238,16 @@ var runs_screenshots_default = `  // Regional_Indicator pairs (flag emoji \\uD83
 
 `;
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/core/tables-lists.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\core\tables-lists.js?raw
 var tables_lists_default = "  function extractTable(el) {\n    const rect = el.getBoundingClientRect();\n    const hasCompactPaintedLabel = [...el.querySelectorAll('td *, th *')].some(isCompactPaintedLabel);\n    if (hasCompactPaintedLabel && rect.height <= 900) return markForScreenshot(el);\n    return globalThis.__html2docxTable.extractTable(el, {\n      bgHex,\n      isCompactPaintedLabel,\n      bordersOf,\n      cellPaddingOf,\n      collectRuns,\n      cs,\n      hasBlockChildren,\n      isRTL,\n      isVisible,\n      markForScreenshot,\n      processChildren,\n      textAlignOf,\n      toHex,\n    });\n  }\n\n  // A CSS-grid table whose direct children are grid rows with the same number\n  // of columns (for example a Likert survey built from divs instead of table).\n  function gridTableRows(el) {\n    const rows = [...el.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    if (rows.length < 2) return null;\n    const cssTable =\n      cs(el).display === 'table' &&\n      rows.every(\n        (row) =>\n          cs(row).display === 'table-row' &&\n          [...row.children]\n            .filter((cell) => !SKIP_TAGS.has(cell.tagName) && isVisible(cell))\n            .every((cell) => cs(cell).display === 'table-cell'),\n      );\n    const counts = rows.map((row) => {\n      const s = cs(row);\n      if (s.display !== 'grid' && !(cssTable && s.display === 'table-row')) return 0;\n      return [...row.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c)).length;\n    });\n    const base = Math.max(...counts);\n    if (base < 2 || base > 12) return null;\n    // CSS tables tolerate short rows (a lone header cell): the browser leaves\n    // the missing columns empty, so extractGridTable pads them with fillers.\n    // Grid rows keep the strict equal-count rule.\n    if (counts.some((count) => count !== base && !(cssTable && count >= 1))) return null;\n    if (counts.filter((count) => count === base).length < 2) return null;\n    const widths = rows.map((row) => Math.round(row.getBoundingClientRect().width));\n    if (Math.max(...widths) - Math.min(...widths) > 8) return null;\n    // Cells must sit in the same columns in every row: alternating layouts\n    // (timeline cards flipping left/right around a center rail) are grids of\n    // rows too, but mapping their cells positionally scrambles the columns.\n    const leftsOf = (row) =>\n      [...row.children]\n        .filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c))\n        .map((c) => Math.round(c.getBoundingClientRect().left))\n        .sort((a, b) => a - b);\n    const firstLefts = leftsOf(rows[counts.indexOf(base)]);\n    for (const row of rows) {\n      const lefts = leftsOf(row);\n      if (lefts.length === base) {\n        if (lefts.some((left, i) => Math.abs(left - firstLefts[i]) > 12)) return null;\n      } else if (\n        lefts.some((left) => !firstLefts.some((columnLeft) => Math.abs(left - columnLeft) <= 12))\n      ) {\n        return null;\n      }\n    }\n    // Avoid classifying arbitrary stacks of small grids as a data table.\n    if (!cssTable && rows.length < 4 && !fullBorderOf(el)) return null;\n    return rows;\n  }\n\n  function extractGridTable(el, gridRows, depth) {\n    const cellsOf = (row) =>\n      [...row.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    const baseRow = gridRows.reduce(\n      (best, row) => (cellsOf(row).length > cellsOf(best).length ? row : best),\n      gridRows[0],\n    );\n    const firstCells = cellsOf(baseRow);\n    const colWidths = firstCells.map((c) => Math.round(c.getBoundingClientRect().width));\n    const colLefts = firstCells.map((c) => Math.round(c.getBoundingClientRect().left));\n    const rows = gridRows.map((row, rowIdx) => {\n      const domCells = cellsOf(row);\n      let cells = domCells.map((cell) => {\n          const textAlign = textAlignOf(cell);\n          const entry = {\n            shading: bgHex(cell) || bgHex(row),\n            borders: bordersOf(cell),\n            padPx: cellPaddingOf(cell),\n            vAlign: cs(row).alignItems === 'center' ? 'center' : undefined,\n            rtl: isRTL(cell) || undefined,\n          };\n          if (textAlign === 'center' || textAlign === 'right') entry.align = textAlign;\n          entry.children = needsBlockWalk(cell)\n            ? processChildren(cell, depth + 1, { decorations: false })\n            : paraNodesFrom(cell, false);\n          return entry;\n        });\n      // Short row (lone header cell in a CSS table): seat each cell in its\n      // geometric column and fill the rest with empty cells \u2014 unshaded, so\n      // they inherit the table background, same as the browser leaves them.\n      if (cells.length && cells.length < colWidths.length) {\n        const placed = new Array(colWidths.length).fill(null);\n        domCells.forEach((cell, i) => {\n          const left = Math.round(cell.getBoundingClientRect().left);\n          let col = colLefts.findIndex((columnLeft) => Math.abs(columnLeft - left) <= 12);\n          if (col < 0 || placed[col]) col = placed.findIndex((slot) => !slot);\n          placed[col] = cells[i];\n        });\n        cells = placed.map((entry) => entry || { children: [] });\n      }\n      const renderedHeight = Math.round(row.getBoundingClientRect().height);\n      return {\n        cells,\n        // Let text-driven rows use Word's natural compact height. Preserve\n        // only genuinely tall visual rows (planners / empty writing areas).\n        heightPx: renderedHeight >= 80 ? renderedHeight : undefined,\n        // Only a short strip reads as a repeatable header; a tall first row\n        // is content (card stacks) and would reprint on every page.\n        header: rowIdx === 0 && renderedHeight < 60,\n      };\n    });\n    return [{\n      type: 'table',\n      gridTable: true,\n      rows,\n      colWidths,\n      outerBorder: bordersOf(el),\n      shading: bgHex(el),\n      padPx: cellPaddingOf(el),\n      heightPx: Math.round(el.getBoundingClientRect().height),\n      rtl: isRTL(el) || undefined,\n    }];\n  }\n\n  function extractCode(el) {\n    const shading = bgHex(el) || 'F5F5F5';\n    const lines = el.innerText.replace(/\\n$/, '').split('\\n');\n    const { color, sizePx } = runStyleOf(el);\n    return [{ type: 'code', lines, shading, color, sizePx }];\n  }\n\n  function extractList(el, ordered, depth = 1) {\n    const listItems = [...el.children].filter((li) => li.tagName === 'LI' && isVisible(li));\n    // list-style:none -> the author wants plain paragraphs, not numbering.\n    // Judge by the items, not the UL: frameworks (pico.css) re-style the LI\n    // marker even when the UL itself says none.\n    const plain = listItems.length\n      ? listItems.every(\n          (li) => cs(li).listStyleType === 'none' || cs(li).display !== 'list-item',\n        )\n      : cs(el).listStyleType === 'none';\n    const needsExactPseudoMarker = (li) =>\n      /[\u2611\u2610\u274B]/u.test(pseudoBulletRun(li)?.text || '');\n    const hasCompactPaintedLabels = listItems.some((li) =>\n      [...li.querySelectorAll(':scope > *')].some(isCompactPaintedLabel),\n    );\n    if (hasCompactPaintedLabels) return [markForScreenshot(el)];\n    // CSS multi-column list (columns: 2 on a TOC): reproduce as a layout\n    // table with one cell per rendered column. Numbering continues across\n    // columns, so synthesize literal number prefixes instead of Word lists.\n    const columnCount = parseInt(cs(el).columnCount, 10);\n    if (\n      depth <= 2 &&\n      Number.isFinite(columnCount) &&\n      columnCount >= 2 &&\n      listItems.length >= columnCount &&\n      listItems.every((li) => !hasBlockChildren(li))\n    ) {\n      const lefts = listItems.map((li) => Math.round(li.getBoundingClientRect().left));\n      const uniqueLefts = [...new Set(lefts)].sort((a, b) => a - b);\n      if (uniqueLefts.length >= 2) {\n        const groups = uniqueLefts.map(() => []);\n        listItems.forEach((li, index) => {\n          groups[uniqueLefts.indexOf(lefts[index])].push({ li, index });\n        });\n        const cells = groups.map((group) => ({\n          children: group.flatMap(({ li, index }) => {\n            if (plain && needsExactPseudoMarker(li)) return [markForScreenshot(li)];\n            const runs = collectRuns(li);\n            if (!runs.length) return [];\n            const pseudoRun = pseudoBulletRun(li);\n            let prefixed = Boolean(pseudoRun);\n            if (pseudoRun) runs.unshift(pseudoRun);\n            else if (ordered) {\n              runs.unshift({ text: `${index + 1}. `, ...runStyleOf(li) });\n              prefixed = true;\n            } else if (!plain) {\n              runs.unshift({ text: '\\u2022\\u00a0', ...runStyleOf(li) });\n              prefixed = true;\n            }\n            const style = { ...paraStyleOf(el, false), ...paraStyleOf(li, false) };\n            delete style.indentLeftPx;\n            if (prefixed) {\n              const em = parseFloat(cs(li).fontSize) || 16;\n              style.indentHangingPx = Math.round(em * (ordered ? 1.1 : 0.8));\n            }\n            return [{ type: 'para', runs, style }];\n          }),\n        }));\n        const width = el.getBoundingClientRect().width || 1;\n        return [{\n          type: 'table',\n          layout: true,\n          rows: [{ cells: cells.map((cell, i) => ({ ...cell, gridStart: i, colspan: 1 })) }],\n          colWidths: uniqueLefts.map((left, i) =>\n            Math.round((i + 1 < uniqueLefts.length ? uniqueLefts[i + 1] : el.getBoundingClientRect().right) - left) || Math.round(width / uniqueLefts.length),\n          ),\n        }];\n      }\n    }\n    // Layout list: display:flex items (numbered chip + content column) need\n    // the full classifier. Flattening them to runs drops the chip and\n    // inlines nested callout boxes into the text. Items too tall for a table\n    // row (isBoxRow rejects them) still get a block walk so nested dialogue\n    // bubbles / sub-lists survive.\n    // CSS-counter numbering (\"counter(toc-counter)\") never resolves through\n    // getComputedStyle; synthesize it from the item's position.\n    const counterPrefix = (li, index) => {\n      const pseudoStyle = getComputedStyle(li, '::before');\n      const content = pseudoStyle.content || '';\n      const counterStart = content.indexOf('counter(');\n      if (counterStart < 0) return null;\n      const counterEnd = content.indexOf(')', counterStart);\n      const quotedText = (part) =>\n        [...part.matchAll(/\"([^\"]*)\"|'([^']*)'/g)]\n          .map((match) => match[1] ?? match[2] ?? '')\n          .join('');\n      const prefix = quotedText(content.slice(0, counterStart));\n      const suffix = quotedText(content.slice(counterEnd + 1));\n      let value = `${prefix}${index + 1}${suffix}`;\n      if (pseudoStyle.textTransform === 'uppercase') value = value.toUpperCase();\n      if (pseudoStyle.textTransform === 'lowercase') value = value.toLowerCase();\n      return value.endsWith(' ') ? value : `${value} `;\n    };\n    if (plain && listItems.some((li) => isBoxRow(li) || hasBlockChildren(li))) {\n      return listItems.flatMap((li, index) => {\n        if (isBoxRow(li)) return processElement(li, depth + 1);\n        // A counter badge glyph (\u2776) already carries the number \u2014 adding the\n        // synthesized plain counter text would double-number the item.\n        const bulletRun = pseudoBulletRun(li) || chipBulletRun(li);\n        const prefix = bulletRun ? null : counterPrefix(li, index);\n        if (hasBlockChildren(li)) {\n          const nodes = processChildren(li, depth + 1);\n          const first = nodes.find((n) => n.type === 'para');\n          if (first && bulletRun) first.runs = [bulletRun, ...first.runs];\n          if (first && prefix) first.runs = [{ text: prefix, ...runStyleOf(li) }, ...first.runs];\n          return nodes;\n        }\n        const runs = collectRuns(li);\n        if (!runs.length) return [];\n        if (prefix) runs.unshift({ text: prefix, ...runStyleOf(li) });\n        if (bulletRun) runs.unshift(bulletRun);\n        const style = { ...paraStyleOf(el), ...paraStyleOf(li) };\n        return [{ type: 'para', runs, style }];\n      });\n    }\n    const nativeMarkerOf = (li) => {\n      const itemStyle = cs(li);\n      if (itemStyle.display !== 'list-item' || itemStyle.listStyleType === 'none') return null;\n      const glyphs = {\n        disc: '\\u2022',\n        circle: '\\u25e6',\n        square: '\\u25aa',\n      };\n      const glyph = glyphs[itemStyle.listStyleType];\n      if (!glyph) return null;\n      const runStyle = runStyleOf(li);\n      return {\n        run: {\n          text: `${glyph}\\u00a0`,\n          color: runStyle.color,\n          sizePx: runStyle.sizePx,\n          fontFamily: runStyle.fontFamily,\n        },\n        widthPx: Math.max(10, Math.round((runStyle.sizePx || 14) * 1.05)),\n      };\n    };\n    const markers = listItems.map((li) => {\n      const first = [...li.children].find((child) => isVisible(child));\n      const nativeMarker = nativeMarkerOf(li);\n      if (first && isCheckboxLike(first)) {\n        const rect = first.getBoundingClientRect();\n        const itemStyle = cs(li);\n        return {\n          element: first,\n          widthPx: rect.width,\n          gapPx: parseFloat(itemStyle.columnGap) || parseFloat(itemStyle.gap) || 8,\n          nativeMarker,\n        };\n      }\n      const marker = pseudoCheckbox(li);\n      return marker ? { ...marker, nativeMarker } : null;\n    });\n    const checklist =\n      plain &&\n      listItems.length > 1 &&\n      markers.every(Boolean);\n    if (checklist) {\n      const listRect = el.getBoundingClientRect();\n      const firstColWidth = Math.round(\n        Math.max(\n          ...markers.map(\n            (marker) => marker.widthPx + marker.gapPx + (marker.nativeMarker?.widthPx || 0),\n          ),\n        ),\n      );\n      const rows = listItems.map((li, index) => {\n        const children = [...li.children].filter((child) => isVisible(child));\n        const marker = markers[index];\n        const label = marker.element ? children.find((child) => child !== marker.element) : null;\n        const rowBorders = bordersOf(li);\n        const pad = cellPaddingOf(li);\n        const itemStyle = cs(li);\n        const itemParaStyle = paraStyleOf(li);\n        delete itemParaStyle.spacingBeforePx;\n        delete itemParaStyle.spacingAfterPx;\n        // The marker table already consumes the list item's left padding.\n        // Keeping it on the label paragraph would indent the text twice.\n        delete itemParaStyle.indentLeftPx;\n        const markerRuns = [];\n        if (marker.nativeMarker) markerRuns.push(marker.nativeMarker.run);\n        markerRuns.push(marker.element ? checkboxNode(marker.element) : checkboxRun(marker));\n        return {\n          heightPx: Math.round(\n            li.getBoundingClientRect().height + Math.max(0, parseFloat(itemStyle.marginBottom) || 0),\n          ),\n          cells: [\n            {\n              runs: markerRuns,\n              borders: rowBorders || {},\n              padPx: { top: pad.top, bottom: pad.bottom, left: 0, right: marker.gapPx },\n            },\n            {\n              runs: label ? collectRuns(label) : collectRuns(li),\n              style: itemParaStyle,\n              borders: rowBorders || {},\n              padPx: { top: pad.top, bottom: pad.bottom, left: 0, right: 0 },\n            },\n          ],\n          last: index === listItems.length - 1,\n        };\n      });\n      const listStyle = cs(el);\n      return [{\n        type: 'table',\n        checklist: true,\n        noHeader: true,\n        rows,\n        colWidths: [firstColWidth, Math.max(1, Math.round(listRect.width) - firstColWidth)],\n        spacingBeforePx: Math.max(0, Math.round(parseFloat(listStyle.marginTop) || 0)),\n        spacingAfterPx: Math.max(0, Math.round(parseFloat(listStyle.marginBottom) || 0)),\n        rtl: isRTL(el) || undefined,\n      }];\n    }\n    const items = [];\n    for (const li of listItems) {\n      items.push({ runs: collectRuns(li), style: paraStyleOf(li) });\n    }\n    if (!items.length) return [];\n    if (plain) {\n      return items\n        .filter((it) => it.runs.length)\n        .map((it, index) => {\n          const li = listItems[index];\n          if (needsExactPseudoMarker(li)) return markForScreenshot(li);\n          const style = { ...paraStyleOf(el), ...it.style };\n          const itemStyle = cs(li);\n          const paddingTop = parseFloat(itemStyle.paddingTop) || 0;\n          const paddingBottom = parseFloat(itemStyle.paddingBottom) || 0;\n          if (paddingTop > 0) style.spacingBeforePx = (style.spacingBeforePx || 0) + paddingTop;\n          if (paddingBottom > 0) style.spacingAfterPx = (style.spacingAfterPx || 0) + paddingBottom;\n          const bulletRun = pseudoBulletRun(li) || chipBulletRun(li);\n          if (bulletRun) it.runs.unshift(bulletRun);\n          else {\n            // list-style:none + ::before counter() (self-numbered rule\n            // lists): the marker lives in the pseudo-element, not the runs\n            const prefix = counterPrefix(li, index);\n            if (prefix) {\n              const pseudoWeight = parseInt(getComputedStyle(li, '::before').fontWeight, 10);\n              it.runs.unshift({\n                text: prefix,\n                ...runStyleOf(li),\n                ...(pseudoWeight >= 600 ? { bold: true } : {}),\n              });\n              const em = parseFloat(itemStyle.fontSize) || 16;\n              style.indentHangingPx = Math.round(em * 1.1);\n            }\n          }\n          return { type: 'para', runs: it.runs, style };\n        });\n    }\n    // <ol start=\"951\">: Word numbering always restarts at 1 (startOverride\n    // is fixed), so lists with an authored start keep literal number\n    // prefixes instead \u2014 the TOC must match the 951-975 headings it links.\n    const startAt = ordered ? parseInt(el.getAttribute('start'), 10) : NaN;\n    if (Number.isFinite(startAt) && startAt !== 1 && listItems.every((li) => !hasBlockChildren(li))) {\n      return listItems.flatMap((li, index) => {\n        const runs = collectRuns(li);\n        if (!runs.length) return [];\n        runs.unshift({ text: `${startAt + index}. `, ...runStyleOf(li) });\n        const style = { ...paraStyleOf(el, false), ...paraStyleOf(li, false) };\n        const em = parseFloat(cs(li).fontSize) || 16;\n        style.indentHangingPx = Math.round(em * 1.6);\n        return [{ type: 'para', runs, style }];\n      });\n    }\n    const nestedItems = [];\n    // liIndex = ordinal of the top-level li each item came from, so column\n    // slicing can split a tall bullet list at li boundaries.\n    const appendListItems = (listEl, level, parentIndentPx, rootIndex) => {\n      const listStyle = cs(listEl);\n      const indentLeftPx = parentIndentPx + Math.max(0, parseFloat(listStyle.paddingLeft) || 0);\n      const childItems = [...listEl.children].filter(\n        (child) => child.tagName === 'LI' && isVisible(child),\n      );\n      for (let liOrdinal = 0; liOrdinal < childItems.length; liOrdinal++) {\n        const li = childItems[liOrdinal];\n        const liIndex = level === 0 ? liOrdinal : rootIndex;\n        // Walk li children in DOM order, splitting content around nested\n        // lists: text after a nested list must stay after it (a trailing\n        // \"to perform...\" clause hoisted above its sub-items inverts the\n        // reading order).\n        const segments = [];\n        let current = [];\n        for (const node of li.childNodes) {\n          const isList =\n            node.nodeType === Node.ELEMENT_NODE &&\n            (node.tagName === 'UL' || node.tagName === 'OL');\n          if (isList) {\n            if (isVisible(node)) {\n              segments.push({ content: current });\n              current = [];\n              segments.push({ list: node });\n            }\n          } else current.push(node);\n        }\n        segments.push({ content: current });\n        const style = paraStyleOf(li);\n        if (segments.some((seg) => seg.list)) delete style.spacingAfterPx;\n        let leading = true;\n        for (const seg of segments) {\n          if (seg.list) {\n            appendListItems(seg.list, level + 1, indentLeftPx, liIndex);\n            continue;\n          }\n          const runs = trimRuns(runsFromNodes(seg.content, li));\n          if (!runs.length) continue;\n          // A justified li with an explicit <br> keeps the break as \\n in one\n          // paragraph \u2014 Word stretches the line BEFORE a manual break under\n          // justify (CSS never does), blowing huge gaps into short label\n          // lines. Split at the breaks like makeParaNodes: only the final\n          // fragment keeps justify (Word never stretches a last line).\n          const fragments = [runs];\n          if (style.align === 'justify' && runs.some((run) => (run.text || '').includes('\\n'))) {\n            fragments.length = 0;\n            let currentLine = [];\n            for (const run of runs) {\n              const parts = (run.text || '').split('\\n');\n              parts.forEach((part, partIndex) => {\n                if (part) currentLine.push({ ...run, text: part });\n                if (partIndex < parts.length - 1 && currentLine.length) {\n                  fragments.push(currentLine);\n                  currentLine = [];\n                }\n              });\n            }\n            if (currentLine.length) fragments.push(currentLine);\n            if (!fragments.length) fragments.push(runs);\n          }\n          fragments.forEach((fragmentRuns, fragmentIndex) => {\n            const fragmentStyle =\n              fragments.length > 1 && fragmentIndex < fragments.length - 1\n                ? { ...style, align: undefined }\n                : style;\n            if (leading) {\n              nestedItems.push({\n                runs: fragmentRuns,\n                style: fragmentStyle,\n                level,\n                // ::before counter() numbering counts as ordered even on a UL\n                ordered:\n                  listEl.tagName === 'OL' ||\n                  (getComputedStyle(li, '::before').content || '').includes('counter('),\n                markerType: cs(li).listStyleType || listStyle.listStyleType,\n                indentLeftPx,\n                liIndex,\n              });\n              leading = false;\n            } else {\n              // continuation text of the same li: no marker, text-aligned indent\n              nestedItems.push({\n                runs: fragmentRuns,\n                style: fragmentStyle,\n                level,\n                continuation: true,\n                indentLeftPx,\n                liIndex,\n              });\n            }\n          });\n        }\n      }\n    };\n    appendListItems(el, 0, 0, 0);\n    return [{\n      type: 'list',\n      ordered,\n      items: nestedItems,\n      rtl: isRTL(el) || undefined,\n    }];\n  }\n\n  // A horizontal row of >=2 similar boxes (flex row / grid columns) -> kpirow\n";
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/core/layouts-controls.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\core\layouts-controls.js?raw
 var layouts_controls_default = "  function isBoxRow(el) {\n    const s = cs(el);\n    const kids = [...el.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    // bare text between element children (badge + question text + hint):\n    // column extraction iterates elements only and silently drops the text\n    for (const node of el.childNodes) {\n      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) return false;\n    }\n    const navRow = el.tagName === 'NAV' && s.display === 'flex';\n    const singleGridRow = s.display === 'grid' && s.gridTemplateColumns.split(' ').length >= 2;\n    // Narrow separators (\u25B6 arrows between process steps) are not columns \u2014\n    // exclude them from the column-count cap or a 4-step flow with 3 arrows\n    // (7 children) falls back to a vertical card stack.\n    const columnCount = kids.filter((k) => k.getBoundingClientRect().width > 40).length;\n    if (kids.length < 2 || columnCount > (navRow || singleGridRow ? 12 : 6)) return false;\n    const flexRow = s.display === 'flex' && (s.flexDirection === 'row' || s.flexDirection === '');\n    const gridCols = s.display === 'grid' && (s.gridTemplateColumns.split(' ').length >= 2);\n    // CSS table layout (display: table + table-cell children) is a\n    // side-by-side row exactly like a flex row\n    const cssTableRow =\n      s.display === 'table' && kids.every((k) => cs(k).display === 'table-cell');\n    if (!flexRow && !gridCols && !cssTableRow) return false;\n    // Page-level column layouts (sidebar + main) are far too tall for one\n    // table row \u2014 Word/LO can't paginate it. Those flatten to sequential flow.\n    // A row of similar-width parallel cards (pricing tiers, lead + stacked\n    // cells) is not a page layout: page-level two-column designs are consumed\n    // by the earlier pageColumns branch and sidebars fail the width-similarity\n    // check, so allow up to the ~one-page cell budget gridRowClusters uses.\n    const kidHeights = kids.map((k) => k.getBoundingClientRect().height);\n    const kidWidths = kids.map((k) => k.getBoundingClientRect().width).filter((w) => w > 40);\n    const parallelCards =\n      kidWidths.length >= 2 && Math.max(...kidWidths) <= Math.min(...kidWidths) * 1.8;\n    if (Math.max(...kidHeights) > (parallelCards ? 950 : 500)) return false;\n    // children laid out side by side: every pair overlaps vertically\n    // (tops alone fail for align-items: center/end rows of unequal heights)\n    const rects = kids.map((k) => k.getBoundingClientRect());\n    // RTL flex rows progress right-to-left in DOM order\n    const ltr = rects.length < 2 || rects[1].left >= rects[0].left;\n    for (let i = 0; i < rects.length - 1; i++) {\n      const a = rects[i];\n      const b = rects[i + 1];\n      if (Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) < Math.min(a.height, b.height) * 0.5) {\n        return false;\n      }\n      // must progress consistently in one horizontal direction\n      if (ltr && b.left < a.right - 2) return false;\n      if (!ltr && b.right > a.left + 2) return false;\n    }\n    return true;\n  }\n\n  // Multi-row grid of cards (2-4 columns, 2+ rows): children clustered into\n  // rows by rendered Y position -> borderless layout table, one table row per\n  // visual row, so the side-by-side arrangement survives and Word can still\n  // paginate between rows.\n  function gridRowClusters(el) {\n    const s = cs(el);\n    const gridCols = s.display === 'grid' && s.gridTemplateColumns.split(' ').length >= 2;\n    const wrapFlex = s.display === 'flex' && s.flexWrap === 'wrap';\n    if (!gridCols && !wrapFlex) return null;\n    const kids = [...el.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    if (kids.length < 3) return null;\n    // grid-area placement makes DOM order diverge from visual order \u2014\n    // cluster by rendered position, not source position\n    kids.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);\n    const rows = [];\n    let cur = null;\n    let curTop = -1e9;\n    for (const k of kids) {\n      const t = k.getBoundingClientRect().top;\n      if (!cur || t - curTop > 20) {\n        cur = [];\n        rows.push(cur);\n        curTop = t;\n      }\n      cur.push(k);\n    }\n    if (rows.length < 2) return null;\n    const nCols = Math.max(...rows.map((r) => r.length));\n    if (nCols < 2 || nCols > 13) return null;\n    // A table row can't paginate mid-cell, so cells must fit one page. Word's\n    // usable content height is ~970px \u2014 cards up to ~950px still render as a\n    // single side-by-side row (a 2\xD72 teacher-card grid has ~780px cells).\n    if (kids.some((k) => k.getBoundingClientRect().height > 950)) return null;\n    if (kids.some((k) => k.getBoundingClientRect().height > 700)) {\n      // Page-tall rows are only safe for grids of self-painted cards; a\n      // painted section's internal text layout (dark manifesto chapters)\n      // must stay with the card/section branches that keep its backdrop.\n      const paintedKids = kids.filter(\n        (k) => bgHex(k) || paintedBgHex(k) || fullBorderOf(k),\n      ).length;\n      if (paintedKids * 2 < kids.length) return null;\n    }\n    // physical left-to-right cell order (RTL grids arrive right-to-left)\n    for (const row of rows) {\n      row.sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);\n    }\n    return rows;\n  }\n\n  function largeTableGridRows(el) {\n    const s = cs(el);\n    const gridCols = s.display === 'grid' && s.gridTemplateColumns.split(' ').length >= 2;\n    const wrapFlex = s.display === 'flex' && s.flexWrap === 'wrap';\n    if (!gridCols && !wrapFlex) return null;\n    if (pageColumnParts(el)) return null;\n    const kids = [...el.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    if (kids.length < 3 || kids.length > 8) return null;\n    const tableKids = kids.filter((kid) => kid.querySelector('table'));\n    if (tableKids.length < 2 || tableKids.length * 2 < kids.length) return null;\n    if (!kids.some((kid) => kid.getBoundingClientRect().height > 700)) return null;\n    if (el.getBoundingClientRect().height > 2200) return null;\n    // same as gridRowClusters: visual order, not DOM order\n    kids.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);\n    const rows = [];\n    let current = null;\n    let currentTop = -1e9;\n    for (const kid of kids) {\n      const top = kid.getBoundingClientRect().top;\n      if (!current || top - currentTop > 20) {\n        current = [];\n        rows.push(current);\n        currentTop = top;\n      }\n      current.push(kid);\n    }\n    if (rows.length < 2 || rows.length > 4) return null;\n    const columnCount = Math.max(...rows.map((row) => row.length));\n    if (columnCount < 2 || columnCount > 4) return null;\n    for (const row of rows) {\n      row.sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);\n    }\n    return rows;\n  }\n\n  function extractGridRows(\n    el,\n    gridRows,\n    depth,\n    { screenshotCells = false, noSplit = true, largeTableGrid = false } = {},\n  ) {\n    // Column tracks are clustered from cell left edges across ALL rows, not\n    // just row 0: rows can occupy different columns (timeline layouts where\n    // cards alternate left/right and empty divs are invisible), and taking\n    // row 0's cells as the column set mis-registers every other row.\n    const containerRect = el.getBoundingClientRect();\n    const trackLefts = [];\n    for (const c of gridRows.flat()) {\n      const left = c.getBoundingClientRect().left;\n      if (!trackLefts.some((x) => Math.abs(x - left) < 12)) trackLefts.push(left);\n    }\n    trackLefts.sort((a, b) => a - b);\n    const trackIndex = (x) => {\n      let best = 0;\n      for (let i = 1; i < trackLefts.length; i++) {\n        if (Math.abs(trackLefts[i] - x) < Math.abs(trackLefts[best] - x)) best = i;\n      }\n      return best;\n    };\n    let colWidths = trackLefts.map((left, i) =>\n      Math.round((i + 1 < trackLefts.length ? trackLefts[i + 1] : containerRect.right) - left),\n    );\n    const containerBg = bgHex(el);\n    const cellFor = (c) => {\n      if (screenshotCells) return { children: [markForScreenshot(c)] };\n      // screenshot cells carry their own paint - no cell shading on top\n      if (\n        isReplacedTag(c) ||\n        isPill(c) ||\n        isDecorativeLeaf(c) ||\n        isBadgeGrid(c) ||\n        needsVisualEffectScreenshot(c)\n      ) {\n        return { children: processElement(c, depth + 1) };\n      }\n      // a cell that is itself a flex row or a visual card needs the full\n      // classifier: rows collapse into a stack and cards lose their\n      // border/background when only their children are walked\n      return {\n        children: isBoxRow(c) || isCard(c, depth + 1)\n          ? processElement(c, depth + 1)\n          : needsBlockWalk(c)\n            ? processChildren(c, depth + 1, { decorations: false })\n            : paraNodesFrom(c, false),\n        // on a tinted/gradient backdrop, white card paint must survive\n        shading: paintedBgHex(c),\n      };\n    };\n    const rows = gridRows.map((cells) => {\n      const rowCells = [];\n      let pos = 0;\n      for (const c of cells) {\n        const rect = c.getBoundingClientRect();\n        const start = Math.max(pos, trackIndex(rect.left));\n        let span = 1;\n        while (start + span < trackLefts.length && trackLefts[start + span] < rect.right - 12) {\n          span += 1;\n        }\n        // empty filler for grid columns this row does not occupy\n        if (start > pos) {\n          rowCells.push({ children: [], gridStart: pos, colspan: start - pos });\n        }\n        rowCells.push({ ...cellFor(c), gridStart: start, colspan: span });\n        pos = start + span;\n      }\n      if (pos < trackLefts.length) {\n        rowCells.push({ children: [], gridStart: pos, colspan: trackLefts.length - pos });\n      }\n      return {\n        // planner-style rows of mostly-empty cells must keep their drawn height\n        heightPx:\n          cells.reduce((n, c) => n + (c.innerText || '').trim().length, 0) < 30\n            ? Math.min(420, Math.max(...cells.map((c) => Math.round(c.getBoundingClientRect().height))))\n            : undefined,\n        cells: rowCells,\n      };\n    });\n    const s = cs(el);\n    const rowGapPx = Math.min(parseFloat(s.rowGap) || 0, 60);\n    const colGapPx = Math.min(parseFloat(s.columnGap) || 0, 60);\n    // Authored grid gaps become explicit gap tracks/rows shaded with the\n    // container's background: as interior cell margins the gap would be\n    // filled by the cell's own (e.g. white card) shading and visually vanish.\n    if (colGapPx >= 8 && trackLefts.length >= 2) {\n      const totalTracks = trackLefts.length * 2 - 1;\n      for (const row of rows) {\n        const remapped = [];\n        let pos = 0;\n        for (const cell of row.cells) {\n          const start = cell.gridStart * 2;\n          if (start > pos) {\n            remapped.push({ children: [], shading: containerBg, gridStart: pos, colspan: start - pos });\n          }\n          const span = cell.colspan * 2 - 1;\n          remapped.push({\n            ...cell,\n            gridStart: start,\n            colspan: span,\n            // fillers and transparent cells show the container tint in HTML\n            shading: cell.shading ?? containerBg,\n          });\n          pos = start + span;\n        }\n        if (pos < totalTracks) {\n          remapped.push({ children: [], shading: containerBg, gridStart: pos, colspan: totalTracks - pos });\n        }\n        row.cells = remapped;\n      }\n      const expanded = [];\n      colWidths.forEach((w, i) => {\n        if (i < colWidths.length - 1) {\n          expanded.push(Math.max(10, w - colGapPx), colGapPx);\n        } else {\n          expanded.push(w);\n        }\n      });\n      colWidths = expanded;\n    }\n    if (rowGapPx >= 8) {\n      const totalTracks = colWidths.length;\n      const spaced = [];\n      rows.forEach((row, i) => {\n        spaced.push(row);\n        if (i < rows.length - 1) {\n          spaced.push({\n            gapRow: true,\n            heightPx: rowGapPx,\n            cells: [{ children: [], shading: containerBg, gridStart: 0, colspan: totalTracks }],\n          });\n        }\n      });\n      return [{\n        type: 'table',\n        layout: true,\n        noSplit,\n        largeTableGrid,\n        rowGapPx: 0,\n        rows: spaced,\n        colWidths,\n      }];\n    }\n    return [{ type: 'table', layout: true, noSplit, largeTableGrid, rowGapPx, rows, colWidths }];\n  }\n\n  // Page-level side-by-side columns (sidebar + main). Reproduced as a\n  // borderless multi-row table: content blocks from all columns are sliced\n  // into rows by their rendered Y position, so side-by-side placement\n  // survives while Word can still paginate between rows.\n  function pageColumnParts(el) {\n    const s = cs(el);\n    const kids = [...el.children].filter(\n      (c) =>\n        !SKIP_TAGS.has(c.tagName) &&\n        isVisible(c) &&\n        cs(c).position !== 'absolute' &&\n        cs(c).position !== 'fixed',\n    );\n    if (kids.length < 2 || kids.length > 4) return null;\n    const flexRow = s.display === 'flex' && (s.flexDirection === 'row' || s.flexDirection === '');\n    const gridCols = s.display === 'grid' && (s.gridTemplateColumns.split(' ').length >= 2);\n    if (!flexRow && !gridCols) return null;\n    const containerRect = el.getBoundingClientRect();\n    const columns = kids.filter((k) => k.getBoundingClientRect().height > 500);\n    if (columns.length < 2 || columns.length > 3) return null;\n    const tops = columns.map((k) => Math.round(k.getBoundingClientRect().top));\n    if (Math.max(...tops) - Math.min(...tops) >= 60) return null;\n    const ordered = [...columns].sort(\n      (a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left,\n    );\n    for (let i = 0; i < ordered.length - 1; i++) {\n      if (ordered[i + 1].getBoundingClientRect().left < ordered[i].getBoundingClientRect().right - 2) {\n        return null;\n      }\n    }\n    const leading = kids.filter((k) => !columns.includes(k));\n    if (\n      leading.some((k) => {\n        const r = k.getBoundingClientRect();\n        return r.width < containerRect.width * 0.8 || r.bottom > Math.min(...tops) + 2;\n      })\n    ) {\n      return null;\n    }\n    return { leading, columns: ordered };\n  }\n\n  // Flatten a column into addressable blocks with their rendered Y position.\n  function columnBlocks(col, depth, out, colIdx) {\n    let kids = [...col.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    // unwrap single-child wrappers\n    while (kids.length === 1 && kids[0].children.length && !directText(col)) {\n      col = kids[0];\n      kids = [...col.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    }\n    if (!kids.length) {\n      const nodes = paraNodesFrom(col);\n      if (nodes.length) {\n        const r = col.getBoundingClientRect();\n        out.push({ col: colIdx, top: r.top, bottom: r.bottom, nodes });\n      }\n      return;\n    }\n    for (const child of kids) {\n      const r = child.getBoundingClientRect();\n      // very tall composite blocks get split further so row slicing stays\n      // fine-grained \u2014 but never into tables/grids/lists, whose internal\n      // structure must reach the classifier whole\n      const atomic =\n        ['TABLE', 'UL', 'OL'].includes(child.tagName) ||\n        cs(child).display === 'grid' ||\n        child.querySelector('table');\n      // 320 (not a full page): slicing needs block granularity well under a\n      // page or two columns never share a legal cut line (479px job entries\n      // left no common gap below page 1's limit and degraded the layout).\n      if (r.height > 320 && !atomic && hasBlockChildren(child) && !bgHex(child) && !isBadgeGrid(child)) {\n        columnBlocks(child, depth, out, colIdx);\n        continue;\n      }\n      const nodes = processElement(child, depth + 1);\n      if (!nodes.length) continue;\n      // A tall bullet list is the classic slice blocker (a near-page atomic\n      // block forces the sequential-flow fallback): split it per top-level\n      // li so cuts can land between items. Ordered lists stay atomic \u2014\n      // splitting them would restart their numbering.\n      if (\n        r.height > 320 &&\n        (child.tagName === 'UL' || child.tagName === 'OL') &&\n        nodes.length === 1 &&\n        nodes[0].type === 'list' &&\n        nodes[0].items.every((item) => !item.ordered && item.liIndex != null)\n      ) {\n        const lis = [...child.children].filter(\n          (li) => li.tagName === 'LI' && isVisible(li),\n        );\n        const groups = new Map();\n        for (const item of nodes[0].items) {\n          if (!groups.has(item.liIndex)) groups.set(item.liIndex, []);\n          groups.get(item.liIndex).push(item);\n        }\n        const liBlocks = [];\n        for (const [liIdx, items] of groups) {\n          const li = lis[liIdx];\n          if (!li) { liBlocks.length = 0; break; }\n          const liRect = li.getBoundingClientRect();\n          liBlocks.push({\n            col: colIdx,\n            top: liRect.top,\n            bottom: liRect.bottom,\n            nodes: [{ ...nodes[0], items }],\n          });\n        }\n        if (liBlocks.length >= 2) {\n          out.push(...liBlocks);\n          continue;\n        }\n      }\n      out.push({ col: colIdx, top: r.top, bottom: r.bottom, nodes });\n    }\n  }\n\n  function directText(el) {\n    for (const n of el.childNodes) {\n      if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) return true;\n    }\n    return false;\n  }\n\n  // One single-row borderless table, one cell per column, each cell holding\n  // the column's full content. The row is allowed to break across pages\n  // (Word/LO default), which paginates naturally while keeping the exact\n  // side-by-side geometry \u2014 far more faithful than slicing content into\n  // pseudo-rows by Y position.\n  function compactColumnNodes(nodes) {\n    for (const node of nodes) {\n      if (node.style) {\n        if (node.style.spacingBeforePx) {\n          node.style.spacingBeforePx = Math.max(1, Math.round(node.style.spacingBeforePx * 0.5));\n        }\n        if (node.style.spacingAfterPx) {\n          node.style.spacingAfterPx = Math.max(1, Math.round(node.style.spacingAfterPx * 0.5));\n        }\n      }\n      if (node.spacingBeforePx) {\n        node.spacingBeforePx = Math.max(1, Math.round(node.spacingBeforePx * 0.5));\n      }\n      if (node.spacingAfterPx) {\n        node.spacingAfterPx = Math.max(1, Math.round(node.spacingAfterPx * 0.5));\n      }\n      if (node.type === 'spacer') node.px = Math.max(2, Math.round(node.px * 0.5));\n      if (node.children) compactColumnNodes(node.children);\n      if (node.cells) {\n        for (const cell of node.cells) compactColumnNodes(cell.children || []);\n      }\n      if (node.rows) {\n        for (const row of node.rows) {\n          for (const cell of row.cells) compactColumnNodes(cell.children || []);\n        }\n      }\n    }\n    return nodes;\n  }\n\n  // A page column's own 1px edge border is the visual divider between\n  // columns \u2014 carry it onto the cell (borderLeftOf demands >=2px).\n  function columnEdgeBorder(csc, side) {\n    const widthPx = parseFloat(csc[`border${side}Width`]);\n    if (!(widthPx >= 1) || csc[`border${side}Style`] === 'none') return null;\n    const color = toHex(csc[`border${side}Color`]);\n    return color ? { color, widthPx } : null;\n  }\n\n  // Word never splits a table row that contains a nested table, so a\n  // taller-than-page single-row column layout strands page 1 blank and dumps\n  // everything onto page 2+. Slice the columns into multiple rows at Y\n  // positions no block straddles: each slice fits a page and Word paginates\n  // between the rows.\n  function slicedPageColumnRows(el, depth, cols, colWidths) {\n    const blocks = [];\n    cols.forEach((col, colIdx) => columnBlocks(col, depth, blocks, colIdx));\n    if (!blocks.length) return null;\n    return buildColumnRows(blocks, cols.length, colWidths, (ci, sliceIdx) => {\n      const csc = cs(cols[ci]);\n      return {\n        shading: bgHex(cols[ci]),\n        borderLeft: columnEdgeBorder(csc, 'Left'),\n        borderRight: columnEdgeBorder(csc, 'Right'),\n        gapAfterPx:\n          ci < cols.length - 1\n            ? Math.max(\n                0,\n                Math.round(\n                  cols[ci + 1].getBoundingClientRect().left -\n                    cols[ci].getBoundingClientRect().right,\n                ),\n              )\n            : 0,\n        padPx: {\n          top: sliceIdx === 0 ? Math.round(parseFloat(csc.paddingTop)) : 0,\n          left: Math.round(parseFloat(csc.paddingLeft)),\n          right: Math.round(parseFloat(csc.paddingRight)),\n        },\n      };\n    });\n  }\n\n  // Slice pre-collected column blocks into page-height rows so Word can\n  // paginate between them while keeping side-by-side placement. cellStyle\n  // supplies per-column paint/padding; children come from the sliced blocks.\n  function buildColumnRows(\n    blocks,\n    colCount,\n    colWidths,\n    cellStyle,\n    { allowSingleRow = false, ignoreHeaderOffset = false } = {},\n  ) {\n    const PAGE_H = 1123; // A4 @96dpi\n    const topMin = Math.min(...blocks.map((b) => b.top));\n    const bottomMax = Math.max(...blocks.map((b) => b.bottom));\n    // Content above the columns (title header) eats into Word's first page:\n    // the first slice must be short enough to fit the remainder, or the\n    // whole first row slides to page 2 and page 1 is stranded again. For a\n    // column block nested deep in a multi-page document the body-top distance\n    // is meaningless (Word repositions the block per page), so skip it.\n    const body = document.body.getBoundingClientRect();\n    const offsetAbove = ignoreHeaderOffset\n      ? 0\n      : Math.max(0, topMin - body.top - (parseFloat(cs(document.body).paddingTop) || 0));\n    const cuts = [];\n    const straddlerAt = (y) => blocks.find((b) => b.top < y - 4 && b.bottom > y + 4);\n    const bumpPast = (y) => {\n      for (let guard = 0; guard < 200; guard++) {\n        const straddler = straddlerAt(y);\n        if (!straddler) break;\n        y = straddler.bottom + 6;\n      }\n      return y;\n    };\n    const bumpAbove = (y) => {\n      for (let guard = 0; guard < 200; guard++) {\n        const straddler = straddlerAt(y);\n        if (!straddler) break;\n        y = straddler.top - 6;\n      }\n      return y;\n    };\n    // Word lays out the pre-column header taller than the browser (built-in\n    // heading spacing, substituted font metrics), so the browser-measured\n    // offset underestimates what page 1 has left. A row that misses the\n    // real remainder slides whole to page 2 and strands page 1 \u2014 budget\n    // conservatively; a shorter first row costs nothing.\n    const page1Limit = topMin + PAGE_H - offsetAbove * 1.2 - 160;\n    let target = topMin + Math.max(250, PAGE_H * 0.75 - offsetAbove * 1.2);\n    while (target < bottomMax - 150) {\n      let y = bumpPast(target);\n      if (!cuts.length && y > page1Limit) {\n        // An atomic straddler pushed the first cut below page 1's remaining\n        // space. Cutting above it keeps a short-but-valid first row instead\n        // of degrading the whole two-column layout to sequential flow.\n        const up = bumpAbove(Math.min(target, page1Limit));\n        if (up - topMin >= 150) y = up;\n      }\n      if (y >= bottomMax - 100) break;\n      cuts.push(y);\n      target = y + PAGE_H * 0.8;\n    }\n    // Column content that fits one page needs no cut: emit a single row when\n    // the caller has no sequential-flow fallback (CSS multi-column), else\n    // signal null so the tall-sidebar path can fall back.\n    if (!cuts.length && !allowSingleRow) return null;\n    // A first slice taller than page 1's remaining space strands page 1\n    // anyway (atomic blocks forced the cut too far down) \u2014 signal the\n    // caller to fall back to sequential flow.\n    if (cuts.length && cuts[0] - topMin > PAGE_H - offsetAbove - 80) return null;\n    const boundaries = [topMin - 1, ...cuts, bottomMax + 1];\n    const rows = [];\n    for (let s = 0; s + 1 < boundaries.length; s++) {\n      const cells = Array.from({ length: colCount }, (_, ci) => {\n        const cellBlocks = blocks\n          .filter((b) => b.col === ci && b.top >= boundaries[s] && b.top < boundaries[s + 1])\n          .sort((a, b) => a.top - b.top);\n        return {\n          ...cellStyle(ci, s),\n          children: compactColumnNodes(cellBlocks.flatMap((b) => b.nodes)),\n        };\n      });\n      rows.push({ cells });\n    }\n    return [{ type: 'table', layout: true, pageColumns: true, rows, colWidths }];\n  }\n\n  // CSS multi-column (`column-count` / `columns`): content flows into N\n  // physical columns with no per-column element. flatten the direct children,\n  // bucket each into a column by its rendered center, then slice into\n  // page-height rows like the flex/grid column path.\n  function cssMultiColumnParts(el) {\n    const s = cs(el);\n    if (s.display !== 'block' && s.display !== 'flow-root') return null;\n    let colCount = parseInt(s.columnCount, 10);\n    const hasColWidth = s.columnWidth && s.columnWidth !== 'auto';\n    if ((!Number.isFinite(colCount) || colCount < 2) && !hasColWidth) return null;\n    const kids = [...el.children].filter(\n      (c) =>\n        !SKIP_TAGS.has(c.tagName) &&\n        isVisible(c) &&\n        cs(c).position !== 'absolute' &&\n        cs(c).position !== 'fixed',\n    );\n    // need enough items to actually populate more than one column\n    if (kids.length < 4) return null;\n    const lefts = kids.map((k) => Math.round(k.getBoundingClientRect().left));\n    const buckets = [];\n    for (const x of lefts) if (!buckets.some((b) => Math.abs(b - x) < 20)) buckets.push(x);\n    if (buckets.length < 2) return null;\n    if (!Number.isFinite(colCount) || colCount < 2) colCount = buckets.length;\n    if (colCount < 2 || colCount > 4) return null;\n    const gap = parseFloat(s.columnGap);\n    const rect = el.getBoundingClientRect();\n    const colGapPx = Number.isFinite(gap) ? Math.round(gap) : Math.round(rect.width * 0.04);\n    return { colCount: Math.min(colCount, buckets.length), colGapPx };\n  }\n\n  function extractCssColumns(el, depth, colCount, colGapPx) {\n    const rect = el.getBoundingClientRect();\n    const s = cs(el);\n    const padL = parseFloat(s.paddingLeft) || 0;\n    const padR = parseFloat(s.paddingRight) || 0;\n    const contentLeft = rect.left + padL;\n    const contentWidth = Math.max(1, rect.width - padL - padR);\n    const colPitch = (contentWidth + colGapPx) / colCount;\n    const kids = [...el.children].filter(\n      (c) =>\n        !SKIP_TAGS.has(c.tagName) &&\n        isVisible(c) &&\n        cs(c).position !== 'absolute' &&\n        cs(c).position !== 'fixed',\n    );\n    const blocks = [];\n    for (const child of kids) {\n      const r = child.getBoundingClientRect();\n      let colIdx = Math.floor((r.left + r.width / 2 - contentLeft) / colPitch);\n      colIdx = Math.max(0, Math.min(colCount - 1, colIdx));\n      const nodes = processElement(child, depth + 1);\n      if (nodes.length) blocks.push({ col: colIdx, top: r.top, bottom: r.bottom, nodes });\n    }\n    if (blocks.length < 2 || new Set(blocks.map((b) => b.col)).size < 2) return null;\n    const colWidthPx = Math.round((contentWidth - colGapPx * (colCount - 1)) / colCount);\n    const colWidths = Array.from({ length: colCount }, () => colWidthPx);\n    const containerShading = bgHex(el);\n    return buildColumnRows(\n      blocks,\n      colCount,\n      colWidths,\n      (ci, sliceIdx) => ({\n        shading: containerShading,\n        gapAfterPx: ci < colCount - 1 ? colGapPx : 0,\n        padPx: { top: sliceIdx === 0 ? Math.round(parseFloat(s.paddingTop) || 0) : 0, left: 0, right: 0 },\n      }),\n      { allowSingleRow: true, ignoreHeaderOffset: true },\n    );\n  }\n\n  function extractPageColumns(el, depth, cols) {\n    const colWidths = cols.map((c) => Math.round(c.getBoundingClientRect().width));\n    const anyPositionedComposition = cols.some((col) =>\n      [...col.querySelectorAll('*')].some((descendant) => {\n        if (!isVisible(descendant)) return false;\n        const position = cs(descendant).position;\n        return position === 'absolute' || position === 'fixed';\n      }),\n    );\n    const tallestPx = Math.max(...cols.map((c) => c.getBoundingClientRect().height));\n    if (!anyPositionedComposition && tallestPx > 1123 * 1.15) {\n      const sliced = slicedPageColumnRows(el, depth, cols, colWidths);\n      if (sliced) return sliced;\n      const flowCells = cols.map((col) =>\n        compactColumnNodes(\n          needsBlockWalk(col) ? processChildren(col, depth + 1) : paraNodesFrom(col),\n        ),\n      );\n      const hasTableish = (nodes) =>\n        (nodes || []).some(\n          (n) =>\n            ['table', 'card', 'kpirow'].includes(n.type) ||\n            hasTableish(n.children) ||\n            (n.rows || []).some((row) => (row.cells || []).some((c) => hasTableish(c.children))),\n        );\n      // Nested tables make a table row unsplittable in Word: a single\n      // multi-page row would strand page 1 blank \u2014 sequential flow reads\n      // better. Pure paragraph/list columns split across pages natively,\n      // so they keep the two-column geometry as one row.\n      if (flowCells.some(hasTableish)) return flowCells.flat();\n      return [{\n        type: 'table',\n        layout: true,\n        pageColumns: true,\n        rows: [{\n          cells: cols.map((col, colIndex) => {\n            const csc = cs(col);\n            return {\n              shading: bgHex(col),\n              borderLeft: columnEdgeBorder(csc, 'Left'),\n              borderRight: columnEdgeBorder(csc, 'Right'),\n              gapAfterPx:\n                colIndex < cols.length - 1\n                  ? Math.max(\n                      0,\n                      Math.round(\n                        cols[colIndex + 1].getBoundingClientRect().left -\n                          col.getBoundingClientRect().right,\n                      ),\n                    )\n                  : 0,\n              padPx: {\n                top: Math.round(parseFloat(csc.paddingTop)),\n                left: Math.round(parseFloat(csc.paddingLeft)),\n                right: Math.round(parseFloat(csc.paddingRight)),\n              },\n              children: flowCells[colIndex],\n            };\n          }),\n        }],\n        colWidths,\n      }];\n    }\n    const cells = cols.map((col, colIndex) => {\n      const csc = cs(col);\n      const hasPositionedComposition = [...col.querySelectorAll('*')].some((descendant) => {\n        if (!isVisible(descendant)) return false;\n        const position = cs(descendant).position;\n        return position === 'absolute' || position === 'fixed';\n      });\n      const colRect = col.getBoundingClientRect();\n      const children = compactColumnNodes(\n        hasPositionedComposition && colRect.height <= 1800\n          ? [markForScreenshot(col)]\n          : needsBlockWalk(col)\n            ? processChildren(col, depth + 1)\n            : paraNodesFrom(col),\n      );\n      let topEdgeFill;\n      if (children[0]?.type === 'image' && (children[0].spacingBeforePx || 0) <= 2) {\n        const firstPaintedChild = [...col.children].find(\n          (child) => !SKIP_TAGS.has(child.tagName) && isVisible(child),\n        );\n        if (firstPaintedChild) {\n          const firstRect = firstPaintedChild.getBoundingClientRect();\n          const offLeft = firstRect.left - colRect.left;\n          const offRight = colRect.right - firstRect.right;\n          children[0].bleedLeftPx =\n            offLeft <= 2 ? Math.max(0, parseFloat(csc.paddingLeft) || 0) : 0;\n          children[0].bleedRightPx =\n            offRight <= 2 ? Math.max(0, parseFloat(csc.paddingRight) || 0) : 0;\n          children[0].align =\n            offLeft > 8 &&\n            offRight > 8 &&\n            Math.abs(offLeft - offRight) < Math.max(12, firstRect.width * 0.08)\n              ? 'center'\n              : offLeft > offRight * 3\n                ? 'right'\n                : 'left';\n        }\n        const firstStyle = firstPaintedChild ? cs(firstPaintedChild) : null;\n        const gradientColor = firstStyle?.backgroundImage.match(\n          /rgba?\\([^)]+\\)|#[0-9a-f]{3,8}/i,\n        )?.[0];\n        topEdgeFill =\n          (gradientColor && toHex(gradientColor, { dropWhite: false })) ||\n          (firstPaintedChild && bgHex(firstPaintedChild));\n        children[0].topEdgeFill = topEdgeFill;\n      }\n      return {\n        // column-level paint (sidebar background) becomes cell shading\n        shading: bgHex(col),\n        borderLeft: columnEdgeBorder(csc, 'Left'),\n        borderRight: columnEdgeBorder(csc, 'Right'),\n        gapAfterPx:\n          colIndex < cols.length - 1\n            ? Math.max(\n                0,\n                Math.round(\n                  cols[colIndex + 1].getBoundingClientRect().left -\n                    col.getBoundingClientRect().right,\n                ),\n              )\n            : 0,\n        padPx: {\n          top: Math.round(parseFloat(csc.paddingTop)),\n          left: Math.round(parseFloat(csc.paddingLeft)),\n          right: Math.round(parseFloat(csc.paddingRight)),\n        },\n        children,\n      };\n    });\n    return [{ type: 'table', layout: true, pageColumns: true, rows: [{ cells }], colWidths }];\n  }\n\n  // Grid/flex of small uniformly-painted badges (skill icons, tag clouds with\n  // shaped backgrounds): text alone can't reproduce circles/pills laid out in\n  // a grid, so capture the whole container as one image.\n  function isBadgeGrid(el) {\n    const s = cs(el);\n    const kids = [...el.children].filter((c) => !SKIP_TAGS.has(c.tagName) && isVisible(c));\n    if (kids.length < 2) return false;\n    const r = el.getBoundingClientRect();\n    if (r.height < 8 || r.height > 320) return false;\n    if ((el.innerText || '').trim().length > 150) return false;\n    const flexOrGrid = s.display === 'grid' || s.display === 'flex';\n    const pillKids = kids.filter((k) => isPill(k));\n    // Plain block tag clouds: optional label + >=3 pill chips\n    // (e.g. <div>Book tags</div><span class=\"tag-pill\">\u2026).\n    const tagCloud =\n      !flexOrGrid &&\n      pillKids.length >= 3 &&\n      pillKids.length >= kids.length - 1 &&\n      r.height <= 160;\n    if (!flexOrGrid && !tagCloud) return false;\n    const checkKids = tagCloud ? pillKids : kids;\n    // badges hold a short label at most; multi-line award/skill cards with\n    // real sentences must stay editable text (CJK chars weighted double)\n    const weighted = (t) =>\n      t.length + (t.match(/[\\u3000-\\u9fff\\uf900-\\ufaff]/g) || []).length;\n    return checkKids.every((k) => {\n      const kr = k.getBoundingClientRect();\n      return (\n        kr.height <= 130 &&\n        Boolean(bgHex(k) || paintedBgHex(k)) &&\n        weighted((k.innerText || '').trim()) <= 30 &&\n        // badges/chips are single-line; a label+value pair is a KPI stat\n        // box that must stay an editable kpirow cell\n        !(k.innerText || '').trim().includes('\\n')\n      );\n    });\n  }\n\n  // Empty bordered square drawn as a form checkbox (styled div or <input>).\n  function isCheckboxLike(el) {\n    if (el.tagName === 'INPUT') {\n      return el.type === 'checkbox' || el.type === 'radio';\n    }\n    if ((el.innerText || '').trim() || el.children.length) return false;\n    const r = el.getBoundingClientRect();\n    if (r.width < 8 || r.width > 30 || r.height < 8 || r.height > 30) return false;\n    if (Math.abs(r.width - r.height) > 6) return false;\n    const s = cs(el);\n    return parseFloat(s.borderTopWidth) >= 1 && s.borderTopStyle !== 'none';\n  }\n\n  function checkboxNode(el) {\n    const r = el.getBoundingClientRect();\n    const checked = el.tagName === 'INPUT' && el.checked;\n    const radio =\n      (el.tagName === 'INPUT' && el.type === 'radio') ||\n      // styled circle: border-radius >= 40% of the box\n      parseFloat(cs(el).borderTopLeftRadius) >= r.height * 0.4;\n    return checkboxRun({\n      checked,\n      radio,\n      contentControl: el.tagName === 'INPUT' && !radio ? 'checkbox' : undefined,\n      heightPx: r.height,\n      color: toHex(cs(el).borderTopColor) || '333333',\n    });\n  }\n\n  function checkboxRun(marker) {\n    const glyph = marker.radio\n      ? marker.checked\n        ? '\\u25c9'\n        : '\\u25cb'\n      : marker.checked\n        ? '\\u2611'\n        : '\\u2610';\n    const sizePx = Math.max(12, Math.min(22, Math.round(marker.heightPx * 1.1)));\n    return {\n      text: glyph,\n      color: marker.color || '333333',\n      sizePx,\n      contentControl: marker.contentControl,\n      checked: marker.checked,\n    };\n  }\n\n  function pseudoCheckbox(el) {\n    for (const which of ['::before', '::after']) {\n      const s = getComputedStyle(el, which);\n      if (!s || s.content === 'none' || s.content === 'normal') continue;\n      const content = s.content.replace(/^['\"]|['\"]$/g, '');\n      if (content.trim()) continue;\n      const width = parseFloat(s.width);\n      const height = parseFloat(s.height);\n      if (\n        width < 8 ||\n        width > 30 ||\n        height < 8 ||\n        height > 30 ||\n        Math.abs(width - height) > 6\n      ) {\n        continue;\n      }\n      const borderWidth = parseFloat(s.borderTopWidth);\n      if (borderWidth < 1 || s.borderTopStyle === 'none') continue;\n      const itemStyle = cs(el);\n      const left = Number.isFinite(parseFloat(s.left)) ? parseFloat(s.left) : 0;\n      const gap = Math.max(4, (parseFloat(itemStyle.paddingLeft) || 0) - left - width);\n      return {\n        widthPx: width,\n        heightPx: height,\n        gapPx: gap,\n        checked: false,\n        radio: parseFloat(s.borderTopLeftRadius) >= height * 0.4,\n        color: toHex(s.borderTopColor) || '999999',\n      };\n    }\n    return null;\n  }\n\n  // Small rounded-corner painted box with a short text (badge / pill / logo\n  // circle): rectangles can't reproduce the rounding, screenshot it.\n  function isPill(el) {\n    const r = el.getBoundingClientRect();\n    if (r.height < 14 || r.height > 90 || r.width > 420) return false;\n    if ((el.innerText || '').trim().length > 60) return false;\n    if (parseFloat(cs(el).borderTopLeftRadius) < Math.min(12, r.height * 0.25)) {\n      return false;\n    }\n    // Solid tint, or translucent/near-white paint kept only because a tinted\n    // parent sits behind it (e.g. rgba(255,255,255,.2) number chips on colored\n    // headers). bgHex alone drops those and they wrongly become white bars.\n    return Boolean(bgHex(el) || paintedBgHex(el));\n  }\n\n  // Step/number circles only \u2014 not wider tag pills that must stay inline.\n  function isCompactCircleBadge(el) {\n    if (!isPill(el)) return false;\n    const r = el.getBoundingClientRect();\n    const radius = parseFloat(cs(el).borderTopLeftRadius) || 0;\n    return (\n      r.width <= 48 &&\n      Math.abs(r.width - r.height) <= 8 &&\n      radius >= r.height * 0.4\n    );\n  }\n\n  // Textless painted leaf (progress bar, color swatch, decorative strip,\n  // fill-in box): nothing to map to OOXML text, screenshot it. Paint may\n  // live on the element itself or on a nested fill div. Height cap is\n  // generous only because the element is guaranteed textless.\n  function isDecorativeLeaf(el) {\n    // a lone emoji/pictograph still counts as textless decoration\n    if ((el.innerText || '').trim().length > 4) return false;\n    const r = el.getBoundingClientRect();\n    if (r.height < 3 || r.height > 400 || r.width < 16) return false;\n    if (bgHex(el)) return true;\n    if (cs(el).backgroundImage !== 'none') return true;\n    // bordered empty box (fill-in area) counts even without background.\n    // 1px form answer boxes fail borderTopOf (>=2px), so also accept fullBorder.\n    if (\n      r.height >= 28 &&\n      !isCheckboxLike(el) &&\n      (borderTopOf(el) || fullBorderOf(el))\n    ) {\n      return true;\n    }\n    for (const d of el.querySelectorAll('*')) {\n      if (isVisible(d) && bgHex(d)) return true;\n    }\n    return false;\n  }\n\n  // Icon-font glyph element (<i class=\"bi bi-telephone\">): the glyph lives in\n  // a ::before pseudo element, so text extraction sees nothing at all.\n  function isIconGlyph(el) {\n    if ((el.innerText || '').trim()) return false;\n    if (el.children.length) return false;\n    const r = el.getBoundingClientRect();\n    if (r.width < 6 || r.height < 6 || r.width > 48 || r.height > 48) return false;\n    const hasContent = (pseudo) => {\n      const content = getComputedStyle(el, pseudo).content;\n      return content && content !== 'none' && content !== 'normal' && content !== '\"\"';\n    };\n    return hasContent('::before') || hasContent('::after');\n  }\n\n  // Absolutely-positioned full-height painted strip hugging the card's left\n  // edge (decorative accent). Reproduced as a shaded table cell, not a float.\n  function leftAccentOf(el) {\n    const pr = el.getBoundingClientRect();\n    for (const c of el.children) {\n      if (cs(c).position !== 'absolute') continue;\n      const bg = bgHex(c);\n      if (!bg) continue;\n      const r = c.getBoundingClientRect();\n      if (\n        Math.abs(r.left - pr.left) < 3 &&\n        r.height >= pr.height * 0.85 &&\n        r.width >= 8 &&\n        r.width < pr.width * 0.4\n      ) {\n        return { el: c, color: bg, widthPx: Math.round(r.width) };\n      }\n    }\n    return null;\n  }\n\n  // Uniform border on all four sides (outlined card / framed box)\n  function fullBorderOf(el) {\n    const s = cs(el);\n    const w = parseFloat(s.borderTopWidth);\n    if (!(w >= 1) || s.borderTopStyle === 'none') return null;\n    if (\n      parseFloat(s.borderLeftWidth) < 1 ||\n      parseFloat(s.borderRightWidth) < 1 ||\n      parseFloat(s.borderBottomWidth) < 1\n    ) {\n      return null;\n    }\n    // A uniform frame paints every side the same color. A bright accent on one\n    // edge over near-background hairlines (gold top rule + dark 1px sides) is a\n    // top rule, not a box \u2014 let borderTopOf claim just that edge instead of\n    // drawing the accent color around all four sides.\n    const color = toHex(s.borderTopColor);\n    const sidesMatch =\n      toHex(s.borderRightColor) === color &&\n      toHex(s.borderBottomColor) === color &&\n      toHex(s.borderLeftColor) === color;\n    if (!sidesMatch) return null;\n    return color ? { color, widthPx: w } : null;\n  }\n\n  // Visual card: own background, strong left border, or a full outline \u2014\n  // smaller than page frame\n  function isCard(el, depth) {\n    if (depth >= 4) return false;\n    const r = el.getBoundingClientRect();\n    const shading = paintedBgHex(el);\n    const bl = borderLeftOf(el);\n    const br = borderRightOf(el);\n    const fullBorder = fullBorderOf(el);\n    // Very tall unframed wrappers are page containers, but an explicit\n    // four-sided border is authored content and must survive across pages.\n    // Exception: a full-bleed SECTION with its own solid backdrop among\n    // sibling sections (dark manifesto chapters) \u2014 without the card shading\n    // its light text lands unreadable on the page background. The card row\n    // splits across pages, so height is no obstacle.\n    if (r.height > 1000 && !fullBorder) {\n      const siblingCountAt = (node) =>\n        node.parentElement\n          ? [...node.parentElement.children].filter((c) => c !== node && isVisible(c)).length\n          : 0;\n      // shading (paintedBgHex above) includes a white sheet on a tinted\n      // page \u2014 dropping it dumps the sheet's content onto the backdrop.\n      // The painted panel may sit inside a transparent section wrapper\n      // (<section><div style=\"background:\u2026\">): the \"among sibling sections\"\n      // signal then lives on the wrapper, so look up through unpainted ones.\n      let host = el;\n      let siblings = siblingCountAt(host);\n      while (\n        siblings < 2 &&\n        host.parentElement &&\n        host.parentElement !== document.body &&\n        !paintedBgHex(host.parentElement)\n      ) {\n        host = host.parentElement;\n        siblings = siblingCountAt(host);\n      }\n      if (!(shading && siblings >= 2)) return false;\n    }\n    const s = cs(el);\n    const hasPadding = parseFloat(s.paddingLeft) >= 6 || parseFloat(s.paddingTop) >= 6;\n    return Boolean((shading || bl || br || fullBorder) && hasPadding);\n  }\n\n  function formFieldNode(el) {\n    return globalThis.__html2docxFormsMedia.formFieldNode(el, {\n      bgHex,\n      bordersOf,\n      cellPaddingOf,\n      cs,\n      runStyleOf,\n    });\n  }\n\n  function fillInLineNode(el) {\n    return globalThis.__html2docxFormsMedia.fillInLineNode(el, { bordersOf, cs });\n  }\n\n  function fillInBoxNode(el) {\n    return globalThis.__html2docxFormsMedia.fillInBoxNode(el, {\n      bordersOf,\n      cs,\n      toHex,\n      paintedBgHex,\n      runStyleOf,\n    });\n  }\n\n  function embeddedMediaNode(el) {\n    return globalThis.__html2docxFormsMedia.embeddedMediaNode(el, { markForScreenshot });\n  }\n\n";
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/core/decorators.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\core\decorators.js?raw
 var decorators_default = "  // Rendered math (KaTeX / MathJax / MathML): the internal spans are layout\n  // hacks \u2014 walking them yields garbage text runs (\"y=ncx\"). Screenshot the\n  // whole formula instead.\n  function isMathContainer(el) {\n    const tag = el.tagName;\n    if (tag === 'MATH' || tag === 'MJX-CONTAINER') return true;\n    const cls = el.classList;\n    return Boolean(\n      cls && (cls.contains('katex') || cls.contains('katex-display') || cls.contains('MathJax')),\n    );\n  }\n\n  function pseudoBullet(el) {\n    const s = getComputedStyle(el, '::before');\n    if (!s || s.content === 'none' || s.content === 'normal') return false;\n    const content = s.content.replace(/^['\"]|['\"]$/g, '').trim();\n    return BULLET_GLYPHS.has(content);\n  }\n\n  // Real-element twin of the painted ::before dot below: a small empty\n  // painted first child (<div class=\"dot\"></div>) is a list marker, not a\n  // block \u2014 classifier would silently drop it.\n  function chipBulletRun(el) {\n    const first = [...el.children].find((child) => isVisible(child));\n    if (!first || first.childElementCount || (first.innerText || '').trim()) return null;\n    const r = first.getBoundingClientRect();\n    if (r.width < 4 || r.width > 14 || r.height < 4 || r.height > 14) return null;\n    const color = toHex(cs(first).backgroundColor);\n    if (!color) return null;\n    const round = parseFloat(cs(first).borderRadius) >= r.width / 2 - 1;\n    return {\n      text: `${round ? '\u25CF' : '\u25A0'}\xA0`,\n      color,\n      // the dot glyph inks ~60% of its em box: scale up to match the chip\n      sizePx: Math.max(8, Math.round(Math.min(r.width, r.height) / 0.6)),\n    };\n  }\n\n  function pseudoBulletRun(el) {\n    const s = getComputedStyle(el, '::before');\n    if (!s || s.content === 'none' || s.content === 'normal') return null;\n    const content = s.content.replace(/^['\"]|['\"]$/g, '').trim();\n    if (!content) {\n      // Painted dot bullet: empty ::before drawn as a small colored circle\n      // or square \\u2014 emit an equivalent colored glyph run.\n      const dotW = parseFloat(s.width);\n      const dotH = parseFloat(s.height);\n      const dotColor = toHex(s.backgroundColor);\n      // Composite icon: ::before circle + ::after strokes (check-in-circle\n      // list markers) \\u2014 a flat glyph drops the checkmark, so clip-screenshot\n      // the drawn icon box instead.\n      const after = getComputedStyle(el, '::after');\n      const afterPaints =\n        after &&\n        after.content !== 'none' &&\n        (parseFloat(after.borderLeftWidth) >= 1 ||\n          parseFloat(after.borderBottomWidth) >= 1 ||\n          Boolean(toHex(after.backgroundColor)));\n      if (\n        dotColor &&\n        afterPaints &&\n        s.position === 'absolute' &&\n        dotW >= 10 &&\n        dotW <= 28 &&\n        dotH >= 10 &&\n        dotH <= 28\n      ) {\n        const host = el.getBoundingClientRect();\n        const x = host.left + (parseFloat(s.left) || 0);\n        const y = host.top + (parseFloat(s.top) || 0);\n        if (x >= 0 && y >= 0) {\n          const gapPx = 6;\n          return {\n            text: '',\n            inlineImage: true,\n            shotId: `h2d-${shotCounter++}`,\n            clip: {\n              x: Math.round(x),\n              y: Math.round(y),\n              width: Math.round(dotW + gapPx),\n              height: Math.round(dotH),\n            },\n            width: Math.round(dotW + gapPx),\n            height: Math.round(dotH),\n          };\n        }\n      }\n      if (dotColor && dotW >= 4 && dotW <= 14 && dotH >= 4 && dotH <= 14) {\n        const round = parseFloat(s.borderRadius) >= dotW / 2 - 1;\n        return {\n          text: `${round ? '\\u25cf' : '\\u25a0'}\\u00a0`,\n          color: dotColor,\n          // the dot glyph inks ~60% of its em box: scale up to match the chip\n          sizePx: Math.max(8, Math.round(Math.min(dotW, dotH) / 0.6)),\n        };\n      }\n      return null;\n    }\n    // Numbered circle badge: content:counter(x) painted as a colored circle\n    // with a light number.\n    if (content.includes('counter(') && el.parentElement) {\n      const badgeW = parseFloat(s.width);\n      // gradient badges have a transparent backgroundColor: take the first\n      // gradient stop as the representative color\n      const gradientStop = s.backgroundImage.match(/rgba?\\([^)]+\\)|#[0-9a-f]{3,8}/i)?.[0];\n      const badgeColor =\n        toHex(s.backgroundColor) ||\n        (gradientStop && toHex(gradientStop, { dropWhite: false }));\n      // Pseudo-elements have no DOM node to screenshot, but an absolutely\n      // positioned badge's rendered box is computable from the host rect +\n      // its own offsets/size \u2014 clip-screenshot it so size and gradient\n      // survive exactly.\n      const badgeH = parseFloat(s.height) || badgeW;\n      if (\n        badgeColor &&\n        s.position === 'absolute' &&\n        badgeW >= 14 &&\n        badgeW <= 72 &&\n        badgeH >= 14 &&\n        badgeH <= 72 &&\n        parseFloat(s.borderRadius) >= badgeW / 2 - 2\n      ) {\n        const host = el.getBoundingClientRect();\n        const x = host.left + (parseFloat(s.left) || 0);\n        const y = host.top + (parseFloat(s.top) || 0);\n        if (x >= 0 && y >= 0) {\n          const gapPx = 8; // right whitespace baked in as the text gap\n          return {\n            text: '',\n            inlineImage: true,\n            shotId: `h2d-${shotCounter++}`,\n            clip: {\n              x: Math.round(x),\n              y: Math.round(y),\n              width: Math.round(badgeW + gapPx),\n              height: Math.round(badgeH),\n            },\n            width: Math.round(badgeW + gapPx),\n            height: Math.round(badgeH),\n          };\n        }\n      }\n      // Word has no circular chips \u2014 a negative circled digit (\u2776\u2777\u2026) in the\n      // badge color reads the same.\n      if (badgeColor && badgeW >= 14 && parseFloat(s.borderRadius) >= badgeW / 2 - 2) {\n        const siblings = [...el.parentElement.children].filter(\n          (sibling) => sibling.tagName === el.tagName && isVisible(sibling),\n        );\n        const index = siblings.indexOf(el) + 1;\n        const glyph =\n          index >= 1 && index <= 10\n            ? String.fromCodePoint(0x2775 + index)\n            : `${index}.`;\n        return {\n          text: `${glyph} `,\n          color: badgeColor,\n          sizePx: Math.max(10, Math.round(parseFloat(s.fontSize) * 1.15) || 16),\n        };\n      }\n    }\n    // Authored visible text prefixes (\"\u25C6 SLIDE \") count too, not only\n    // single-glyph markers.\n    const literalListMarker =\n      content.length <= 24 &&\n      !content.includes('counter(') &&\n      !content.includes('attr(') &&\n      !content.includes('url(');\n    if (!BULLET_GLYPHS.has(content) && !literalListMarker) return null;\n    return {\n      text: `${content}\\u00a0`,\n      color: toHex(s.color) || undefined,\n      sizePx: parseFloat(s.fontSize) || undefined,\n      fontFamily: BULLET_GLYPHS.has(content) ? s.fontFamily || undefined : 'Arial Unicode MS',\n    };\n  }\n\n  function hrNode(el) {\n    const s = cs(el);\n    const r = el.getBoundingClientRect();\n    const body = document.body.getBoundingClientRect();\n    const border = borderSideOf(el, 'top') || borderSideOf(el, 'bottom');\n    return {\n      type: 'hr',\n      color: border?.color || bgHex(el) || 'CCCCCC',\n      heightPx: border?.widthPx || Math.max(1, Math.min(r.height, 8)),\n      widthFrac: body.width > 0 ? Math.min(1, r.width / body.width) : 1,\n      align:\n        Math.abs(r.left + r.width / 2 - (body.left + body.width / 2)) < 12\n          ? 'center'\n          : 'left',\n    };\n  }\n\n  function thinRuleNode(el) {\n    if ((el.innerText || '').trim() || el.children.length) return null;\n    const r = el.getBoundingClientRect();\n    const parentWidth = el.parentElement?.getBoundingClientRect().width || r.width;\n    if (r.height < 1 || r.height > 8 || r.width < parentWidth * 0.5) return null;\n    const border = borderSideOf(el, 'top') || borderSideOf(el, 'bottom');\n    const color = border?.color || bgHex(el);\n    if (!color) return null;\n    return {\n      type: 'hr',\n      color,\n      heightPx: border?.widthPx || Math.max(1, r.height),\n      widthFrac: Math.min(1, r.width / document.body.getBoundingClientRect().width),\n      align: 'left',\n      spacingBeforePx: Math.max(0, Math.round(parseFloat(cs(el).marginTop) || 0)),\n      spacingAfterPx: Math.max(0, Math.round(parseFloat(cs(el).marginBottom) || 0)),\n    };\n  }\n\n  function isOverlaidInfographic(el) {\n    const rect = el.getBoundingClientRect();\n    if (rect.width < 200 || rect.height < 160 || rect.width > 1000 || rect.height > 1000) {\n      return false;\n    }\n    const children = [...el.children].filter((child) => isVisible(child));\n    const layoutChild = children.find((child) => {\n      const display = cs(child).display;\n      return display === 'grid' || display === 'flex';\n    });\n    if (!layoutChild) return false;\n    const layoutRect = layoutChild.getBoundingClientRect();\n    return children.some((child) => {\n      if (child === layoutChild || cs(child).position !== 'absolute') return false;\n      const childRect = child.getBoundingClientRect();\n      if (childRect.width < 40 || childRect.height < 40) return false;\n      return (\n        childRect.left < layoutRect.right &&\n        childRect.right > layoutRect.left &&\n        childRect.top < layoutRect.bottom &&\n        childRect.bottom > layoutRect.top\n      );\n    });\n  }\n\n  function needsVisualEffectScreenshot(el) {\n    return globalThis.__html2docxVisualEffects.needsScreenshot(el, {\n      bgHex,\n      cs,\n      fullBorderOf,\n    });\n  }\n\n";
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/core/classifier.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\core\classifier.js?raw
 var classifier_default = `  function markForScreenshotSlices(el, maxSliceHeight = 700) {
     const base = markForScreenshot(el);
     const rect = el.getBoundingClientRect();
@@ -205259,10 +205399,10 @@ var classifier_default = `  function markForScreenshotSlices(el, maxSliceHeight 
   const BULLET_GLYPHS = new Set(['\xB7', '\u2022', '\u25CF', '\u25A0', '\u25AA', '\u2023', '\u25E6', '\u2219', '\xA7']);
 `;
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/core/paragraphs-document.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\core\paragraphs-document.js?raw
 var paragraphs_document_default = "  function makePara(runs, style) {\n    const first = runs[0];\n    const marker = first && first.text.trim();\n    if (marker && BULLET_GLYPHS.has(marker)) {\n      if (first.color && first.color !== '000000') {\n        return { type: 'para', runs, style };\n      }\n      let rest = runs.slice(1);\n      // swallow the separator gap right after the marker\n      if (rest.length && !rest[0].text.replace(/[\\s\\u00a0\\t]/g, '')) rest = rest.slice(1);\n      if (rest.length) return { type: 'para', runs: rest, style: { ...style, bullet: true } };\n    }\n    if (first && /^[\xB7\u2022\u25CF\u25AA\u2023\u25E6\u2219]\\s+/.test(first.text)) {\n      if (first.color && first.color !== '000000') {\n        return { type: 'para', runs, style };\n      }\n      const runsCopy = runs.slice();\n      runsCopy[0] = { ...first, text: first.text.replace(/^[\xB7\u2022\u25CF\u25AA\u2023\u25E6\u2219]\\s+/, '') };\n      return { type: 'para', runs: runsCopy, style: { ...style, bullet: true } };\n    }\n    return { type: 'para', runs, style };\n  }\n\n  function makeParaNodes(runs, style) {\n    if (style.align !== 'justify' || !runs.some((run) => (run.text || '').includes('\\n'))) {\n      return [makePara(runs, style)];\n    }\n    const lines = [[]];\n    for (const run of runs) {\n      if (run.inlineImage) {\n        lines[lines.length - 1].push(run);\n        continue;\n      }\n      const parts = (run.text || '').split('\\n');\n      parts.forEach((part, index) => {\n        if (part) lines[lines.length - 1].push({ ...run, text: part });\n        if (index < parts.length - 1) lines.push([]);\n      });\n    }\n    const nonEmptyLines = lines.filter((line) => line.length);\n    if (nonEmptyLines.length <= 1) return [makePara(runs, style)];\n    return nonEmptyLines.map((line, index) => {\n      const lineStyle = { ...style };\n      if (index < nonEmptyLines.length - 1) delete lineStyle.align;\n      if (index > 0) delete lineStyle.spacingBeforePx;\n      if (index < nonEmptyLines.length - 1) delete lineStyle.spacingAfterPx;\n      return makePara(line, lineStyle);\n    });\n  }\n\n  function paraNodesFrom(el, decorations = true) {\n    // A painted display:block span inside a paragraph (scripture-line quote\n    // boxes with border-left + tint) renders as its own bordered block in\n    // the browser \u2014 merging it into the parent's runs loses both the\n    // paragraph break and the decoration. Split the paragraph around it.\n    const paintedBlocks = [...el.children].filter((child) => {\n      if (SKIP_TAGS.has(child.tagName) || !isVisible(child)) return false;\n      const childStyle = cs(child);\n      const painted = Boolean(bgHex(child)) || Boolean(borderLeftOf(child));\n      if (!painted) return false;\n      if (childStyle.display === 'block') return true;\n      // Inline quote box (scripture-line): border/tint + padding wrapping\n      // multiple lines reads as a block quote even at display:inline \u2014\n      // short painted chips stay inline via the single-line guard.\n      if (parseFloat(childStyle.paddingLeft) < 6) return false;\n      if ((child.innerText || '').trim().length < 40) return false;\n      const lineHeight = parseFloat(childStyle.lineHeight) || 20;\n      return child.getBoundingClientRect().height > lineHeight * 1.4;\n    });\n    if (paintedBlocks.length && el.children.length <= 8) {\n      const style = paraStyleOf(el, decorations);\n      const nodes = [];\n      let pending = [];\n      const flushPending = () => {\n        const runs = trimRuns(runsFromNodes(pending, el));\n        pending = [];\n        if (runs.length) nodes.push(...makeParaNodes(runs, { ...style }));\n      };\n      for (const node of el.childNodes) {\n        if (paintedBlocks.includes(node)) {\n          flushPending();\n          const quoteRuns = trimRuns(runsFromNodes([...node.childNodes], node));\n          if (quoteRuns.length) {\n            const quoteStyle = paraStyleOf(node, decorations);\n            const bl = borderLeftOf(node);\n            if (bl) quoteStyle.borderLeft = bl;\n            const shading = bgHex(node);\n            if (shading) quoteStyle.shading = shading;\n            const padLeft = parseFloat(cs(node).paddingLeft) || 0;\n            const marginLeft = parseFloat(cs(node).marginLeft) || 0;\n            if (padLeft + marginLeft > 2) quoteStyle.indentLeftPx = Math.round(padLeft + marginLeft);\n            nodes.push(...makeParaNodes(quoteRuns, quoteStyle));\n          }\n        } else pending.push(node);\n      }\n      flushPending();\n      if (nodes.length) return nodes;\n    }\n    const runs = collectRuns(el);\n    if (!runs.length) return [];\n    if (el.tagName !== 'LI') {\n      const pseudoRun = pseudoBulletRun(el);\n      if (pseudoRun) runs.unshift(pseudoRun);\n    }\n    return makeParaNodes(runs, paraStyleOf(el, decorations));\n  }\n\n  const PHRASING_TAGS = new Set([\n    'STRONG', 'B', 'EM', 'I', 'U', 'S', 'SPAN', 'A', 'CODE', 'SMALL', 'SUB', 'SUP', 'MARK', 'ABBR', 'Q', 'CITE', 'KBD',\n  ]);\n\n  function isInlineNode(node) {\n    if (node.nodeType === Node.TEXT_NODE) return true;\n    if (node.nodeType !== Node.ELEMENT_NODE) return false;\n    if (SKIP_TAGS.has(node.tagName)) return false;\n    if (node.tagName === 'IMG' || node.tagName === 'CANVAS' || node.tagName === 'svg') return false;\n    if (node.tagName === 'IFRAME' || node.tagName === 'VIDEO' || node.tagName === 'AUDIO') return false;\n    if (node.tagName === 'TEXTAREA' || node.tagName === 'SELECT') return false;\n    // checkbox inputs flow inline with their label; other inputs are blocks\n    if (node.tagName === 'INPUT') return isCheckboxLike(node);\n    // Compact circular number badges (30\xD730 inline-flex chips) must go through\n    // processElement for screenshot \u2014 otherwise they flatten to white bars.\n    // Wider tag pills stay inline so wrap/flow is preserved.\n    if (isCompactCircleBadge(node)) return false;\n    const d = cs(node).display;\n    if (\n      d === 'inline-block' &&\n      node.getBoundingClientRect().width >= 120 &&\n      fullBorderOf(node) &&\n      (parseFloat(cs(node).paddingLeft) >= 2 || parseFloat(cs(node).paddingTop) >= 2)\n    ) {\n      return false;\n    }\n    if (d === 'inline' || d.startsWith('inline-') || d === 'contents') return true;\n    // Chrome reports display:block for phrasing elements that are actually\n    // laid out inline (flex containers blockify children; some elements\n    // compute block with no matching rule at all). Trust the geometry: if\n    // the element shares a line with adjacent text, it flows inline.\n    if (PHRASING_TAGS.has(node.tagName) && node.children.length === 0) {\n      const sameLine = (textNode, textEdge) => {\n        try {\n          const range = document.createRange();\n          range.selectNodeContents(textNode);\n          const rects = range.getClientRects();\n          const box = textEdge === 'last' ? rects[rects.length - 1] : rects[0];\n          const r = node.getBoundingClientRect();\n          if (!box) return false;\n          if (textEdge === 'last') return r.top < box.bottom - 2 && r.left >= box.right - 4;\n          return box.top < r.bottom - 2 && box.left >= r.right - 4;\n        } catch (e) {\n          return false;\n        }\n      };\n      const prev = node.previousSibling;\n      if (prev && prev.nodeType === Node.TEXT_NODE && prev.textContent.trim() && sameLine(prev, 'last')) {\n        return true;\n      }\n      const next = node.nextSibling;\n      if (next && next.nodeType === Node.TEXT_NODE && next.textContent.trim() && sameLine(next, 'first')) {\n        return true;\n      }\n    }\n    return false;\n  }\n\n  function attachBookmark(nodes, id) {\n    if (!id) return false;\n    for (const node of nodes) {\n      if (node.type === 'para' || node.type === 'heading') {\n        node.bookmarks = [...new Set([...(node.bookmarks || []), id])];\n        return true;\n      }\n      if (node.type === 'list' && node.items?.length) {\n        const item = node.items[0];\n        item.bookmarks = [...new Set([...(item.bookmarks || []), id])];\n        return true;\n      }\n      if (node.children && attachBookmark(node.children, id)) return true;\n      for (const cell of node.cells || []) {\n        if (cell.children && attachBookmark(cell.children, id)) return true;\n      }\n    }\n    return false;\n  }\n\n  // Walk a block container: consecutive inline siblings merge into one paragraph,\n  // block-level children are classified recursively.\n  function processChildren(el, depth, opts = {}) {\n    const decorations = opts.decorations !== false;\n    const out = [];\n    const containerStyle = cs(el);\n    const singleColumnGrid =\n      containerStyle.display === 'grid' &&\n      containerStyle.gridTemplateColumns.split(' ').filter(Boolean).length === 1;\n    const columnFlex =\n      containerStyle.display === 'flex' &&\n      (containerStyle.flexDirection === 'column' || containerStyle.flexDirection === 'column-reverse');\n    const stackGapPx =\n      singleColumnGrid || columnFlex\n        ? Math.min(\n            120,\n            Math.max(\n              0,\n              parseFloat(containerStyle.rowGap) || parseFloat(containerStyle.gap) || 0,\n            ),\n          )\n        : 0;\n    let emittedGroup = false;\n    let inlineBuffer = [];\n    const appendGroup = (nodes) => {\n      if (!nodes.length) return;\n      if (emittedGroup && stackGapPx > 0) out.push({ type: 'spacer', px: stackGapPx });\n      out.push(...nodes);\n      emittedGroup = true;\n    };\n    const flush = () => {\n      if (!inlineBuffer.length) return;\n      const runs = trimRuns(runsFromNodes(inlineBuffer, el));\n      if (runs.length) appendGroup(makeParaNodes(runs, paraStyleOf(el, decorations)));\n      inlineBuffer = [];\n    };\n    // CSS `order` / *-reverse reorders flex/grid items visually without\n    // touching the DOM: walking childNodes would emit e.g. the photo/content\n    // stack in authored order while the browser shows the reverse. Only\n    // reorder when the author opted in and no bare text is in play.\n    let iterNodes = el.childNodes;\n    if (\n      (containerStyle.display === 'grid' || containerStyle.display === 'flex') &&\n      ([...el.children].some((c) => (parseInt(cs(c).order, 10) || 0) !== 0) ||\n        containerStyle.flexDirection.endsWith('-reverse')) &&\n      [...el.childNodes].every(\n        (n) => n.nodeType !== Node.TEXT_NODE || !n.textContent.trim(),\n      )\n    ) {\n      iterNodes = [...el.children].sort((a, b) => {\n        const ra = a.getBoundingClientRect();\n        const rb = b.getBoundingClientRect();\n        return ra.top - rb.top || (DOC_RTL ? rb.left - ra.left : ra.left - rb.left);\n      });\n    }\n    for (const node of iterNodes) {\n      if (isInlineNode(node)) {\n        // An inline-block that starts on a fresh line below the buffered\n        // content is a visual block (inline-block heading + inline-block\n        // paragraph stacked by wrapping): break the paragraph between them.\n        if (\n          inlineBuffer.length &&\n          node.nodeType === Node.ELEMENT_NODE &&\n          cs(node).display.startsWith('inline-')\n        ) {\n          const r = node.getBoundingClientRect();\n          // skip buffered whitespace-only text nodes to find the last element\n          let prevEl = null;\n          for (let i = inlineBuffer.length - 1; i >= 0; i--) {\n            const b = inlineBuffer[i];\n            if (b.nodeType === Node.TEXT_NODE && !b.textContent.trim()) continue;\n            if (b.nodeType === Node.ELEMENT_NODE) prevEl = b;\n            break;\n          }\n          const pr = prevEl && prevEl.getBoundingClientRect();\n          if (\n            pr &&\n            r.height > 0 &&\n            pr.height > 0 &&\n            r.top >= pr.bottom - 2 &&\n            r.width >= el.getBoundingClientRect().width * 0.4\n          ) {\n            flush();\n            appendGroup(processElement(node, depth));\n            continue;\n          }\n        }\n        inlineBuffer.push(node);\n      } else if (node.nodeType === Node.ELEMENT_NODE) {\n        flush();\n        const children = processElement(node, depth);\n        attachBookmark(children, node.id);\n        appendGroup(children);\n      }\n    }\n    flush();\n    return out;\n  }\n\n  return globalThis.__html2docxPages.build({\n    cs,\n    docRTL: DOC_RTL,\n    isVisible,\n    markForScreenshot,\n    nextShotId: () => `h2d-${shotCounter++}`,\n    processChildren,\n    processElement,\n    toHex,\n  });";
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/table.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\table.js?raw
 var table_default = `(function installHtmlTableExtractor(global) {
   function extractTable(el, deps) {
     const {
@@ -205560,7 +205700,7 @@ var table_default = `(function installHtmlTableExtractor(global) {
 })(globalThis);
 `;
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/forms-media.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\forms-media.js?raw
 var forms_media_default = `(function installFormsAndMediaExtractor(global) {
   // Empty block/inline with only a bottom border is a fill-in underline
   // (consent forms, contract blanks). Without this they collapse away.
@@ -205739,10 +205879,10 @@ var forms_media_default = `(function installFormsAndMediaExtractor(global) {
 })(globalThis);
 `;
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/visual-effects.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\visual-effects.js?raw
 var visual_effects_default = "(function installVisualEffectClassifier(global) {\n  function needsScreenshot(el, deps) {\n    const { bgHex, cs, fullBorderOf } = deps;\n    // A broken image's rendered box is Chrome's placeholder chrome (icon +\n    // clipped alt text), never the author's design \u2014 even when transformed\n    // or shadowed, let the IMG branch fall back to alt text instead.\n    if (el.tagName === 'IMG' && (!el.complete || el.naturalWidth === 0)) return false;\n    const style = cs(el);\n    const rect = el.getBoundingClientRect();\n    if (rect.width < 20 || rect.height < 12 || rect.width > 1000 || rect.height > 1000) {\n      return false;\n    }\n    const transformed = style.transform && style.transform !== 'none';\n    const shadowed = style.boxShadow && style.boxShadow !== 'none';\n    const filtered =\n      (style.filter && style.filter !== 'none') ||\n      (style.backdropFilter && style.backdropFilter !== 'none');\n    const radii = [\n      style.borderTopLeftRadius,\n      style.borderTopRightRadius,\n      style.borderBottomRightRadius,\n      style.borderBottomLeftRadius,\n    ].map((value) => parseFloat(value) || 0);\n    const complexRadius =\n      Math.max(...radii) >= 8 &&\n      (Boolean(bgHex(el)) || Boolean(fullBorderOf(el))) &&\n      (new Set(radii.map((radius) => Math.round(radius))).size > 1 ||\n        style.overflow === 'hidden' ||\n        Math.max(...radii) >= Math.min(rect.width, rect.height) * 0.25);\n    // Text-heavy cards must stay editable/searchable: soft shadows, filters\n    // and rounded corners are not worth rasterizing paragraphs of content.\n    // Transforms still rasterize (flowed text would land in the wrong place).\n    // CJK counts double: a 60-char Japanese question carries as much content\n    // as a 120-char English sentence.\n    const text = (el.innerText || '').trim();\n    const cjkCount = (text.match(/[\\u3000-\\u9fff\\uf900-\\ufaff\\uff66-\\uff9f]/g) || []).length;\n    const weightedTextLength = text.length + cjkCount;\n    // Many short lines (schedule cards, subject lists) are as content-heavy\n    // as long prose \\u2014 a 5-day timetable trapped in pixels is uneditable.\n    const lineCount = text ? text.split('\\n').filter((line) => line.trim()).length : 0;\n    const textHeavy = weightedTextLength > 80 || (lineCount >= 4 && text.length >= 30);\n    const compactRoundedCard =\n      complexRadius && rect.height <= 160 && weightedTextLength <= 200 && lineCount < 4;\n    return Boolean(\n      transformed ||\n      ((shadowed || filtered || complexRadius) && (!textHeavy || compactRoundedCard)),\n    );\n  }\n\n  global.__html2docxVisualEffects = { needsScreenshot };\n})(globalThis);\n";
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/html2docx/src/browser/pages.js?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\html2docx\src\browser\pages.js?raw
 var pages_default = "(function installPageExtractor(global) {\n  function build(deps) {\n    const {\n      cs,\n      docRTL,\n      isVisible,\n      markForScreenshot,\n      nextShotId,\n      processChildren,\n      processElement,\n      toHex,\n    } = deps;\n    const rootBodyStyle = cs(document.body);\n    const absoluteRootChildren = [...document.body.children].filter(\n      (child) => isVisible(child) && cs(child).position === 'absolute',\n    );\n    const bodyHeight = document.body.getBoundingClientRect().height;\n    const visibleBodyChildren = [...document.body.children].filter(isVisible);\n    const authoredPageRoots = visibleBodyChildren.filter(\n      (child) => child.hasAttribute('data-docx-page') || child.hasAttribute('data-page'),\n    );\n    const inferredPageRoots = visibleBodyChildren.filter((child) => {\n      if (authoredPageRoots.includes(child)) return false;\n      if (!isVisible(child)) return false;\n      const style = cs(child);\n      const rect = child.getBoundingClientRect();\n      return (\n        (style.breakAfter === 'page' || style.pageBreakAfter === 'always') &&\n        rect.width >= 300 &&\n        rect.height >= 400\n      );\n    });\n    const multiPageComposition = authoredPageRoots.length >= 2;\n    const mixedPageComposition = !multiPageComposition && inferredPageRoots.length >= 2;\n    const renderedPageHeight = window.innerHeight;\n    // Fixed-composition slide pages: page-sized relative sections whose\n    // direct children are absolutely positioned (coordinate layouts authored\n    // without data-docx-page). Flow classification drops the positioned\n    // content entirely, so rasterize each page like authored pages.\n    const slidePageRoots = visibleBodyChildren.filter((child) => {\n      if (authoredPageRoots.includes(child)) return false;\n      const style = cs(child);\n      if (style.position !== 'relative' && style.position !== 'absolute') return false;\n      const rect = child.getBoundingClientRect();\n      if (Math.abs(rect.height - renderedPageHeight) > renderedPageHeight * 0.08) return false;\n      if (rect.width < window.innerWidth * 0.8) return false;\n      const absoluteKids = [...child.children].filter(\n        (kid) => isVisible(kid) && cs(kid).position === 'absolute',\n      );\n      return absoluteKids.length >= 2 && (child.innerText || '').trim().length >= 20;\n    });\n    const slidePageComposition =\n      !multiPageComposition &&\n      !mixedPageComposition &&\n      slidePageRoots.length >= 2 &&\n      slidePageRoots.length >= visibleBodyChildren.length - 1;\n    const multiPageAbsoluteComposition =\n      !multiPageComposition &&\n      !mixedPageComposition &&\n      bodyHeight > renderedPageHeight &&\n      bodyHeight <= renderedPageHeight * 10 &&\n      absoluteRootChildren.some(\n        (child) => child.getBoundingClientRect().top >= renderedPageHeight - 2,\n      );\n    const activePageView = [...document.body.children].find(\n      (child) =>\n        isVisible(child) &&\n        child.classList.contains('page-view') &&\n        child.classList.contains('active-page'),\n    );\n    const fixedNavigation = [...document.body.children].some((child) => {\n      if (!isVisible(child)) return false;\n      const style = cs(child);\n      return (\n        (child.tagName === 'NAV' || child.tagName === 'HEADER') &&\n        (style.position === 'fixed' || style.position === 'sticky')\n      );\n    });\n    const webPageComposition =\n      !multiPageComposition &&\n      !mixedPageComposition &&\n      !multiPageAbsoluteComposition &&\n      Boolean(activePageView) &&\n      fixedNavigation &&\n      bodyHeight > renderedPageHeight &&\n      activePageView.querySelector('img') &&\n      activePageView.querySelector('.container, .row, [class*=\"grid\"]');\n    const pageComposition =\n      (rootBodyStyle.position === 'relative' || rootBodyStyle.position === 'absolute') &&\n      rootBodyStyle.overflow === 'hidden' &&\n      bodyHeight >= 700 &&\n      bodyHeight <= 1600 &&\n      absoluteRootChildren.length >= 3 &&\n      (document.body.innerText || '').trim().length >= 20;\n    const singleVisualPageRoot = visibleBodyChildren.length === 1 ? visibleBodyChildren[0] : null;\n    const singleVisualPageRect = singleVisualPageRoot?.getBoundingClientRect();\n    const singleVisualPageStyle = singleVisualPageRoot ? cs(singleVisualPageRoot) : null;\n    const singleVisualPagePaint =\n      singleVisualPageStyle &&\n      (singleVisualPageStyle.backgroundImage !== 'none' ||\n        Boolean(toHex(singleVisualPageStyle.backgroundColor, { dropWhite: true })));\n    const singleVisualPageLayout = singleVisualPageRoot\n      ? [...singleVisualPageRoot.querySelectorAll('*')].some((element) => {\n          const style = cs(element);\n          return (\n            (style.display === 'grid' && style.gridTemplateColumns.split(' ').length >= 2) ||\n            (style.display === 'flex' &&\n              (style.flexDirection === 'row' || style.flexDirection === ''))\n          );\n        })\n      : false;\n    const flowingVisualComposition =\n      !multiPageComposition &&\n      !mixedPageComposition &&\n      !multiPageAbsoluteComposition &&\n      !webPageComposition &&\n      !pageComposition &&\n      Boolean(singleVisualPageRoot) &&\n      singleVisualPageStyle.position === 'relative' &&\n      (singleVisualPageStyle.overflow === 'hidden' ||\n        singleVisualPageStyle.overflow === 'clip') &&\n      singleVisualPagePaint &&\n      singleVisualPageLayout &&\n      singleVisualPageRect.width >= window.innerWidth * 0.7 &&\n      singleVisualPageRect.height > renderedPageHeight * 1.05 &&\n      singleVisualPageRect.height <= renderedPageHeight * 3 &&\n      (singleVisualPageRoot.innerText || '').trim().length >= 20;\n    const singlePageVisualComposition =\n      !multiPageComposition &&\n      !mixedPageComposition &&\n      !multiPageAbsoluteComposition &&\n      !webPageComposition &&\n      !pageComposition &&\n      !flowingVisualComposition &&\n      Boolean(singleVisualPageRoot) &&\n      (singleVisualPageStyle.position === 'relative' ||\n        singleVisualPageStyle.position === 'absolute') &&\n      (singleVisualPageStyle.overflow === 'hidden' ||\n        singleVisualPageStyle.overflow === 'clip') &&\n      singleVisualPagePaint &&\n      singleVisualPageRect.width >= window.innerWidth * 0.7 &&\n      singleVisualPageRect.height >= renderedPageHeight * 0.7 &&\n      singleVisualPageRect.height <= renderedPageHeight * 1.35 &&\n      (singleVisualPageRoot.innerText || '').trim().length >= 20;\n    const bodySinglePageVisualComposition =\n      !multiPageComposition &&\n      !mixedPageComposition &&\n      !multiPageAbsoluteComposition &&\n      !webPageComposition &&\n      !pageComposition &&\n      !singlePageVisualComposition &&\n      rootBodyStyle.position === 'relative' &&\n      rootBodyStyle.backgroundImage !== 'none' &&\n      rootBodyStyle.maxWidth !== 'none' &&\n      visibleBodyChildren.length >= 2 &&\n      visibleBodyChildren.length <= 5 &&\n      bodyHeight >= renderedPageHeight * 0.7 &&\n      bodyHeight <= renderedPageHeight * 1.35 &&\n      (document.body.innerText || '').trim().length >= 20;\n    const bodyRect = document.body.getBoundingClientRect();\n    // Word (Mac) insets the first line ~26px below the page top even at zero\n    // margins, so a slice scaled to the full content height loses its bottom\n    // rows to the page edge. Budget slices below the page height so the\n    // width-driven scale governs every slice (uniform scale across pages)\n    // and Word never clips a pixel row. Matches the 45px renderer headroom:\n    // 1 - 45/1123.\n    const sliceBudget = Math.round(renderedPageHeight * 0.96);\n    // Bands (y ranges relative to body top) a slice boundary must not cross:\n    // text lines and replaced elements always; painted card boxes when small\n    // enough to move to the next page whole.\n    const collectCutBands = () => {\n      const lineBands = [];\n      const boxBands = [];\n      const push = (bands, rect) => {\n        if (rect.height > 0 && rect.width > 0) {\n          bands.push({ top: rect.top - bodyRect.top, bottom: rect.bottom - bodyRect.top });\n        }\n      };\n      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);\n      while (walker.nextNode()) {\n        const textNode = walker.currentNode;\n        if (!textNode.textContent.trim()) continue;\n        const range = document.createRange();\n        range.selectNodeContents(textNode);\n        for (const rect of range.getClientRects()) push(lineBands, rect);\n      }\n      for (const element of document.body.querySelectorAll('*')) {\n        if (!isVisible(element)) continue;\n        const rect = element.getBoundingClientRect();\n        if (rect.height <= 0 || rect.width <= 0) continue;\n        if (\n          element.matches('img, svg, canvas, video, iframe, input, textarea, select, button')\n        ) {\n          push(lineBands, rect);\n          continue;\n        }\n        if (rect.height < 40 || rect.height > sliceBudget * 0.9) continue;\n        const style = cs(element);\n        // dropWhite:false \u2014 an explicit white card on a tinted page is still\n        // a visual card whose rows must not be split across pages.\n        const painted =\n          style.backgroundImage !== 'none' ||\n          style.boxShadow !== 'none' ||\n          Boolean(toHex(style.backgroundColor, { dropWhite: false })) ||\n          parseFloat(style.borderTopWidth) > 0 ||\n          parseFloat(style.borderBottomWidth) > 0;\n        if (painted) push(boxBands, rect);\n      }\n      return { lineBands, boxBands };\n    };\n    const chooseCut = (ideal, minCut, bands) => {\n      const clearance = 3;\n      for (let y = ideal; y >= minCut; y -= 2) {\n        const blocked = bands.some(\n          (band) => band.top < y + clearance && band.bottom > y - clearance,\n        );\n        if (!blocked) return y;\n      }\n      return null;\n    };\n    const sliceBoundaries = () => {\n      // A composition only slightly taller than one page reads as a\n      // single-page design (e.g. a resume): render one full slice and let\n      // the renderer's page scale absorb the few percent, instead of\n      // stranding a couple of lines on a second page.\n      if (bodyHeight <= sliceBudget * 1.12) return [Math.round(bodyHeight)];\n      const { lineBands, boxBands } = collectCutBands();\n      const allBands = [...lineBands, ...boxBands];\n      const boundaries = [];\n      let cursor = 0;\n      while (bodyHeight - cursor > sliceBudget) {\n        const ideal = cursor + sliceBudget;\n        const minCut = cursor + Math.round(sliceBudget * 0.6);\n        // Whole cards move to the next page when a gap exists; otherwise cut\n        // between text lines inside the card; otherwise hard-cut.\n        const cut =\n          chooseCut(ideal, minCut, allBands) ??\n          chooseCut(ideal, minCut, lineBands) ??\n          ideal;\n        boundaries.push(cut);\n        cursor = cut;\n      }\n      boundaries.push(Math.round(bodyHeight));\n      // Trailing sliver: absorb a short final slice into the previous page\n      // when the merged slice still fits with a small page-scale shrink.\n      if (boundaries.length >= 2) {\n        const previousStart = boundaries.length >= 3 ? boundaries[boundaries.length - 3] : 0;\n        const lastStart = boundaries[boundaries.length - 2];\n        if (\n          bodyHeight - lastStart <= sliceBudget * 0.25 &&\n          bodyHeight - previousStart <= sliceBudget * 1.12\n        ) {\n          boundaries.splice(boundaries.length - 2, 1);\n        }\n      }\n      return boundaries;\n    };\n    const screenshotPageSlices = ({ authoredPageHeights = false } = {}) => {\n      // Absolutely-positioned multi-page canvases are authored in exact\n      // viewport-height pages: gap-aware cuts would shift authored page\n      // boundaries, so slice at the authored pitch and let the renderer\n      // headroom shrink each page to fit.\n      const boundaries = authoredPageHeights\n        ? Array.from(\n            { length: Math.ceil(bodyHeight / renderedPageHeight) },\n            (_, index) => Math.min(bodyHeight, (index + 1) * renderedPageHeight),\n          )\n        : sliceBoundaries();\n      // Decorative absolutes bleeding past the body's box (half-out hero\n      // circles) get flat-cut by a body-width clip. Extend the horizontal\n      // extent to overhanging descendants that still touch the body band \u2014\n      // capped so parked off-screen decorations (left/right: -10000px)\n      // never drag the clip away.\n      let paintLeft = bodyRect.left;\n      let paintRight = bodyRect.right;\n      const maxBleed = 200;\n      for (const d of document.body.querySelectorAll('*')) {\n        const dr = d.getBoundingClientRect();\n        if (!dr.width || !dr.height) continue;\n        if (dr.right <= bodyRect.left - maxBleed || dr.left >= bodyRect.right + maxBleed) continue;\n        if (dr.left < paintLeft) paintLeft = Math.max(dr.left, bodyRect.left - maxBleed);\n        if (dr.right > paintRight) paintRight = Math.min(dr.right, bodyRect.right + maxBleed);\n      }\n      paintLeft = Math.max(0, Math.round(paintLeft));\n      const paintWidth = Math.round(paintRight - paintLeft);\n      let previousBoundary = 0;\n      return boundaries.map((boundary) => {\n        const sliceHeight = Math.round(boundary - previousBoundary);\n        const sliceTop = previousBoundary;\n        previousBoundary = boundary;\n        return {\n          type: 'image',\n          shotId: nextShotId(),\n          width: paintWidth,\n          height: sliceHeight,\n          align: 'center',\n          pageComposition: true,\n          capturesDocumentText: true,\n          clip: {\n            x: paintLeft,\n            y: Math.max(0, Math.round(bodyRect.top + sliceTop)),\n            width: paintWidth,\n            height: sliceHeight,\n          },\n        };\n      });\n    };\n    const buildMixedPageIr = () => {\n      const output = [];\n      const pageRoots = new Set(inferredPageRoots);\n      let pendingPageBreak = false;\n      let previousPageRootFillsPage = false;\n      const append = (nodes) => {\n        for (const node of nodes) {\n          if (\n            node.type === 'pagebreak' &&\n            (!output.length || output[output.length - 1].type === 'pagebreak')\n          ) {\n            continue;\n          }\n          output.push(node);\n        }\n      };\n      for (const child of visibleBodyChildren) {\n        const style = cs(child);\n        const isPageRoot = pageRoots.has(child);\n        const breaksBefore =\n          style.breakBefore === 'page' || style.pageBreakBefore === 'always';\n        const naturalPageAdvance = pendingPageBreak && previousPageRootFillsPage;\n        if (\n          !naturalPageAdvance &&\n          (pendingPageBreak || (isPageRoot && breaksBefore)) &&\n          output.length\n        ) {\n          append([{ type: 'pagebreak' }]);\n        }\n        const nodes = isPageRoot\n          ? [{ ...markForScreenshot(child), pageComposition: true }]\n          : processElement(child, 0);\n        if (naturalPageAdvance && nodes[0]?.type === 'pagebreak') nodes.shift();\n        append(nodes);\n        pendingPageBreak =\n          style.breakAfter === 'page' || style.pageBreakAfter === 'always';\n        previousPageRootFillsPage =\n          isPageRoot &&\n          child.getBoundingClientRect().height >= renderedPageHeight - 12;\n      }\n      return output;\n    };\n    const ir = multiPageComposition\n      ? authoredPageRoots.flatMap((page, index) => [\n          ...(index > 0 ? [{ type: 'pagebreak' }] : []),\n          { ...markForScreenshot(page), pageComposition: true },\n        ])\n      : slidePageComposition\n        ? slidePageRoots.flatMap((page, index) => [\n            ...(index > 0 ? [{ type: 'pagebreak' }] : []),\n            { ...markForScreenshot(page), pageComposition: true },\n          ])\n      : mixedPageComposition\n        ? buildMixedPageIr()\n        : webPageComposition\n          ? screenshotPageSlices()\n          : multiPageAbsoluteComposition\n            ? screenshotPageSlices({ authoredPageHeights: true })\n            : flowingVisualComposition\n              ? screenshotPageSlices()\n            : singlePageVisualComposition\n              ? [{ ...markForScreenshot(singleVisualPageRoot), pageComposition: true }]\n              : bodySinglePageVisualComposition\n                ? [{ ...markForScreenshot(document.body), pageComposition: true }]\n              : pageComposition\n                ? [{ ...markForScreenshot(document.body), pageComposition: true }]\n                : processChildren(document.body, 0);\n    while (ir.length && ir[0].type === 'pagebreak') ir.shift();\n    for (let index = ir.length - 1; index >= 0; index--) {\n      const node = ir[index];\n      if (\n        node.type !== 'image' ||\n        node.clip ||\n        node.pageComposition ||\n        node.height <= 1000\n      ) {\n        continue;\n      }\n      const element = document.querySelector(`[data-h2d-id=\"${node.shotId}\"]`);\n      if (!element) continue;\n      const rect = element.getBoundingClientRect();\n      const maxSliceHeight = 700;\n      const sliceCount = Math.ceil(rect.height / maxSliceHeight);\n      const slices = Array.from({ length: sliceCount }, (_, sliceIndex) => {\n        const sliceHeight = Math.min(\n          maxSliceHeight,\n          rect.height - sliceIndex * maxSliceHeight,\n        );\n        return {\n          ...node,\n          shotId: sliceIndex === 0 ? node.shotId : nextShotId(),\n          height: Math.round(sliceHeight),\n          spacingBeforePx: sliceIndex === 0 ? node.spacingBeforePx : 0,\n          spacingAfterPx:\n            sliceIndex === sliceCount - 1 ? node.spacingAfterPx : 0,\n          clip: {\n            x: Math.max(0, Math.round(rect.left)),\n            y: Math.max(0, Math.round(rect.top + sliceIndex * maxSliceHeight)),\n            width: Math.round(rect.width),\n            height: Math.round(sliceHeight),\n          },\n        };\n      });\n      ir.splice(index, 1, ...slices);\n    }\n\n    // A centered \"paper sheet\" holding all the content on a tinted desk\n    // backdrop (body bg + one max-width/box-shadow child): the desk color is\n    // screen chrome, the sheet IS the page \u2014 take its paint instead.\n    const paperSheet = (() => {\n      const kids = [...document.body.children].filter(\n        (child) =>\n          isVisible(child) &&\n          ((child.innerText || '').trim() || child.querySelector('img,svg,canvas,table')),\n      );\n      if (kids.length !== 1) return null;\n      const el = kids[0];\n      const st = cs(el);\n      if (!toHex(st.backgroundColor, { dropWhite: false })) return null;\n      const rect = el.getBoundingClientRect();\n      const centered = Math.abs(rect.left - (window.innerWidth - rect.right)) <= 24;\n      const coversContent = rect.height >= document.body.scrollHeight * 0.8;\n      const sheetLike = st.boxShadow !== 'none' || parseFloat(st.maxWidth) > 0;\n      return centered && coversContent && sheetLike ? el : null;\n    })();\n    const bodyBackground = toHex(cs(document.body).backgroundColor, {\n      dropWhite: false,\n    });\n    // The desk-vs-sheet call only holds for neutral backdrops: a saturated\n    // color or gradient behind the sheet is poster design, not screen chrome.\n    const backdropDesigned = (() => {\n      if (cs(document.body).backgroundImage.includes('gradient')) return true;\n      if (!bodyBackground) return false;\n      const channels = [0, 2, 4].map((i) => parseInt(bodyBackground.slice(i, i + 2), 16));\n      return Math.max(...channels) - Math.min(...channels) > 24;\n    })();\n    const deskSheet = backdropDesigned ? null : paperSheet;\n    const pageBg = deskSheet\n      ? toHex(cs(deskSheet).backgroundColor, { dropWhite: true })\n      : bodyBackground\n        ? toHex(cs(document.body).backgroundColor, { dropWhite: true })\n        : toHex(cs(document.documentElement).backgroundColor, { dropWhite: true });\n    const bodyHasPaint =\n      !deskSheet &&\n      (cs(document.body).backgroundImage !== 'none' || Boolean(bodyBackground));\n    const bgSource = bodyHasPaint ? document.body : document.documentElement;\n    const bgStyle = cs(bgSource);\n    const pagePseudoPaints = (which) => {\n      const pseudo = getComputedStyle(bgSource, which);\n      if (!pseudo || pseudo.content === 'none' || pseudo.content === 'normal') return false;\n      const hasBorder = ['Top', 'Right', 'Bottom', 'Left'].some(\n        (side) =>\n          parseFloat(pseudo[`border${side}Width`]) >= 1 &&\n          pseudo[`border${side}Style`] !== 'none',\n      );\n      return (\n        hasBorder ||\n        pseudo.backgroundImage !== 'none' ||\n        Boolean(toHex(pseudo.backgroundColor, { dropWhite: true }))\n      );\n    };\n    // a flat solid body color needs no backdrop screenshot: w:background\n    // renders the exact hex, while the header-image route's resampled tone\n    // visibly differs from same-color shading fills on content blocks\n    const backdropHasArt =\n      bgStyle.backgroundImage !== 'none' ||\n      pagePseudoPaints('::before') ||\n      pagePseudoPaints('::after') ||\n      Boolean(paperSheet && backdropDesigned);\n    if (\n      !pageComposition &&\n      !multiPageComposition &&\n      !mixedPageComposition &&\n      !multiPageAbsoluteComposition &&\n      !webPageComposition &&\n      !flowingVisualComposition &&\n      !singlePageVisualComposition &&\n      !bodySinglePageVisualComposition &&\n      backdropHasArt\n    ) {\n      const backdrop = document.createElement('div');\n      const width = window.innerWidth;\n      const height = window.innerHeight;\n      // park off-screen on the side the document ignores for overflow:\n      // in RTL, left-side overflow extends the scrollable area and shifts\n      // the capture surface origin, blanking every later element screenshot\n      const rtlDoc =\n        cs(document.documentElement).direction === 'rtl' ||\n        cs(document.body).direction === 'rtl';\n      Object.assign(backdrop.style, {\n        position: 'absolute',\n        [rtlDoc ? 'right' : 'left']: '-10000px',\n        top: '0',\n        width: `${width}px`,\n        height: `${height}px`,\n        backgroundColor: pageBg ? `#${pageBg}` : bgStyle.backgroundColor,\n        backgroundImage: bgStyle.backgroundImage,\n        backgroundSize: bgStyle.backgroundSize,\n        backgroundPosition: bgStyle.backgroundPosition,\n        backgroundRepeat: bgStyle.backgroundRepeat,\n        pointerEvents: 'none',\n      });\n      const appendPagePseudo = (which) => {\n        const pseudo = getComputedStyle(bgSource, which);\n        if (!pseudo || pseudo.content === 'none' || pseudo.content === 'normal') return;\n        const hasBorder = ['Top', 'Right', 'Bottom', 'Left'].some(\n          (side) =>\n            parseFloat(pseudo[`border${side}Width`]) >= 1 &&\n            pseudo[`border${side}Style`] !== 'none',\n        );\n        const hasPaint =\n          pseudo.backgroundImage !== 'none' ||\n          Boolean(toHex(pseudo.backgroundColor, { dropWhite: true }));\n        if (!hasBorder && !hasPaint) return;\n        const overlay = document.createElement('div');\n        Object.assign(overlay.style, {\n          position: 'absolute',\n          top: pseudo.top === 'auto' ? '0' : pseudo.top,\n          right: pseudo.right === 'auto' ? '0' : pseudo.right,\n          bottom: pseudo.bottom === 'auto' ? '0' : pseudo.bottom,\n          left: pseudo.left === 'auto' ? '0' : pseudo.left,\n          boxSizing: 'border-box',\n          backgroundColor: pseudo.backgroundColor,\n          backgroundImage: pseudo.backgroundImage,\n          backgroundSize: pseudo.backgroundSize,\n          backgroundPosition: pseudo.backgroundPosition,\n          backgroundRepeat: pseudo.backgroundRepeat,\n          borderTop: pseudo.borderTop,\n          borderRight: pseudo.borderRight,\n          borderBottom: pseudo.borderBottom,\n          borderLeft: pseudo.borderLeft,\n          opacity: pseudo.opacity,\n        });\n        backdrop.appendChild(overlay);\n      };\n      appendPagePseudo('::before');\n      appendPagePseudo('::after');\n      // Designed backdrop with a content sheet on top (poster on gradient):\n      // paint the sheet's box into the backdrop so page chrome = backdrop +\n      // sheet, and the flowing text keeps its readable card behind it.\n      if (paperSheet && backdropDesigned) {\n        const sheetRect = paperSheet.getBoundingClientRect();\n        const sheetStyle = cs(paperSheet);\n        const sheet = document.createElement('div');\n        Object.assign(sheet.style, {\n          position: 'absolute',\n          left: `${Math.round(sheetRect.left)}px`,\n          top: `${Math.round(Math.max(0, sheetRect.top))}px`,\n          width: `${Math.round(sheetRect.width)}px`,\n          height: `${Math.round(Math.max(100, height - Math.max(0, sheetRect.top)))}px`,\n          backgroundColor: sheetStyle.backgroundColor,\n          borderRadius: sheetStyle.borderRadius,\n          boxShadow: sheetStyle.boxShadow,\n        });\n        backdrop.appendChild(sheet);\n      }\n      document.body.appendChild(backdrop);\n      const shot = markForScreenshot(backdrop);\n      ir.unshift({\n        type: 'pagebg',\n        color: pageBg,\n        shotId: shot.shotId,\n        width,\n        height,\n      });\n    } else if (pageBg) {\n      ir.unshift({ type: 'pagebg', color: pageBg });\n    }\n    for (let index = ir.length - 1; index > 0; index--) {\n      if (ir[index].type === 'pagebreak' && ir[index - 1].type === 'spacer') {\n        ir.splice(index - 1, 1);\n      }\n    }\n    // Section boundaries stack spacers (padding-bottom + divider walk +\n    // padding-top emitted by different branches): the real CSS gap is the\n    // two paddings, so keep the two largest of a run and drop the rest.\n    for (let index = ir.length - 1; index >= 0; index--) {\n      if (ir[index].type !== 'spacer' || ir[index].bindsNeighbors) continue;\n      let first = index;\n      while (first > 0 && ir[first - 1].type === 'spacer' && !ir[first - 1].bindsNeighbors) first--;\n      if (first === index) continue;\n      const run = ir.slice(first, index + 1).map((node) => node.px || 0).sort((a, b) => b - a);\n      const merged = Math.min(260, run[0] + (run[1] || 0));\n      ir.splice(first, index - first + 1, { type: 'spacer', px: merged });\n      index = first;\n    }\n    const lastContent = ir[ir.length - 1];\n    if (lastContent?.spacingAfterPx != null) lastContent.spacingAfterPx = 0;\n    if (lastContent?.style?.spacingAfterPx != null) lastContent.style.spacingAfterPx = 0;\n\n    const bodyStyle = cs(document.body);\n    const cssLengthPx = (value) => {\n      const match = String(value || '').trim().match(/^([\\d.]+)(px|pt|in|cm|mm)?$/i);\n      if (!match) return null;\n      const amount = parseFloat(match[1]);\n      return (\n        amount *\n        ({ px: 1, pt: 96 / 72, in: 96, cm: 96 / 2.54, mm: 96 / 25.4 }[\n          (match[2] || 'px').toLowerCase()\n        ] || 1)\n      );\n    };\n    const namedPageSizes = {\n      a3: [1123, 1587],\n      a4: [794, 1123],\n      a5: [559, 794],\n      letter: [816, 1056],\n      legal: [816, 1344],\n      tabloid: [1056, 1632],\n      ledger: [1632, 1056],\n    };\n    let pageSizePx = null;\n    for (const sheet of [...document.styleSheets]) {\n      let rules;\n      try {\n        rules = [...sheet.cssRules];\n      } catch {\n        continue;\n      }\n      for (const rule of rules) {\n        if (rule.type !== CSSRule.PAGE_RULE) continue;\n        const parts = (rule.style.getPropertyValue('size') || '').trim().toLowerCase().split(/\\s+/);\n        const orientation = parts.find((part) => part === 'landscape' || part === 'portrait');\n        const named = parts.find((part) => namedPageSizes[part]);\n        if (named) {\n          pageSizePx = [...namedPageSizes[named]];\n        } else {\n          const lengths = parts.map(cssLengthPx).filter((value) => value != null);\n          if (lengths.length >= 2) pageSizePx = [lengths[0], lengths[1]];\n          else if (lengths.length === 1) pageSizePx = [lengths[0], lengths[0] * Math.SQRT2];\n        }\n        if (pageSizePx && orientation === 'landscape' && pageSizePx[0] < pageSizePx[1]) {\n          pageSizePx.reverse();\n        }\n        if (pageSizePx && orientation === 'portrait' && pageSizePx[0] > pageSizePx[1]) {\n          pageSizePx.reverse();\n        }\n        break;\n      }\n      if (pageSizePx) break;\n    }\n    if (!pageSizePx && (multiPageComposition || mixedPageComposition)) {\n      const pageRect = (authoredPageRoots[0] || inferredPageRoots[0]).getBoundingClientRect();\n      pageSizePx = [pageRect.width, pageRect.height];\n    } else if (!pageSizePx && multiPageAbsoluteComposition) {\n      pageSizePx = [bodyRect.width, renderedPageHeight];\n    } else if (!pageSizePx && pageComposition) {\n      pageSizePx = [bodyRect.width, bodyRect.height];\n    }\n    pageSizePx ||= [794, 1123];\n    const composed =\n      pageComposition ||\n      multiPageComposition ||\n      slidePageComposition ||\n      mixedPageComposition ||\n      multiPageAbsoluteComposition ||\n      webPageComposition ||\n      flowingVisualComposition ||\n      singlePageVisualComposition ||\n      bodySinglePageVisualComposition;\n    // A natively-rendered flow document slightly taller than one page (e.g. a\n    // resume that strands two lines on page 2) reads as a one-page design.\n    // Word lays such docs out ~10% denser than the browser proxy (narrower\n    // Arial + width scale), so browser ratios up to ~1.22 are recoverable\n    // with a small whole-document squeeze applied to geometry and fonts.\n    // ratio against the page height at the ACTUAL viewport width \u2014 the\n    // viewport height is not resized when the authored width differs, so\n    // innerHeight is the wrong denominator there (880-wide doc in a\n    // 1024-proportioned window read as 0.95 pages instead of 1.11)\n    const flowCanvasWidth = Math.min(\n      window.innerWidth,\n      Math.max(Math.round(pageSizePx[0]), Math.ceil(bodyRect.width)),\n    );\n    const flowPageHeight = flowCanvasWidth * (pageSizePx[1] / pageSizePx[0]);\n    const flowRatio = bodyHeight / flowPageHeight;\n    const squeezableFlow = !composed && !authoredPageRoots.length && !inferredPageRoots.length;\n    (globalThis.__h2dTrace ||= []).push({\n      where: 'pageFitSqueeze',\n      flowRatio: Math.round(flowRatio * 1000) / 1000,\n      bodyHeight: Math.round(bodyHeight),\n      renderedPageHeight,\n      composed: Boolean(composed),\n      authoredRoots: authoredPageRoots.length,\n      inferredRoots: inferredPageRoots.length,\n    });\n    // Word lays text-heavy docs ~10% denser than the browser proxy (narrower\n    // Arial), which the 0.9 fudge credits. Table/fixed-height-heavy docs get\n    // no such densening, so past ~1.05 the fudge under-squeezes and the last\n    // block still strands (invoice stamp boxes) \u2014 taper the credit away.\n    const pageFitSqueeze =\n      squeezableFlow && flowRatio > 1.05 && flowRatio <= 1.22\n        ? // table/fixed-height-heavy docs (invoices) get none of the Arial\n          // densening the 0.9 fudge below assumes \u2014 squeeze at face value\n          // plus slack so the trailing block doesn't strand by one line\n          // 0.90/0.82 (was 0.92/0.84): Word (Mac) lays these table-heavy\n          // docs up to ~9% taller than the browser proxy \u2014 the old floor\n          // left a marginal one-pager's footer stranding on page 2\n          Math.max(0.8, Math.min(1, 0.88 / flowRatio))\n        : squeezableFlow && flowRatio > 1.02 && flowRatio <= 1.05\n          ? Math.max(0.88, Math.min(1, 0.98 / (flowRatio * 0.9)))\n          : // A doc filling exactly one browser page (invoices, forms) is a\n            // one-page design; Word's layout runs a few percent taller (table\n            // leading, min row heights), so squeeze preemptively.\n            squeezableFlow && flowRatio > 0.96 && flowRatio <= 1.02\n            ? 0.94\n            : 1;\n    // A viewport wider than the authored canvas (1024 reload of a\n    // letter-width design) centers the body with auto margins \u2014 a viewport\n    // artifact, not an authored page margin. Measure against the canvas and\n    // strip the centering offset, or the page gets ~3cm fake margins and the\n    // content shrinks by the canvas/viewport ratio.\n    const canvasWidth = Math.min(\n      window.innerWidth,\n      Math.max(Math.round(pageSizePx[0]), Math.ceil(bodyRect.width)),\n    );\n    const centerOffset = Math.max(0, (window.innerWidth - canvasWidth) / 2);\n    // flowed documents get a small margin floor: an authored padding:0 body\n    // puts Word text hard against the physical page edge, which no print\n    // layout intends; composed pages keep exact geometry. The floor widens\n    // the margins beyond the measured geometry, so the reported canvas must\n    // widen by the same amount or the px->page scale over-sizes the content\n    // and Word clips it at the right margin.\n    const rawLeftPx = composed\n      ? Math.max(0, Math.round(bodyRect.left - centerOffset))\n      : Math.max(\n          0,\n          Math.round(bodyRect.left - centerOffset + (parseFloat(bodyStyle.paddingLeft) || 0)),\n        );\n    const rawRightPx = Math.max(\n      0,\n      composed\n        ? Math.round(canvasWidth - (bodyRect.right - centerOffset))\n        : Math.round(\n            canvasWidth -\n              (bodyRect.right - centerOffset) +\n              (parseFloat(bodyStyle.paddingRight) || 0),\n          ),\n    );\n    const leftPx = composed ? rawLeftPx : Math.max(24, rawLeftPx);\n    const rightPx = composed ? rawRightPx : Math.max(24, rawRightPx);\n    const metaContent = (name) =>\n      document.querySelector(`meta[name=\"${name}\" i]`)?.content?.trim() || undefined;\n    ir.unshift({\n      type: 'docsettings',\n      viewportWidthPx: canvasWidth + (leftPx - rawLeftPx) + (rightPx - rawRightPx),\n      rtl: docRTL || undefined,\n      lang: document.documentElement.lang || undefined,\n      meta: {\n        title: (document.title || '').trim() || undefined,\n        author: metaContent('author'),\n        description: metaContent('description'),\n        keywords: metaContent('keywords'),\n      },\n      composed: composed || undefined,\n      pageFitSqueeze: pageFitSqueeze < 1 ? pageFitSqueeze : undefined,\n      pageSizePx: { width: Math.round(pageSizePx[0]), height: Math.round(pageSizePx[1]) },\n      marginsPx: {\n        top: composed\n          ? Math.max(0, Math.round(bodyRect.top))\n          : Math.max(24, Math.round(bodyRect.top + (parseFloat(bodyStyle.paddingTop) || 0))),\n        bottom: composed\n          ? 0\n          : Math.max(24, Math.round(parseFloat(bodyStyle.paddingBottom) || 0)),\n        left: leftPx,\n        right: rightPx,\n      },\n    });\n    return ir;\n  }\n\n  global.__html2docxPages = { build };\n})(globalThis);\n";
 
 // vendor/happyoffice/packages/html2docx/src/extract.ts
@@ -209430,7 +209570,7 @@ var require_buffer_list = /* @__PURE__ */ __commonJSMin(((exports2, module2) => 
       },
       {
         key: "join",
-        value: function join15(s) {
+        value: function join16(s) {
           if (this.length === 0) return "";
           var p = this.head;
           var ret = "" + p.data;
@@ -231316,7 +231456,7 @@ async function convertHtmlToDocx(input, driver, options = {}) {
   const shotIds = [];
   const shotNodes = /* @__PURE__ */ new Map();
   const pageBgShotIds = new Set(
-    ir.filter((node) => node.type === "pagebg" && node.shotId).map((node) => node.shotId)
+    ir.flatMap((node) => node.type === "pagebg" && node.shotId ? [node.shotId] : [])
   );
   const collectRunShots = (runs) => {
     for (const run2 of runs || []) {
@@ -231559,7 +231699,7 @@ async function convertHtmlToDocx(input, driver, options = {}) {
 }
 
 // vendor/happyoffice/packages/html2docx/src/drivers/electron.ts
-var import_electron3 = require("electron");
+var import_electron5 = require("electron");
 var NETWORK_QUIET_MS = 500;
 var POLL_MS = 100;
 var sleep2 = (ms) => new Promise((resolve4) => setTimeout(resolve4, ms));
@@ -231571,7 +231711,7 @@ var ElectronBrowserDriver = class _ElectronBrowserDriver {
   }
   inflight = /* @__PURE__ */ new Set();
   static async create(viewport) {
-    const win = new import_electron3.BrowserWindow({
+    const win = new import_electron5.BrowserWindow({
       show: false,
       width: viewport.width,
       height: viewport.height,
@@ -233918,12 +234058,12 @@ async function chatOpenAiCompatible(wd, baseUrl2, config, system, user, options 
 }
 
 // vendor/happyoffice/packages/ai-provider/src/codex-app-server.ts
-var import_node_child_process = require("node:child_process");
+var import_node_child_process2 = require("node:child_process");
 var import_node_crypto3 = require("node:crypto");
-var import_promises5 = require("node:fs/promises");
+var import_promises6 = require("node:fs/promises");
 var import_node_readline = require("node:readline");
-var import_node_path11 = require("node:path");
-var import_node_os4 = require("node:os");
+var import_node_path12 = require("node:path");
+var import_node_os5 = require("node:os");
 var DIAGNOSTIC_LIMIT = 16e3;
 var REQUEST_TIMEOUT_MS = 3e4;
 var IDLE_SHUTDOWN_MS = 12e4;
@@ -233940,7 +234080,7 @@ function cleanCliPath(value) {
 }
 async function fileExists(path) {
   try {
-    return (await (0, import_promises5.stat)(path)).isFile();
+    return (await (0, import_promises6.stat)(path)).isFile();
   } catch {
     return false;
   }
@@ -233948,33 +234088,33 @@ async function fileExists(path) {
 function managedCodexRoot(platform, env) {
   if (platform !== "win32") return void 0;
   const localAppData = env.LOCALAPPDATA ?? env.LocalAppData;
-  return localAppData ? (0, import_node_path11.join)(localAppData, "OpenAI", "Codex", "bin") : void 0;
+  return localAppData ? (0, import_node_path12.join)(localAppData, "OpenAI", "Codex", "bin") : void 0;
 }
 function isInside2(path, root, platform) {
-  const normalizedPath = (0, import_node_path11.resolve)(path);
-  const normalizedRoot = (0, import_node_path11.resolve)(root);
+  const normalizedPath = (0, import_node_path12.resolve)(path);
+  const normalizedRoot = (0, import_node_path12.resolve)(root);
   const pathValue = platform === "win32" ? normalizedPath.toLowerCase() : normalizedPath;
   const rootValue = platform === "win32" ? normalizedRoot.toLowerCase() : normalizedRoot;
-  return pathValue === rootValue || pathValue.startsWith(`${rootValue}${import_node_path11.sep}`);
+  return pathValue === rootValue || pathValue.startsWith(`${rootValue}${import_node_path12.sep}`);
 }
 async function newestManagedCodex(root, platform) {
   let entries;
   try {
-    entries = await (0, import_promises5.readdir)(root, { withFileTypes: true });
+    entries = await (0, import_promises6.readdir)(root, { withFileTypes: true });
   } catch {
     return null;
   }
   const executable = platform === "win32" ? "codex.exe" : "codex";
   const candidates = await Promise.all(
     entries.filter((entry) => entry.isDirectory()).map(async (entry) => {
-      const path = (0, import_node_path11.join)(root, entry.name, executable);
+      const path = (0, import_node_path12.join)(root, entry.name, executable);
       try {
         const [info3, directoryInfo] = await Promise.all([
-          (0, import_promises5.stat)(path),
-          (0, import_promises5.stat)((0, import_node_path11.join)(root, entry.name))
+          (0, import_promises6.stat)(path),
+          (0, import_promises6.stat)((0, import_node_path12.join)(root, entry.name))
         ]);
         if (!info3.isFile()) return null;
-        const companion = platform !== "win32" || await fileExists((0, import_node_path11.join)(root, entry.name, "codex-code-mode-host.exe"));
+        const companion = platform !== "win32" || await fileExists((0, import_node_path12.join)(root, entry.name, "codex-code-mode-host.exe"));
         return { path, modified: Math.max(info3.mtimeMs, directoryInfo.mtimeMs), companion };
       } catch {
         return null;
@@ -233992,32 +234132,32 @@ async function commonUnixBinDirs(env) {
   const dirs = ["/opt/homebrew/bin", "/usr/local/bin"];
   if (home) {
     dirs.push(
-      (0, import_node_path11.join)(home, ".local", "bin"),
-      (0, import_node_path11.join)(home, ".npm-global", "bin"),
-      (0, import_node_path11.join)(home, ".volta", "bin"),
-      (0, import_node_path11.join)(home, ".bun", "bin"),
-      (0, import_node_path11.join)(home, ".yarn", "bin")
+      (0, import_node_path12.join)(home, ".local", "bin"),
+      (0, import_node_path12.join)(home, ".npm-global", "bin"),
+      (0, import_node_path12.join)(home, ".volta", "bin"),
+      (0, import_node_path12.join)(home, ".bun", "bin"),
+      (0, import_node_path12.join)(home, ".yarn", "bin")
     );
-    const nvmRoot = (0, import_node_path11.join)(home, ".nvm", "versions", "node");
-    const versions = await (0, import_promises5.readdir)(nvmRoot).catch(() => []);
-    for (const version2 of versions.sort().reverse()) dirs.push((0, import_node_path11.join)(nvmRoot, version2, "bin"));
+    const nvmRoot = (0, import_node_path12.join)(home, ".nvm", "versions", "node");
+    const versions = await (0, import_promises6.readdir)(nvmRoot).catch(() => []);
+    for (const version2 of versions.sort().reverse()) dirs.push((0, import_node_path12.join)(nvmRoot, version2, "bin"));
   }
   return dirs;
 }
 async function codexOnPath(platform, env) {
   const pathValue = env.PATH ?? env.Path ?? env.path ?? "";
   const names = platform === "win32" ? ["codex.exe"] : ["codex"];
-  const directories = pathValue ? pathValue.split(platform === "win32" ? ";" : import_node_path11.delimiter) : [];
+  const directories = pathValue ? pathValue.split(platform === "win32" ? ";" : import_node_path12.delimiter) : [];
   if (platform !== "win32") directories.push(...await commonUnixBinDirs(env));
   for (const directory of directories) {
     const cleanDirectory = cleanCliPath(directory);
     if (!cleanDirectory) continue;
     for (const name of names) {
-      const candidate = (0, import_node_path11.join)(cleanDirectory, name);
+      const candidate = (0, import_node_path12.join)(cleanDirectory, name);
       if (!await fileExists(candidate)) continue;
       if (platform !== "win32") {
         try {
-          await (0, import_promises5.access)(candidate);
+          await (0, import_promises6.access)(candidate);
         } catch {
           continue;
         }
@@ -234033,10 +234173,10 @@ async function resolveCodexCliPath(configuredPath, options = {}) {
   const managedRoot = options.managedInstallRoot ?? managedCodexRoot(platform, env);
   const configured = cleanCliPath(configuredPath);
   if (configured) {
-    const configuredExecutable = (0, import_node_path11.isAbsolute)(configured) && (await (0, import_promises5.stat)(configured).catch(() => null))?.isDirectory() ? (0, import_node_path11.join)(configured, platform === "win32" ? "codex.exe" : "codex") : configured;
-    const managed = managedRoot && (0, import_node_path11.isAbsolute)(configuredExecutable) ? isInside2(configuredExecutable, managedRoot, platform) : false;
+    const configuredExecutable = (0, import_node_path12.isAbsolute)(configured) && (await (0, import_promises6.stat)(configured).catch(() => null))?.isDirectory() ? (0, import_node_path12.join)(configured, platform === "win32" ? "codex.exe" : "codex") : configured;
+    const managed = managedRoot && (0, import_node_path12.isAbsolute)(configuredExecutable) ? isInside2(configuredExecutable, managedRoot, platform) : false;
     if (!managed) {
-      if (!(0, import_node_path11.isAbsolute)(configuredExecutable)) return configuredExecutable;
+      if (!(0, import_node_path12.isAbsolute)(configuredExecutable)) return configuredExecutable;
       if (await fileExists(configuredExecutable)) return configuredExecutable;
     }
   }
@@ -234069,9 +234209,9 @@ function cancelledError() {
 function codexChildEnv(cliPath) {
   const env = { ...process.env };
   if (process.platform === "win32" && !env.HOME && env.USERPROFILE) env.HOME = env.USERPROFILE;
-  if ((0, import_node_path11.isAbsolute)(cliPath)) {
+  if ((0, import_node_path12.isAbsolute)(cliPath)) {
     const key = Object.keys(env).find((name) => name.toLowerCase() === "path") ?? "PATH";
-    env[key] = `${(0, import_node_path11.dirname)(cliPath)}${import_node_path11.delimiter}${env[key] ?? ""}`;
+    env[key] = `${(0, import_node_path12.dirname)(cliPath)}${import_node_path12.delimiter}${env[key] ?? ""}`;
   }
   return env;
 }
@@ -234082,7 +234222,7 @@ var CodexAppServerClient = class {
   constructor(cliPath, onClose) {
     this.cliPath = cliPath;
     this.onClose = onClose;
-    this.child = (0, import_node_child_process.spawn)(cliPath, codexAppServerLaunchArgs(), {
+    this.child = (0, import_node_child_process2.spawn)(cliPath, codexAppServerLaunchArgs(), {
       env: codexChildEnv(cliPath),
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true
@@ -234162,7 +234302,7 @@ var CodexAppServerClient = class {
   /** Drop a session's temp dir and, when the process is still alive, its native
    * thread. `signal` is false during shutdown, where the child is already gone. */
   disposeSession(session, signal) {
-    void (0, import_promises5.rm)(session.tempDir, { recursive: true, force: true }).catch(() => void 0);
+    void (0, import_promises6.rm)(session.tempDir, { recursive: true, force: true }).catch(() => void 0);
     if (signal && !this.closed) {
       void this.requestWire("thread/delete", { threadId: session.threadId }).catch(() => void 0);
     }
@@ -234294,8 +234434,8 @@ async function materializeImages(messages, tempDir) {
   for (const message of messages) {
     if (message.role !== "user") continue;
     for (const image of message.images ?? []) {
-      const path = (0, import_node_path11.join)(tempDir, `image-${paths.length + 1}${imageExtension(image)}`);
-      await (0, import_promises5.writeFile)(path, Buffer.from(image.base64, "base64"));
+      const path = (0, import_node_path12.join)(tempDir, `image-${paths.length + 1}${imageExtension(image)}`);
+      await (0, import_promises6.writeFile)(path, Buffer.from(image.base64, "base64"));
       paths.push(path);
     }
   }
@@ -234558,12 +234698,12 @@ async function runCodexAppServer(config, system, messages, tools, maxTokens, cb)
     let nextMessages = incrementalMessages(session, signature, messages);
     if (!session || nextMessages === null) {
       if (session) client.deleteSession(nativeSessionId);
-      const tempDir = await (0, import_promises5.mkdtemp)((0, import_node_path11.join)((0, import_node_os4.tmpdir)(), CODEX_TEMP_PREFIX));
+      const tempDir = await (0, import_promises6.mkdtemp)((0, import_node_path12.join)((0, import_node_os5.tmpdir)(), CODEX_TEMP_PREFIX));
       let threadId;
       try {
         threadId = await startNativeThread(client, config, tempDir);
       } catch (error) {
-        await (0, import_promises5.rm)(tempDir, { recursive: true, force: true }).catch(() => void 0);
+        await (0, import_promises6.rm)(tempDir, { recursive: true, force: true }).catch(() => void 0);
         throw error;
       }
       session = { threadId, signature, messageFingerprints: [], tempDir };
@@ -234839,17 +234979,17 @@ function gskProxyUrl() {
 }
 
 // vendor/happyoffice/packages/ai-search/src/gsk.ts
-var import_node_child_process2 = require("node:child_process");
-var import_node_fs7 = require("node:fs");
-var import_node_os6 = require("node:os");
-var import_node_path13 = require("node:path");
+var import_node_child_process3 = require("node:child_process");
+var import_node_fs8 = require("node:fs");
+var import_node_os7 = require("node:os");
+var import_node_path14 = require("node:path");
 var import_node_module3 = require("node:module");
 
 // vendor/happyoffice/packages/ai-search/src/genoffice-auth.ts
-var import_node_fs6 = require("node:fs");
+var import_node_fs7 = require("node:fs");
 var import_node_module2 = require("node:module");
-var import_node_os5 = require("node:os");
-var import_node_path12 = require("node:path");
+var import_node_os6 = require("node:os");
+var import_node_path13 = require("node:path");
 var APP_TYPE = "genoffice";
 var KEY_NAME = "genoffice";
 var HTTP_TIMEOUT_MS = 3e4;
@@ -234862,7 +235002,7 @@ function resolveFetch() {
   let impl = (...args) => fetch(...args);
   if (process.versions.electron) {
     try {
-      const require2 = (0, import_node_module2.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs");
+      const require2 = (0, import_node_module2.createRequire)(__fridayBundleUrl);
       const { net: net3 } = require2("electron");
       if (net3?.fetch) impl = net3.fetch.bind(net3);
     } catch {
@@ -234881,7 +235021,7 @@ async function proxyFallbackFetch() {
   let impl = (...args) => fetch(...args);
   if (process.versions.electron) {
     try {
-      const require2 = (0, import_node_module2.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs");
+      const require2 = (0, import_node_module2.createRequire)(__fridayBundleUrl);
       const { session } = require2("electron");
       if (session) {
         const ses = session.fromPartition("genoffice-login-proxy");
@@ -234901,12 +235041,12 @@ async function loginFetchChannels() {
   return proxyFallbackPreferred ? [fallback, primary] : [primary, fallback];
 }
 function genofficeAuthPath() {
-  return (0, import_node_path12.join)(process.env.GENOFFICE_AUTH_DIR || (0, import_node_path12.join)((0, import_node_os5.homedir)(), ".genoffice"), "auth.json");
+  return (0, import_node_path13.join)(process.env.GENOFFICE_AUTH_DIR || (0, import_node_path13.join)((0, import_node_os6.homedir)(), ".genoffice"), "auth.json");
 }
 var cachedAuth;
 function readAuthFile() {
   try {
-    const raw = asRecord2(JSON.parse((0, import_node_fs6.readFileSync)(genofficeAuthPath(), "utf-8")));
+    const raw = asRecord2(JSON.parse((0, import_node_fs7.readFileSync)(genofficeAuthPath(), "utf-8")));
     if (typeof raw.api_key !== "string" || !raw.api_key) return null;
     return {
       apiKey: raw.api_key,
@@ -234926,8 +235066,8 @@ function genofficeApiKey() {
 }
 function saveAuth(auth) {
   const path = genofficeAuthPath();
-  (0, import_node_fs6.mkdirSync)((0, import_node_path12.dirname)(path), { recursive: true });
-  (0, import_node_fs6.writeFileSync)(
+  (0, import_node_fs7.mkdirSync)((0, import_node_path13.dirname)(path), { recursive: true });
+  (0, import_node_fs7.writeFileSync)(
     path,
     JSON.stringify(
       { api_key: auth.apiKey, key_id: auth.keyId, access_token: auth.accessToken },
@@ -235117,12 +235257,12 @@ function resolveGskEntry() {
   if (process.env.GSK_CLI_PATH) return process.env.GSK_CLI_PATH;
   if (cachedEntry !== void 0) return cachedEntry;
   try {
-    const require2 = (0, import_node_module3.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/docs-main.cjs");
+    const require2 = (0, import_node_module3.createRequire)(__fridayBundleUrl);
     cachedEntry = require2.resolve("@genspark/cli/dist/index.js");
   } catch {
     const resourcesPath = process.resourcesPath;
-    const packed = resourcesPath ? (0, import_node_path13.join)(resourcesPath, "gsk", "node_modules", "@genspark", "cli", "dist", "index.js") : null;
-    cachedEntry = packed && (0, import_node_fs7.existsSync)(packed) ? packed : null;
+    const packed = resourcesPath ? (0, import_node_path14.join)(resourcesPath, "gsk", "node_modules", "@genspark", "cli", "dist", "index.js") : null;
+    cachedEntry = packed && (0, import_node_fs8.existsSync)(packed) ? packed : null;
   }
   return cachedEntry;
 }
@@ -235131,10 +235271,10 @@ function electronCompatArgs() {
   if (!process.versions.electron) return [];
   if (compatPath === void 0) {
     try {
-      const dir = (0, import_node_path13.join)((0, import_node_os6.homedir)(), ".genoffice", "bin");
-      (0, import_node_fs7.mkdirSync)(dir, { recursive: true });
-      compatPath = (0, import_node_path13.join)(dir, "electron-compat.js");
-      (0, import_node_fs7.writeFileSync)(compatPath, "delete process.versions.electron;\n");
+      const dir = (0, import_node_path14.join)((0, import_node_os7.homedir)(), ".genoffice", "bin");
+      (0, import_node_fs8.mkdirSync)(dir, { recursive: true });
+      compatPath = (0, import_node_path14.join)(dir, "electron-compat.js");
+      (0, import_node_fs8.writeFileSync)(compatPath, "delete process.versions.electron;\n");
     } catch {
       compatPath = null;
     }
@@ -235146,9 +235286,9 @@ function gskApiKey() {
   const own = genofficeApiKey();
   if (own) return own;
   try {
-    const configPath = (0, import_node_path13.join)((0, import_node_os6.homedir)(), ".genspark-tool-cli", "config.json");
-    if (!(0, import_node_fs7.existsSync)(configPath)) return "";
-    const config = JSON.parse((0, import_node_fs7.readFileSync)(configPath, "utf-8"));
+    const configPath = (0, import_node_path14.join)((0, import_node_os7.homedir)(), ".genspark-tool-cli", "config.json");
+    if (!(0, import_node_fs8.existsSync)(configPath)) return "";
+    const config = JSON.parse((0, import_node_fs8.readFileSync)(configPath, "utf-8"));
     return config.api_key ?? "";
   } catch {
     return "";
@@ -235204,7 +235344,7 @@ function runGsk(args, timeoutMs, signal) {
   if (!entry) return Promise.reject(new Error("@genspark/cli is not installed"));
   const key = gskApiKey();
   return new Promise((resolve4, reject) => {
-    (0, import_node_child_process2.execFile)(
+    (0, import_node_child_process3.execFile)(
       process.execPath,
       [...electronCompatArgs(), entry, ...args, "--output", "json"],
       {
@@ -235331,8 +235471,8 @@ async function gskLoginInfo() {
 }
 
 // vendor/happyoffice/packages/ai-search/src/media-tools.ts
-var import_node_fs8 = require("node:fs");
-var import_node_path14 = require("node:path");
+var import_node_fs9 = require("node:fs");
+var import_node_path15 = require("node:path");
 var GSK_NOT_LOGGED_IN_ERROR = "Genspark account is not logged in on this machine; ask the user to log in first";
 var GSK_TOOLS_OFF_ERROR = "Genspark cloud tools are turned off in Settings (AI Model); enable them or configure an image provider under Settings (AI Media) to use this tool";
 var MAX_MEDIA_BYTES = 200 * 1024 * 1024;
@@ -235361,7 +235501,7 @@ var MIME_BY_EXT2 = {
 function readAiSettingsFile(path) {
   let stored = {};
   try {
-    if ((0, import_node_fs8.existsSync)(path)) stored = JSON.parse((0, import_node_fs8.readFileSync)(path, "utf-8"));
+    if ((0, import_node_fs9.existsSync)(path)) stored = JSON.parse((0, import_node_fs9.readFileSync)(path, "utf-8"));
   } catch {
   }
   return resolveAiSettings(stored, defaultAiSettings());
@@ -235386,8 +235526,8 @@ async function loadMediaReference(ref) {
     }
     const rawCt = resp.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
     const ct = rawCt && rawCt !== "application/octet-stream" ? rawCt : void 0;
-    const name = (0, import_node_path14.basename)(new URL(ref).pathname) || void 0;
-    const mime2 = ct && ct !== "application/octet-stream" ? ct : MIME_BY_EXT2[(0, import_node_path14.extname)(name ?? "").toLowerCase()];
+    const name = (0, import_node_path15.basename)(new URL(ref).pathname) || void 0;
+    const mime2 = ct && ct !== "application/octet-stream" ? ct : MIME_BY_EXT2[(0, import_node_path15.extname)(name ?? "").toLowerCase()];
     if (!mime2) throw new Error(`Could not tell the media type of ${ref}`);
     return { bytes, mime: mime2, ...name ? { name } : {} };
   }
@@ -235396,13 +235536,13 @@ async function loadMediaReference(ref) {
     if (!local) throw new Error(`Not an accessible image: ${ref}`);
     return { bytes: new Uint8Array(local.bytes), mime: local.mime };
   }
-  const mime = MIME_BY_EXT2[(0, import_node_path14.extname)(ref).toLowerCase()];
+  const mime = MIME_BY_EXT2[(0, import_node_path15.extname)(ref).toLowerCase()];
   if (!mime) throw new Error(`Unsupported media file: ${ref} (images, video and audio only)`);
-  if (!(0, import_node_fs8.existsSync)(ref)) throw new Error(`File not found: ${ref}`);
-  if ((0, import_node_fs8.statSync)(ref).size > MAX_MEDIA_BYTES) {
+  if (!(0, import_node_fs9.existsSync)(ref)) throw new Error(`File not found: ${ref}`);
+  if ((0, import_node_fs9.statSync)(ref).size > MAX_MEDIA_BYTES) {
     throw new MediaTooLargeError(`${ref} is too large to analyze`);
   }
-  return { bytes: new Uint8Array((0, import_node_fs8.readFileSync)(ref)), mime, name: (0, import_node_path14.basename)(ref) };
+  return { bytes: new Uint8Array((0, import_node_fs9.readFileSync)(ref)), mime, name: (0, import_node_path15.basename)(ref) };
 }
 var GSK_RMBG_MODEL = "fal-bria-rmbg";
 async function generateImageTool(settingsPath, op, options = {}) {
@@ -235700,21 +235840,21 @@ function findDocxPath(argv) {
 
 // vendor/happyoffice/apps/docs/src/main/atomic-write.ts
 var import_node_crypto4 = require("node:crypto");
-var import_promises6 = require("node:fs/promises");
-var import_node_path15 = require("node:path");
+var import_promises7 = require("node:fs/promises");
+var import_node_path16 = require("node:path");
 var RETRYABLE_RENAME_CODES = /* @__PURE__ */ new Set(["EPERM", "EACCES", "EBUSY"]);
 var RENAME_RETRIES = 4;
 var sleep4 = (ms) => new Promise((r) => setTimeout(r, ms));
 async function atomicWriteFile(filePath, data) {
-  const tmp = (0, import_node_path15.join)(
-    (0, import_node_path15.dirname)(filePath),
-    `.${(0, import_node_path15.basename)(filePath)}.${(0, import_node_crypto4.randomBytes)(6).toString("hex")}.tmp`
+  const tmp = (0, import_node_path16.join)(
+    (0, import_node_path16.dirname)(filePath),
+    `.${(0, import_node_path16.basename)(filePath)}.${(0, import_node_crypto4.randomBytes)(6).toString("hex")}.tmp`
   );
   try {
-    await (0, import_promises6.writeFile)(tmp, data);
+    await (0, import_promises7.writeFile)(tmp, data);
     for (let attempt = 0; ; attempt++) {
       try {
-        await (0, import_promises6.rename)(tmp, filePath);
+        await (0, import_promises7.rename)(tmp, filePath);
         return;
       } catch (err) {
         const code = err.code ?? "";
@@ -235724,11 +235864,11 @@ async function atomicWriteFile(filePath, data) {
     }
   } catch (err) {
     try {
-      await (0, import_promises6.unlink)(tmp);
+      await (0, import_promises7.unlink)(tmp);
     } catch {
     }
     if (RETRYABLE_RENAME_CODES.has(err.code ?? "")) {
-      await (0, import_promises6.writeFile)(filePath, data);
+      await (0, import_promises7.writeFile)(filePath, data);
       return;
     }
     throw err;
@@ -235740,13 +235880,13 @@ function looksLikeZip(bytes) {
 
 // vendor/happyoffice/apps/docs/src/main/lazy-media.ts
 var import_node_crypto5 = require("node:crypto");
-var import_node_fs9 = require("node:fs");
-var import_promises8 = require("node:fs/promises");
+var import_node_fs10 = require("node:fs");
+var import_promises9 = require("node:fs/promises");
 var import_node_zlib3 = require("node:zlib");
-var import_electron4 = require("electron");
+var import_electron6 = require("electron");
 
 // vendor/happyoffice/packages/docx-engine/src/zip-splice.ts
-var import_promises7 = require("node:fs/promises");
+var import_promises8 = require("node:fs/promises");
 var import_node_zlib2 = require("node:zlib");
 var SIG_LOCAL = 67324752;
 var SIG_CENTRAL = 33639248;
@@ -235842,7 +235982,7 @@ async function readZipEntries(src) {
   return entries;
 }
 async function openZipFile(path) {
-  const fh = await (0, import_promises7.open)(path, "r");
+  const fh = await (0, import_promises8.open)(path, "r");
   try {
     const { size } = await fh.stat();
     const src = fileSource(fh, size);
@@ -235986,7 +236126,7 @@ var MIME = {
 function sha256File(path) {
   return new Promise((resolve4, reject) => {
     const hash = (0, import_node_crypto5.createHash)("sha256");
-    (0, import_node_fs9.createReadStream)(path).on("error", reject).on("data", (chunk) => hash.update(chunk)).on("end", () => resolve4(hash.digest("hex")));
+    (0, import_node_fs10.createReadStream)(path).on("error", reject).on("data", (chunk) => hash.update(chunk)).on("end", () => resolve4(hash.digest("hex")));
   });
 }
 function registerSource(hash, path, wcId) {
@@ -236034,7 +236174,7 @@ function forgetLazyMediaOwner(wcId) {
   }
 }
 async function entriesOf(source) {
-  const st = await (0, import_promises8.stat)(source.path).catch(() => null);
+  const st = await (0, import_promises9.stat)(source.path).catch(() => null);
   if (!st) return null;
   if (source.table && source.table.size === st.size && source.table.mtimeMs === st.mtimeMs) {
     return source.table.entries;
@@ -236048,7 +236188,7 @@ async function entriesOf(source) {
   }
 }
 async function readRange(path, offset, length) {
-  const fh = await (0, import_promises8.open)(path, "r");
+  const fh = await (0, import_promises9.open)(path, "r");
   try {
     const buf = Buffer.alloc(length);
     let done = 0;
@@ -236079,7 +236219,7 @@ async function sourceZip(hash) {
   const entries = source ? await entriesOf(source) : null;
   if (!source || !entries) return null;
   return {
-    size: (await (0, import_promises8.stat)(source.path)).size,
+    size: (await (0, import_promises9.stat)(source.path)).size,
     entries,
     read: (offset, length) => {
       if (source.bytes) throw new Error("lazy media source replaced during read");
@@ -236128,8 +236268,8 @@ function registerLazyMediaProtocol() {
   if (DOCX_MEDIA_SCHEME_PRIVILEGE.scheme !== LAZY_MEDIA_SCHEME) {
     throw new Error("lazy media scheme privilege registered under another name");
   }
-  if (import_electron4.protocol.isProtocolHandled(LAZY_MEDIA_SCHEME)) return;
-  import_electron4.protocol.handle(LAZY_MEDIA_SCHEME, async (request) => {
+  if (import_electron6.protocol.isProtocolHandled(LAZY_MEDIA_SCHEME)) return;
+  import_electron6.protocol.handle(LAZY_MEDIA_SCHEME, async (request) => {
     const media = await readLazyMedia(request.url);
     if (!media) return new Response(null, { status: 404 });
     return new Response(new Uint8Array(media.body), { headers: { "Content-Type": media.mime } });
@@ -236301,7 +236441,7 @@ async function isExternallyModified(recorded, current, readHash) {
 }
 
 // vendor/happyoffice/apps/docs/src/main/updater.ts
-var import_electron5 = require("electron");
+var import_electron7 = require("electron");
 var import_electron_updater = __toESM(require_stub());
 var tUpd = createI18n({
   zh: {
@@ -236463,7 +236603,7 @@ async function promptInstall(win, info3) {
     defaultId: 0,
     cancelId: 1
   };
-  const { response } = win && !win.isDestroyed() ? await import_electron5.dialog.showMessageBox(win, options) : await import_electron5.dialog.showMessageBox(options);
+  const { response } = win && !win.isDestroyed() ? await import_electron7.dialog.showMessageBox(win, options) : await import_electron7.dialog.showMessageBox(options);
   if (response === 0) {
     import_electron_updater.autoUpdater.quitAndInstall(true, true);
   } else {
@@ -236473,7 +236613,7 @@ async function promptInstall(win, info3) {
 function initDocsAutoUpdater(getWindow) {
   if (started) return;
   started = true;
-  if (!import_electron5.app.isPackaged) return;
+  if (!import_electron7.app.isPackaged) return;
   if (process.platform !== "win32" && process.platform !== "darwin") return;
   import_electron_updater.autoUpdater.autoDownload = true;
   import_electron_updater.autoUpdater.autoInstallOnAppQuit = true;
@@ -236497,7 +236637,7 @@ function initDocsAutoUpdater(getWindow) {
 
 // vendor/happyoffice/apps/docs/src/main/zotero-ipc.ts
 var import_node_crypto6 = require("node:crypto");
-var import_electron6 = require("electron");
+var import_electron8 = require("electron");
 
 // vendor/happyoffice/apps/docs/src/main/zotero-wire.ts
 var import_node_net2 = require("node:net");
@@ -236647,7 +236787,7 @@ function requestRenderer(contents, request) {
 function registerZoteroIpc() {
   if (registered) return;
   registered = true;
-  import_electron6.ipcMain.handle("zotero:command", async (event, command) => {
+  import_electron8.ipcMain.handle("zotero:command", async (event, command) => {
     if (!/^(addEditCitation|addEditBibliography|refresh|setDocPrefs|removeCodes)$/.test(command)) {
       return { ok: false, errorCode: "unsupported-command", error: "Unsupported Zotero command" };
     }
@@ -236668,7 +236808,7 @@ function registerZoteroIpc() {
       };
     }
   });
-  import_electron6.ipcMain.on("zotero:response", (event, response) => {
+  import_electron8.ipcMain.on("zotero:response", (event, response) => {
     if (!response || typeof response.requestId !== "string") return;
     const waiter = pending.get(response.requestId);
     if (!waiter || waiter.webContentsId !== event.sender.id) return;
@@ -238633,9 +238773,9 @@ var tMain = createI18n({
 });
 var tm = (key, params) => tMain(getUiLang(), key, params);
 var runtime = {
-  preloadPath: (0, import_node_path16.join)(__dirname, "../preload/index.js"),
+  preloadPath: (0, import_node_path17.join)(__dirname, "../preload/index.js"),
   rendererUrl: process.env.ELECTRON_RENDERER_URL,
-  rendererFile: (0, import_node_path16.join)(__dirname, "../renderer/index.html")
+  rendererFile: (0, import_node_path17.join)(__dirname, "../renderer/index.html")
 };
 function configureDocsRuntime(config) {
   runtime = config;
@@ -238645,6 +238785,7 @@ var mainWindow = null;
 var rendererReady = false;
 var pendingOpenPath = findDocxPath(process.argv);
 var pendingWindowOpens = /* @__PURE__ */ new Map();
+var pendingWindowSources = /* @__PURE__ */ new Map();
 var pendingNewBlankIds = /* @__PURE__ */ new Set();
 function markDocsNewBlank(wcId) {
   pendingNewBlankIds.add(wcId);
@@ -238663,31 +238804,31 @@ function setActiveDocsResolver(fn) {
 }
 function activeDocsWebContents() {
   if (activeDocsResolver) return activeDocsResolver();
-  return import_electron7.BrowserWindow.getFocusedWindow()?.webContents ?? mainWindow?.webContents ?? null;
+  return import_electron9.BrowserWindow.getFocusedWindow()?.webContents ?? mainWindow?.webContents ?? null;
 }
 function dialogParent(event) {
-  return docsShellWindow ?? import_electron7.BrowserWindow.fromWebContents(event.sender) ?? void 0;
+  return docsShellWindow ?? import_electron9.BrowserWindow.fromWebContents(event.sender) ?? void 0;
 }
 async function openDialog(event, options) {
-  return showOpenDialogWithMemory(import_electron7.dialog, dialogParent(event), options);
+  return showOpenDialogWithMemory(import_electron9.dialog, dialogParent(event), options);
 }
 async function saveDialog(event, options) {
-  return showSaveDialogWithMemory(import_electron7.dialog, dialogParent(event), options, defaultSaveDir());
+  return showSaveDialogWithMemory(import_electron9.dialog, dialogParent(event), options, defaultSaveDir());
 }
 function defaultSaveDir() {
-  return configuredDefaultSaveDir(import_electron7.app);
+  return configuredDefaultSaveDir(import_electron9.app);
 }
 function uniquePathIn(dir, fileName) {
   const dot = fileName.lastIndexOf(".");
   const base = dot > 0 ? fileName.slice(0, dot) : fileName;
   const ext = dot > 0 ? fileName.slice(dot) : "";
-  let candidate = (0, import_node_path16.join)(dir, fileName);
-  for (let i = 2; (0, import_node_fs10.existsSync)(candidate); i++) candidate = (0, import_node_path16.join)(dir, `${base}-${i}${ext}`);
+  let candidate = (0, import_node_path17.join)(dir, fileName);
+  for (let i = 2; (0, import_node_fs11.existsSync)(candidate); i++) candidate = (0, import_node_path17.join)(dir, `${base}-${i}${ext}`);
   return candidate;
 }
 function openExternalDocx(filePath) {
   if (!filePath || !/\.docx$/i.test(filePath)) return;
-  const win = import_electron7.BrowserWindow.getFocusedWindow() ?? mainWindow;
+  const win = import_electron9.BrowserWindow.getFocusedWindow() ?? mainWindow;
   if (!rendererReady || !win) {
     pendingOpenPath = filePath;
     return;
@@ -238698,21 +238839,21 @@ function openExternalDocx(filePath) {
     win.show();
     win.focus();
     win.webContents.send("docs:opened", result);
-  }).catch((err) => import_electron7.dialog.showErrorBox(tm("dlgOpenDoc"), String(err)));
+  }).catch((err) => import_electron9.dialog.showErrorBox(tm("dlgOpenDoc"), String(err)));
 }
 function userDataPath(...parts) {
-  return (0, import_node_path16.join)(import_electron7.app.getPath("userData"), ...parts);
+  return (0, import_node_path17.join)(import_electron9.app.getPath("userData"), ...parts);
 }
 function readJson2(path, fallback) {
   try {
-    if ((0, import_node_fs10.existsSync)(path)) return JSON.parse((0, import_node_fs10.readFileSync)(path, "utf-8"));
+    if ((0, import_node_fs11.existsSync)(path)) return JSON.parse((0, import_node_fs11.readFileSync)(path, "utf-8"));
   } catch {
   }
   return fallback;
 }
 function writeJson2(path, value) {
-  (0, import_node_fs10.mkdirSync)((0, import_node_path16.join)(path, ".."), { recursive: true });
-  (0, import_node_fs10.writeFileSync)(path, JSON.stringify(value, null, 2));
+  (0, import_node_fs11.mkdirSync)((0, import_node_path17.join)(path, ".."), { recursive: true });
+  (0, import_node_fs11.writeFileSync)(path, JSON.stringify(value, null, 2));
 }
 var RECENT_PATH = () => userDataPath("recent.json");
 var RECENT_LIMIT = 100;
@@ -238784,9 +238925,9 @@ function removeStarredFiles(filePaths) {
 async function archiveOriginal(filePath, hash, size) {
   if (size > ORIGINALS_MAX_BYTES) return;
   const dir = userDataPath("originals");
-  await (0, import_promises9.mkdir)(dir, { recursive: true });
-  const target = (0, import_node_path16.join)(dir, `${hash}.docx`);
-  if (!(0, import_node_fs10.existsSync)(target)) await (0, import_promises9.copyFile)(filePath, target);
+  await (0, import_promises10.mkdir)(dir, { recursive: true });
+  const target = (0, import_node_path17.join)(dir, `${hash}.docx`);
+  if (!(0, import_node_fs11.existsSync)(target)) await (0, import_promises10.copyFile)(filePath, target);
   void pruneOriginals(dir);
 }
 var ORIGINALS_MAX_BYTES = 500 * 1024 * 1024;
@@ -238796,10 +238937,10 @@ async function pruneOriginals(dir) {
   originalsPruneRunning = true;
   try {
     const files = [];
-    for (const name of await (0, import_promises9.readdir)(dir)) {
+    for (const name of await (0, import_promises10.readdir)(dir)) {
       try {
-        const s = await (0, import_promises9.stat)((0, import_node_path16.join)(dir, name));
-        if (s.isFile()) files.push({ path: (0, import_node_path16.join)(dir, name), size: s.size, mtimeMs: s.mtimeMs });
+        const s = await (0, import_promises10.stat)((0, import_node_path17.join)(dir, name));
+        if (s.isFile()) files.push({ path: (0, import_node_path17.join)(dir, name), size: s.size, mtimeMs: s.mtimeMs });
       } catch {
       }
     }
@@ -238808,7 +238949,7 @@ async function pruneOriginals(dir) {
     for (const f of files) {
       if (total <= ORIGINALS_MAX_BYTES) break;
       try {
-        await (0, import_promises9.unlink)(f.path);
+        await (0, import_promises10.unlink)(f.path);
         total -= f.size;
       } catch {
       }
@@ -238850,7 +238991,7 @@ function isImageExportTemp(wcId, filePath) {
 function dropDocWriter(wcId) {
   docWritablePaths.delete(wcId);
   pdfWritablePaths.delete(wcId);
-  for (const p of imageExportTemps.get(wcId) ?? []) void (0, import_promises9.rm)(p, { force: true });
+  for (const p of imageExportTemps.get(wcId) ?? []) void (0, import_promises10.rm)(p, { force: true });
   imageExportTemps.delete(wcId);
   imageExportDirs.delete(wcId);
   docDiskStates.delete(wcId);
@@ -238861,7 +239002,7 @@ var docDiskStates = /* @__PURE__ */ new Map();
 var sha256Hex = (bytes) => (0, import_node_crypto7.createHash)("sha256").update(bytes).digest("hex");
 async function rememberDiskState(wcId, filePath, hash) {
   try {
-    const s = await (0, import_promises9.stat)(filePath);
+    const s = await (0, import_promises10.stat)(filePath);
     const states = docDiskStates.get(wcId) ?? /* @__PURE__ */ new Map();
     states.set(filePath, { mtimeMs: s.mtimeMs, size: s.size, hash });
     docDiskStates.set(wcId, states);
@@ -238871,13 +239012,13 @@ async function rememberDiskState(wcId, filePath, hash) {
 async function diskChangedExternally(wcId, filePath) {
   let current;
   try {
-    current = await (0, import_promises9.stat)(filePath);
+    current = await (0, import_promises10.stat)(filePath);
   } catch {
     current = null;
   }
   return isExternallyModified(docDiskStates.get(wcId)?.get(filePath), current, async () => {
     try {
-      return sha256Hex(await (0, import_promises9.readFile)(filePath));
+      return sha256Hex(await (0, import_promises10.readFile)(filePath));
     } catch {
       return null;
     }
@@ -238895,22 +239036,22 @@ function teardownDocsRenderer(contents) {
   if (!contents.isDestroyed()) contents.send("docs:teardown");
 }
 var recoveryDir = () => userDataPath("docs-autosave");
-var recoveryPathFor = (filePath) => (0, import_node_path16.join)(recoveryDir(), `${(0, import_node_crypto7.createHash)("sha1").update(filePath).digest("hex").slice(0, 16)}.docx`);
+var recoveryPathFor = (filePath) => (0, import_node_path17.join)(recoveryDir(), `${(0, import_node_crypto7.createHash)("sha1").update(filePath).digest("hex").slice(0, 16)}.docx`);
 var recoveryClearEpochs = /* @__PURE__ */ new Map();
 function clearRecoveryCopy(filePath) {
   recoveryClearEpochs.set(filePath, (recoveryClearEpochs.get(filePath) ?? 0) + 1);
   try {
-    (0, import_node_fs10.unlinkSync)(recoveryPathFor(filePath));
+    (0, import_node_fs11.unlinkSync)(recoveryPathFor(filePath));
   } catch {
   }
 }
 async function maybeRecoverDocBytes(filePath, original) {
   const asPath = recoveryPathFor(filePath);
   try {
-    if (!(0, import_node_fs10.existsSync)(asPath)) return { bytes: original, recovered: false };
-    if ((0, import_node_fs10.statSync)(asPath).mtimeMs <= (0, import_node_fs10.statSync)(filePath).mtimeMs) {
+    if (!(0, import_node_fs11.existsSync)(asPath)) return { bytes: original, recovered: false };
+    if ((0, import_node_fs11.statSync)(asPath).mtimeMs <= (0, import_node_fs11.statSync)(filePath).mtimeMs) {
       if (looksLikeZip(original) || isEncryptedDocx(original)) {
-        (0, import_node_fs10.unlinkSync)(asPath);
+        (0, import_node_fs11.unlinkSync)(asPath);
         return { bytes: original, recovered: false };
       }
     }
@@ -238925,11 +239066,11 @@ async function maybeRecoverDocBytes(filePath, original) {
     message: tm("autosaveFoundTitle"),
     detail: tm("autosaveFoundBody")
   };
-  const parent = import_electron7.BrowserWindow.getFocusedWindow() ?? mainWindow;
-  const r = parent && !parent.isDestroyed() ? await import_electron7.dialog.showMessageBox(parent, options) : await import_electron7.dialog.showMessageBox(options);
+  const parent = import_electron9.BrowserWindow.getFocusedWindow() ?? mainWindow;
+  const r = parent && !parent.isDestroyed() ? await import_electron9.dialog.showMessageBox(parent, options) : await import_electron9.dialog.showMessageBox(options);
   if (r.response === 0) {
     try {
-      return { bytes: await (0, import_promises9.readFile)(asPath), recovered: true };
+      return { bytes: await (0, import_promises10.readFile)(asPath), recovered: true };
     } catch {
       return { bytes: original, recovered: false };
     }
@@ -238939,35 +239080,52 @@ async function maybeRecoverDocBytes(filePath, original) {
 }
 var MAX_OPEN_BYTES = 512 * 1024 * 1024;
 async function showOpenError(wcId, detail) {
-  const wc = import_electron7.webContents.fromId(wcId);
-  const parent = docsShellWindow ?? (wc && import_electron7.BrowserWindow.fromWebContents(wc)) ?? mainWindow;
+  const wc = import_electron9.webContents.fromId(wcId);
+  const parent = docsShellWindow ?? (wc && import_electron9.BrowserWindow.fromWebContents(wc)) ?? mainWindow;
   const options = { type: "error", message: tm("dlgOpenDoc"), detail };
-  if (parent && !parent.isDestroyed()) await import_electron7.dialog.showMessageBox(parent, options);
-  else await import_electron7.dialog.showMessageBox(options);
+  if (parent && !parent.isDestroyed()) await import_electron9.dialog.showMessageBox(parent, options);
+  else await import_electron9.dialog.showMessageBox(options);
+}
+async function prepareDocxSource(filePath, wcId) {
+  const startedAt = performance.now();
+  const { size, mtimeMs } = await (0, import_promises10.stat)(filePath);
+  const lazy = await openLazyDocx(filePath, wcId);
+  const original = (lazy?.bytes.length ?? size) > MAX_OPEN_BYTES ? null : lazy?.bytes ?? await (0, import_promises10.readFile)(filePath);
+  performance.measure("office.docs.read-source", { start: startedAt, end: performance.now() });
+  return { size, mtimeMs, lazy, original };
 }
 async function loadDocx(filePath, wcId, password) {
+  const loadStartedAt = performance.now();
   if (typeof filePath !== "string" || !/\.docx$/i.test(filePath)) return null;
-  if (!(0, import_node_fs10.existsSync)(filePath)) return null;
-  const size = (await (0, import_promises9.stat)(filePath)).size;
-  const lazy = await openLazyDocx(filePath, wcId);
+  if (!(0, import_node_fs11.existsSync)(filePath)) return null;
+  const pendingSource = pendingWindowSources.get(wcId);
+  pendingWindowSources.delete(wcId);
+  const prepared = pendingSource?.path === filePath ? await pendingSource.promise : null;
+  if (prepared && !prepared.ok) throw prepared.error;
+  const current = prepared?.ok ? await (0, import_promises10.stat)(filePath) : null;
+  const unchanged = prepared?.ok && current?.size === prepared.value.size && current.mtimeMs === prepared.value.mtimeMs;
+  const { size, lazy, original: preparedOriginal } = unchanged ? prepared.value : await prepareDocxSource(filePath, wcId);
   if ((lazy?.bytes.length ?? size) > MAX_OPEN_BYTES) {
     const mb = MAX_OPEN_BYTES / 1024 / 1024;
-    await showOpenError(wcId, `${(0, import_node_path16.basename)(filePath)}: ${tm("errTooLarge", { mb })}`);
+    await showOpenError(wcId, `${(0, import_node_path17.basename)(filePath)}: ${tm("errTooLarge", { mb })}`);
     return null;
   }
-  const original = lazy?.bytes ?? await (0, import_promises9.readFile)(filePath);
+  if (!preparedOriginal) return null;
+  const original = preparedOriginal;
   let plainBytes = original;
   const encrypted = isEncryptedDocx(original);
   if (encrypted) {
     const pwd = password ?? docPasswordFor(wcId, filePath);
-    if (!pwd) return { needsPassword: true, path: filePath, name: (0, import_node_path16.basename)(filePath) };
+    if (!pwd) return { needsPassword: true, path: filePath, name: (0, import_node_path17.basename)(filePath) };
     plainBytes = await decryptDocx(original, pwd);
     rememberDocPassword(wcId, filePath, pwd);
   } else {
     rememberDocPassword(wcId, filePath, null);
   }
   const hash = lazy?.hash ?? sha256Hex(original);
+  const archiveStartedAt = performance.now();
   await archiveOriginal(filePath, hash, size);
+  performance.measure("office.docs.archive-original", { start: archiveStartedAt, end: performance.now() });
   const recovery = await maybeRecoverDocBytes(filePath, plainBytes);
   let bytes = recovery.bytes;
   let recovered = recovery.recovered;
@@ -238985,9 +239143,10 @@ async function loadDocx(filePath, wcId, password) {
   if (fileOpenedHook) fileOpenedHook(wcId, filePath);
   markDiskEncrypted(wcId, filePath, encrypted);
   await rememberDiskState(wcId, filePath, hash);
+  performance.measure("office.docs.load-source", { start: loadStartedAt, end: performance.now() });
   return {
     path: filePath,
-    name: (0, import_node_path16.basename)(filePath),
+    name: (0, import_node_path17.basename)(filePath),
     data: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
     hash,
     encrypted,
@@ -239052,11 +239211,11 @@ var ATTACHMENT_IMAGE_MIME = {
 var ATTACHMENT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 var attachmentTextCache = /* @__PURE__ */ new Map();
 function statAttachment(filePath) {
-  const name = (0, import_node_path16.basename)(filePath);
+  const name = (0, import_node_path17.basename)(filePath);
   const ext = name.split(".").pop()?.toLowerCase() ?? "";
   if (!ATTACHMENT_EXTS.has(ext)) return { error: `${name}: ${tm("errUnsupportedExt", { ext })}` };
   try {
-    const stat4 = (0, import_node_fs10.statSync)(filePath);
+    const stat4 = (0, import_node_fs11.statSync)(filePath);
     if (!stat4.isFile()) return { error: `${name}: ${tm("errNotFile")}` };
     if (stat4.size > ATTACHMENT_MAX_BYTES) {
       return {
@@ -239088,10 +239247,10 @@ function prunePastedImages(dir) {
   pastedDirPruned = true;
   const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1e3;
   try {
-    for (const name of (0, import_node_fs10.readdirSync)(dir)) {
-      const p = (0, import_node_path16.join)(dir, name);
+    for (const name of (0, import_node_fs11.readdirSync)(dir)) {
+      const p = (0, import_node_path17.join)(dir, name);
       try {
-        if ((0, import_node_fs10.statSync)(p).mtimeMs < cutoff) (0, import_node_fs10.unlinkSync)(p);
+        if ((0, import_node_fs11.statSync)(p).mtimeMs < cutoff) (0, import_node_fs11.unlinkSync)(p);
       } catch {
       }
     }
@@ -239103,16 +239262,16 @@ function savePastedImage(data, ext) {
   if (!ATTACHMENT_IMAGE_EXTS.has(cleanExt)) return null;
   const bytes = data instanceof ArrayBuffer ? Buffer.from(data) : ArrayBuffer.isView(data) ? Buffer.from(data.buffer, data.byteOffset, data.byteLength) : null;
   if (!bytes || bytes.byteLength === 0) return null;
-  const dir = (0, import_node_path16.join)(import_electron7.app.getPath("temp"), "genoffice-pasted");
-  (0, import_node_fs10.mkdirSync)(dir, { recursive: true });
+  const dir = (0, import_node_path17.join)(import_electron9.app.getPath("temp"), "genoffice-pasted");
+  (0, import_node_fs11.mkdirSync)(dir, { recursive: true });
   prunePastedImages(dir);
   const stamp = (/* @__PURE__ */ new Date()).toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "-");
-  const filePath = (0, import_node_path16.join)(dir, `pasted-${stamp}-${++pastedImageSeq}.${cleanExt}`);
-  (0, import_node_fs10.writeFileSync)(filePath, bytes);
+  const filePath = (0, import_node_path17.join)(dir, `pasted-${stamp}-${++pastedImageSeq}.${cleanExt}`);
+  (0, import_node_fs11.writeFileSync)(filePath, bytes);
   return filePath;
 }
 async function extractAttachmentText(filePath) {
-  const stat4 = (0, import_node_fs10.statSync)(filePath);
+  const stat4 = (0, import_node_fs11.statSync)(filePath);
   const stamp = `${stat4.mtimeMs}:${stat4.size}`;
   const cached = attachmentTextCache.get(filePath);
   if (cached && cached.stamp === stamp) return cached.text;
@@ -239132,8 +239291,8 @@ var TWIPS_PER_INCH = 1440;
 var SETTINGS_PATH = () => userDataPath("ai-settings.json");
 var activeAiStreams = /* @__PURE__ */ new Map();
 function registerAiIpc() {
-  import_electron7.app.once("before-quit", shutdownCodexAppServers);
-  import_electron7.ipcMain.handle("ai:get-settings", () => {
+  import_electron9.app.once("before-quit", shutdownCodexAppServers);
+  import_electron9.ipcMain.handle("ai:get-settings", () => {
     const stored = readJson2(SETTINGS_PATH(), {});
     if ((stored.provider ?? "genspark") === "genspark" && stored.gskToolsEnabled === false) {
       stored.gskToolsEnabled = true;
@@ -239143,7 +239302,7 @@ function registerAiIpc() {
     settings.provider = activeProvider(settings);
     return settings;
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "ai:gsk-status",
     async (_event, withEmail) => {
       if (!hasGskAuth()) return { loggedIn: false };
@@ -239152,16 +239311,16 @@ function registerAiIpc() {
       return info3?.email ? { loggedIn: true, email: info3.email } : { loggedIn: true };
     }
   );
-  import_electron7.ipcMain.handle("ai:gsk-login", () => {
-    ensureGenofficeLogin((url) => void import_electron7.shell.openExternal(url));
+  import_electron9.ipcMain.handle("ai:gsk-login", () => {
+    ensureGenofficeLogin((url) => void import_electron9.shell.openExternal(url));
   });
-  import_electron7.ipcMain.handle("ai:set-settings", (_event, settings) => {
+  import_electron9.ipcMain.handle("ai:set-settings", (_event, settings) => {
     writeJson2(SETTINGS_PATH(), settings);
   });
-  import_electron7.ipcMain.handle("ai:codex-models", async (_event, cliPath) => {
+  import_electron9.ipcMain.handle("ai:codex-models", async (_event, cliPath) => {
     return listCodexModels(typeof cliPath === "string" ? cliPath : void 0);
   });
-  import_electron7.ipcMain.handle("ai:stream", async (event, request) => {
+  import_electron9.ipcMain.handle("ai:stream", async (event, request) => {
     const { requestId, settings, system, messages } = request;
     const tools = request.tools ?? [];
     const maxTokens = request.maxTokens ?? maxOutputTokensOf(settings);
@@ -239223,10 +239382,10 @@ function registerAiIpc() {
       activeAiStreams.delete(requestId);
     }
   });
-  import_electron7.ipcMain.handle("ai:stream-cancel", (_event, requestId) => {
+  import_electron9.ipcMain.handle("ai:stream-cancel", (_event, requestId) => {
     activeAiStreams.get(requestId)?.abort();
   });
-  import_electron7.ipcMain.handle("ai:web-search", async (_event, query, maxResults) => {
+  import_electron9.ipcMain.handle("ai:web-search", async (_event, query, maxResults) => {
     try {
       return await webSearchTool(
         SETTINGS_PATH(),
@@ -239237,7 +239396,7 @@ function registerAiIpc() {
       return { results: [], method: "error", error: String(err) };
     }
   });
-  import_electron7.ipcMain.handle("ai:image-search", async (_event, query, maxResults) => {
+  import_electron9.ipcMain.handle("ai:image-search", async (_event, query, maxResults) => {
     try {
       return await imageSearchTool(
         SETTINGS_PATH(),
@@ -239248,7 +239407,7 @@ function registerAiIpc() {
       return { images: [], method: "error", error: String(err) };
     }
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "ai:fetch-image",
     async (_event, url) => {
       try {
@@ -239263,21 +239422,21 @@ function registerAiIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:ai-generate-image",
     (_event, op) => generateImageTool(SETTINGS_PATH(), {
       prompt: String(op?.prompt ?? ""),
       aspectRatio: op?.aspectRatio ? String(op.aspectRatio) : void 0
     })
   );
-  import_electron7.ipcMain.handle("ai:search-test", (_event, input) => {
+  import_electron9.ipcMain.handle("ai:search-test", (_event, input) => {
     const { provider, apiKey } = input ?? {};
     if (!provider || provider === "genspark") {
       return hasGskAuth() ? { ok: true } : { ok: false, error: tm("errGskNotLoggedIn") };
     }
     return testSearchProvider(provider, String(apiKey ?? ""));
   });
-  import_electron7.ipcMain.handle("ai:media-test", (_event, input) => {
+  import_electron9.ipcMain.handle("ai:media-test", (_event, input) => {
     const { provider, config } = input ?? {};
     if (!provider || provider === "genspark") {
       return hasGskAuth() ? { ok: true } : { ok: false, error: tm("errGskNotLoggedIn") };
@@ -239285,7 +239444,7 @@ function registerAiIpc() {
     if (!config) return { ok: false, error: "No media provider configuration" };
     return testMediaProvider(provider, config);
   });
-  import_electron7.ipcMain.handle("ai:chat", async (_event, request) => {
+  import_electron9.ipcMain.handle("ai:chat", async (_event, request) => {
     const { settings, system, user } = request;
     const provider = settings.provider;
     let config = settings.providers?.[provider];
@@ -239313,7 +239472,7 @@ function registerAiIpc() {
 var projectStore = null;
 var projectIpcRegistered = false;
 function getProjectStore() {
-  if (!projectStore) projectStore = new ProjectStore(import_electron7.app.getPath("userData"));
+  if (!projectStore) projectStore = new ProjectStore(import_electron9.app.getPath("userData"));
   return projectStore;
 }
 var fileSavedHook = null;
@@ -239341,7 +239500,7 @@ function projectFileRenamed(oldPath, newPath) {
 function registerProjectIpc() {
   if (projectIpcRegistered) return;
   projectIpcRegistered = true;
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "project:resolveChat",
     (event, args) => {
       const store = getProjectStore();
@@ -239359,7 +239518,7 @@ function registerProjectIpc() {
       return store.resolveChatForFile(resolvedPath);
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "project:appendChat",
     (_event, args) => {
       const store = getProjectStore();
@@ -239373,14 +239532,14 @@ function registerProjectIpc() {
       store.appendChatMessage(args.projectId, args.chatId, msg);
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "project:loadChat",
     (_event, args) => {
       const store = getProjectStore();
       return store.loadChat(args.projectId, args.chatId, args.limit ?? 200);
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "project:rebindChat",
     (event, args) => {
       const store = getProjectStore();
@@ -239406,17 +239565,17 @@ var reissuedDoc = (encrypted, hashes, plain) => encrypted && hashes.size > 0 ? {
 } : {};
 function registerDocsIpc() {
   registerZoteroIpc();
-  void import_electron7.app.whenReady().then(registerLazyMediaProtocol);
-  setRescueFetch((url, init) => import_electron7.net.fetch(url, init));
-  setAiUserAgent(`GenOffice/${import_electron7.app.getVersion()}`);
-  import_electron7.ipcMain.removeHandler("app:get-language");
-  import_electron7.ipcMain.handle("app:get-language", () => getUiLang());
+  void import_electron9.app.whenReady().then(registerLazyMediaProtocol);
+  setRescueFetch((url, init) => import_electron9.net.fetch(url, init));
+  setAiUserAgent(`GenOffice/${import_electron9.app.getVersion()}`);
+  import_electron9.ipcMain.removeHandler("app:get-language");
+  import_electron9.ipcMain.handle("app:get-language", () => getUiLang());
   configureMetricsCache(userDataPath("font-metrics"));
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:font-metrics",
     (_event, family) => typeof family === "string" ? familyVerticalMetrics(family) : null
   );
-  import_electron7.ipcMain.handle("docs:open", async (event) => {
+  import_electron9.ipcMain.handle("docs:open", async (event) => {
     const result = await openDialog(event, {
       title: tm("dlgOpenDoc"),
       filters: [{ name: tm("filterWord"), extensions: ["docx"] }],
@@ -239425,18 +239584,18 @@ function registerDocsIpc() {
     if (result.canceled || result.filePaths.length === 0) return null;
     return loadDocx(result.filePaths[0], event.sender.id);
   });
-  import_electron7.ipcMain.handle("docs:open-path", (event, filePath) => loadDocx(filePath, event.sender.id));
-  import_electron7.ipcMain.handle("docs:altchunk-html-to-docx", async (_event, html) => {
+  import_electron9.ipcMain.handle("docs:open-path", (event, filePath) => loadDocx(filePath, event.sender.id));
+  import_electron9.ipcMain.handle("docs:altchunk-html-to-docx", async (_event, html) => {
     if (typeof html !== "string" || !html.trim() || html.length > ALT_CHUNK_HTML_MAX_CHARS) {
       return null;
     }
-    const workDir = await (0, import_promises9.mkdtemp)((0, import_node_path16.join)((0, import_node_os7.tmpdir)(), "genoffice-altchunk-"));
+    const workDir = await (0, import_promises10.mkdtemp)((0, import_node_path17.join)((0, import_node_os8.tmpdir)(), "genoffice-altchunk-"));
     let driver = null;
     try {
-      const htmlPath = (0, import_node_path16.join)(workDir, "chunk.html");
-      await (0, import_promises9.writeFile)(htmlPath, `\uFEFF${html}`, "utf8");
+      const htmlPath = (0, import_node_path17.join)(workDir, "chunk.html");
+      await (0, import_promises10.writeFile)(htmlPath, `\uFEFF${html}`, "utf8");
       driver = await ElectronBrowserDriver.create(ALT_CHUNK_VIEWPORT);
-      const { docx } = await convertHtmlToDocx({ url: (0, import_node_url3.pathToFileURL)(htmlPath).href }, driver, {
+      const { docx } = await convertHtmlToDocx({ url: (0, import_node_url4.pathToFileURL)(htmlPath).href }, driver, {
         naturalTableWidth: true
       });
       return docx;
@@ -239445,11 +239604,11 @@ function registerDocsIpc() {
       return null;
     } finally {
       await driver?.close();
-      await (0, import_promises9.rm)(workDir, { recursive: true, force: true }).catch(() => {
+      await (0, import_promises10.rm)(workDir, { recursive: true, force: true }).catch(() => {
       });
     }
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:set-password",
     (event, filePath, password) => {
       if (tornDownWcIds.has(event.sender.id)) return { ok: false };
@@ -239462,11 +239621,11 @@ function registerDocsIpc() {
       return { ok: true };
     }
   );
-  import_electron7.ipcMain.handle("docs:password-intent-revision", (event) => {
+  import_electron9.ipcMain.handle("docs:password-intent-revision", (event) => {
     if (tornDownWcIds.has(event.sender.id)) return -1;
     return currentDocPasswordIntentRevision();
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:discard-password-intents",
     (event, throughRevision) => {
       if (tornDownWcIds.has(event.sender.id)) return { ok: false };
@@ -239477,7 +239636,7 @@ function registerDocsIpc() {
       return { ok: true };
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:open-decrypt",
     async (event, filePath, password) => {
       if (typeof filePath !== "string" || typeof password !== "string" || password.length === 0) {
@@ -239496,7 +239655,7 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle("docs:consume-pending-open", (event) => {
+  import_electron9.ipcMain.handle("docs:consume-pending-open", (event) => {
     rendererReady = true;
     const queued = pendingWindowOpens.get(event.sender.id);
     if (queued) {
@@ -239507,7 +239666,7 @@ function registerDocsIpc() {
     pendingOpenPath = null;
     return filePath ? loadDocx(filePath, event.sender.id) : null;
   });
-  import_electron7.ipcMain.handle("docs:consume-new-blank", (event) => {
+  import_electron9.ipcMain.handle("docs:consume-new-blank", (event) => {
     rendererReady = true;
     if (pendingNewBlankIds.has(event.sender.id)) {
       pendingNewBlankIds.delete(event.sender.id);
@@ -239515,17 +239674,17 @@ function registerDocsIpc() {
     }
     return false;
   });
-  import_electron7.ipcMain.handle("docs:consume-ai-doc-content", (event) => {
+  import_electron9.ipcMain.handle("docs:consume-ai-doc-content", (event) => {
     const content = pendingAiDocContents.get(event.sender.id) ?? null;
     pendingAiDocContents.delete(event.sender.id);
     return content;
   });
-  import_electron7.ipcMain.handle("docs:consume-headless-export", (event) => {
+  import_electron9.ipcMain.handle("docs:consume-headless-export", (event) => {
     const target = headlessExportTargets.get(event.sender.id) ?? null;
     headlessExportTargets.delete(event.sender.id);
     return target;
   });
-  import_electron7.ipcMain.on("docs:headless-export-done", (event, result) => {
+  import_electron9.ipcMain.on("docs:headless-export-done", (event, result) => {
     const settle = headlessExportWaiters.get(event.sender.id);
     if (!settle) return;
     headlessExportWaiters.delete(event.sender.id);
@@ -239535,7 +239694,7 @@ function registerDocsIpc() {
       ...typeof state?.error === "string" ? { error: state.error } : {}
     });
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:save",
     async (event, filePath, data, auto) => {
       try {
@@ -239554,7 +239713,7 @@ function registerDocsIpc() {
             noLink: true
           };
           const parent = dialogParent(event);
-          const { response } = parent && !parent.isDestroyed() ? await import_electron7.dialog.showMessageBox(parent, options) : await import_electron7.dialog.showMessageBox(options);
+          const { response } = parent && !parent.isDestroyed() ? await import_electron9.dialog.showMessageBox(parent, options) : await import_electron9.dialog.showMessageBox(options);
           if (response !== 0) return { ok: false, reason: "external-modified" };
         }
         if (tornDownWcIds.has(event.sender.id) || !canDocWrite(event.sender.id, filePath)) {
@@ -239594,13 +239753,13 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle("docs:write-recovery", async (event, filePath, data) => {
+  import_electron9.ipcMain.handle("docs:write-recovery", async (event, filePath, data) => {
     try {
       if (tornDownWcIds.has(event.sender.id)) return { ok: false };
       if (typeof filePath !== "string" || !canDocWrite(event.sender.id, filePath))
         return { ok: false };
       const epoch = recoveryClearEpochs.get(filePath) ?? 0;
-      await (0, import_promises9.mkdir)(recoveryDir(), { recursive: true });
+      await (0, import_promises10.mkdir)(recoveryDir(), { recursive: true });
       const bytes = prepareRecoveryDocx(event.sender.id, filePath, Buffer.from(data));
       if (!bytes) return { ok: false };
       await atomicWriteFile(recoveryPathFor(filePath), bytes);
@@ -239613,27 +239772,27 @@ function registerDocsIpc() {
       return { ok: false };
     }
   });
-  import_electron7.ipcMain.on("docs:spell-diag", (_event, line) => {
+  import_electron9.ipcMain.on("docs:spell-diag", (_event, line) => {
     if (typeof line !== "string" || line.length > 500) return;
     try {
       const path = userDataPath("spell-diag.log");
-      if ((0, import_node_fs10.existsSync)(path) && (0, import_node_fs10.statSync)(path).size > 256 * 1024) {
-        const tail = (0, import_node_fs10.readFileSync)(path, "utf-8").slice(-128 * 1024);
-        (0, import_node_fs10.writeFileSync)(path, tail.slice(tail.indexOf("\n") + 1));
+      if ((0, import_node_fs11.existsSync)(path) && (0, import_node_fs11.statSync)(path).size > 256 * 1024) {
+        const tail = (0, import_node_fs11.readFileSync)(path, "utf-8").slice(-128 * 1024);
+        (0, import_node_fs11.writeFileSync)(path, tail.slice(tail.indexOf("\n") + 1));
       }
-      (0, import_node_fs10.appendFileSync)(path, `${(/* @__PURE__ */ new Date()).toISOString()} ${line}
+      (0, import_node_fs11.appendFileSync)(path, `${(/* @__PURE__ */ new Date()).toISOString()} ${line}
 `);
     } catch {
     }
   });
-  import_electron7.ipcMain.handle("docs:respell-kick", async (event) => {
+  import_electron9.ipcMain.handle("docs:respell-kick", async (event) => {
     const wc = event.sender;
     if (tornDownWcIds.has(wc.id) || wc.isDestroyed()) return;
     wc.focus();
     wc.sendInputEvent({ type: "char", keyCode: " " });
     await new Promise((r) => setTimeout(r, 120));
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:save-as",
     async (event, defaultName, data, sourcePath) => {
       if (tornDownWcIds.has(event.sender.id)) return { ok: false };
@@ -239683,7 +239842,7 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle("docs:save-new", async (event, defaultName, data) => {
+  import_electron9.ipcMain.handle("docs:save-new", async (event, defaultName, data) => {
     try {
       if (tornDownWcIds.has(event.sender.id)) return { ok: false };
       const filePath = uniquePathIn(defaultSaveDir(), defaultName);
@@ -239692,7 +239851,7 @@ function registerDocsIpc() {
       const bytes = passwordState.password ? encryptDocx(plain, passwordState.password) : plain;
       await atomicWriteFile(filePath, bytes);
       if (tornDownWcIds.has(event.sender.id)) {
-        await (0, import_promises9.unlink)(filePath).catch(() => {
+        await (0, import_promises10.unlink)(filePath).catch(() => {
         });
         return { ok: false };
       }
@@ -239705,7 +239864,7 @@ function registerDocsIpc() {
         passwordState.password ? plain : void 0
       );
       if (tornDownWcIds.has(event.sender.id)) {
-        await (0, import_promises9.unlink)(filePath).catch(() => {
+        await (0, import_promises10.unlink)(filePath).catch(() => {
         });
         return { ok: false };
       }
@@ -239722,38 +239881,38 @@ function registerDocsIpc() {
       return { ok: false, error: String(err) };
     }
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:create-document",
     (_event, request) => createAiDocument(request)
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:save-to",
     async (event, filePath, data, overwrite) => {
       try {
         if (tornDownWcIds.has(event.sender.id)) return { ok: false };
-        if (typeof filePath !== "string" || !(0, import_node_path16.isAbsolute)(filePath)) {
+        if (typeof filePath !== "string" || !(0, import_node_path17.isAbsolute)(filePath)) {
           return { ok: false, error: "path must be absolute" };
         }
-        if ((0, import_node_path16.extname)(filePath).toLowerCase() !== ".docx") {
+        if ((0, import_node_path17.extname)(filePath).toLowerCase() !== ".docx") {
           return { ok: false, error: "path must point to a .docx file" };
         }
         if (!canDocWrite(event.sender.id, filePath)) {
           return { ok: false, error: "save target was not authorized" };
         }
-        const existed = (0, import_node_fs10.existsSync)(filePath);
+        const existed = (0, import_node_fs11.existsSync)(filePath);
         if (!overwrite && existed) {
           return {
             ok: false,
             error: `file already exists: ${filePath} (pass overwrite:true to replace it)`
           };
         }
-        await (0, import_promises9.mkdir)((0, import_node_path16.dirname)(filePath), { recursive: true });
+        await (0, import_promises10.mkdir)((0, import_node_path17.dirname)(filePath), { recursive: true });
         const passwordState = snapshotDocPassword(event.sender.id, null);
         const { bytes: plain, hashes } = await materializeLazyDocx(Buffer.from(data));
         const bytes = passwordState.password ? encryptDocx(plain, passwordState.password) : plain;
         await atomicWriteFile(filePath, bytes);
         const rollback = async () => {
-          if (!existed) await (0, import_promises9.unlink)(filePath).catch(() => {
+          if (!existed) await (0, import_promises10.unlink)(filePath).catch(() => {
           });
           return { ok: false };
         };
@@ -239784,11 +239943,11 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:recent",
-    () => readJson2(RECENT_PATH(), []).filter((p) => (0, import_node_fs10.existsSync)(p))
+    () => readJson2(RECENT_PATH(), []).filter((p) => (0, import_node_fs11.existsSync)(p))
   );
-  import_electron7.ipcMain.handle("docs:pick-image", async (event) => {
+  import_electron9.ipcMain.handle("docs:pick-image", async (event) => {
     const result = await openDialog(event, {
       title: tm("dlgInsertImage"),
       filters: [{ name: tm("filterImages"), extensions: ["png", "jpg", "jpeg", "gif"] }],
@@ -239800,12 +239959,12 @@ function registerDocsIpc() {
     const mime = IMAGE_MIME2[ext];
     if (!mime) return null;
     return {
-      base64: (0, import_node_fs10.readFileSync)(filePath).toString("base64"),
+      base64: (0, import_node_fs11.readFileSync)(filePath).toString("base64"),
       mime,
-      name: (0, import_node_path16.basename)(filePath)
+      name: (0, import_node_path17.basename)(filePath)
     };
   });
-  import_electron7.ipcMain.handle("files:pick", async (event) => {
+  import_electron9.ipcMain.handle("files:pick", async (event) => {
     const result = await openDialog(event, {
       title: tm("dlgAddAttachment"),
       filters: [
@@ -239817,11 +239976,11 @@ function registerDocsIpc() {
     if (result.canceled || result.filePaths.length === 0) return null;
     return collectAttachments(result.filePaths);
   });
-  import_electron7.ipcMain.handle("files:add", (_event, paths) => collectAttachments(paths));
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle("files:add", (_event, paths) => collectAttachments(paths));
+  import_electron9.ipcMain.handle(
     "files:read",
     async (_event, filePath, offset, maxChars) => {
-      const name = (0, import_node_path16.basename)(filePath);
+      const name = (0, import_node_path17.basename)(filePath);
       const ext = name.split(".").pop()?.toLowerCase() ?? "";
       if (!ATTACHMENT_EXTS.has(ext)) return { ok: false, error: tm("errUnsupportedExt", { ext }) };
       if (ATTACHMENT_IMAGE_EXTS.has(ext)) {
@@ -239843,29 +240002,29 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle("files:read-image", (_event, filePath) => {
-    const name = (0, import_node_path16.basename)(filePath);
+  import_electron9.ipcMain.handle("files:read-image", (_event, filePath) => {
+    const name = (0, import_node_path17.basename)(filePath);
     const ext = name.split(".").pop()?.toLowerCase() ?? "";
     const mime = ATTACHMENT_IMAGE_MIME[ext];
     if (!mime) return { ok: false, error: `${name}: ${tm("errNotImage")}` };
     try {
-      const stat4 = (0, import_node_fs10.statSync)(filePath);
+      const stat4 = (0, import_node_fs11.statSync)(filePath);
       if (stat4.size > ATTACHMENT_IMAGE_MAX_BYTES) {
         return { ok: false, error: `${name}: ${tm("errImageTooLarge")}` };
       }
-      return { ok: true, base64: (0, import_node_fs10.readFileSync)(filePath).toString("base64"), mime };
+      return { ok: true, base64: (0, import_node_fs11.readFileSync)(filePath).toString("base64"), mime };
     } catch {
       return { ok: false, error: `${name}: ${tm("errUnreadable")}` };
     }
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "files:add-pasted-image",
     (_event, data, ext) => {
       const filePath = savePastedImage(data, ext);
       return filePath ? collectAttachments([filePath]) : { accepted: [], rejected: [tm("errNotImage")] };
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:copy-image-to-clipboard",
     async (_event, dataUrl2, meta) => {
       if (typeof dataUrl2 !== "string") return false;
@@ -239879,7 +240038,7 @@ function registerDocsIpc() {
         bytes = media.body;
         htmlSrc = `data:${media.mime};base64,${bytes.toString("base64")}`;
       }
-      const image = import_electron7.nativeImage.createFromBuffer(bytes);
+      const image = import_electron9.nativeImage.createFromBuffer(bytes);
       if (image.isEmpty()) return false;
       let width = image.getSize().width;
       let height = image.getSize().height;
@@ -239896,7 +240055,7 @@ function registerDocsIpc() {
         } catch {
         }
       }
-      import_electron7.clipboard.write({
+      import_electron9.clipboard.write({
         image,
         html: `<img src="${htmlSrc}" width="${width}" height="${height}"${metaAttr}>`
       });
@@ -239905,20 +240064,16 @@ function registerDocsIpc() {
   );
   const pdfScale = (scale) => scale && scale > 0 && scale !== 1 ? { scale } : {};
   const printScale = (scale) => scale && scale > 0 && scale !== 1 ? { scaleFactor: Math.round(scale * 100) } : {};
-  import_electron7.ipcMain.handle("docs:print", async (event, scale) => {
-    return new Promise((resolve4) => {
-      event.sender.print(
-        { margins: { marginType: "none" }, ...printScale(scale) },
-        (success, failureReason) => {
-          resolve4({
-            ok: success,
-            ...failureReason && !/cancel/i.test(failureReason) ? { error: failureReason } : {}
-          });
-        }
-      );
-    });
+  import_electron9.ipcMain.handle("docs:print", async (event, scale, job) => {
+    try {
+      if (scale !== void 0 && (!Number.isFinite(scale) || scale < 0.1 || scale > 2)) throw new Error("INVALID_PRINT_SETTINGS");
+      const result = await printWithSystemDialog(event.sender, { margins: { marginType: "none" }, ...printScale(scale), ...parsePrintJobSettings(job) });
+      return { ok: result.success, ...result.failureReason && !/cancel/i.test(result.failureReason) ? { error: result.failureReason } : {} };
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : "WINDOWS_PRINT_FAILED" };
+    }
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:export-pdf",
     async (event, defaultName, pageWidthTwips, pageHeightTwips, outPath, scale) => {
       let filePath = outPath ?? null;
@@ -239946,7 +240101,7 @@ function registerDocsIpc() {
           margins: { top: 0, bottom: 0, left: 0, right: 0 },
           ...pdfScale(scale)
         });
-        (0, import_node_fs10.writeFileSync)(filePath, data);
+        (0, import_node_fs11.writeFileSync)(filePath, data);
         if (!isImageExportTemp(event.sender.id, filePath)) openGeneratedFile(filePath);
         return { ok: true, path: filePath };
       } catch (err) {
@@ -239954,14 +240109,14 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle("docs:save-image-as", async (event, src) => {
+  import_electron9.ipcMain.handle("docs:save-image-as", async (event, src) => {
     if (tornDownWcIds.has(event.sender.id) || typeof src !== "string") return { ok: false };
     return saveImageFromUrl(dialogParent(event), src, {
       title: tm("dlgSaveAs"),
       fallbackDir: defaultSaveDir()
     });
   });
-  import_electron7.ipcMain.handle("docs:pick-export-images-target", async (event) => {
+  import_electron9.ipcMain.handle("docs:pick-export-images-target", async (event) => {
     let dir = testExportDir;
     if (!dir) {
       const r = await openDialog(event, {
@@ -239972,46 +240127,46 @@ function registerDocsIpc() {
     }
     if (!dir) return null;
     const wcId = event.sender.id;
-    const pdfPath = (0, import_node_path16.join)((0, import_node_os7.tmpdir)(), `genoffice-docs-images-${(0, import_node_crypto7.randomUUID)()}.pdf`);
+    const pdfPath = (0, import_node_path17.join)((0, import_node_os8.tmpdir)(), `genoffice-docs-images-${(0, import_node_crypto7.randomUUID)()}.pdf`);
     allowPdfWrite(wcId, pdfPath);
     imageExportTemps.set(wcId, (imageExportTemps.get(wcId) ?? /* @__PURE__ */ new Set()).add(pdfPath));
     imageExportDirs.set(wcId, (imageExportDirs.get(wcId) ?? /* @__PURE__ */ new Set()).add(dir));
     return { dir, pdfPath };
   });
-  import_electron7.ipcMain.handle("docs:take-export-pdf", async (event, pdfPath) => {
+  import_electron9.ipcMain.handle("docs:take-export-pdf", async (event, pdfPath) => {
     const temps = imageExportTemps.get(event.sender.id);
     if (typeof pdfPath !== "string" || !temps?.has(pdfPath)) {
       return { ok: false, error: "not an image-export temp file" };
     }
     temps.delete(pdfPath);
     try {
-      const data = await (0, import_promises9.readFile)(pdfPath);
+      const data = await (0, import_promises10.readFile)(pdfPath);
       return { ok: true, base64: data.toString("base64") };
     } catch (err) {
       return { ok: false, error: String(err) };
     } finally {
-      await (0, import_promises9.rm)(pdfPath, { force: true });
+      await (0, import_promises10.rm)(pdfPath, { force: true });
     }
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:write-export-image",
     async (event, dir, fileName, pngBase64) => {
       if (typeof dir !== "string" || !imageExportDirs.get(event.sender.id)?.has(dir)) {
         return { ok: false, error: "export target is not an authorized folder" };
       }
-      if (typeof fileName !== "string" || fileName !== (0, import_node_path16.basename)(fileName) || !/^[^/\\]+\.png$/.test(fileName)) {
+      if (typeof fileName !== "string" || fileName !== (0, import_node_path17.basename)(fileName) || !/^[^/\\]+\.png$/.test(fileName)) {
         return { ok: false, error: "invalid image file name" };
       }
       try {
-        const filePath = (0, import_node_path16.join)(dir, fileName);
-        await (0, import_promises9.writeFile)(filePath, Buffer.from(String(pngBase64), "base64"));
+        const filePath = (0, import_node_path17.join)(dir, fileName);
+        await (0, import_promises10.writeFile)(filePath, Buffer.from(String(pngBase64), "base64"));
         return { ok: true, path: filePath };
       } catch (err) {
         return { ok: false, error: String(err) };
       }
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:export-html",
     async (event, defaultName, html, outPath) => {
       if (typeof html !== "string" || !html) return { ok: false, error: "empty document" };
@@ -240030,7 +240185,7 @@ function registerDocsIpc() {
         allowPdfWrite(event.sender.id, filePath);
       }
       try {
-        (0, import_node_fs10.writeFileSync)(filePath, html, "utf8");
+        (0, import_node_fs11.writeFileSync)(filePath, html, "utf8");
         openGeneratedFile(filePath);
         return { ok: true, path: filePath };
       } catch (err) {
@@ -240038,7 +240193,7 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:print-pdf-buffer",
     async (event, pageWidthTwips, pageHeightTwips, scale) => {
       try {
@@ -240057,7 +240212,7 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "docs:save-merged-pdf",
     async (event, defaultName, base64Parts, outPath) => {
       let filePath = outPath ?? null;
@@ -240082,7 +240237,7 @@ function registerDocsIpc() {
           const pages = await merged.copyPages(part, part.getPageIndices());
           for (const page of pages) merged.addPage(page);
         }
-        (0, import_node_fs10.writeFileSync)(filePath, Buffer.from(await merged.save()));
+        (0, import_node_fs11.writeFileSync)(filePath, Buffer.from(await merged.save()));
         if (!isImageExportTemp(event.sender.id, filePath)) openGeneratedFile(filePath);
         return { ok: true, path: filePath };
       } catch (err) {
@@ -240090,7 +240245,7 @@ function registerDocsIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle("win:new", (_event, openPath) => {
+  import_electron9.ipcMain.handle("win:new", (_event, openPath) => {
     const path = openPath ?? void 0;
     if (shellHooks) shellHooks.openTab(path, path ? void 0 : { newBlank: true });
     else {
@@ -240098,20 +240253,20 @@ function registerDocsIpc() {
       if (!path) markDocsNewBlank(win.webContents.id);
     }
   });
-  import_electron7.ipcMain.handle("win:list", () => {
+  import_electron9.ipcMain.handle("win:list", () => {
     if (shellHooks) return shellHooks.listTabs();
-    return import_electron7.BrowserWindow.getAllWindows().map((w) => ({
+    return import_electron9.BrowserWindow.getAllWindows().map((w) => ({
       id: String(w.id),
       title: w.getTitle(),
       focused: w.isFocused()
     }));
   });
-  import_electron7.ipcMain.handle("win:focus", (_event, id) => {
+  import_electron9.ipcMain.handle("win:focus", (_event, id) => {
     if (shellHooks) {
       shellHooks.focusTab(id);
       return;
     }
-    const win = import_electron7.BrowserWindow.fromId(Number(id));
+    const win = import_electron9.BrowserWindow.fromId(Number(id));
     if (!win) return;
     if (win.isMinimized()) win.restore();
     win.show();
@@ -240129,7 +240284,7 @@ function openGeneratedFile(path) {
   } catch (err) {
     console.warn("[docs] Failed to open generated file:", err);
   }
-  import_electron7.shell.showItemInFolder(path);
+  import_electron9.shell.showItemInFolder(path);
 }
 function sanitizeAiDocFileBase(title) {
   const cleaned = String(title ?? "").replace(/[/\\:*?"<>|\u0000-\u001f]/g, "_").trim().slice(0, 80).trim();
@@ -240154,16 +240309,16 @@ async function createAiDocument(request) {
     if (type === "pdf") {
       const bytes = await printHtmlToPdf(
         buildPrintableHtml(title, content),
-        () => new import_electron7.BrowserWindow({ show: false, webPreferences: { sandbox: true, javascript: false } })
+        () => new import_electron9.BrowserWindow({ show: false, webPreferences: { sandbox: true, javascript: false } })
       );
       const filePath = uniquePathIn(defaultSaveDir(), `${title}.pdf`);
-      await (0, import_promises9.writeFile)(filePath, bytes);
+      await (0, import_promises10.writeFile)(filePath, bytes);
       openGeneratedFile(filePath);
       return { ok: true, path: filePath };
     }
     if (type === "md" || type === "html") {
       const filePath = uniquePathIn(defaultSaveDir(), `${title}.${type}`);
-      await (0, import_promises9.writeFile)(filePath, content, "utf8");
+      await (0, import_promises10.writeFile)(filePath, content, "utf8");
       openGeneratedFile(filePath);
       return { ok: true, path: filePath };
     }
@@ -240194,9 +240349,9 @@ function setDocsMenuGate(gate) {
 function buildDocsMenu() {
   if (docsMenuGate && !docsMenuGate()) return;
   const isMac = process.platform === "darwin";
-  const recent = readJson2(RECENT_PATH(), []).filter((p) => (0, import_node_fs10.existsSync)(p)).slice(0, 10);
+  const recent = readJson2(RECENT_PATH(), []).filter((p) => (0, import_node_fs11.existsSync)(p)).slice(0, 10);
   const recentSubmenu = recent.length > 0 ? recent.map((p) => ({
-    label: (0, import_node_path16.basename)(p),
+    label: (0, import_node_path17.basename)(p),
     sublabel: isMac ? void 0 : p,
     toolTip: p,
     click: () => sendCommand("open-path", p)
@@ -240204,7 +240359,7 @@ function buildDocsMenu() {
   const template = [
     ...isMac ? [
       {
-        label: import_electron7.app.name,
+        label: import_electron9.app.name,
         submenu: [
           { role: "about" },
           { type: "separator" },
@@ -240403,12 +240558,12 @@ function buildDocsMenu() {
       ]
     }
   ];
-  import_electron7.Menu.setApplicationMenu(import_electron7.Menu.buildFromTemplate(template));
+  import_electron9.Menu.setApplicationMenu(import_electron9.Menu.buildFromTemplate(template));
 }
 var headlessExportTargets = /* @__PURE__ */ new Map();
 var headlessExportWaiters = /* @__PURE__ */ new Map();
 async function exportDocsHeadless(input, outPath, format2 = "pdf", timeoutMs = 3e5) {
-  const win = new import_electron7.BrowserWindow({
+  const win = new import_electron9.BrowserWindow({
     show: false,
     width: 1360,
     height: 900,
@@ -240448,7 +240603,7 @@ async function exportDocsHeadless(input, outPath, format2 = "pdf", timeoutMs = 3
   }
 }
 function createDocsWindow(openPath) {
-  const win = new import_electron7.BrowserWindow({
+  const win = new import_electron9.BrowserWindow({
     width: 1360,
     height: 900,
     minWidth: 720,
@@ -240460,7 +240615,7 @@ function createDocsWindow(openPath) {
       titleBarOverlay: { color: "#ffffff", symbolColor: "#444444", height: 40 }
     },
     // packaged builds embed the icon (build/icon.icns|ico); dev needs the file path
-    ...isDev && process.platform !== "darwin" ? { icon: (0, import_node_path16.join)(import_electron7.app.getAppPath(), "build/icon.png") } : {},
+    ...isDev && process.platform !== "darwin" ? { icon: (0, import_node_path17.join)(import_electron9.app.getAppPath(), "build/icon.png") } : {},
     webPreferences: {
       preload: runtime.preloadPath,
       contextIsolation: true,
@@ -240477,7 +240632,7 @@ function createDocsWindow(openPath) {
   if (openPath) pendingWindowOpens.set(webContentsId, openPath);
   win.webContents.setWindowOpenHandler(({ url }) => {
     const target = safeExternalUrl(url);
-    if (target) void import_electron7.shell.openExternal(target);
+    if (target) void import_electron9.shell.openExternal(target);
     return { action: "deny" };
   });
   void win.loadURL(rendererUrl(runtime.rendererUrl, "docs"));
@@ -240500,7 +240655,7 @@ function createDocsWindow(openPath) {
     closeSaveWaiters.get(webContentsId)?.(false);
     closeSaveWaiters.delete(webContentsId);
     if (mainWindow === win) {
-      mainWindow = import_electron7.BrowserWindow.getAllWindows().find((w) => w !== win) ?? null;
+      mainWindow = import_electron9.BrowserWindow.getAllWindows().find((w) => w !== win) ?? null;
       if (!mainWindow) rendererReady = false;
     }
   });
@@ -240508,7 +240663,7 @@ function createDocsWindow(openPath) {
 }
 var closeCheckWaiters = /* @__PURE__ */ new Map();
 var closeSaveWaiters = /* @__PURE__ */ new Map();
-import_electron7.ipcMain.on("docs:view-menu-state", (event, state) => {
+import_electron9.ipcMain.on("docs:view-menu-state", (event, state) => {
   const s = state;
   const next = { aiSidebar: s?.aiSidebar === true, darkCanvas: s?.darkCanvas === true };
   if (!viewMenuStateByWebContents.has(event.sender.id)) {
@@ -240517,13 +240672,13 @@ import_electron7.ipcMain.on("docs:view-menu-state", (event, state) => {
   }
   viewMenuStateByWebContents.set(event.sender.id, next);
   if (event.sender.id !== activeDocsWebContents()?.id) return;
-  const menu = import_electron7.Menu.getApplicationMenu();
+  const menu = import_electron9.Menu.getApplicationMenu();
   const ai = menu?.getMenuItemById("docs-menu-ai-sidebar");
   if (ai) ai.checked = next.aiSidebar;
   const dark = menu?.getMenuItemById("docs-menu-dark-mode");
   if (dark) dark.checked = next.darkCanvas;
 });
-import_electron7.ipcMain.on("docs:close-check-result", (event, state) => {
+import_electron9.ipcMain.on("docs:close-check-result", (event, state) => {
   const waiter = closeCheckWaiters.get(event.sender.id);
   if (!waiter) return;
   closeCheckWaiters.delete(event.sender.id);
@@ -240536,7 +240691,7 @@ import_electron7.ipcMain.on("docs:close-check-result", (event, state) => {
     }
   );
 });
-import_electron7.ipcMain.on("docs:close-save-result", (event, ok) => {
+import_electron9.ipcMain.on("docs:close-save-result", (event, ok) => {
   const waiter = closeSaveWaiters.get(event.sender.id);
   if (!waiter) return;
   closeSaveWaiters.delete(event.sender.id);
@@ -240600,7 +240755,7 @@ async function performDocsClose(contents, parent) {
       cancelId: 1,
       noLink: true
     };
-    const { response: response2 } = parent && !parent.isDestroyed() ? await import_electron7.dialog.showMessageBox(parent, options2) : await import_electron7.dialog.showMessageBox(options2);
+    const { response: response2 } = parent && !parent.isDestroyed() ? await import_electron9.dialog.showMessageBox(parent, options2) : await import_electron9.dialog.showMessageBox(options2);
     return response2 === 0;
   }
   if (state.autoSave && await requestRendererSave(contents)) return true;
@@ -240613,7 +240768,7 @@ async function performDocsClose(contents, parent) {
     cancelId: 2,
     noLink: true
   };
-  const { response } = parent && !parent.isDestroyed() ? await import_electron7.dialog.showMessageBox(parent, options) : await import_electron7.dialog.showMessageBox(options);
+  const { response } = parent && !parent.isDestroyed() ? await import_electron9.dialog.showMessageBox(parent, options) : await import_electron9.dialog.showMessageBox(options);
   if (response === 2) return false;
   if (response === 1) {
     if (state.filePath) clearRecoveryCopy(state.filePath);
@@ -240622,7 +240777,7 @@ async function performDocsClose(contents, parent) {
   return requestRendererSave(contents);
 }
 function createDocsView(openPath) {
-  const view = new import_electron7.WebContentsView({
+  const view = new import_electron9.WebContentsView({
     webPreferences: {
       preload: runtime.preloadPath,
       contextIsolation: true,
@@ -240631,16 +240786,31 @@ function createDocsView(openPath) {
       backgroundThrottling: false
     }
   });
-  if (openPath) pendingWindowOpens.set(view.webContents.id, openPath);
+  if (openPath) {
+    pendingWindowOpens.set(view.webContents.id, openPath);
+    const wcId2 = view.webContents.id;
+    pendingWindowSources.set(wcId2, {
+      path: openPath,
+      // 捕获异常，防止 renderer 尚未消费时产生未处理的 Promise 拒绝。
+      promise: prepareDocxSource(openPath, wcId2).then(
+        (value) => {
+          if (!import_electron9.webContents.fromId(wcId2)) forgetLazyMediaOwner(wcId2);
+          return { ok: true, value };
+        },
+        (error) => ({ ok: false, error })
+      )
+    });
+  }
   view.webContents.setWindowOpenHandler(({ url }) => {
     const target = safeExternalUrl(url);
-    if (target) void import_electron7.shell.openExternal(target);
+    if (target) void import_electron9.shell.openExternal(target);
     return { action: "deny" };
   });
   void view.webContents.loadURL(rendererUrl(runtime.rendererUrl, "docs", { mode: "tab" }));
   const wcId = view.webContents.id;
   view.webContents.once("destroyed", () => {
     pendingWindowOpens.delete(wcId);
+    pendingWindowSources.delete(wcId);
     dropDocWriter(wcId);
     closeCheckWaiters.get(wcId)?.({ dirty: false, autoSave: false });
     closeCheckWaiters.delete(wcId);
@@ -240654,20 +240824,20 @@ function hasDocsWindow() {
 }
 function startDocsStandalone() {
   registerRendererScheme();
-  installNavigationGuard(import_electron7.app);
-  installContextMenu(import_electron7.app, () => contextMenuLabels(getUiLang()));
-  if (process.env.AI_OFFICE_USER_DATA) import_electron7.app.setPath("userData", process.env.AI_OFFICE_USER_DATA);
-  else if (isDev) import_electron7.app.setPath("userData", (0, import_node_path16.join)(import_electron7.app.getPath("appData"), "GenOffice Docs Dev"));
-  const hasSingleInstanceLock = import_electron7.app.requestSingleInstanceLock();
+  installNavigationGuard(import_electron9.app);
+  installContextMenu(import_electron9.app, () => contextMenuLabels(getUiLang()));
+  if (process.env.AI_OFFICE_USER_DATA) import_electron9.app.setPath("userData", process.env.AI_OFFICE_USER_DATA);
+  else if (isDev) import_electron9.app.setPath("userData", (0, import_node_path17.join)(import_electron9.app.getPath("appData"), "GenOffice Docs Dev"));
+  const hasSingleInstanceLock = import_electron9.app.requestSingleInstanceLock();
   if (!hasSingleInstanceLock) {
-    import_electron7.app.quit();
+    import_electron9.app.quit();
     return;
   }
-  import_electron7.app.on("open-file", (event, filePath) => {
+  import_electron9.app.on("open-file", (event, filePath) => {
     event.preventDefault();
     openExternalDocx(filePath);
   });
-  import_electron7.app.on("second-instance", (_event, argv) => {
+  import_electron9.app.on("second-instance", (_event, argv) => {
     openExternalDocx(findDocxPath(argv));
     mainWindow?.show();
     mainWindow?.focus();
@@ -240675,21 +240845,21 @@ function startDocsStandalone() {
   registerAiIpc();
   registerProjectIpc();
   registerDocsIpc();
-  import_electron7.app.whenReady().then(() => {
-    installRendererProtocol({ docs: (0, import_node_path16.join)(__dirname, "../renderer") });
-    setUiLang(normalizeLang(process.env.GENOFFICE_LANG ?? import_electron7.app.getLocale()));
+  import_electron9.app.whenReady().then(() => {
+    installRendererProtocol({ docs: (0, import_node_path17.join)(__dirname, "../renderer") });
+    setUiLang(normalizeLang(process.env.GENOFFICE_LANG ?? import_electron9.app.getLocale()));
     if (isDev && process.platform === "darwin") {
-      import_electron7.app.dock?.setIcon((0, import_node_path16.join)(import_electron7.app.getAppPath(), "build/icon.png"));
+      import_electron9.app.dock?.setIcon((0, import_node_path17.join)(import_electron9.app.getAppPath(), "build/icon.png"));
     }
     buildDocsMenu();
     createDocsWindow();
     initDocsAutoUpdater(() => mainWindow);
-    import_electron7.app.on("activate", () => {
-      if (import_electron7.BrowserWindow.getAllWindows().length === 0) createDocsWindow();
+    import_electron9.app.on("activate", () => {
+      if (import_electron9.BrowserWindow.getAllWindows().length === 0) createDocsWindow();
     });
   });
-  import_electron7.app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") import_electron7.app.quit();
+  import_electron9.app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") import_electron9.app.quit();
   });
 }
 // Annotate the CommonJS export names for ESM import in node:

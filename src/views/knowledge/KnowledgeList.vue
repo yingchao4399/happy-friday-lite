@@ -15,6 +15,8 @@
       @update:search-query="searchQuery = $event"
       @toggle-category="toggleCategory"
       @add-kb="addKnowledgeBase"
+      @add-category="openCategoryDialog"
+      @show-category-menu="showCategoryMenu"
       @select-kb="selectKnowledgeBase"
       @show-context-menu="showContextMenu"
       @open-agent-dir="openAgentDir"
@@ -70,6 +72,7 @@
         </svg>
         <span>编辑</span>
       </div>
+      <div v-if="contextMenu.categoryId !== 'agent'" class="context-menu-item" @mousedown="handleMoveKnowledgeBase">{{ t('knowledge.actions.moveToCategory') }}</div>
       <div v-if="!contextMenu.item?.protected" class="context-menu-item danger" @mousedown="handleDeleteKB">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"></polyline>
@@ -79,6 +82,14 @@
         </svg>
         <span>删除</span>
       </div>
+    </KbContextMenu>
+
+    <!-- 文件区域右键菜单 -->
+    <KbContextMenu :visible="categoryMenu.visible" :x="categoryMenu.x" :y="categoryMenu.y" @close="categoryMenu.visible = false">
+      <div class="context-menu-item" @mousedown="openCategoryDialog(categoryMenu.item)">{{ t('knowledge.actions.renameCategory') }}</div>
+      <div class="context-menu-item" @mousedown="moveCategory(-1)">{{ t('knowledge.actions.moveUp') }}</div>
+      <div class="context-menu-item" @mousedown="moveCategory(1)">{{ t('knowledge.actions.moveDown') }}</div>
+      <div class="context-menu-item danger" @mousedown="requestDeleteCategory">{{ t('knowledge.actions.deleteCategory') }}</div>
     </KbContextMenu>
 
     <!-- 文件区域右键菜单 -->
@@ -150,6 +161,35 @@
       @confirm="confirmNewFolder"
       @update:folder-name="newFolderName = $event"
     />
+
+    <NewFolderDialog
+      :visible="categoryDialog.visible"
+      :folder-name="categoryDialog.name"
+      :title="categoryDialog.id ? t('knowledge.actions.renameCategory') : t('knowledge.actions.newCategory')"
+      :placeholder="t('knowledge.actions.categoryName')"
+      @close="categoryDialog.visible = false"
+      @confirm="saveCategory"
+      @update:folder-name="categoryDialog.name = $event"
+    />
+
+    <div v-if="moveDialog.visible" class="build-index-overlay" @click.self="moveDialog.visible = false">
+      <div class="build-index-modal">
+        <div class="build-index-header">{{ t('knowledge.actions.moveToCategory') }}</div>
+        <div class="build-index-body">
+          <select v-model="moveDialog.target" class="category-select">
+            <option v-for="category in movableCategories" :key="category.id" :value="category.id">{{ category.name }}</option>
+          </select>
+        </div>
+        <div class="build-index-footer">
+          <button class="btn-close" @click="moveDialog.visible = false">{{ t('knowledge.actions.cancel') }}</button>
+          <button class="btn-close" :disabled="!moveDialog.target" @click="confirmMoveFolder">{{ t('knowledge.actions.confirm') }}</button>
+        </div>
+      </div>
+    </div>
+    <div v-if="operationError" class="knowledge-error" role="alert">
+      <span>{{ operationError }}</span>
+      <button @click="operationError = ''" :title="t('knowledge.actions.dismiss')">×</button>
+    </div>
 
     <!-- 重命名对话框 -->
     <NewFolderDialog
@@ -255,6 +295,10 @@ const deleteConfirmMessage = ref('');
 const pendingDeleteItem = ref(null);
 const pendingDeleteCategoryId = ref('');
 const pendingDeleteFile = ref(null);
+const pendingDeleteCategory = ref(null);
+const categoryMenu = reactive({ visible: false, x: 0, y: 0, item: null });
+const categoryDialog = reactive({ visible: false, id: '', name: '' });
+const moveDialog = reactive({ visible: false, item: null, source: '', target: '' });
 
 // 构建索引进度弹窗状态
 const buildIndexState = reactive({
@@ -335,6 +379,7 @@ const {
   selectedKB,
   currentTitle,
   currentCategoryId,
+  categories,
   filteredCategories,
   showCreateDialog,
   currentCategoryName,
@@ -349,8 +394,58 @@ const {
   closeCreateDialog,
   confirmCreateKB,
   editKnowledgeBase,
-  deleteKnowledgeBase
+  deleteKnowledgeBase,
+  changeCategory,
+  moveKnowledgeBaseTo,
+  operationError
 } = useKnowledgeBase(fileSystem, sidebar, t);
+
+const movableCategories = computed(() => categories.filter(category => category.id !== moveDialog.source && category.id !== 'agent'));
+
+function showCategoryMenu(event, item) {
+  if (!item.id.startsWith('category-')) return;
+  categoryMenu.item = item;
+  categoryMenu.x = event.clientX;
+  categoryMenu.y = event.clientY;
+  categoryMenu.visible = true;
+}
+
+function openCategoryDialog(item = null) {
+  categoryMenu.visible = false;
+  categoryDialog.id = item?.id || '';
+  categoryDialog.name = item?.name || '';
+  categoryDialog.visible = true;
+}
+
+async function saveCategory() {
+  const action = categoryDialog.id ? 'rename' : 'create';
+  if (await changeCategory(action, { id: categoryDialog.id, name: categoryDialog.name })) categoryDialog.visible = false;
+}
+
+async function moveCategory(direction) {
+  const id = categoryMenu.item?.id;
+  categoryMenu.visible = false;
+  if (id) await changeCategory('move', { id, direction });
+}
+
+function requestDeleteCategory() {
+  pendingDeleteCategory.value = categoryMenu.item;
+  categoryMenu.visible = false;
+  deleteConfirmMessage.value = t('knowledge.actions.deleteCategoryConfirm', { name: pendingDeleteCategory.value.name });
+  showDeleteConfirm.value = true;
+}
+
+function handleMoveKnowledgeBase() {
+  moveDialog.item = contextMenu.item;
+  moveDialog.source = contextMenu.categoryId;
+  moveDialog.target = '';
+  moveDialog.visible = true;
+  hideContextMenu();
+}
+
+async function confirmMoveFolder() {
+  if (await moveKnowledgeBaseTo(moveDialog.item, moveDialog.source, moveDialog.target)) moveDialog.visible = false;
+}
 
 const {
   contextMenu,
@@ -381,8 +476,15 @@ function handleDeleteKB() {
   showDeleteConfirm.value = true;
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   showDeleteConfirm.value = false;
+
+  if (pendingDeleteCategory.value) {
+    const id = pendingDeleteCategory.value.id;
+    pendingDeleteCategory.value = null;
+    await changeCategory('delete', { id });
+    return;
+  }
 
   if (pendingDeleteFile.value) {
     const items = Array.isArray(pendingDeleteFile.value) ? pendingDeleteFile.value : [pendingDeleteFile.value];
@@ -401,6 +503,7 @@ function cancelDelete() {
   pendingDeleteItem.value = null;
   pendingDeleteCategoryId.value = '';
   pendingDeleteFile.value = null;
+  pendingDeleteCategory.value = null;
 }
 
 function handleRenameFile() {
@@ -561,6 +664,7 @@ function debouncedReloadCategories() {
 let unsubKbDirChanged = null;
 let unsubBuildProgress = null;
 let unsubBuildTaskComplete = null;
+let unsubResourceChanged = null;
 
 onMounted(async () => {
   await loadDataDir();
@@ -568,6 +672,10 @@ onMounted(async () => {
 
   // 订阅后端文件变更事件
   if (window.electronAPI && window.electronAPI.on) {
+    unsubResourceChanged = window.electronAPI.on('resource-changed', () => {
+      debouncedReloadCategories();
+      debouncedRefreshCurrentDir();
+    });
     unsubKbDirChanged = window.electronAPI.on('kb-directory-changed', ({ dirs }) => {
       if (!dirs || !dirs.length) return;
       // 后端已将路径分隔符统一规范化为 '/'，前端 currentPath/knowledgeRoot 也需规范化后再比较
@@ -619,6 +727,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  unsubResourceChanged?.();
   if (refreshDebounceTimer) {
     clearTimeout(refreshDebounceTimer);
     refreshDebounceTimer = null;
@@ -688,6 +797,10 @@ onBeforeUnmount(() => {
     opacity: 0.4;
   }
 }
+
+.category-select { width: 100%; padding: 9px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); border-radius: 6px; }
+.knowledge-error { position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 10001; padding: 10px 14px; background: var(--bg-primary); border: 1px solid #e53935; color: #e53935; border-radius: 6px; font-size: 13px; display: flex; justify-content: space-between; gap: 12px; }
+.knowledge-error button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 18px; line-height: 1; }
 
 .context-menu-item {
   display: flex;

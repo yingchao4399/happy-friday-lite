@@ -1,3 +1,4 @@
+const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -314,7 +315,7 @@ var require_BufferList = __commonJS({
         this.head = this.tail = null;
         this.length = 0;
       };
-      BufferList.prototype.join = function join18(s) {
+      BufferList.prototype.join = function join19(s) {
         if (this.length === 0) return "";
         var p = this.head;
         var ret = "" + p.data;
@@ -10541,10 +10542,10 @@ var require_bidi = __commonJS({
   }
 });
 
-// asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/apps/slides/node_modules/harfbuzzjs/dist/harfbuzz.wasm
+// asset-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\apps\slides\node_modules\harfbuzzjs\dist\harfbuzz.wasm
 var require_harfbuzz = __commonJS({
-  "asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/apps/slides/node_modules/harfbuzzjs/dist/harfbuzz.wasm"(exports2, module2) {
-    module2.exports = require("path").join(__dirname, "..", "assets", "74301eb4ac95.wasm");
+  "asset-file:C:\\\u9879\u76EE\u7EC3\u4E60\\doc\\Happy Friday Lite \u8111\u6D1E\\Friday-3.0.6-preview.1-source\\vendor\\happyoffice\\apps\\slides\\node_modules\\harfbuzzjs\\dist\\harfbuzz.wasm"(exports2, module2) {
+    module2.exports = require("path").join(__dirname, "..", "assets", "36187a232d4a.wasm");
   }
 });
 
@@ -32325,31 +32326,31 @@ var require_opentype = __commonJS({
   }
 });
 
-// asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-Regular.ttf
+// asset-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\ui\src\fonts\Carlito-Regular.ttf
 var require_Carlito_Regular = __commonJS({
-  "asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-Regular.ttf"(exports2, module2) {
-    module2.exports = require("path").join(__dirname, "..", "assets", "f5ecbb70009a.ttf");
+  "asset-file:C:\\\u9879\u76EE\u7EC3\u4E60\\doc\\Happy Friday Lite \u8111\u6D1E\\Friday-3.0.6-preview.1-source\\vendor\\happyoffice\\packages\\ui\\src\\fonts\\Carlito-Regular.ttf"(exports2, module2) {
+    module2.exports = require("path").join(__dirname, "..", "assets", "7a0986869efc.ttf");
   }
 });
 
-// asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-Bold.ttf
+// asset-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\ui\src\fonts\Carlito-Bold.ttf
 var require_Carlito_Bold = __commonJS({
-  "asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-Bold.ttf"(exports2, module2) {
-    module2.exports = require("path").join(__dirname, "..", "assets", "bf8c7a54bfba.ttf");
+  "asset-file:C:\\\u9879\u76EE\u7EC3\u4E60\\doc\\Happy Friday Lite \u8111\u6D1E\\Friday-3.0.6-preview.1-source\\vendor\\happyoffice\\packages\\ui\\src\\fonts\\Carlito-Bold.ttf"(exports2, module2) {
+    module2.exports = require("path").join(__dirname, "..", "assets", "2233acebae3d.ttf");
   }
 });
 
-// asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-Italic.ttf
+// asset-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\ui\src\fonts\Carlito-Italic.ttf
 var require_Carlito_Italic = __commonJS({
-  "asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-Italic.ttf"(exports2, module2) {
-    module2.exports = require("path").join(__dirname, "..", "assets", "ed61061afb0a.ttf");
+  "asset-file:C:\\\u9879\u76EE\u7EC3\u4E60\\doc\\Happy Friday Lite \u8111\u6D1E\\Friday-3.0.6-preview.1-source\\vendor\\happyoffice\\packages\\ui\\src\\fonts\\Carlito-Italic.ttf"(exports2, module2) {
+    module2.exports = require("path").join(__dirname, "..", "assets", "57748330cc02.ttf");
   }
 });
 
-// asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-BoldItalic.ttf
+// asset-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\ui\src\fonts\Carlito-BoldItalic.ttf
 var require_Carlito_BoldItalic = __commonJS({
-  "asset-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/ui/src/fonts/Carlito-BoldItalic.ttf"(exports2, module2) {
-    module2.exports = require("path").join(__dirname, "..", "assets", "467967ca741d.ttf");
+  "asset-file:C:\\\u9879\u76EE\u7EC3\u4E60\\doc\\Happy Friday Lite \u8111\u6D1E\\Friday-3.0.6-preview.1-source\\vendor\\happyoffice\\packages\\ui\\src\\fonts\\Carlito-BoldItalic.ttf"(exports2, module2) {
+    module2.exports = require("path").join(__dirname, "..", "assets", "8efa22483509.ttf");
   }
 });
 
@@ -38771,7 +38772,7 @@ async function JBig2(moduleArg = {}) {
   var quit_ = (status, toThrow) => {
     throw toThrow;
   };
-  var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs";
+  var _scriptName = __fridayBundleUrl;
   var scriptDirectory = "";
   var readAsync, readBinary;
   if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -39073,7 +39074,7 @@ async function OpenJPEG(moduleArg = {}) {
   var quit_ = (status, toThrow) => {
     throw toThrow;
   };
-  var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs";
+  var _scriptName = __fridayBundleUrl;
   var scriptDirectory = "";
   var readAsync, readBinary;
   if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -46831,7 +46832,7 @@ var init_pdf_worker = __esm({
         var defineProperty = Object.defineProperty;
         var stringSlice = uncurryThis("".slice);
         var replace = uncurryThis("".replace);
-        var join18 = uncurryThis([].join);
+        var join19 = uncurryThis([].join);
         var CONFIGURABLE_LENGTH = DESCRIPTORS && !fails(function() {
           return defineProperty(function() {
           }, "length", { value: 8 }).length !== 8;
@@ -46858,7 +46859,7 @@ var init_pdf_worker = __esm({
           }
           var state = enforceInternalState(value);
           if (!hasOwn(state, "source")) {
-            state.source = join18(TEMPLATE, typeof name == "string" ? name : "");
+            state.source = join19(TEMPLATE, typeof name == "string" ? name : "");
           }
           return value;
         };
@@ -48937,7 +48938,7 @@ var init_pdf_worker = __esm({
         var anUint8Array = __webpack_require__3(4154);
         var notDetached = __webpack_require__3(5169);
         var numberToString2 = uncurryThis(1.1.toString);
-        var join18 = uncurryThis([].join);
+        var join19 = uncurryThis([].join);
         var $Array = Array;
         var Uint8Array2 = globalThis2.Uint8Array;
         var INCORRECT_BEHAVIOR_OR_DOESNT_EXISTS = !Uint8Array2 || !Uint8Array2.prototype.toHex || !(function() {
@@ -48957,7 +48958,7 @@ var init_pdf_worker = __esm({
               var hex = numberToString2(this[i], 16);
               result[i] = hex.length === 1 ? "0" + hex : hex;
             }
-            return join18(result, "");
+            return join19(result, "");
           }
         });
       },
@@ -107520,7 +107521,7 @@ var init_pdf = __esm({
         var defineProperty = Object.defineProperty;
         var stringSlice = uncurryThis("".slice);
         var replace = uncurryThis("".replace);
-        var join18 = uncurryThis([].join);
+        var join19 = uncurryThis([].join);
         var CONFIGURABLE_LENGTH = DESCRIPTORS && !fails(function() {
           return defineProperty(function() {
           }, "length", { value: 8 }).length !== 8;
@@ -107547,7 +107548,7 @@ var init_pdf = __esm({
           }
           var state = enforceInternalState(value);
           if (!hasOwn(state, "source")) {
-            state.source = join18(TEMPLATE, typeof name == "string" ? name : "");
+            state.source = join19(TEMPLATE, typeof name == "string" ? name : "");
           }
           return value;
         };
@@ -109985,7 +109986,7 @@ var init_pdf = __esm({
         var anUint8Array = __webpack_require__3(4154);
         var notDetached = __webpack_require__3(5169);
         var numberToString2 = uncurryThis(1.1.toString);
-        var join18 = uncurryThis([].join);
+        var join19 = uncurryThis([].join);
         var $Array = Array;
         var Uint8Array2 = globalThis2.Uint8Array;
         var INCORRECT_BEHAVIOR_OR_DOESNT_EXISTS = !Uint8Array2 || !Uint8Array2.prototype.toHex || !(function() {
@@ -110005,7 +110006,7 @@ var init_pdf = __esm({
               var hex = numberToString2(this[i], 16);
               result[i] = hex.length === 1 ? "0" + hex : hex;
             }
-            return join18(result, "");
+            return join19(result, "");
           }
         });
       },
@@ -118809,7 +118810,7 @@ var init_pdf = __esm({
     if (isNodeJS2) {
       let canvas;
       try {
-        const require2 = process.getBuiltinModule("module").createRequire("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs");
+        const require2 = process.getBuiltinModule("module").createRequire(__fridayBundleUrl);
         try {
           canvas = require2("@napi-rs/canvas");
         } catch (ex) {
@@ -118844,7 +118845,7 @@ var init_pdf = __esm({
     };
     NodeCanvasFactory = class extends BaseCanvasFactory {
       _createCanvas(width, height) {
-        const require2 = process.getBuiltinModule("module").createRequire("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs");
+        const require2 = process.getBuiltinModule("module").createRequire(__fridayBundleUrl);
         const canvas = require2("@napi-rs/canvas");
         return canvas.createCanvas(width, height);
       }
@@ -136522,8 +136523,8 @@ var require_cfb = __commonJS({
         }
         return L2.length - R.length;
       }
-      function dirname7(p) {
-        if (p.charAt(p.length - 1) == "/") return p.slice(0, -1).indexOf("/") === -1 ? p : dirname7(p.slice(0, -1));
+      function dirname8(p) {
+        if (p.charAt(p.length - 1) == "/") return p.slice(0, -1).indexOf("/") === -1 ? p : dirname8(p.slice(0, -1));
         var c = p.lastIndexOf("/");
         return c === -1 ? p : p.slice(0, c + 1);
       }
@@ -136944,10 +136945,10 @@ var require_cfb = __commonJS({
           data.push([cfb.FullPaths[i2], cfb.FileIndex[i2]]);
         }
         for (i2 = 0; i2 < data.length; ++i2) {
-          var dad = dirname7(data[i2][0]);
+          var dad = dirname8(data[i2][0]);
           s = fullPaths[dad];
           while (!s) {
-            while (dirname7(dad) && !fullPaths[dirname7(dad)]) dad = dirname7(dad);
+            while (dirname8(dad) && !fullPaths[dirname8(dad)]) dad = dirname8(dad);
             data.push([dad, {
               name: filename(dad).replace("/", ""),
               type: 1,
@@ -136957,7 +136958,7 @@ var require_cfb = __commonJS({
               content: null
             }]);
             fullPaths[dad] = true;
-            dad = dirname7(data[i2][0]);
+            dad = dirname8(data[i2][0]);
             s = fullPaths[dad];
           }
         }
@@ -136983,13 +136984,13 @@ var require_cfb = __commonJS({
             elt.size = 0;
             elt.type = 5;
           } else if (nm.slice(-1) == "/") {
-            for (j = i2 + 1; j < data.length; ++j) if (dirname7(cfb.FullPaths[j]) == nm) break;
+            for (j = i2 + 1; j < data.length; ++j) if (dirname8(cfb.FullPaths[j]) == nm) break;
             elt.C = j >= data.length ? -1 : j;
-            for (j = i2 + 1; j < data.length; ++j) if (dirname7(cfb.FullPaths[j]) == dirname7(nm)) break;
+            for (j = i2 + 1; j < data.length; ++j) if (dirname8(cfb.FullPaths[j]) == dirname8(nm)) break;
             elt.R = j >= data.length ? -1 : j;
             elt.type = 1;
           } else {
-            if (dirname7(cfb.FullPaths[i2 + 1] || "") == dirname7(nm)) elt.R = i2 + 1;
+            if (dirname8(cfb.FullPaths[i2 + 1] || "") == dirname8(nm)) elt.R = i2 + 1;
             elt.type = 2;
           }
         }
@@ -174731,6 +174732,7 @@ __export(slides_exports, {
   createSlidesWindow: () => createSlidesWindow,
   discardSlidesRecovery: () => discardSlidesRecovery,
   exportSlidesPdfHeadless: () => exportSlidesPdfHeadless,
+  exportSlidesSnapshot: () => exportSlidesSnapshot,
   installSlidesMenu: () => installSlidesMenu,
   registerAiIpc: () => registerAiIpc,
   registerProjectIpc: () => registerProjectIpc,
@@ -174751,13 +174753,13 @@ __export(slides_exports, {
 module.exports = __toCommonJS(slides_exports);
 
 // vendor/happyoffice/apps/slides/src/main/slides-main.ts
-var import_electron8 = require("electron");
-var import_node_child_process3 = require("node:child_process");
-var import_promises7 = require("node:fs/promises");
+var import_electron10 = require("electron");
+var import_node_child_process4 = require("node:child_process");
+var import_promises8 = require("node:fs/promises");
 var import_node_crypto8 = require("node:crypto");
-var import_node_fs12 = require("node:fs");
-var import_node_os7 = require("node:os");
-var import_node_path19 = require("node:path");
+var import_node_fs13 = require("node:fs");
+var import_node_os8 = require("node:os");
+var import_node_path20 = require("node:path");
 
 // vendor/happyoffice/apps/slides/src/main/generated-page-temp.ts
 var import_promises = require("node:fs/promises");
@@ -174789,6 +174791,18 @@ async function cleanupExpiredGeneratedPages(tempRoot, now = Date.now()) {
     }
   }
   return removed;
+}
+
+// vendor/happyoffice/packages/electron-utils/src/print-job-settings.ts
+var DEFAULT_PRINT_JOB = { copies: 1, color: true, collate: true, duplexMode: "simplex" };
+function parsePrintJobSettings(value) {
+  if (value === void 0) return { ...DEFAULT_PRINT_JOB };
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("INVALID_PRINT_SETTINGS");
+  const input = value;
+  if (Object.keys(input).some((key) => !["copies", "color", "collate", "duplexMode"].includes(key))) throw new Error("INVALID_PRINT_SETTINGS");
+  const result = { ...DEFAULT_PRINT_JOB, ...input };
+  if (!Number.isInteger(result.copies) || result.copies < 1 || result.copies > 999 || typeof result.color !== "boolean" || typeof result.collate !== "boolean" || !["simplex", "longEdge", "shortEdge"].includes(result.duplexMode)) throw new Error("INVALID_PRINT_SETTINGS");
+  return result;
 }
 
 // vendor/happyoffice/apps/slides/src/main/pdf-export.ts
@@ -174923,7 +174937,7 @@ function resolveFetch() {
   let impl = (...args) => fetch(...args);
   if (process.versions.electron) {
     try {
-      const require2 = (0, import_node_module.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs");
+      const require2 = (0, import_node_module.createRequire)(__fridayBundleUrl);
       const { net: net4 } = require2("electron");
       if (net4?.fetch) impl = net4.fetch.bind(net4);
     } catch {
@@ -174942,7 +174956,7 @@ async function proxyFallbackFetch() {
   let impl = (...args) => fetch(...args);
   if (process.versions.electron) {
     try {
-      const require2 = (0, import_node_module.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs");
+      const require2 = (0, import_node_module.createRequire)(__fridayBundleUrl);
       const { session } = require2("electron");
       if (session) {
         const ses = session.fromPartition("genoffice-login-proxy");
@@ -175178,7 +175192,7 @@ function resolveGskEntry() {
   if (process.env.GSK_CLI_PATH) return process.env.GSK_CLI_PATH;
   if (cachedEntry !== void 0) return cachedEntry;
   try {
-    const require2 = (0, import_node_module2.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs");
+    const require2 = (0, import_node_module2.createRequire)(__fridayBundleUrl);
     cachedEntry = require2.resolve("@genspark/cli/dist/index.js");
   } catch {
     const resourcesPath = process.resourcesPath;
@@ -179425,8 +179439,8 @@ async function popupMenu(contents, params, labels) {
       return {
         label: item.label,
         click: async () => {
-          const { BrowserWindow: BrowserWindow4 } = await import("electron");
-          await saveImageFromUrl(BrowserWindow4.fromWebContents(contents), params.srcURL, {
+          const { BrowserWindow: BrowserWindow6 } = await import("electron");
+          await saveImageFromUrl(BrowserWindow6.fromWebContents(contents), params.srcURL, {
             title: item.label.replace(/…$/, "")
           });
         }
@@ -181028,8 +181042,156 @@ function isHeadlessMode() {
   return headless;
 }
 
-// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+// vendor/happyoffice/packages/electron-utils/src/system-print-window.ts
+var import_electron2 = require("electron");
+var ownerLocks = /* @__PURE__ */ new WeakMap();
+function lockSystemPrintOwner(owner) {
+  if (!owner || owner.isDestroyed()) return () => {
+  };
+  let lock = ownerLocks.get(owner);
+  if (!lock) {
+    lock = { count: 0, wasEnabled: owner.isEnabled() };
+    ownerLocks.set(owner, lock);
+  }
+  lock.count++;
+  owner.setEnabled(false);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--lock.count > 0) return;
+    ownerLocks.delete(owner);
+    if (!owner.isDestroyed() && lock.wasEnabled) {
+      owner.setEnabled(true);
+      owner.focus();
+    }
+  };
+}
+function createSystemPrintWindow(owner, options) {
+  const window2 = new import_electron2.BrowserWindow({
+    ...options,
+    show: false,
+    ...process.platform === "win32" ? { width: 900, height: 700, autoHideMenuBar: true, closable: false, skipTaskbar: false } : {}
+  });
+  if (process.platform !== "win32" || !owner || owner.isDestroyed()) return window2;
+  let release = () => {
+  };
+  const ownerClosed = () => {
+    if (!window2.isDestroyed()) window2.destroy();
+  };
+  owner.once("closed", ownerClosed);
+  window2.once("show", () => {
+    if (owner.isDestroyed()) return;
+    release = lockSystemPrintOwner(owner);
+  });
+  window2.once("closed", () => {
+    owner.removeListener("closed", ownerClosed);
+    release();
+  });
+  return window2;
+}
+
+// vendor/happyoffice/packages/electron-utils/src/system-print.ts
+var import_electron3 = require("electron");
+var import_node_child_process3 = require("node:child_process");
+var import_node_fs6 = require("node:fs");
+var import_promises6 = require("node:fs/promises");
+var import_node_os6 = require("node:os");
 var import_node_path10 = require("node:path");
+var import_node_url2 = require("node:url");
+function helperPath() {
+  const here = (0, import_node_path10.dirname)((0, import_node_url2.fileURLToPath)(__fridayBundleUrl));
+  return [
+    (0, import_node_path10.join)(here, "../native/system-print.exe"),
+    (0, import_node_path10.join)(here, "../../../../packages/electron-utils/native/system-print.exe"),
+    ...process.resourcesPath ? [(0, import_node_path10.join)(process.resourcesPath, "office/native/system-print.exe"), (0, import_node_path10.join)(process.resourcesPath, "native/system-print.exe")] : []
+  ].find((candidate) => (0, import_node_fs6.existsSync)(candidate));
+}
+var paperSizes = {
+  A0: [841e3, 1189e3],
+  A1: [594e3, 841e3],
+  A2: [42e4, 594e3],
+  A3: [297e3, 42e4],
+  A4: [21e4, 297e3],
+  A5: [148e3, 21e4],
+  A6: [105e3, 148e3],
+  Letter: [215900, 279400],
+  Legal: [215900, 355600],
+  Tabloid: [279400, 431800],
+  Ledger: [279400, 431800]
+};
+function systemPrintPaperSize(size) {
+  if (!size) return void 0;
+  const pair = typeof size === "string" ? paperSizes[size] : [size.width, size.height];
+  if (!pair || pair.some((n) => !Number.isFinite(n) || n <= 0)) throw new Error("INVALID_PRINT_PAGE_SIZE");
+  return { width: Math.round(Math.min(...pair)), height: Math.round(Math.max(...pair)) };
+}
+async function printPdfFileWithSystemDialog(pdfPath, options = {}, owner) {
+  if (process.platform !== "win32") return { success: false, failureReason: "WINDOWS_PRINT_UNAVAILABLE" };
+  if (owner?.isDestroyed()) return { success: false, failureReason: "Print job canceled" };
+  const helper = helperPath();
+  if (!helper) return { success: false, failureReason: "WINDOWS_PRINT_HELPER_MISSING" };
+  const size = systemPrintPaperSize(options.pageSize);
+  return new Promise((resolve5) => {
+    const release = lockSystemPrintOwner(owner);
+    const closed = () => child2.kill();
+    const child2 = (0, import_node_child_process3.execFile)(helper, [], { windowsHide: false, timeout: 15 * 60 * 1e3, maxBuffer: 64 * 1024, encoding: "utf8" }, (error, stdout) => {
+      owner?.removeListener("closed", closed);
+      release();
+      try {
+        const result = JSON.parse(stdout.trim());
+        if (typeof result.success === "boolean" && typeof result.failureReason === "string") {
+          resolve5(result);
+          return;
+        }
+      } catch {
+      }
+      resolve5({ success: false, failureReason: owner?.isDestroyed() ? "Print job canceled" : error?.killed ? "WINDOWS_PRINT_TIMEOUT" : "WINDOWS_PRINT_FAILED" });
+    });
+    owner?.once("closed", closed);
+    child2.stdin?.on("error", () => {
+    });
+    child2.stdin?.end(JSON.stringify({
+      pdfPath,
+      title: owner && !owner.isDestroyed() ? owner.getTitle() : "Friday",
+      landscape: options.landscape,
+      color: options.color,
+      copies: options.copies ?? 1,
+      collate: options.collate,
+      pageRanges: options.pageRanges,
+      duplexMode: options.duplexMode,
+      paperWidth: size?.width,
+      paperHeight: size?.height
+    }));
+  });
+}
+async function printWithSystemDialog(contents, options = {}, owner = import_electron3.BrowserWindow.fromWebContents(contents)) {
+  if (process.platform !== "win32") return new Promise((resolve5) => contents.print(options, (success, failureReason) => resolve5({ success, failureReason })));
+  const workDir = await (0, import_promises6.mkdtemp)((0, import_node_path10.join)((0, import_node_os6.tmpdir)(), "friday-system-print-"));
+  const pdfPath = (0, import_node_path10.join)(workDir, "print.pdf");
+  try {
+    const size = systemPrintPaperSize(options.pageSize);
+    const margins = options.margins;
+    const pdf = await contents.printToPDF({
+      printBackground: options.printBackground ?? true,
+      preferCSSPageSize: true,
+      ...options.landscape !== void 0 ? { landscape: options.landscape } : {},
+      ...size ? { pageSize: { width: size.width / 25400, height: size.height / 25400 } } : {},
+      ...options.scaleFactor ? { scale: options.scaleFactor / 100 } : {},
+      ...margins ? { margins: margins.marginType === "none" ? { top: 0, bottom: 0, left: 0, right: 0 } : { top: (margins.top ?? 0) / 96, bottom: (margins.bottom ?? 0) / 96, left: (margins.left ?? 0) / 96, right: (margins.right ?? 0) / 96 } } : {}
+    });
+    await (0, import_promises6.writeFile)(pdfPath, pdf);
+    return await printPdfFileWithSystemDialog(pdfPath, options, owner);
+  } finally {
+    await (0, import_promises6.unlink)(pdfPath).catch(() => {
+    });
+    await (0, import_promises6.rmdir)(workDir).catch(() => {
+    });
+  }
+}
+
+// vendor/happyoffice/packages/electron-utils/src/renderer-scheme.ts
+var import_node_path11 = require("node:path");
 var RENDERER_SCHEME = "genoffice-app";
 var RENDERER_SCHEME_PRIVILEGE = {
   scheme: RENDERER_SCHEME,
@@ -181072,22 +181234,22 @@ function resolveRendererFile(roots, requestUrl) {
   } catch {
     return null;
   }
-  const file = (0, import_node_path10.resolve)(root, pathname.replace(/^\/+/, ""));
-  return file === root || file.startsWith(root + import_node_path10.sep) ? file : null;
+  const file = (0, import_node_path11.resolve)(root, pathname.replace(/^\/+/, ""));
+  return file === root || file.startsWith(root + import_node_path11.sep) ? file : null;
 }
 
 // vendor/happyoffice/packages/electron-utils/src/renderer-protocol.ts
-var import_electron2 = require("electron");
-var import_node_url2 = require("node:url");
+var import_electron4 = require("electron");
+var import_node_url3 = require("node:url");
 function registerRendererScheme() {
-  import_electron2.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
+  import_electron4.protocol.registerSchemesAsPrivileged([RENDERER_SCHEME_PRIVILEGE, DOCX_MEDIA_SCHEME_PRIVILEGE]);
 }
 function installRendererProtocol(roots) {
   const table = new Map(Object.entries(roots));
-  import_electron2.protocol.handle(RENDERER_SCHEME, (request) => {
+  import_electron4.protocol.handle(RENDERER_SCHEME, (request) => {
     const file = resolveRendererFile(table, request.url);
     if (!file) return new Response(null, { status: 404 });
-    return import_electron2.net.fetch((0, import_node_url2.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
+    return import_electron4.net.fetch((0, import_node_url3.pathToFileURL)(file).toString()).catch(() => new Response(null, { status: 404 }));
   });
 }
 
@@ -188487,7 +188649,7 @@ function parseStroke(spPr, ctx, fallbackColor) {
     tri: "tri"
   };
   const compound = ln["@_cmpd"] ? cmpdMap[ln["@_cmpd"]] : void 0;
-  const join18 = "a:round" in ln ? "round" : "a:bevel" in ln ? "bevel" : "a:miter" in ln ? "miter" : void 0;
+  const join19 = "a:round" in ln ? "round" : "a:bevel" in ln ? "bevel" : "a:miter" in ln ? "miter" : void 0;
   const headEnd = parseArrowEnd(ln["a:headEnd"]);
   const tailEnd = parseArrowEnd(ln["a:tailEnd"]);
   return {
@@ -188495,7 +188657,7 @@ function parseStroke(spPr, ctx, fallbackColor) {
     width: intOr(ln["@_w"], 12700),
     ...dash ? { dash: String(dash) } : {},
     ...cap ? { cap } : {},
-    ...join18 ? { join: join18 } : {},
+    ...join19 ? { join: join19 } : {},
     ...compound && compound !== "sng" ? { compound } : {},
     ...headEnd ? { headEnd } : {},
     ...tailEnd ? { tailEnd } : {}
@@ -204036,22 +204198,22 @@ register({
   }
 });
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/pptx-ops/src/prompts/ops/text.md?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\pptx-ops\src\prompts\ops\text.md?raw
 var text_default = '# Text ops\n\n> Replace or restyle the text of a text box, shape or table: whole-body rewrite (setText), run-level font patch (setFont), paragraph format patch (setParagraphFormat), typeset math (insertEquation).\n\nAll three take `target:{slide, el}`. `el` is an element id from the outline or\n`read_slide` (`e_*` ids are durable). For a direct child of a group put the\nchild id in `target.el` and add `group:"<group id>"`.\n\nFont sizes are points. Colors are `"#RRGGBB"`.\n\n### setText\n\n`{paragraphs:[{runs:[{text,bold?,italic?,fontSize?,color?}],align?}]} (group children: add group:"<group id>")`\n\nReplaces the element\'s entire text with the given paragraphs. Runs you do not\nrestyle inherit the formatting of the run they replace (position-wise), so a\nplain `{text}` run keeps the original size, color and font. A shape that has\nnever had text gets a text body created (autoshapes default to centered text).\n\n| Field                                                    | Type                                                                                          | Notes                                                                                                                                                                                                                  |\n| -------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| paragraphs                                               | array                                                                                         | Required, one object per paragraph; an empty array clears the text                                                                                                                                                     |\n| paragraphs[].runs                                        | array of `{text, bold?, italic?, underline?, strike?, fontSize?, fontFamily?, color?, link?}` | `fontSize` in pt; `link` is `{kind:"url",url}`, `{kind:"slide",slideIndex}`, `{kind:"action",action}` (`nextslide` / `previousslide` / `firstslide` / `lastslide` / `lastslideviewed` / `endshow`) or `null` to remove |\n| paragraphs[].align                                       | `"left"` / `"center"` / `"right"` / `"justify"`                                               | Optional                                                                                                                                                                                                               |\n| paragraphs[].level                                       | 0..8                                                                                          | Indent level for multi-level lists                                                                                                                                                                                     |\n| paragraphs[].bullet                                      | `"char"` / `"number"` / `"none"`                                                              | Optional; `bulletChar` sets a custom glyph                                                                                                                                                                             |\n| paragraphs[].lineSpacingPct, spaceBeforePt, spaceAfterPt | number                                                                                        | Optional paragraph spacing                                                                                                                                                                                             |\n| paragraphs[].rtl                                         | boolean                                                                                       | Optional base direction                                                                                                                                                                                                |\n| group                                                    | string                                                                                        | Only for a direct child of a group: the group id                                                                                                                                                                       |\n\n```json\n{\n  "op": "setText",\n  "target": { "slide": 0, "el": "e_TEXT" },\n  "paragraphs": [\n    { "runs": [{ "text": "Quarterly Review", "bold": true, "fontSize": 36 }], "align": "left" },\n    { "runs": [{ "text": "Q3 highlights and outlook" }] }\n  ]\n}\n```\n\n```json\n{\n  "op": "setText",\n  "target": { "slide": 0, "el": "e_CHILD" },\n  "group": "e_GROUP",\n  "paragraphs": [{ "runs": [{ "text": "Step 1" }] }]\n}\n```\n\nCommon mistakes\n\n- Passing only the changed paragraph: the array replaces the whole body, so send every paragraph that should remain.\n- Targeting a picture, chart or connector: only text boxes, shapes and table cells (`setTableCell`) hold text.\n- Writing text into a group child without `group`: the child id alone does not resolve on the slide.\n\nRelated: `setFont` (restyle without changing the words), `setTableCell` (table cells), `findReplace` (deck-wide substitutions).\n\n### setFont\n\n`{font:{fontFamily?,fontSizePt?,bold?,italic?,underline?,strike?,color?}} \u2014 merges onto every run of the element`\n\nApplies the given properties to every run of the element (or every cell of a\ntable) and leaves everything else untouched. Use it for "make the title blue\nand bold" style requests; use `setText` when the words change.\n\n| Field                                | Type        | Notes                                          |\n| ------------------------------------ | ----------- | ---------------------------------------------- |\n| font.fontFamily                      | string      | Omit to keep the theme font (recommended)      |\n| font.fontSizePt                      | number > 0  | Points                                         |\n| font.bold, italic, underline, strike | boolean     | Only the keys you pass change                  |\n| font.color                           | `"#RRGGBB"` | Explicit color; clears theme-color inheritance |\n| group                                | string      | Only for a direct child of a group             |\n\n```json\n{\n  "op": "setFont",\n  "target": { "slide": 0, "el": "e_TEXT" },\n  "font": { "color": "#1A73E8", "bold": true }\n}\n```\n\n```json\n{ "op": "setFont", "target": { "slide": 0, "el": "e_TABLE" }, "font": { "fontSizePt": 12 } }\n```\n\nCommon mistakes\n\n- Color names such as `"blue"`: only hex `"#RRGGBB"` is accepted.\n- `fontSizePt` of 0 or negative: must be a positive number of points.\n- Expecting a partial-run change: the patch is element-wide; for one word use `setText` with per-run styling.\n\n### setParagraphFormat\n\n`{format:{align?,bullet?,lineSpacingPct?,spaceBeforePt?,spaceAfterPt?}}`\n\nParagraph-level formatting for every paragraph of the element: alignment,\nbullets, spacing, direction, indent level.\n\n| Field                                     | Type                                            | Notes                                        |\n| ----------------------------------------- | ----------------------------------------------- | -------------------------------------------- |\n| format.align                              | `"left"` / `"center"` / `"right"` / `"justify"` |                                              |\n| format.bullet                             | `"char"` / `"number"` / `"none"`                | `"char"` uses `bulletChar` or a round bullet |\n| format.bulletChar                         | string                                          | Custom glyph, with `bullet:"char"`           |\n| format.bulletSizePct                      | number >= 0                                     | Percent of text size (100 = same)            |\n| format.bulletColor                        | `"#RRGGBB"`                                     |                                              |\n| format.bulletHangEmu                      | number >= 0                                     | Hanging indent in EMU                        |\n| format.lineSpacingPct                     | number >= 0                                     | 100 = single spacing                         |\n| format.spaceBeforePt, format.spaceAfterPt | number >= 0                                     | Points                                       |\n| format.rtl                                | boolean                                         | Base direction                               |\n| format.indentDelta                        | 1 or -1                                         | Shift the list level (clamped 0..8)          |\n| group                                     | string                                          | Only for a direct child of a group           |\n\n```json\n{\n  "op": "setParagraphFormat",\n  "target": { "slide": 0, "el": "e_TEXT" },\n  "format": { "bullet": "char", "lineSpacingPct": 120, "spaceAfterPt": 6 }\n}\n```\n\nCommon mistakes\n\n- Negative spacing values: all `...Pct` / `...Pt` / `...Emu` fields must be >= 0.\n- Using `setParagraphFormat` to change font size: that is a run property, use `setFont`.\n\n### insertEquation\n\n`{latex,position?} \u2014 target:{slide, el}; or {latex,box:{x,y,cx,cy}} to create a text box for it`\n\nAdds a typeset equation (PowerPoint\'s own math format) as a centered paragraph\nat the `position` (`"end"`, default, or `"start"`) of a text or shape element,\nor in a new text box at `box` (EMU, unit suffixes allowed). Older readers and\nthe GenOffice preview show the linearized text (`E=mc\xB2`); PowerPoint 2010+\nrenders the formula. LaTeX subset: `\\frac`, `\\sqrt[n]`, `^`, `_`,\n`\\sum`/`\\int`/`\\prod` with limits, `\\left(` `\\right)`, matrices, Greek\nletters, accents, `\\text{}`.\n\n```json\n{\n  "op": "insertEquation",\n  "target": { "slide": 0, "el": "e_TEXT" },\n  "latex": "E = mc^2"\n}\n```\n\n```json\n{\n  "op": "insertEquation",\n  "target": { "slide": 0 },\n  "box": { "x": 914400, "y": 2743200, "cx": 4572000, "cy": 914400 },\n  "latex": "\\\\frac{a}{b} + \\\\sqrt{x^2 + y^2}"\n}\n```\n';
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/pptx-ops/src/prompts/ops/element.md?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\pptx-ops\src\prompts\ops\element.md?raw
 var element_default = '# Element ops\n\n> Change one existing element: fill, stroke, position and size, crop, opacity, z-order, grouping, shape geometry, text-body properties, effects, hyperlinks, deletion.\n\nEvery op here takes `target:{slide, el}` unless its signature says otherwise\n(`flipElements` and `groupElements` take a list in `els`). Ops that say\n"group children" accept a direct child of a group when you add\n`group:"<group id>"` and put the child id in `target.el`.\n\nGeometry is document-space EMU: 1 pt = 12700 EMU, 1 px = 9525 EMU on a\nstandard 1280 px wide deck (`read_slide` reports the exact factor for the\ncurrent deck). Angles are degrees unless the field says otherwise.\n\n### deleteElement\n\n`{} \u2014 no fields besides target`\n\nRemoves a top-level element. To delete one member of a group, `ungroupElement`\nthe group first (its children become top-level and get fresh ids).\n\n```json\n{ "op": "deleteElement", "target": { "slide": 0, "el": "e_SHAPE" } }\n```\n\nCommon mistakes\n\n- Deleting a group child directly: the id does not resolve at top level; ungroup first or delete the whole group.\n\n### setFill\n\n`{fill:"#RRGGBB"|"none"|{stops:[{pos,color}],angle?}}`\n\nSolid, translucent or gradient fill of a text box or shape. Pictures, tables,\ncharts and connectors have no fill. Picture fills are `setImageFill` (UI only).\n\n| Field       | Type                                                                      | Notes                                                      |\n| ----------- | ------------------------------------------------------------------------- | ---------------------------------------------------------- |\n| fill        | `"none"`, `"#RRGGBB"`, `"#RRGGBBAA"` or `{stops, angle?, radial?, path?}` | Alpha byte `AA`: 00 transparent .. FF opaque               |\n| fill.stops  | array of `{pos, color}`                                                   | At least two; `pos` 0..1                                   |\n| fill.angle  | number                                                                    | Linear gradient angle in 1/60000 degree (90 deg = 5400000) |\n| fill.radial | boolean                                                                   | Radial gradient instead of linear                          |\n| group       | string                                                                    | Only for a direct child of a group                         |\n\n```json\n{ "op": "setFill", "target": { "slide": 0, "el": "e_SHAPE" }, "fill": "#1A73E8" }\n```\n\n```json\n{\n  "op": "setFill",\n  "target": { "slide": 0, "el": "e_SHAPE" },\n  "fill": {\n    "stops": [\n      { "pos": 0, "color": "#1A73E8" },\n      { "pos": 1, "color": "#FFFFFF" }\n    ],\n    "angle": 5400000\n  }\n}\n```\n\nCommon mistakes\n\n- `null` to remove a fill: use `"none"`.\n- Gradient with one stop: at least two stops are required.\n- Targeting a picture: use `setPictureOpacity` / `setImageFill` instead.\n\nRelated: `setStroke`, `setBackground` (page background, a slide op).\n\n### setStroke\n\n`{stroke:{color:"#RRGGBB",widthEmu}|null} \u2014 null removes the outline`\n\nOutline of a text box, shape or picture (picture border).\n\n| Field           | Type                                                        | Notes                                                          |\n| --------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |\n| stroke          | object or `null`                                            | `null` removes the outline                                     |\n| stroke.color    | `"#RRGGBB"`                                                 | Required when stroke is an object                              |\n| stroke.widthEmu | number > 0                                                  | 12700 EMU = 1 pt                                               |\n| stroke.dash     | string                                                      | Preset dash name (`"dash"`, `"sysDot"`, ...); `"solid"` clears |\n| stroke.cap      | `"flat"` / `"rnd"` / `"sq"`                                 | Optional                                                       |\n| stroke.compound | `"sng"` / `"dbl"` / `"thickThin"` / `"thinThick"` / `"tri"` | Optional                                                       |\n| stroke.join     | `"round"` / `"bevel"` / `"miter"`                           | Optional                                                       |\n| stroke.gradient | `{stops:[{pos,color}], angle}`                              | Gradient line; angle in 1/60000 degree                         |\n| group           | string                                                      | Only for a direct child of a group                             |\n\n```json\n{\n  "op": "setStroke",\n  "target": { "slide": 0, "el": "e_SHAPE" },\n  "stroke": { "color": "#333333", "widthEmu": 19050 }\n}\n```\n\n```json\n{ "op": "setStroke", "target": { "slide": 0, "el": "e_PICTURE" }, "stroke": null }\n```\n\nCommon mistakes\n\n- Width in points: `widthEmu` is EMU; multiply points by 12700.\n- `remove:true` or `"none"`: the outline is removed by passing `stroke: null`.\n\n### setTransform\n\n`{box:{x,y,cx,cy},rotDeg?} (group children: absBox instead of box, plus group:"<group id>")`\n\nMoves, resizes and rotates an element. `box` is the full new frame in EMU; pass\nall four numbers even when only one changes (read the current values from\n`read_slide` or an `execute_slide_script` `els` entry).\n\n| Field           | Type                 | Notes                                                                      |\n| --------------- | -------------------- | -------------------------------------------------------------------------- |\n| box             | `{x, y, cx, cy}` EMU | Required for top-level elements                                            |\n| rotDeg          | number               | Degrees clockwise; omitted = 0                                             |\n| absBox          | `{x, y, cx, cy}` EMU | Group children only: document-space frame (the op converts to child space) |\n| group           | string               | Group children only                                                        |\n| resizeTableGrid | boolean              | Tables only: redistribute columns/rows to the new frame                    |\n\n```json\n{\n  "op": "setTransform",\n  "target": { "slide": 0, "el": "e_TEXT" },\n  "box": { "x": 914400, "y": 685800, "cx": 7315200, "cy": 1143000 }\n}\n```\n\n```json\n{\n  "op": "setTransform",\n  "target": { "slide": 0, "el": "e_CHILD" },\n  "group": "e_GROUP",\n  "absBox": { "x": 1828800, "y": 1828800, "cx": 1828800, "cy": 914400 },\n  "rotDeg": 15\n}\n```\n\nCommon mistakes\n\n- Pixel values in `box`: convert with the px-to-EMU factor from `read_slide`.\n- Sending only `cx`/`cy`: the rect must carry all of x, y, cx, cy.\n- For several elements with relative math (align, distribute) prefer `execute_slide_script`, which computes from live geometry.\n\n### setConnectorEndpoints\n\n`{p1:{x,y},p2:{x,y},start?:{targetId,idx}|null,end?:{targetId,idx}|null}`\n\nRe-routes a connector between two points and optionally attaches its ends to\nshapes so it follows later moves. The element must be a connector (line,\narrow, elbow or curved connector).\n\n| Field      | Type                                 | Notes                                                                                                 |\n| ---------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |\n| p1, p2     | `{x, y}` EMU                         | Required; frame and flips are derived from them                                                       |\n| start, end | `{targetId, idx}`, `null` or omitted | Attach to connection point `idx` of an element; `null` detaches; omitted keeps the current attachment |\n\n```json\n{\n  "op": "setConnectorEndpoints",\n  "target": { "slide": 0, "el": "e_LINE" },\n  "p1": { "x": 914400, "y": 914400 },\n  "p2": { "x": 3657600, "y": 2743200 },\n  "start": { "targetId": "e_SHAPE", "idx": 3 },\n  "end": null\n}\n```\n\nCommon mistakes\n\n- Using it on a plain shape: only connectors are accepted; for shapes use `setTransform`.\n- A `targetId` that is not on the slide: the op fails instead of silently detaching; pass `null` to detach.\n\n### flipElements\n\n`{els:[id,\u2026],axis:"h"|"v"} \u2014 target.el unused`\n\nMirrors one or more elements horizontally or vertically around their own\ncenters. Any element with a frame flips (shapes, text boxes, pictures, groups).\n\n| Field | Type           | Notes                                             |\n| ----- | -------------- | ------------------------------------------------- |\n| els   | string[]       | Non-empty list of element ids on `target.slide`   |\n| axis  | `"h"` or `"v"` |                                                   |\n| group | string         | Optional: flip children inside that group instead |\n\n```json\n{ "op": "flipElements", "target": { "slide": 0 }, "els": ["e_SHAPE", "e_PICTURE"], "axis": "h" }\n```\n\n### setPictureSrcRect\n\n`{srcRect:{l,t,r,b}|null} \u2014 crop fractions 0..1, null removes the crop`\n\nNon-destructive crop of a picture: each side is the fraction of the source\nimage removed from that edge. The frame stays; the remaining image stretches to\nfill it. Optionally pass `box` to shrink the frame in the same op.\n\n| Field   | Type                         | Notes                                                                      |\n| ------- | ---------------------------- | -------------------------------------------------------------------------- |\n| srcRect | `{l?, t?, r?, b?}` or `null` | Each 0..1 (exclusive of 1); `l + r < 1` and `t + b < 1`; missing sides = 0 |\n| box     | `{x, y, cx, cy}` EMU         | Optional new frame applied together with the crop                          |\n\n```json\n{\n  "op": "setPictureSrcRect",\n  "target": { "slide": 0, "el": "e_PICTURE" },\n  "srcRect": { "l": 0.1, "t": 0, "r": 0.1, "b": 0.2 }\n}\n```\n\n```json\n{ "op": "setPictureSrcRect", "target": { "slide": 0, "el": "e_PICTURE" }, "srcRect": null }\n```\n\nCommon mistakes\n\n- Percentages such as 10: fractions are 0..1, so 10 percent is 0.1.\n- Opposing crops summing to 1 or more: nothing would remain visible.\n\n### setPictureOpacity\n\n`{opacity:0..1}`\n\nWhole-image transparency of a picture. `1` is fully opaque and removes the effect.\n\n```json\n{ "op": "setPictureOpacity", "target": { "slide": 0, "el": "e_PICTURE" }, "opacity": 0.6 }\n```\n\nCommon mistakes\n\n- Percent values: 60 percent is `0.6`.\n- Non-picture targets: shapes take translucency through `setFill` with an `"#RRGGBBAA"` color.\n\n### reorderElement\n\n`{dir:"front"|"back"|"forward"|"backward"}`\n\nChanges the z-order (stacking) of an element on its slide.\n\n```json\n{ "op": "reorderElement", "target": { "slide": 0, "el": "e_SHAPE" }, "dir": "back" }\n```\n\nCommon mistakes\n\n- Repeating `front`/`back` on an element already at that extreme fails; check the outline order first.\n\n### groupElements\n\n`{els:[id,id,\u2026]} \u2014 at least two ids; target.el unused`\n\nGroups two or more top-level elements. The result reports the new group id in\n`created`; the children keep editable through `group:"<group id>"`.\n\n```json\n{ "op": "groupElements", "target": { "slide": 0 }, "els": ["e_SHAPE", "e_TEXT"] }\n```\n\n### ungroupElement\n\n`{} \u2014 target.el is the group`\n\nDissolves a group; its direct children become top-level elements with new ids\n(positions preserved). Read the slide again before editing them.\n\n```json\n{ "op": "ungroupElement", "target": { "slide": 0, "el": "e_GROUP" } }\n```\n\n### setShapeGeometry\n\n`{prst:"<OOXML preset geometry name>"}`\n\nSwaps the preset geometry of a shape (for example `rect` to `roundRect`,\n`ellipse`, `triangle`, `rightArrow`, `chevron`, `star5`, `hexagon`). Text,\nfill, stroke and frame stay.\n\n```json\n{ "op": "setShapeGeometry", "target": { "slide": 0, "el": "e_SHAPE" }, "prst": "hexagon" }\n```\n\nCommon mistakes\n\n- Applying it to a picture, table or chart: only shapes with a preset geometry qualify.\n\n### setShapeAdjust\n\n`{adjust:{<gdName>:number,\u2026}} \u2014 preset-geometry avLst values (group children: add group)`\n\nSets adjustment handles of a preset geometry, for example the corner radius of\na rounded rectangle (`adj`, 0..50000) or arrow head proportions (`adj1`,\n`adj2`).\n\n```json\n{ "op": "setShapeAdjust", "target": { "slide": 0, "el": "e_SHAPE" }, "adjust": { "adj": 16667 } }\n```\n\nCommon mistakes\n\n- Fractions like 0.25: adjustment values are the raw avLst numbers (25 percent of the range is 25000 for most presets).\n\n### setTextAnchor\n\n`{anchor:"top"|"middle"|"bottom"}`\n\nVertical alignment of the text inside its box.\n\n```json\n{ "op": "setTextAnchor", "target": { "slide": 0, "el": "e_TEXT" }, "anchor": "middle" }\n```\n\n### setTextBodyProps\n\n`{props:{vert?:"horz"|"eaVert"|"vert"|"vert270"|"wordArtVert",autofit?:"none"|"shrink"|"resize",insets?:{l?,t?,r?,b?} (EMU),wrap?:boolean}}`\n\nText-body properties: writing direction, autofit behavior, internal margins and\nword wrap. Pass at least one property.\n\n| Field         | Type                                                             | Notes                                                           |\n| ------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |\n| props.vert    | `"horz"` / `"eaVert"` / `"vert"` / `"vert270"` / `"wordArtVert"` | `"horz"` clears vertical text                                   |\n| props.autofit | `"none"` / `"shrink"` / `"resize"`                               | `shrink` scales text down on overflow, `resize` grows the shape |\n| props.insets  | `{l?, t?, r?, b?}` EMU                                           | Only the given sides change                                     |\n| props.wrap    | boolean                                                          | `false` lets a line overflow instead of wrapping                |\n\n```json\n{\n  "op": "setTextBodyProps",\n  "target": { "slide": 0, "el": "e_TEXT" },\n  "props": { "autofit": "shrink", "insets": { "l": 91440, "r": 91440 } }\n}\n```\n\n### setEffects\n\n`{effects:{shadow?:{color:"#RRGGBB(AA)",blurRad,dist,dirDeg,inner?,sx?,sy?,kxDeg?}|null,glow?:{color,radius}|null,reflection?:{blurRad,startA(0..1),endPos(0..1),dist}|null,softEdge?:EMU|null}} \u2014 null clears; EMU distances (12700/pt)`\n\nShadow, glow, reflection and soft-edge effects. Each key you pass is replaced;\n`null` clears that effect; keys you omit stay as they are. Pass at least one key.\n\n| Field              | Type                                                                         | Notes                                                                         |\n| ------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |\n| effects.shadow     | `{color, blurRad, dist, dirDeg, inner?, sx?, sy?, kxDeg?, kyDeg?}` or `null` | `color` may carry alpha `"#RRGGBBAA"`; `blurRad`/`dist` EMU; `dirDeg` degrees |\n| effects.glow       | `{color, radius}` or `null`                                                  | `radius` EMU                                                                  |\n| effects.reflection | `{blurRad, startA, endPos, dist}` or `null`                                  | `startA`/`endPos` fractions 0..1                                              |\n| effects.softEdge   | number EMU or `null`                                                         | Feather radius                                                                |\n\n```json\n{\n  "op": "setEffects",\n  "target": { "slide": 0, "el": "e_SHAPE" },\n  "effects": { "shadow": { "color": "#00000066", "blurRad": 50800, "dist": 38100, "dirDeg": 90 } }\n}\n```\n\n```json\n{\n  "op": "setEffects",\n  "target": { "slide": 0, "el": "e_SHAPE" },\n  "effects": { "shadow": null, "glow": null }\n}\n```\n\nCommon mistakes\n\n- An empty `effects` object: at least one of shadow/glow/reflection/softEdge is required.\n- Points for `dist`/`blurRad`: these are EMU (12700 per point).\n\n### setLink\n\n`{link:{kind:"url",url}|{kind:"slide",slideIndex}|{kind:"action",action}|null}`\n\nHyperlink on a whole element (click action). `null` removes the link. Links on\nindividual runs are set through `setText` run `link` fields.\n\n| Field       | Type                                                                                                   | Notes                                                                                                                    |\n| ----------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |\n| link.kind   | `"url"` / `"slide"` / `"action"`                                                                       | `url` opens in the browser; `slide` jumps to `slideIndex` (0-based); `action` is a PowerPoint show action                |\n| link.action | `"nextslide"` / `"previousslide"` / `"firstslide"` / `"lastslide"` / `"lastslideviewed"` / `"endshow"` | Written as `ppaction://hlinkshowjump` with no relationship, exactly like PowerPoint\'s Action Settings navigation buttons |\n\n```json\n{\n  "op": "setLink",\n  "target": { "slide": 0, "el": "e_SHAPE" },\n  "link": { "kind": "url", "url": "https://example.com" }\n}\n```\n\n```json\n{\n  "op": "setLink",\n  "target": { "slide": 0, "el": "e_SHAPE" },\n  "link": { "kind": "slide", "slideIndex": 1 }\n}\n```\n\n```json\n{\n  "op": "setLink",\n  "target": { "slide": 0, "el": "e_SHAPE" },\n  "link": { "kind": "action", "action": "nextslide" }\n}\n```\n\n### alignElements\n\n`{els:[ids],mode:"left"|"centerH"|"right"|"top"|"centerV"|"bottom",to?:"selection"|"slide"}`\n\nLines up several top-level elements on one edge or center line. By default\nthe reference is the selection\'s bounding box (at least two elements);\n`to: "slide"` aligns to the slide edges and accepts a single element. Frames\nare the axis-aligned boxes `slides read` reports (rotation is ignored, as in\nPowerPoint\'s Align menu); attached connectors follow.\n\n| Field | Type                                 | Notes                                                                   |\n| ----- | ------------------------------------ | ----------------------------------------------------------------------- |\n| els   | array of element ids                 | Top-level elements only; group children are refused (arrange the group) |\n| mode  | see signature                        | `centerH` = same vertical center line, `centerV` = same horizontal one  |\n| to    | `"selection"` (default) or `"slide"` | Reference box                                                           |\n\n```json\n{\n  "op": "alignElements",\n  "target": { "slide": 0 },\n  "els": ["e_TEXT", "e_SHAPE"],\n  "mode": "left"\n}\n```\n\nCommon mistakes\n\n- One element without `to: "slide"`: aligning a single box to itself does nothing.\n- Expecting text inside the box to move: this moves frames; text alignment is `setParagraphFormat`.\n\n### distributeElements\n\n`{els:[ids],axis:"horizontal"|"vertical",to?:"selection"|"slide"}`\n\nSpaces elements evenly along one axis. `selection` (default, at least three\nelements) keeps the two outer elements and spreads the gaps between the rest;\n`to: "slide"` gives equal gaps between the slide edges and every element (one\nor more elements). Only the coordinate along `axis` changes.\n\n```json\n{\n  "op": "distributeElements",\n  "target": { "slide": 0 },\n  "els": ["e_TEXT", "e_SHAPE", "e_PICTURE"],\n  "axis": "horizontal"\n}\n```\n\nCommon mistakes\n\n- Two elements with the default `to`: there is no gap to even out; align them or pass `to: "slide"`.\n\n### setImageFill (not-ai-callable)\n\n`{source:{mediaPath}|{bytes:base64|dataURL,ext},tile?} \u2014 use the image tools instead`\n\nPicture or texture fill of a shape. The payload is image bytes or an existing\nmedia part path, which the model cannot produce; the UI\'s fill picker uses it.\n';
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/pptx-ops/src/prompts/ops/insert.md?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\pptx-ops\src\prompts\ops\insert.md?raw
 var insert_default = '# Insert ops\n\n> Create new elements on a slide: text boxes, preset shapes and lines (addElement), connectors glued to shapes, tables, native charts, SmartArt-style diagrams.\n\nInsert ops take `target:{slide}` (no `el`) and an `offset:{x,y,cx,cy}` frame\nin document-space EMU. They report the new element id in `created`; later ops\nin the same transaction cannot reference it yet, so insert first and style in\nthe next call, or pass the style inline where the op supports it.\n\n### addElement\n\n`{kind:"textbox"|<preset geometry>,offset:{x,y,cx,cy},paragraphs?,fill?,stroke?,adjustments?:{<gd name>:val},bodyPr?:{autoFit?:"shrink"|"resize"}}`\n\nAdds a text box, a preset-geometry shape, or a line/connector.\n\n| Field       | Type                                                                                           | Notes                                                                                                                                                                                                                                              |\n| ----------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| kind        | string                                                                                         | `"textbox"`; a preset geometry (`rect`, `roundRect`, `ellipse`, `triangle`, `diamond`, `rightArrow`, `chevron`, `star5`, `hexagon`, `wedgeRoundRectCallout`, ...); or a line kind `line`, `lineArrow`, `lineArrowDouble`, `lineBent`, `lineCurved` |\n| offset      | `{x, y, cx, cy}` EMU                                                                           | Required                                                                                                                                                                                                                                           |\n| paragraphs  | array of `{runs:[{text, bold?, italic?, underline?, fontSize?, fontFamily?, color?}], align?}` | Optional text; `fontSize` in pt                                                                                                                                                                                                                    |\n| fill        | `"#RRGGBB"` or `"#RRGGBBAA"`                                                                   | Solid fill; text boxes have none by default                                                                                                                                                                                                        |\n| stroke      | `{color, widthEmu}`                                                                            | Outline; lines default to a 1 pt black stroke                                                                                                                                                                                                      |\n| adjustments | `{<gdName>: number}`                                                                           | Preset adjust values, e.g. `{"adj": 25000}` for a roundRect radius                                                                                                                                                                                 |\n| bodyPr      | `{autoFit?, wrap?, anchor?, insetsEmu?}`                                                       | `autoFit` `"shrink"` or `"resize"`; `wrap` `"square"`/`"none"`; `anchor` `"t"`/`"ctr"`/`"b"`                                                                                                                                                       |\n\n```json\n{\n  "op": "addElement",\n  "target": { "slide": 1 },\n  "kind": "textbox",\n  "offset": { "x": 914400, "y": 685800, "cx": 7315200, "cy": 914400 },\n  "paragraphs": [\n    { "runs": [{ "text": "Key Takeaways", "bold": true, "fontSize": 32 }], "align": "left" }\n  ],\n  "bodyPr": { "autoFit": "shrink" }\n}\n```\n\n```json\n{\n  "op": "addElement",\n  "target": { "slide": 1 },\n  "kind": "roundRect",\n  "offset": { "x": 914400, "y": 2286000, "cx": 3200400, "cy": 1600200 },\n  "fill": "#E8F0FE",\n  "stroke": { "color": "#1A73E8", "widthEmu": 12700 },\n  "adjustments": { "adj": 16667 },\n  "paragraphs": [\n    { "runs": [{ "text": "Card title", "bold": true, "color": "#1A73E8" }], "align": "center" }\n  ]\n}\n```\n\n```json\n{\n  "op": "addElement",\n  "target": { "slide": 1 },\n  "kind": "lineArrow",\n  "offset": { "x": 4572000, "y": 3048000, "cx": 1828800, "cy": 0 }\n}\n```\n\nCommon mistakes\n\n- Building whole pages element by element on an empty deck: use `generate_deck`; `addElement` is for adding to an already designed page.\n- Pixel frames: convert with the px-to-EMU factor from `read_slide`.\n- `autoFit` values other than `"shrink"`/`"resize"`.\n\n### addConnector\n\n`{from,to,kind?:"straight"|"elbow"|"curved",fromSide?,toSide?,arrow?:"none"|"end"|"both",line?:{color?,widthPt?,dash?}}`\n\nDraws a connector glued to two shapes (`a:stCxn`/`a:endCxn`), so PowerPoint\nand later `setTransform` moves keep it attached. When `fromSide`/`toSide`\n(`top`/`left`/`bottom`/`right`) are omitted, the pair of edge midpoints that\nare closest to each other is chosen. The frame is derived from the two\nconnection points; the new element id is in `created`.\n\n| Field            | Type                                    | Notes                                                                        |\n| ---------------- | --------------------------------------- | ---------------------------------------------------------------------------- |\n| from, to         | element ids                             | Two different top-level elements on `target.slide`                           |\n| kind             | `straight` (default), `elbow`, `curved` |                                                                              |\n| fromSide, toSide | side name                               | Pin one or both ends; omitted sides are chosen automatically                 |\n| arrow            | `none`, `end` (default), `both`         | Arrowhead at the `to` end, both ends, or none                                |\n| line             | `{color?, widthPt?, dash?}`             | Defaults 1 pt black solid; `dash` is an OOXML preset (`dash`, `sysDot`, ...) |\n\n```json\n{\n  "op": "addConnector",\n  "target": { "slide": 0 },\n  "from": "e_SHAPE",\n  "to": "e_PICTURE",\n  "kind": "elbow",\n  "line": { "color": "#1A73E8", "widthPt": 1.5 }\n}\n```\n\nCommon mistakes\n\n- Drawing a free line with `addElement` and hoping it follows the shapes: only `addConnector` (or `setConnectorEndpoints` with `start`/`end`) attaches.\n- Using it between a group child and a shape: connect to the group (top-level ids only).\n\n### addPicture (not-ai-callable)\n\n`{bytes:base64|dataURL,ext?,offset} \u2014 use insert_web_image instead`\n\nEmbeds image bytes as a new picture. The model inserts images through\n`insert_web_image` (URL) so the main process downloads and center-crops them.\n\n### replacePicture (not-ai-callable)\n\n`{bytes:base64|dataURL,ext?} \u2014 use replace_image instead`\n\nSwaps a picture\'s bytes in place. The model uses `replace_image` with a URL.\n\n### addTable\n\n`{rows,cols,offset:{x,y,cx,cy},colWidthsEmu?,rowHeightsEmu?,cellProps?:[[{gridSpan?,rowSpan?,hMerge?,vMerge?,anchor?}]]}`\n\nInserts a native table with PowerPoint\'s default style and empty cells. Fill\ncells afterwards with `setTableCell` (one op per cell, same transaction is\nfine once you know the table id from the first result).\n\n| Field         | Type                                                                | Notes                                                                    |\n| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ |\n| rows, cols    | integer >= 1                                                        |                                                                          |\n| offset        | `{x, y, cx, cy}` EMU                                                | Columns and rows split the frame equally unless widths/heights are given |\n| colWidthsEmu  | number[]                                                            | Exactly `cols` positive values                                           |\n| rowHeightsEmu | number[]                                                            | Exactly `rows` positive values                                           |\n| cellProps     | array of rows of `{gridSpan?, rowSpan?, hMerge?, vMerge?, anchor?}` | Row-major; `anchor` `"t"`/`"ctr"`/`"b"`; use for pre-merged headers      |\n\n```json\n{\n  "op": "addTable",\n  "target": { "slide": 1 },\n  "rows": 3,\n  "cols": 3,\n  "offset": { "x": 914400, "y": 1371600, "cx": 7315200, "cy": 2286000 }\n}\n```\n\n```json\n{\n  "op": "addTable",\n  "target": { "slide": 1 },\n  "rows": 2,\n  "cols": 2,\n  "offset": { "x": 914400, "y": 1371600, "cx": 5486400, "cy": 1371600 },\n  "colWidthsEmu": [1828800, 3657600],\n  "cellProps": [\n    [{ "gridSpan": 2 }, { "hMerge": true }],\n    [{}, {}]\n  ]\n}\n```\n\nCommon mistakes\n\n- `colWidthsEmu` with the wrong count: it must list exactly one width per column.\n- Passing cell text here: the op creates empty cells; write text with `setTableCell`.\n\n### addChart\n\n`{kind:"bar"|"barStacked"|"line"|"area"|"pie"|"doughnut"|"scatter"|"radar"|"comboBarLine",categories:[\u2026],series:[{name,values:[\u2026]}],offset,title?,colorScheme?:["#RRGGBB"],holeSizePct?}`\n\nInserts a native, PowerPoint-editable chart.\n\n| Field       | Type                                              | Notes                                                                                                                                                                                                     |\n| ----------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| kind        | see signature                                     | `comboBarLine` draws the last series as a line on a secondary axis                                                                                                                                        |\n| categories  | string[]                                          | At least one; the x-axis labels                                                                                                                                                                           |\n| series      | array of `{name, values:number[]}`                | At least one; each `values` length should equal `categories` length                                                                                                                                       |\n| offset      | `{x, y, cx, cy}` EMU                              |                                                                                                                                                                                                           |\n| title       | string                                            | Optional chart title                                                                                                                                                                                      |\n| colorScheme | `"#RRGGBB"[]`                                     | Optional series colors, cycled; omit to follow the theme                                                                                                                                                  |\n| holeSizePct | number                                            | Doughnut hole size (10..90)                                                                                                                                                                               |\n| barDir      | `"bar"`                                           | Optional: horizontal bars instead of columns                                                                                                                                                              |\n| dataSource  | `"user"` / `"document"` / `"search"` / `"sample"` | Where the numbers came from; checked by apply_ops before the batch runs (not part of the op itself). `"search"` needs a web_search in this conversation; `"sample"` figures must be disclosed to the user |\n\n```json\n{\n  "op": "addChart",\n  "target": { "slide": 1 },\n  "kind": "bar",\n  "title": "Revenue by quarter",\n  "categories": ["Q1", "Q2", "Q3", "Q4"],\n  "series": [{ "name": "Revenue", "values": [120, 135, 150, 170] }],\n  "offset": { "x": 914400, "y": 1371600, "cx": 7315200, "cy": 3657600 },\n  "dataSource": "user"\n}\n```\n\n```json\n{\n  "op": "addChart",\n  "target": { "slide": 1 },\n  "kind": "doughnut",\n  "holeSizePct": 55,\n  "categories": ["Direct", "Partner", "Online"],\n  "series": [{ "name": "Share", "values": [45, 30, 25] }],\n  "offset": { "x": 2743200, "y": 1371600, "cx": 3657600, "cy": 3657600 },\n  "colorScheme": ["#1A73E8", "#34A853", "#FBBC04"]\n}\n```\n\nCommon mistakes\n\n- Inventing numbers: every value needs a source (user, deck, or a search in this conversation); with none, use illustrative values and say so to the user.\n- `values` shorter or longer than `categories`.\n- Editing an existing chart with `addChart`: use the `edit_chart` tool, which keeps position and z-order.\n\n### addSmartArt\n\n`{layout,items:[\u2026],offset}`\n\nInserts a SmartArt-style diagram built from grouped shapes.\n\n| Field  | Type                                                                                     | Notes                     |\n| ------ | ---------------------------------------------------------------------------------------- | ------------------------- |\n| layout | `"list"` / `"process"` / `"cycle"` / `"hierarchy"` / `"pyramid"` / `"matrix"` / `"venn"` |                           |\n| items  | string[]                                                                                 | 1..8 node texts, in order |\n| offset | `{x, y, cx, cy}` EMU                                                                     |                           |\n\n```json\n{\n  "op": "addSmartArt",\n  "target": { "slide": 1 },\n  "layout": "process",\n  "items": ["Discover", "Design", "Deliver"],\n  "offset": { "x": 914400, "y": 1828800, "cx": 7315200, "cy": 1828800 }\n}\n```\n\n### addMedia (not-ai-callable)\n\n`{kind:"video"|"audio",bytes:base64|dataURL,ext,offset}`\n\nEmbeds a video or audio file; bytes payload from the UI file picker.\n\n### addModel3d (not-ai-callable)\n\n`{bytes,ext,offset} \u2014 bytes payload`\n\nEmbeds a 3D model; bytes payload from the UI file picker.\n\n### pasteElements (not-ai-callable)\n\n`{items,dx,dy} \u2014 clipboard payload`\n\nPastes copied elements; the payload comes from the internal clipboard.\n';
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/pptx-ops/src/prompts/ops/table.md?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\pptx-ops\src\prompts\ops\table.md?raw
 var table_default = '# Table ops\n\n> Edit an existing table element: cell text, merges, row/column structure, row heights, column widths, cell anchors, style presets and borders.\n\nAll ops take `target:{slide, el}` where `el` is the table\'s id (type `table` in\nthe outline). `row` and `col` are 0-based. Chart edits (`setChart`) live in the\n`edit_chart` tool.\n\n### setTableCell\n\n`{row,col,paragraphs}`\n\nReplaces one cell\'s text. Runs you do not restyle inherit the cell\'s current\nformatting, so plain `{text}` runs keep size, color and bold.\n\n| Field      | Type                                                                                            | Notes                   |\n| ---------- | ----------------------------------------------------------------------------------------------- | ----------------------- |\n| row, col   | integer                                                                                         | 0-based                 |\n| paragraphs | array of `{runs:[{text, bold?, italic?, fontSize?, color?}], align?, bullet?, lineSpacingPct?}` | Same shape as `setText` |\n\n```json\n{\n  "op": "setTableCell",\n  "target": { "slide": 0, "el": "e_TABLE" },\n  "row": 0,\n  "col": 0,\n  "paragraphs": [{ "runs": [{ "text": "Metric", "bold": true }], "align": "center" }]\n}\n```\n\nCommon mistakes\n\n- Passing the cell text as a string: it must be a paragraph array.\n- Row or column outside the grid: the op reports the failing (row, col).\n\n### tableMerge\n\n`{kind:"merge-right"|"merge-down"|"split",row,col}`\n\nMerges the cell at (row, col) with its right or lower neighbor, or splits a\nmerged cell back into its grid cells.\n\n```json\n{\n  "op": "tableMerge",\n  "target": { "slide": 0, "el": "e_TABLE" },\n  "kind": "merge-right",\n  "row": 0,\n  "col": 0\n}\n```\n\nCommon mistakes\n\n- Merging across an existing merge boundary: the op refuses; split first.\n\n### tableStructure\n\n`{kind:"insert-row"|"delete-row"|"insert-col"|"delete-col",index,before?}`\n\nInserts or deletes a row or column. Insert goes after `index` unless\n`before:true`.\n\n```json\n{\n  "op": "tableStructure",\n  "target": { "slide": 0, "el": "e_TABLE" },\n  "kind": "insert-row",\n  "index": 1\n}\n```\n\n```json\n{\n  "op": "tableStructure",\n  "target": { "slide": 0, "el": "e_TABLE" },\n  "kind": "delete-col",\n  "index": 0\n}\n```\n\nCommon mistakes\n\n- Tables with merged cells refuse row/column surgery: split the merges first (`tableMerge` with `kind:"split"`).\n\n### setTableRowHeight\n\n`{row,hEmu}`\n\nSets one row\'s height in EMU (the table frame grows or shrinks accordingly).\n\n```json\n{ "op": "setTableRowHeight", "target": { "slide": 0, "el": "e_TABLE" }, "row": 0, "hEmu": 457200 }\n```\n\n### setTableCellAnchor\n\n`{row,col,anchor:"top"|"middle"|"bottom"}`\n\nVertical alignment of the text inside one cell.\n\n```json\n{\n  "op": "setTableCellAnchor",\n  "target": { "slide": 0, "el": "e_TABLE" },\n  "row": 0,\n  "col": 1,\n  "anchor": "middle"\n}\n```\n\n### setTableColWidth\n\n`{col,wEmu}`\n\nSets one column\'s width in EMU.\n\n```json\n{ "op": "setTableColWidth", "target": { "slide": 0, "el": "e_TABLE" }, "col": 0, "wEmu": 2743200 }\n```\n\n### setTableStyle\n\n`{styleName} | {styleId?,firstRow?,lastRow?,firstCol?,lastCol?,bandRow?,bandCol?,keepFormatting?,shadingColor?,borderColor?,borderWidthPt?,borderPreset?}`\n\nRestyles the whole table: apply one fixed-color preset by `styleName`, pick one\nof PowerPoint\'s 74 built-in styles by `styleId` (gallery name such as\n`"Medium Style 2 - Accent 1"` or its GUID; they follow the deck\'s theme\ncolors), or change individual region flags, cell shading and border lines. A\npreset wins over the other fields; a preset or `styleId` clears direct cell\nfills and borders like PowerPoint\'s style gallery (`keepFormatting: true`\nkeeps them). `slides read` shows a table\'s current `style`.\n\n| Field                               | Type                  | Notes                                                                                                                                                                                                                                          |\n| ----------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| styleName                           | string                | `none`, `lightGrid`, `zebraBlue`, `zebraGray`, `headerDarkBlue`, `headerOrange`, `noBorder`, `fullBorder`                                                                                                                                      |\n| styleId                             | string                | Built-in gallery name or `{GUID}`: `No Style, No Grid`, `No Style, Table Grid`, `Themed Style 1/2 - Accent N`, `Light Style 1/2/3 [- Accent N]`, `Medium Style 1/2/3/4 [- Accent N]`, `Dark Style 1 [- Accent N]`, `Dark Style 2 [- Accent N]` |\n| firstRow                            | boolean               | Header-row emphasis                                                                                                                                                                                                                            |\n| lastRow, firstCol, lastCol, bandCol | boolean               | Total row, first/last column emphasis, banded columns                                                                                                                                                                                          |\n| bandRow                             | boolean               | Banded rows                                                                                                                                                                                                                                    |\n| keepFormatting                      | boolean               | With `styleId`: keep direct cell fills/borders instead of clearing them                                                                                                                                                                        |\n| shadingColor                        | `#RRGGBB` or `"none"` | Cell fill for every cell                                                                                                                                                                                                                       |\n| borderColor                         | `#RRGGBB`             | Border line color                                                                                                                                                                                                                              |\n| borderWidthPt                       | number (pt)           | Border line width; > 0                                                                                                                                                                                                                         |\n| borderPreset                        | `"all"` or `"none"`   | Draw all border lines, or clear them                                                                                                                                                                                                           |\n\n```json\n{ "op": "setTableStyle", "target": { "slide": 0, "el": "e_TABLE" }, "styleName": "zebraBlue" }\n```\n\n```json\n{\n  "op": "setTableStyle",\n  "target": { "slide": 0, "el": "e_TABLE" },\n  "styleId": "Medium Style 2 - Accent 1",\n  "firstRow": true,\n  "bandRow": true\n}\n```\n\n```json\n{\n  "op": "setTableStyle",\n  "target": { "slide": 0, "el": "e_TABLE" },\n  "firstRow": true,\n  "borderPreset": "all",\n  "borderColor": "#BFBFBF",\n  "borderWidthPt": 1\n}\n```\n\nCommon mistakes\n\n- Passing a color name (`"blue"`): colors are `#RRGGBB`.\n- Mixing `styleName` with the other fields: the preset is applied and the rest is ignored.\n- A built-in name in `styleName`: gallery names and GUIDs go in `styleId`.\n- Restyling one cell\'s text: that is `setTableCell` with styled runs, not this op.\n\n### setChart (not-ai-callable)\n\n`{patch:ChartEdit} \u2014 use the edit_chart tool instead`\n\nChanges a chart\'s type, data, colors or elements. The `edit_chart` tool exposes\nthis with a validated schema.\n';
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/pptx-ops/src/prompts/ops/slide.md?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\pptx-ops\src\prompts\ops\slide.md?raw
 var slide_default = '# Slide ops\n\n> Whole-page operations: delete, duplicate, insert blank or by layout, move, background, hide, transition, auto-advance, animations, speaker notes, comments.\n\nSlide ops take `target:{slide}` only. `slide` is a 0-based index or a durable\n`"s_<n>"` id from the outline. Structural ops (delete, duplicate, insert, move)\nshift later indices; when you batch several in one transaction, later ops are\nstill resolved against the live deck, so prefer durable ids or order the batch\nfrom the last page to the first.\n\n### deleteSlide\n\n`{}`\n\nRemoves the page. A deck must keep at least one slide.\n\n```json\n{ "op": "deleteSlide", "target": { "slide": 1 } }\n```\n\n### duplicateSlide\n\n`{}`\n\nInserts a copy right after the page. `clearText:true` empties the text boxes\nso the copy serves as a layout-preserving blank.\nThe copy lands at the source index + 1; the result echoes only the source\ntarget, so address the new page by that index when you fill it.\n\n```json\n{ "op": "duplicateSlide", "target": { "slide": 0 } }\n```\n\n```json\n{ "op": "duplicateSlide", "target": { "slide": 0 }, "clearText": true }\n```\n\n### addBlankSlide\n\n`{} \u2014 inserts after target.slide`\n\nInserts a new blank page (same layout and background as `target.slide`) right\nafter it.\n\n```json\n{ "op": "addBlankSlide", "target": { "slide": "s_1" } }\n```\n\n### addSlideWithLayout\n\n`{layout:<name>|<index>} \u2014 inserts after target.slide (default: after the last slide)`\n\nInserts a page bound to one of the deck\'s layouts, with that layout\'s\nplaceholders as empty prompt boxes. `layout` is the layout\'s gallery name or\nits 0-based index as listed by `slides read --layouts`; the error names every\nlayout when the reference misses. The new slide\'s id is reported in `created`.\n\n```json\n{ "op": "addSlideWithLayout", "target": { "slide": "s_1" }, "layout": "Blank" }\n```\n\nCommon mistakes\n\n- Guessing layout names from another deck: list them with `slides read --layouts` first.\n- Filling the new placeholders in the same batch: they get ids only after the insert; `slides read` the new slide, then `setText`.\n\n### pasteSlide (not-ai-callable)\n\n`{afterIndex,bundle|png,mode?} \u2014 clipboard payload`\n\nPastes a copied slide bundle from the internal clipboard.\n\n### insertSlidePptx (not-ai-callable)\n\n`{source,at?,replace?} \u2014 generated-page landing payload (use generate_deck/regenerate_slide)`\n\nLands a generated one-slide pptx into the deck; the generation tools call it.\n\n### moveSlide\n\n`{to} \u2014 0-based destination index`\n\nMoves the page to a new position.\n\n```json\n{ "op": "moveSlide", "target": { "slide": 1 }, "to": 0 }\n```\n\n### setSlideLayout\n\n`{layout?:<name>|<index>} \u2014 omitted: snap placeholders back to the current layout`\n\nRe-links the page to another layout (existing shapes stay where they are;\nmissing layout placeholders are added as empty prompt boxes). Without `layout`\nthe current layout is re-applied, moving placeholders back to their layout\npositions.\n\n```json\n{ "op": "setSlideLayout", "target": { "slide": 0 }, "layout": 0 }\n```\n\n### setBackground\n\n`{kind:"solid"|"gradient"|"reset"|"graphics"|"image",color?,from?,to?,angleDeg?,radial?,hidden?} \u2014 image kind needs a bytes source (use set_slide_background)`\n\nPage background. Full-bleed decorative rectangles that act as a backdrop are\nrecolored along with it. One slide per op; for "all pages" send one op per\nslide in the same transaction.\n\n| Kind         | Fields                               | Notes                                                                                 |\n| ------------ | ------------------------------------ | ------------------------------------------------------------------------------------- |\n| `"solid"`    | `color`                              | `"#RRGGBB"`                                                                           |\n| `"gradient"` | `from`, `to`, `angleDeg?`, `radial?` | Two-stop gradient; `angleDeg` in degrees (default 0); `radial:true` ignores the angle |\n| `"reset"`    | none                                 | Remove the page override and inherit the layout/master background                     |\n| `"graphics"` | `hidden`                             | `true` hides the master\'s background graphics on this page                            |\n| `"image"`    | `source`                             | Bytes or media-part payload; not usable from `apply_ops`                              |\n\n```json\n{ "op": "setBackground", "target": { "slide": 0 }, "kind": "solid", "color": "#0B1F3A" }\n```\n\n```json\n{\n  "op": "setBackground",\n  "target": { "slide": 1 },\n  "kind": "gradient",\n  "from": "#0B1F3A",\n  "to": "#1A73E8",\n  "angleDeg": 90\n}\n```\n\n```json\n{ "op": "setBackground", "target": { "slide": 1 }, "kind": "reset" }\n```\n\nCommon mistakes\n\n- Dark backgrounds without lightening the text: follow up with `setFont` color changes on the page\'s text.\n- `kind:"image"` from the model: use the picture tools; the op needs bytes.\n\n### setHidden\n\n`{hidden:boolean}`\n\nHides or shows the page in the slide show (it stays in the deck).\n\n```json\n{ "op": "setHidden", "target": { "slide": 1 }, "hidden": true }\n```\n\n### setTransition\n\n`{kind:"none"|"fade"|"push"|"wipe"|\u2026}`\n\nSlide transition. Accepted kinds: `none`, `morph`, `fade`, `push`, `wipe`,\n`split`, `circle`, `cover`, `pull`, `dissolve`, `zoom`, `random`.\n\n```json\n{ "op": "setTransition", "target": { "slide": 0 }, "kind": "fade" }\n```\n\nCommon mistakes\n\n- Names from other tools such as `"slide"` or `"cut"`: only the kinds listed above are accepted; the error lists them.\n\n### setAdvanceTime\n\n`{ms:number|null} \u2014 auto-advance; null clears`\n\nAutomatic advance after the given milliseconds; `null` returns to click-to-advance.\n\n```json\n{ "op": "setAdvanceTime", "target": { "slide": 0 }, "ms": 5000 }\n```\n\n### setAnimations (not-ai-callable)\n\n`{items:[{spid,effect,trigger,durationMs,delayMs,\u2026}]} \u2014 spid-addressed (cNvPr id), no id translation yet`\n\nRewrites the page\'s animation timeline; addressed by raw shape ids, so the UI\nanimation pane owns it for now.\n\n### addAnimation\n\n`{effect,kind?,trigger?,duration?,delay?,direction?,paragraph?,motionPath?,presetXml?,after?} \u2014 target:{slide, el}; one effect appended to the page timeline`\n\nAdds one animation for the element at the end of the page\'s timeline (or right\nafter position `after`). The timeline is read back as `animations[]` in\n`slides read`, each item with its `seq` (0-based position), `el`, `effect`,\n`kind`, `trigger`, `durationMs`, `delayMs`.\n\n| Field      | Type                                                                                                                                                                                                           | Notes                                                                                                                                             |\n| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |\n| effect     | entrance `appear` `fade` `flyIn` `wipe` `wipeDown` `splitIn` `bounce` `flipIn` `zoom`; emphasis `pulse` `spin` `grow` `teeter`; exit `disappear` `fadeOut` `flyOut` `wipeOut` `shrink` `zoomOut`; `motionPath` | Required unless `presetXml` is given                                                                                                              |\n| kind       | `"entrance"` / `"emphasis"` / `"exit"` / `"path"`                                                                                                                                                              | Optional cross-check; rejected when it does not match the effect                                                                                  |\n| trigger    | `"onClick"` (default) / `"withPrev"` / `"afterPrev"`                                                                                                                                                           | `withPrev` starts with the previous effect, `afterPrev` after it ends                                                                             |\n| duration   | ms >= 0                                                                                                                                                                                                        | Default per effect (appear 0, fade 500, spin 2000, \u2026); `durationMs` also accepted                                                                 |\n| delay      | ms >= 0                                                                                                                                                                                                        | Default 0; `delayMs` also accepted                                                                                                                |\n| direction  | `"top"` / `"bottom"` / `"left"` / `"right"`                                                                                                                                                                    | Only for `flyIn`, `flyOut`, `wipe`, `wipeOut` (default bottom)                                                                                    |\n| paragraph  | 0-based index                                                                                                                                                                                                  | Animate one paragraph of a text body instead of the whole shape                                                                                   |\n| motionPath | `"M 0 0 L 0.25 0"`                                                                                                                                                                                             | With `effect:"motionPath"`; coordinates are fractions of the slide size                                                                           |\n| presetXml  | one `<p:par>\u2026</p:par>` block                                                                                                                                                                                   | Verbatim effect exported from PowerPoint for presets outside the list; every `<p:spTgt spid>` must be this element\'s shape id; kept byte-for-byte |\n| after      | seq                                                                                                                                                                                                            | Insert right after that timeline position instead of appending                                                                                    |\n\n```json\n{\n  "op": "addAnimation",\n  "target": { "slide": 0, "el": "e_TEXT" },\n  "effect": "flyIn",\n  "direction": "left",\n  "trigger": "afterPrev",\n  "duration": 600\n}\n```\n\n### removeAnimation\n\n`{seq} \u2014 target:{slide}; or target:{slide, el} to drop every animation of that element`\n\nRemoves one timeline item by `seq`, or all items targeting an element. Later\nitems renumber; read the page again before the next batch.\n\n```json\n{ "op": "removeAnimation", "target": { "slide": 0, "el": "e_TEXT" } }\n```\n\n### reorderAnimation\n\n`{seq,to} \u2014 target:{slide}; move a timeline item`\n\nMoves the item at `seq` to position `to` (both 0-based, inside the timeline).\n\n```json\n{ "op": "reorderAnimation", "target": { "slide": 0 }, "seq": 2, "to": 0 }\n```\n\n### setNotes\n\n`{text} \u2014 speaker notes`\n\nReplaces the page\'s speaker notes (paragraphs separated by newlines). An empty\nstring clears them. Notes never affect the canvas.\n\n```json\n{\n  "op": "setNotes",\n  "target": { "slide": 0 },\n  "text": "Open with the headline number.\\nPause for questions before the next section."\n}\n```\n\n### addComment\n\n`{text,author}`\n\nAdds a review comment to the page.\n\n```json\n{\n  "op": "addComment",\n  "target": { "slide": 0 },\n  "text": "Consider a stronger verb in the title.",\n  "author": "AI Assistant"\n}\n```\n\n### deleteComment\n\n`{authorId,idx}`\n\nRemoves a comment identified by its author id and index within that author\'s\ncomments on the page (both come from the comments pane data).\n\n```json\n{ "op": "deleteComment", "target": { "slide": 0 }, "authorId": 0, "idx": 0 }\n```\n';
 
-// raw-file:/Users/cheney/Documents/trae_projects/happy-friday-lite/vendor/happyoffice/packages/pptx-ops/src/prompts/ops/deck.md?raw
+// raw-file:C:\项目练习\doc\Happy Friday Lite 脑洞\Friday-3.0.6-preview.1-source\vendor\happyoffice\packages\pptx-ops\src\prompts\ops\deck.md?raw
 var deck_default = '# Deck ops\n\n> Presentation-wide operations with no target: page size, find and replace, header/footer, theme, sections.\n\nDeck ops carry no `target`. They affect every slide (or the presentation\'s\nmetadata), so read the deck outline first and confirm the scope with the user\nwhen the request is ambiguous.\n\n### setSlideSize\n\n`{cx,cy} \u2014 EMU page size, whole deck`\n\nChanges the page size of the whole deck. Element positions are not rescaled;\nfollow up with `execute_slide_script` when content must be re-laid out.\nCommon sizes: 16:9 is 12192000 x 6858000, 4:3 is 9144000 x 6858000.\n\n```json\n{ "op": "setSlideSize", "cx": 12192000, "cy": 6858000 }\n```\n\n### findReplace\n\n`{find,replace,matchCase?,slideIndex?} \u2014 whole deck unless slideIndex`\n\nText substitution inside runs across text boxes, shapes, table cells and direct\ngroup children. Matches that span two differently formatted runs are not\nreplaced.\n\n| Field      | Type             | Notes                                       |\n| ---------- | ---------------- | ------------------------------------------- |\n| find       | non-empty string |                                             |\n| replace    | string           | May be empty to delete the text             |\n| matchCase  | boolean          | Default false                               |\n| slideIndex | integer          | Restrict to one page                        |\n| elementId  | string           | Restrict to one element (with `slideIndex`) |\n| firstOnly  | boolean          | Replace only the first match                |\n\n```json\n{ "op": "findReplace", "find": "2023", "replace": "2024" }\n```\n\n```json\n{\n  "op": "findReplace",\n  "find": "Acme Corp",\n  "replace": "Acme Corporation",\n  "matchCase": true,\n  "slideIndex": 0\n}\n```\n\nCommon mistakes\n\n- Expecting a report of zero changes: the op fails when nothing matched, so a "not found" error is normal feedback, not a fault.\n\n### applyHeaderFooter\n\n`{settings:{footer?,slideNum?,date?,dateAuto?}} \u2014 every slide`\n\nFooter text, slide numbers and date on every page (through the master\'s\nplaceholders).\n\n| Field             | Type             | Notes                                         |\n| ----------------- | ---------------- | --------------------------------------------- |\n| settings.footer   | string or `null` | `null` or empty hides the footer              |\n| settings.slideNum | boolean          | Show page numbers                             |\n| settings.date     | string or `null` | Fixed date text; `null` or empty hides it     |\n| settings.dateAuto | boolean          | Dynamic date field that updates in PowerPoint |\n\n```json\n{\n  "op": "applyHeaderFooter",\n  "settings": { "footer": "Acme Corporation - Confidential", "slideNum": true }\n}\n```\n\nCommon mistakes\n\n- Re-sending identical settings: the op reports "nothing changed" as an error; skip it when the values are already in place.\n\n### setSections\n\n`{sections:[{id,name,slideIndices},\u2026]} \u2014 full replace`\n\nReplaces the whole section list. Each section lists the 0-based indices of its\nslides in order; every slide should belong to exactly one section. Ids are\nGUIDs in braces; reuse existing ids to keep a section\'s identity, mint a new\nGUID for a new one.\n\n```json\n{\n  "op": "setSections",\n  "sections": [\n    { "id": "SECTION_ID", "name": "Introduction", "slideIndices": [0] },\n    { "id": "{6F1D2B0A-4C3E-4F58-9A21-0D7E5B3C9A11}", "name": "Details", "slideIndices": [1] }\n  ]\n}\n```\n\nRelated: `addSection`, `renameSection`, `removeSection`, `moveSection` for single changes.\n\n### applyTheme\n\n`{name,colors:{dk1?,lt1?,dk2?,lt2?,accent1?..accent6?,hlink?,folHlink?},majorFont?,minorFont?} \u2014 "#RRGGBB" slots, whole deck`\n\nRewrites the theme color scheme (and optionally the heading/body fonts) of the\nwhole deck, remapping explicit colors that matched the old scheme. Pages\nwithout their own background get the new `lt1` color.\n\n| Field     | Type                                  | Notes                                                                                                  |\n| --------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------ |\n| name      | non-empty string                      | Theme name written into the file                                                                       |\n| colors    | object of scheme slots to `"#RRGGBB"` | Slots: `dk1`, `lt1`, `dk2`, `lt2`, `accent1`..`accent6`, `hlink`, `folHlink`; six hex digits, no alpha |\n| majorFont | string                                | Heading font                                                                                           |\n| minorFont | string                                | Body font                                                                                              |\n\n```json\n{\n  "op": "applyTheme",\n  "name": "Ocean",\n  "colors": {\n    "dk1": "#0B1F3A",\n    "lt1": "#FFFFFF",\n    "dk2": "#1F3B5C",\n    "lt2": "#E8F0FE",\n    "accent1": "#1A73E8",\n    "accent2": "#34A853",\n    "accent3": "#FBBC04",\n    "accent4": "#EA4335",\n    "accent5": "#9AA0A6",\n    "accent6": "#5F6368",\n    "hlink": "#1A73E8",\n    "folHlink": "#7B1FA2"\n  },\n  "majorFont": "Georgia",\n  "minorFont": "Calibri"\n}\n```\n\nCommon mistakes\n\n- Alpha in scheme colors (`"#RRGGBBAA"`): theme slots take six hex digits only.\n- Passing `colors` as an array: it is a slot-to-color object.\n\n### addSection\n\n`{atSlideIndex,name}`\n\nStarts a new section at the given slide (that slide and the following ones up to\nthe next section move into it).\n\n```json\n{ "op": "addSection", "atSlideIndex": 1, "name": "Appendix" }\n```\n\n### renameSection\n\n`{id,name}`\n\n```json\n{ "op": "renameSection", "id": "SECTION_ID", "name": "Overview" }\n```\n\n### removeSection\n\n`{id} \u2014 keeps the slides`\n\nRemoves the section header; its slides join the previous section.\n\n```json\n{ "op": "removeSection", "id": "SECTION_ID" }\n```\n\n### moveSection\n\n`{id,dir:"up"|"down"}`\n\nSwaps the section (with all its slides) with its neighbor.\n\n```json\n{ "op": "moveSection", "id": "SECTION_ID", "dir": "down" }\n```\n';
 
 // vendor/happyoffice/packages/pptx-ops/src/op-docs.ts
@@ -211541,8 +211703,8 @@ function createI18n(dicts) {
 
 // vendor/happyoffice/packages/project-store/src/store.ts
 var import_node_crypto5 = require("node:crypto");
-var import_node_fs6 = require("node:fs");
-var import_node_path11 = require("node:path");
+var import_node_fs7 = require("node:fs");
+var import_node_path12 = require("node:path");
 var TOOL_FIELD_MAX_CHARS = 16e3;
 var TEXT_MAX_CHARS = 32e3;
 var SCOPE_TEXT_MAX_CHARS = 400;
@@ -211551,42 +211713,42 @@ function nowIso() {
   return (/* @__PURE__ */ new Date()).toISOString();
 }
 function ensureDir(dir) {
-  if (!(0, import_node_fs6.existsSync)(dir)) (0, import_node_fs6.mkdirSync)(dir, { recursive: true });
+  if (!(0, import_node_fs7.existsSync)(dir)) (0, import_node_fs7.mkdirSync)(dir, { recursive: true });
 }
 function readJson(filePath) {
   try {
-    if (!(0, import_node_fs6.existsSync)(filePath)) return null;
-    return JSON.parse((0, import_node_fs6.readFileSync)(filePath, "utf8"));
+    if (!(0, import_node_fs7.existsSync)(filePath)) return null;
+    return JSON.parse((0, import_node_fs7.readFileSync)(filePath, "utf8"));
   } catch {
     return null;
   }
 }
 function writeJson(filePath, data) {
-  ensureDir((0, import_node_path11.dirname)(filePath));
+  ensureDir((0, import_node_path12.dirname)(filePath));
   const tmpPath = `${filePath}.tmp`;
-  (0, import_node_fs6.writeFileSync)(tmpPath, JSON.stringify(data, null, 2), "utf8");
-  (0, import_node_fs6.renameSync)(tmpPath, filePath);
+  (0, import_node_fs7.writeFileSync)(tmpPath, JSON.stringify(data, null, 2), "utf8");
+  (0, import_node_fs7.renameSync)(tmpPath, filePath);
 }
 var ProjectStore = class _ProjectStore {
   baseDir;
   constructor(userDataPath) {
-    this.baseDir = (0, import_node_path11.join)(userDataPath, "projects");
+    this.baseDir = (0, import_node_path12.join)(userDataPath, "projects");
   }
   // ── Path helpers ──────────────────────────────────────────
   indexPath() {
-    return (0, import_node_path11.join)(this.baseDir, "index.json");
+    return (0, import_node_path12.join)(this.baseDir, "index.json");
   }
   projectDir(projectId) {
-    return (0, import_node_path11.join)(this.baseDir, projectId);
+    return (0, import_node_path12.join)(this.baseDir, projectId);
   }
   projectJsonPath(projectId) {
-    return (0, import_node_path11.join)(this.projectDir(projectId), "project.json");
+    return (0, import_node_path12.join)(this.projectDir(projectId), "project.json");
   }
   chatsDir(projectId) {
-    return (0, import_node_path11.join)(this.projectDir(projectId), "chats");
+    return (0, import_node_path12.join)(this.projectDir(projectId), "chats");
   }
   chatPath(projectId, chatId) {
-    return (0, import_node_path11.join)(this.chatsDir(projectId), `${chatId}.jsonl`);
+    return (0, import_node_path12.join)(this.chatsDir(projectId), `${chatId}.jsonl`);
   }
   // ── seq counters (in-memory cache, initialized from JSONL line count on first read) ──
   /** projectId:chatId → current max seq */
@@ -211739,7 +211901,7 @@ var ProjectStore = class _ProjectStore {
     try {
       ensureDir(this.chatsDir(projectId));
       const lines = buf.map((r) => JSON.stringify(r) + "\n").join("");
-      (0, import_node_fs6.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
+      (0, import_node_fs7.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
     } catch (err) {
       console.warn("[project-store] flushPending failed:", err);
     }
@@ -211772,7 +211934,7 @@ var ProjectStore = class _ProjectStore {
         };
       }
       const key = this.seqKey(projectId, chatId);
-      if (msg.role !== "assistant" && !(0, import_node_fs6.existsSync)(this.chatPath(projectId, chatId))) {
+      if (msg.role !== "assistant" && !(0, import_node_fs7.existsSync)(this.chatPath(projectId, chatId))) {
         const buf2 = this.pendingFirstWrite.get(key) ?? [];
         buf2.push(record);
         this.pendingFirstWrite.set(key, buf2);
@@ -211782,7 +211944,7 @@ var ProjectStore = class _ProjectStore {
       const buf = this.pendingFirstWrite.get(key) ?? [];
       this.pendingFirstWrite.delete(key);
       const lines = [...buf, record].map((r) => JSON.stringify(r) + "\n").join("");
-      (0, import_node_fs6.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
+      (0, import_node_fs7.appendFileSync)(this.chatPath(projectId, chatId), lines, "utf8");
     } catch (err) {
       console.warn("[project-store] appendChatMessage failed:", err);
     }
@@ -211796,8 +211958,8 @@ var ProjectStore = class _ProjectStore {
     const filePath = this.chatPath(projectId, chatId);
     const messages = [...pending];
     try {
-      if ((0, import_node_fs6.existsSync)(filePath)) {
-        const raw = (0, import_node_fs6.readFileSync)(filePath, "utf8");
+      if ((0, import_node_fs7.existsSync)(filePath)) {
+        const raw = (0, import_node_fs7.readFileSync)(filePath, "utf8");
         const lines = raw.split("\n").filter((l) => l.trim());
         for (const line2 of lines) {
           try {
@@ -211820,16 +211982,16 @@ var ProjectStore = class _ProjectStore {
    */
   listChats(projectId) {
     const dir = this.chatsDir(projectId);
-    if (!(0, import_node_fs6.existsSync)(dir)) return [];
+    if (!(0, import_node_fs7.existsSync)(dir)) return [];
     try {
-      const files = (0, import_node_fs6.readdirSync)(dir).filter((f) => f.endsWith(".jsonl"));
+      const files = (0, import_node_fs7.readdirSync)(dir).filter((f) => f.endsWith(".jsonl"));
       return files.map((f) => {
         const chatId = f.replace(/\.jsonl$/, "");
-        const fullPath = (0, import_node_path11.join)(dir, f);
+        const fullPath = (0, import_node_path12.join)(dir, f);
         let updatedAt = nowIso();
         let approxCount = 0;
         try {
-          const st = (0, import_node_fs6.statSync)(fullPath);
+          const st = (0, import_node_fs7.statSync)(fullPath);
           updatedAt = st.mtime.toISOString();
           approxCount = Math.round(st.size / 120);
         } catch {
@@ -211852,17 +212014,17 @@ var ProjectStore = class _ProjectStore {
     const newPath = this.chatPath(toProjectId, toId);
     let mergedMaxSeq;
     try {
-      if ((0, import_node_fs6.existsSync)(oldPath)) {
-        ensureDir((0, import_node_path11.dirname)(newPath));
-        if (!(0, import_node_fs6.existsSync)(newPath)) {
-          (0, import_node_fs6.renameSync)(oldPath, newPath);
+      if ((0, import_node_fs7.existsSync)(oldPath)) {
+        ensureDir((0, import_node_path12.dirname)(newPath));
+        if (!(0, import_node_fs7.existsSync)(newPath)) {
+          (0, import_node_fs7.renameSync)(oldPath, newPath);
         } else {
           const existing = this.loadChat(toProjectId, toId, 1e4);
           let seq = existing.reduce((m, msg) => Math.max(m, msg.seq), -1) + 1;
           const moved = this.loadChat(fromProjectId, fromId, 1e4);
           const lines = moved.map((m) => JSON.stringify({ ...m, seq: seq++ }) + "\n").join("");
-          if (lines) (0, import_node_fs6.appendFileSync)(newPath, lines, "utf8");
-          (0, import_node_fs6.unlinkSync)(oldPath);
+          if (lines) (0, import_node_fs7.appendFileSync)(newPath, lines, "utf8");
+          (0, import_node_fs7.unlinkSync)(oldPath);
           mergedMaxSeq = seq - 1;
         }
       }
@@ -211936,7 +212098,7 @@ var ProjectStore = class _ProjectStore {
   listProjectFiles(projectId) {
     const proj = this.readProject(projectId);
     if (!proj) return [];
-    return [...new Set(proj.files)].filter((filePath) => (0, import_node_fs6.existsSync)(filePath));
+    return [...new Set(proj.files)].filter((filePath) => (0, import_node_fs7.existsSync)(filePath));
   }
   /**
    * Creates a project (name must be non-empty; id is the first 12 hex chars of
@@ -211997,11 +212159,11 @@ var ProjectStore = class _ProjectStore {
     if (!proj) throw new Error(`Project does not exist: ${id}`);
     const src = this.projectDir(id);
     const ts = Date.now();
-    const trashDir = (0, import_node_path11.join)(this.baseDir, ".trash");
+    const trashDir = (0, import_node_path12.join)(this.baseDir, ".trash");
     ensureDir(trashDir);
-    const dst = (0, import_node_path11.join)(trashDir, `${id}-${ts}`);
+    const dst = (0, import_node_path12.join)(trashDir, `${id}-${ts}`);
     try {
-      if ((0, import_node_fs6.existsSync)(src)) (0, import_node_fs6.renameSync)(src, dst);
+      if ((0, import_node_fs7.existsSync)(src)) (0, import_node_fs7.renameSync)(src, dst);
     } catch (err) {
       console.warn("[project-store] deleteProject rename to trash failed:", err);
     }
@@ -212056,9 +212218,9 @@ var ProjectStore = class _ProjectStore {
     const srcChatPath = this.chatPath(fromProjectId, chatId);
     const dstChatPath = this.chatPath(targetProjectId, chatId);
     try {
-      if ((0, import_node_fs6.existsSync)(srcChatPath)) {
+      if ((0, import_node_fs7.existsSync)(srcChatPath)) {
         ensureDir(this.chatsDir(targetProjectId));
-        (0, import_node_fs6.renameSync)(srcChatPath, dstChatPath);
+        (0, import_node_fs7.renameSync)(srcChatPath, dstChatPath);
       }
     } catch (err) {
       console.warn("[project-store] moveFileToProject chat rename failed:", err);
@@ -212091,7 +212253,7 @@ var ProjectStore = class _ProjectStore {
       for (const msg of msgs) {
         entries.push({
           filePath,
-          fileName: filePath ? (0, import_node_path11.basename)(filePath) : chatId,
+          fileName: filePath ? (0, import_node_path12.basename)(filePath) : chatId,
           chatId,
           ts: msg.ts,
           role: msg.role,
@@ -212110,7 +212272,7 @@ var ProjectStore = class _ProjectStore {
 };
 
 // vendor/happyoffice/apps/slides/src/main/shaped-metrics.ts
-var import_node_fs7 = require("node:fs");
+var import_node_fs8 = require("node:fs");
 
 // vendor/happyoffice/apps/slides/node_modules/harfbuzzjs/dist/harfbuzz.js
 async function createHarfBuzz(moduleArg = {}) {
@@ -212121,14 +212283,14 @@ async function createHarfBuzz(moduleArg = {}) {
   var ENVIRONMENT_IS_NODE = typeof process == "object" && process.versions?.node && process.type != "renderer";
   if (ENVIRONMENT_IS_NODE) {
     const { createRequire: createRequire4 } = await import("module");
-    var require2 = createRequire4("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs");
+    var require2 = createRequire4(__fridayBundleUrl);
   }
   var arguments_ = [];
   var thisProgram = "./this.program";
   var quit_ = (status, toThrow) => {
     throw toThrow;
   };
-  var _scriptName = "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs";
+  var _scriptName = __fridayBundleUrl;
   var scriptDirectory = "";
   function locateFile(path) {
     if (Module["locateFile"]) {
@@ -212279,7 +212441,7 @@ async function createHarfBuzz(moduleArg = {}) {
     if (Module["locateFile"]) {
       return locateFile("harfbuzz.wasm");
     }
-    return new URL("harfbuzz.wasm", "file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs").href;
+    return new URL("harfbuzz.wasm", __fridayBundleUrl).href;
   }
   function getBinarySync(file) {
     if (file == wasmBinaryFile && wasmBinary) {
@@ -212861,14 +213023,14 @@ function initShapedMetrics() {
   started = true;
   readyPromise = (async () => {
     try {
-      const wasmBinary = (0, import_node_fs7.readFileSync)(import_harfbuzz2.default);
+      const wasmBinary = (0, import_node_fs8.readFileSync)(import_harfbuzz2.default);
       const factory = harfbuzz_default;
       const mod = await factory({ wasmBinary });
       const ex = mod.wasmExports;
       for (const entry of FONT_TABLE[process.platform] ?? []) {
-        if (fonts.has(entry.script) || !(0, import_node_fs7.existsSync)(entry.file)) continue;
+        if (fonts.has(entry.script) || !(0, import_node_fs8.existsSync)(entry.file)) continue;
         try {
-          const bytes = (0, import_node_fs7.readFileSync)(entry.file);
+          const bytes = (0, import_node_fs8.readFileSync)(entry.file);
           const ptr = ex.malloc(bytes.length);
           mod.HEAPU8.set(bytes, ptr);
           const blob = ex.hb_blob_create(ptr, bytes.length, 2, 0, 0);
@@ -213127,6 +213289,14 @@ var MAX_PRINT_RATIO = 5;
 function normalizePrintRatio(ratio) {
   if (!Number.isFinite(ratio) || ratio <= 0) return DEFAULT_PRINT_RATIO;
   return Math.min(Math.max(ratio, MIN_PRINT_RATIO), MAX_PRINT_RATIO);
+}
+function printPageLandscape(o) {
+  return o.layout === "full" ? normalizePrintRatio(o.ratio) >= 1 : o.orientation === "landscape";
+}
+function printPageSizeMicrons(o) {
+  const width = o.layout === "full" ? Math.round(normalizePrintRatio(o.ratio) * SLIDE_H * 1e3) / 1e3 : A4_W;
+  const height = o.layout === "full" ? SLIDE_H : A4_H;
+  return { width: Math.round(Math.min(width, height) * 25400), height: Math.round(Math.max(width, height) * 25400) };
 }
 function buildPrintDocumentHtml(o) {
   const layout = o.layout;
@@ -215248,13 +215418,13 @@ function tiffToPng(bytes) {
 }
 
 // vendor/happyoffice/apps/slides/src/main/session-state.ts
-var import_electron3 = require("electron");
-var import_node_path13 = require("node:path");
+var import_electron5 = require("electron");
+var import_node_path14 = require("node:path");
 
 // vendor/happyoffice/apps/slides/src/main/fonts.ts
-var import_node_fs8 = require("node:fs");
-var import_node_path12 = require("node:path");
-var import_node_os6 = require("node:os");
+var import_node_fs9 = require("node:fs");
+var import_node_path13 = require("node:path");
+var import_node_os7 = require("node:os");
 var import_node_crypto6 = require("node:crypto");
 var opentype = __toESM(require_opentype());
 
@@ -215367,7 +215537,7 @@ var userFontDir = null;
 function setUserFontDir(dir) {
   userFontDir = dir;
 }
-var EMBEDDED_FONT_DIR = (0, import_node_path12.join)((0, import_node_os6.tmpdir)(), "genoffice-embedded-fonts");
+var EMBEDDED_FONT_DIR = (0, import_node_path13.join)((0, import_node_os7.tmpdir)(), "genoffice-embedded-fonts");
 var embeddedFaces = /* @__PURE__ */ new Map();
 function registerEmbeddedFonts(faces) {
   let added = false;
@@ -215381,13 +215551,13 @@ function registerEmbeddedFonts(faces) {
       embeddedFaces.set(key, perStyle);
     }
     if (perStyle.has(styleKey)) continue;
-    const path = (0, import_node_path12.join)(
+    const path = (0, import_node_path13.join)(
       EMBEDDED_FONT_DIR,
       `${(0, import_node_crypto6.createHash)("sha256").update(f.sfnt).digest("hex").slice(0, 32)}.ttf`
     );
     try {
-      (0, import_node_fs8.mkdirSync)(EMBEDDED_FONT_DIR, { recursive: true });
-      if (!(0, import_node_fs8.existsSync)(path)) (0, import_node_fs8.writeFileSync)(path, f.sfnt);
+      (0, import_node_fs9.mkdirSync)(EMBEDDED_FONT_DIR, { recursive: true });
+      if (!(0, import_node_fs9.existsSync)(path)) (0, import_node_fs9.writeFileSync)(path, f.sfnt);
     } catch {
       continue;
     }
@@ -215403,18 +215573,18 @@ function fontDirs() {
         "/System/Library/Fonts",
         "/System/Library/Fonts/Supplemental",
         "/Library/Fonts",
-        (0, import_node_path12.join)((0, import_node_os6.homedir)(), "Library/Fonts")
+        (0, import_node_path13.join)((0, import_node_os7.homedir)(), "Library/Fonts")
       ];
     case "win32":
-      return ["C:\\Windows\\Fonts", (0, import_node_path12.join)((0, import_node_os6.homedir)(), "AppData/Local/Microsoft/Windows/Fonts")];
+      return ["C:\\Windows\\Fonts", (0, import_node_path13.join)((0, import_node_os7.homedir)(), "AppData/Local/Microsoft/Windows/Fonts")];
     default:
-      return ["/usr/share/fonts", "/usr/local/share/fonts", (0, import_node_path12.join)((0, import_node_os6.homedir)(), ".fonts")];
+      return ["/usr/share/fonts", "/usr/local/share/fonts", (0, import_node_path13.join)((0, import_node_os7.homedir)(), ".fonts")];
   }
 }
 function officeFontDirs() {
   if (process.platform !== "darwin") return [];
   return ["Microsoft PowerPoint", "Microsoft Word", "Microsoft Excel"].map(
-    (app5) => (0, import_node_path12.join)("/Applications", `${app5}.app`, "Contents/Resources/DFonts")
+    (app5) => (0, import_node_path13.join)("/Applications", `${app5}.app`, "Contents/Resources/DFonts")
   );
 }
 var APPLE_FONT_ASSET_ROOT = "/System/Library/AssetsV2/com_apple_MobileAsset_Font7";
@@ -215423,8 +215593,8 @@ function appleFontAssetDirs() {
   if (process.platform !== "darwin") return [];
   const dirs = [];
   try {
-    for (const d of (0, import_node_fs8.readdirSync)(APPLE_FONT_ASSET_ROOT))
-      dirs.push((0, import_node_path12.join)(APPLE_FONT_ASSET_ROOT, d, "AssetData"));
+    for (const d of (0, import_node_fs9.readdirSync)(APPLE_FONT_ASSET_ROOT))
+      dirs.push((0, import_node_path13.join)(APPLE_FONT_ASSET_ROOT, d, "AssetData"));
   } catch {
   }
   dirs.push(APPLE_FONT_SUBSETS);
@@ -215433,9 +215603,9 @@ function appleFontAssetDirs() {
 function cloudFontBase() {
   switch (process.platform) {
     case "darwin":
-      return (0, import_node_path12.join)((0, import_node_os6.homedir)(), "Library/Group Containers/UBF8T346G9.Office/FontCache");
+      return (0, import_node_path13.join)((0, import_node_os7.homedir)(), "Library/Group Containers/UBF8T346G9.Office/FontCache");
     case "win32":
-      return (0, import_node_path12.join)((0, import_node_os6.homedir)(), "AppData/Local/Microsoft/FontCache");
+      return (0, import_node_path13.join)((0, import_node_os7.homedir)(), "AppData/Local/Microsoft/FontCache");
     default:
       return void 0;
   }
@@ -215725,7 +215895,7 @@ var FontRegistry = class {
       const m = /^(.+)\.(ttf|otf|ttc|otc)$/i.exec(name);
       if (!m) continue;
       const key = norm(m[1].replace(/\[[^\]]*\]$/, ""));
-      if (!this.index.has(key)) this.index.set(key, (0, import_node_path12.join)(dir, name));
+      if (!this.index.has(key)) this.index.set(key, (0, import_node_path13.join)(dir, name));
     }
   }
   buildIndex() {
@@ -215774,7 +215944,7 @@ var FontRegistry = class {
     if (cached) return cached;
     let faces;
     try {
-      faces = readFaceDir((0, import_node_fs8.readFileSync)(path));
+      faces = readFaceDir((0, import_node_fs9.readFileSync)(path));
     } catch {
       faces = [];
     }
@@ -215787,7 +215957,7 @@ var FontRegistry = class {
     if (cached !== void 0) return cached;
     let font;
     try {
-      const buf = (0, import_node_fs8.readFileSync)(path);
+      const buf = (0, import_node_fs9.readFileSync)(path);
       try {
         font = opentype.parse(extractFace(buf, offset));
       } catch {
@@ -216005,7 +216175,7 @@ function getPrivateFontData(id) {
   const f = privateFaces.get(id);
   if (!f) return null;
   try {
-    return extractFace((0, import_node_fs8.readFileSync)(f.path), f.offset);
+    return extractFace((0, import_node_fs9.readFileSync)(f.path), f.offset);
   } catch {
     return null;
   }
@@ -216028,7 +216198,7 @@ function familyAvailable(family) {
 }
 function fontFileFamilies(path) {
   try {
-    const faces = readFaceDir((0, import_node_fs8.readFileSync)(path));
+    const faces = readFaceDir((0, import_node_fs9.readFileSync)(path));
     return [...new Set(faces.map((f) => f.display).filter(Boolean))];
   } catch {
     return [];
@@ -216146,7 +216316,7 @@ function createSystemFontMetrics() {
       family,
       bytes: () => {
         try {
-          return extractFace((0, import_node_fs8.readFileSync)(path), offset);
+          return extractFace((0, import_node_fs9.readFileSync)(path), offset);
         } catch {
           return null;
         }
@@ -216236,9 +216406,9 @@ function neutralizeJpegOrientation(bytes) {
 
 // vendor/happyoffice/apps/slides/src/main/session-state.ts
 var runtime = {
-  preloadPath: (0, import_node_path13.join)(__dirname, "../preload/index.js"),
+  preloadPath: (0, import_node_path14.join)(__dirname, "../preload/index.js"),
   rendererDevUrl: process.env.ELECTRON_RENDERER_URL,
-  rendererFilePath: (0, import_node_path13.join)(__dirname, "../renderer/index.html")
+  rendererFilePath: (0, import_node_path14.join)(__dirname, "../renderer/index.html")
 };
 function configureSlidesRuntime(paths) {
   runtime.preloadPath = paths.preloadPath;
@@ -216289,7 +216459,7 @@ function scheduleHistoryNotify(session) {
   setImmediate(() => {
     session.historyNotifyScheduled = false;
     for (const id of attachedIds(session)) {
-      import_electron3.webContents.fromId(id)?.send("slides:history-changed", {
+      import_electron5.webContents.fromId(id)?.send("slides:history-changed", {
         canUndo: session.undoStack.length > 0,
         canRedo: session.redoStack.length > 0
       });
@@ -216316,7 +216486,7 @@ function scheduleDeckBroadcast(session) {
       slides: buildAllRenderSlides(session.opened, session.fitWidthPx),
       size: { cx: session.opened.deck.size.cx, cy: session.opened.deck.size.cy }
     };
-    for (const id of ids) import_electron3.webContents.fromId(id)?.send("slides:deck-changed", payload);
+    for (const id of ids) import_electron5.webContents.fromId(id)?.send("slides:deck-changed", payload);
   });
 }
 function pushHistory(session) {
@@ -216414,7 +216584,7 @@ function setActiveSlidesWebContents(wc) {
   windowRefs.activeWebContents = wc;
 }
 function dialogParent() {
-  return import_electron3.BrowserWindow.getFocusedWindow() ?? windowRefs.shellWindow ?? void 0;
+  return import_electron5.BrowserWindow.getFocusedWindow() ?? windowRefs.shellWindow ?? void 0;
 }
 var fontMetrics = null;
 function getFontMetrics() {
@@ -216525,30 +216695,30 @@ function rebuildSlideWithReparse(session, slideIndex) {
 }
 
 // vendor/happyoffice/apps/slides/src/main/ai-ipc.ts
-var import_electron4 = require("electron");
-var import_node_fs9 = require("node:fs");
-var import_node_path14 = require("node:path");
-var AI_SETTINGS_PATH = () => (0, import_node_path14.join)(import_electron4.app.getPath("userData"), "ai-settings.json");
+var import_electron6 = require("electron");
+var import_node_fs10 = require("node:fs");
+var import_node_path15 = require("node:path");
+var AI_SETTINGS_PATH = () => (0, import_node_path15.join)(import_electron6.app.getPath("userData"), "ai-settings.json");
 function readJson2(path, fallback) {
   try {
-    if ((0, import_node_fs9.existsSync)(path)) return JSON.parse((0, import_node_fs9.readFileSync)(path, "utf-8"));
+    if ((0, import_node_fs10.existsSync)(path)) return JSON.parse((0, import_node_fs10.readFileSync)(path, "utf-8"));
   } catch {
   }
   return fallback;
 }
 function writeJson2(path, value) {
-  (0, import_node_fs9.mkdirSync)((0, import_node_path14.join)(path, ".."), { recursive: true });
-  (0, import_node_fs9.writeFileSync)(path, JSON.stringify(value, null, 2));
+  (0, import_node_fs10.mkdirSync)((0, import_node_path15.join)(path, ".."), { recursive: true });
+  (0, import_node_fs10.writeFileSync)(path, JSON.stringify(value, null, 2));
 }
 var activeAiStreams = /* @__PURE__ */ new Map();
-var AI_RUN_FAILURES_PATH = () => (0, import_node_path14.join)(import_electron4.app.getPath("userData"), "ai-run-failures.jsonl");
+var AI_RUN_FAILURES_PATH = () => (0, import_node_path15.join)(import_electron6.app.getPath("userData"), "ai-run-failures.jsonl");
 var RUN_FAILURE_TEXT_MAX = 2e4;
 var RUN_FAILURES_MAX_BYTES = 2e6;
 function appendRunFailure(entry) {
   const path = AI_RUN_FAILURES_PATH();
   try {
-    if ((0, import_node_fs9.existsSync)(path) && (0, import_node_fs9.statSync)(path).size > RUN_FAILURES_MAX_BYTES) {
-      (0, import_node_fs9.renameSync)(path, `${path}.1`);
+    if ((0, import_node_fs10.existsSync)(path) && (0, import_node_fs10.statSync)(path).size > RUN_FAILURES_MAX_BYTES) {
+      (0, import_node_fs10.renameSync)(path, `${path}.1`);
     }
     const record = {
       ts: (/* @__PURE__ */ new Date()).toISOString(),
@@ -216557,21 +216727,21 @@ function appendRunFailure(entry) {
       streamed: entry.streamed.slice(0, RUN_FAILURE_TEXT_MAX),
       streamedChars: entry.streamed.length
     };
-    (0, import_node_fs9.appendFileSync)(path, JSON.stringify(record) + "\n", "utf-8");
+    (0, import_node_fs10.appendFileSync)(path, JSON.stringify(record) + "\n", "utf-8");
   } catch {
   }
 }
 function registerAiIpc() {
-  import_electron4.app.once("before-quit", shutdownCodexAppServers);
-  setRescueFetch((url, init) => import_electron4.net.fetch(url, init));
-  setAiUserAgent(`GenOffice/${import_electron4.app.getVersion()}`);
-  import_electron4.ipcMain.handle("ai:get-settings", () => {
+  import_electron6.app.once("before-quit", shutdownCodexAppServers);
+  setRescueFetch((url, init) => import_electron6.net.fetch(url, init));
+  setAiUserAgent(`GenOffice/${import_electron6.app.getVersion()}`);
+  import_electron6.ipcMain.handle("ai:get-settings", () => {
     const stored = readJson2(AI_SETTINGS_PATH(), {});
     const settings = resolveAiSettings(stored, defaultAiSettings());
     settings.provider = activeProvider(settings);
     return settings;
   });
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:gsk-status",
     async (_event, withEmail) => {
       if (!hasGskAuth()) return { loggedIn: false };
@@ -216580,16 +216750,16 @@ function registerAiIpc() {
       return info3?.email ? { loggedIn: true, email: info3.email } : { loggedIn: true };
     }
   );
-  import_electron4.ipcMain.handle("ai:gsk-login", () => {
-    ensureGenofficeLogin((url) => void import_electron4.shell.openExternal(url));
+  import_electron6.ipcMain.handle("ai:gsk-login", () => {
+    ensureGenofficeLogin((url) => void import_electron6.shell.openExternal(url));
   });
-  import_electron4.ipcMain.handle("ai:set-settings", (_event, settings) => {
+  import_electron6.ipcMain.handle("ai:set-settings", (_event, settings) => {
     writeJson2(AI_SETTINGS_PATH(), settings);
   });
-  import_electron4.ipcMain.handle("ai:log-run-failure", (_event, entry) => {
+  import_electron6.ipcMain.handle("ai:log-run-failure", (_event, entry) => {
     appendRunFailure(entry);
   });
-  import_electron4.ipcMain.handle("ai:stream", async (event, request) => {
+  import_electron6.ipcMain.handle("ai:stream", async (event, request) => {
     const { requestId, settings, system, messages } = request;
     const tools = request.tools ?? [];
     const maxTokens = request.maxTokens ?? maxOutputTokensOf(settings);
@@ -216655,10 +216825,10 @@ function registerAiIpc() {
       activeAiStreams.delete(requestId);
     }
   });
-  import_electron4.ipcMain.handle("ai:stream-cancel", (_event, requestId) => {
+  import_electron6.ipcMain.handle("ai:stream-cancel", (_event, requestId) => {
     activeAiStreams.get(requestId)?.abort();
   });
-  import_electron4.ipcMain.handle("ai:web-search", async (_event, query, maxResults) => {
+  import_electron6.ipcMain.handle("ai:web-search", async (_event, query, maxResults) => {
     try {
       return await webSearchTool(
         AI_SETTINGS_PATH(),
@@ -216669,7 +216839,7 @@ function registerAiIpc() {
       return { results: [], method: "error", error: String(err) };
     }
   });
-  import_electron4.ipcMain.handle("ai:image-search", async (_event, query, maxResults) => {
+  import_electron6.ipcMain.handle("ai:image-search", async (_event, query, maxResults) => {
     try {
       return await imageSearchTool(
         AI_SETTINGS_PATH(),
@@ -216682,7 +216852,7 @@ function registerAiIpc() {
   });
 }
 function registerSlidesOnlyAiIpc() {
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:generate-image",
     async (_event, op) => {
       return generateImageTool(
@@ -216699,7 +216869,7 @@ function registerSlidesOnlyAiIpc() {
       );
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:analyze-media",
     async (_event, op) => {
       return analyzeMediaTool(
@@ -216717,11 +216887,11 @@ function registerSlidesOnlyAiIpc() {
     if (!buf.length) return null;
     const norm2 = String(ext).toLowerCase().replace(/^jpeg$/, "jpg");
     if (norm2 === "png" || norm2 === "gif" || norm2 === "jpg") return { buf, ext: norm2 };
-    const img = import_electron4.nativeImage.createFromBuffer(buf);
+    const img = import_electron6.nativeImage.createFromBuffer(buf);
     if (img.isEmpty()) return null;
     return { buf: img.toPNG(), ext: "png" };
   };
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:insert-image-url",
     async (e, op) => {
       const session = sessions.get(e.sender.id);
@@ -216761,7 +216931,7 @@ function registerSlidesOnlyAiIpc() {
           scheduleHistoryNotify(session);
           return null;
         }
-        const natural = import_electron4.nativeImage.createFromBuffer(buf).getSize();
+        const natural = import_electron6.nativeImage.createFromBuffer(buf).getSize();
         const crop = coverCropFractions(natural.width, natural.height, op.wPx, op.hPx);
         if (crop) editPictureSrcRect(slide, el.id, crop);
         session.fitWidthPx = op.fitWidthPx;
@@ -216772,7 +216942,7 @@ function registerSlidesOnlyAiIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:replace-picture-url",
     async (e, op) => {
       const session = sessions.get(e.sender.id);
@@ -216812,7 +216982,7 @@ function registerSlidesOnlyAiIpc() {
           const pic = slide.elements.find((el) => el.id === targetId && el.type === "picture");
           const frame = pic?.transform?.offset;
           if (frame) {
-            const natural = import_electron4.nativeImage.createFromBuffer(buf).getSize();
+            const natural = import_electron6.nativeImage.createFromBuffer(buf).getSize();
             const crop = coverCropFractions(natural.width, natural.height, frame.cx, frame.cy);
             if (crop) editPictureSrcRect(slide, targetId, crop);
           }
@@ -216823,7 +216993,7 @@ function registerSlidesOnlyAiIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:save-sidecar",
     async (event, data) => {
       try {
@@ -216831,39 +217001,39 @@ function registerSlidesOnlyAiIpc() {
         const draftPath = session?.path;
         if (!draftPath || !draftPath.endsWith(".pptx")) return { ok: false };
         const sidecarPath = draftPath.replace(/\.pptx$/i, ".styleskill.json");
-        (0, import_node_fs9.writeFileSync)(sidecarPath, JSON.stringify(data, null, 2));
+        (0, import_node_fs10.writeFileSync)(sidecarPath, JSON.stringify(data, null, 2));
         return { ok: true };
       } catch {
         return { ok: false };
       }
     }
   );
-  const STYLE_TEMPLATES_DIR = () => (0, import_node_path14.join)(import_electron4.app.getPath("userData"), "style-templates");
-  import_electron4.ipcMain.handle(
+  const STYLE_TEMPLATES_DIR = () => (0, import_node_path15.join)(import_electron6.app.getPath("userData"), "style-templates");
+  import_electron6.ipcMain.handle(
     "ai:save-style-template",
     (_event, name, data) => {
       try {
         const dir = STYLE_TEMPLATES_DIR();
-        (0, import_node_fs9.mkdirSync)(dir, { recursive: true });
+        (0, import_node_fs10.mkdirSync)(dir, { recursive: true });
         const safeName = name.replace(/[/\\:*?"<>|]/g, "_").slice(0, 64);
         if (!safeName) return { ok: false, error: tm("errTplNameInvalid") };
-        writeJson2((0, import_node_path14.join)(dir, `${safeName}.json`), { ...data, name: safeName });
+        writeJson2((0, import_node_path15.join)(dir, `${safeName}.json`), { ...data, name: safeName });
         return { ok: true };
       } catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : String(err) };
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:list-style-templates",
     () => {
       try {
         const dir = STYLE_TEMPLATES_DIR();
-        if (!(0, import_node_fs9.existsSync)(dir)) return [];
-        const files = (0, import_node_fs9.readdirSync)(dir).filter((f) => f.endsWith(".json"));
+        if (!(0, import_node_fs10.existsSync)(dir)) return [];
+        const files = (0, import_node_fs10.readdirSync)(dir).filter((f) => f.endsWith(".json"));
         return files.map((f) => {
           try {
-            const raw = readJson2((0, import_node_path14.join)(dir, f), {});
+            const raw = readJson2((0, import_node_path15.join)(dir, f), {});
             return {
               name: raw.name ?? f.replace(/\.json$/, ""),
               topic: raw.topic ?? "",
@@ -216878,14 +217048,14 @@ function registerSlidesOnlyAiIpc() {
       }
     }
   );
-  import_electron4.ipcMain.handle(
+  import_electron6.ipcMain.handle(
     "ai:load-style-template",
     (_event, name) => {
       try {
         const dir = STYLE_TEMPLATES_DIR();
         const safeName = name.replace(/[/\\:*?"<>|]/g, "_").slice(0, 64);
-        const filePath = (0, import_node_path14.join)(dir, `${safeName}.json`);
-        if (!(0, import_node_fs9.existsSync)(filePath)) return { ok: false, error: tm("errTplMissing", { name }) };
+        const filePath = (0, import_node_path15.join)(dir, `${safeName}.json`);
+        if (!(0, import_node_fs10.existsSync)(filePath)) return { ok: false, error: tm("errTplMissing", { name }) };
         const raw = readJson2(filePath, {});
         if (!raw.styleSkill) return { ok: false, error: tm("errTplNoSkill", { name }) };
         return { ok: true, styleSkill: raw.styleSkill, topic: raw.topic ?? "" };
@@ -217017,9 +217187,9 @@ function listMetafileFonts(archive) {
 
 // vendor/happyoffice/apps/slides/src/main/font-store.ts
 var import_node_crypto7 = require("node:crypto");
-var import_node_fs10 = require("node:fs");
-var import_node_path15 = require("node:path");
-var import_electron5 = require("electron");
+var import_node_fs11 = require("node:fs");
+var import_node_path16 = require("node:path");
+var import_electron7 = require("electron");
 
 // vendor/happyoffice/apps/slides/src/main/font-catalog.ts
 var FONT_CATALOG = [
@@ -217544,16 +217714,16 @@ function extractFontCdnBaseUrl(pkg) {
   return normalizeFontCdnBaseUrl(raw.baseUrl);
 }
 function fontCdnBaseUrl() {
-  if (!import_electron5.app.isPackaged) return normalizeFontCdnBaseUrl(process.env.GENOFFICE_FONT_CDN_URL);
+  if (!import_electron7.app.isPackaged) return normalizeFontCdnBaseUrl(process.env.GENOFFICE_FONT_CDN_URL);
   try {
-    const pkg = JSON.parse((0, import_node_fs10.readFileSync)((0, import_node_path15.join)(import_electron5.app.getAppPath(), "package.json"), "utf8"));
+    const pkg = JSON.parse((0, import_node_fs11.readFileSync)((0, import_node_path16.join)(import_electron7.app.getAppPath(), "package.json"), "utf8"));
     return extractFontCdnBaseUrl(pkg);
   } catch {
     return null;
   }
 }
 function fontStoreDir() {
-  return (0, import_node_path15.join)(import_electron5.app.getPath("userData"), "fonts");
+  return (0, import_node_path16.join)(import_electron7.app.getPath("userData"), "fonts");
 }
 function initFontStore() {
   setUserFontDir(fontStoreDir());
@@ -217569,7 +217739,7 @@ function listFontCatalog() {
   }));
 }
 async function fetchVerified(url, sha256) {
-  const res = await import_electron5.net.fetch(url);
+  const res = await import_electron7.net.fetch(url);
   if (!res.ok) throw new Error(`download failed: HTTP ${res.status}`);
   const buf = Buffer.from(await res.arrayBuffer());
   const got = (0, import_node_crypto7.createHash)("sha256").update(buf).digest("hex");
@@ -217585,13 +217755,13 @@ function downloadFontFamily(family) {
   if (inFlight) return inFlight;
   const run2 = (async () => {
     const dir = fontStoreDir();
-    (0, import_node_fs10.mkdirSync)(dir, { recursive: true });
+    (0, import_node_fs11.mkdirSync)(dir, { recursive: true });
     for (const file of entry.files) {
-      const dest = (0, import_node_path15.join)(dir, file.file);
-      if ((0, import_node_fs10.existsSync)(dest)) continue;
+      const dest = (0, import_node_path16.join)(dir, file.file);
+      if ((0, import_node_fs11.existsSync)(dest)) continue;
       const url = new URL(encodeURIComponent(file.file), `${baseUrl2}/`).toString();
       const buf = await fetchVerified(url, file.sha256);
-      (0, import_node_fs10.writeFileSync)(dest, buf);
+      (0, import_node_fs11.writeFileSync)(dest, buf);
     }
   })().finally(() => downloading.delete(family));
   downloading.set(family, run2);
@@ -217600,12 +217770,12 @@ function downloadFontFamily(family) {
 var SFNT_MAGIC = /* @__PURE__ */ new Set(["00010000", "4f54544f", "74746366", "74727565"]);
 function installLocalFontFiles(paths) {
   const dir = fontStoreDir();
-  (0, import_node_fs10.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs11.mkdirSync)(dir, { recursive: true });
   const installed = [];
   for (const p of paths) {
     let head;
     try {
-      head = (0, import_node_fs10.readFileSync)(p).subarray(0, 4).toString("hex");
+      head = (0, import_node_fs11.readFileSync)(p).subarray(0, 4).toString("hex");
     } catch {
       continue;
     }
@@ -217613,11 +217783,11 @@ function installLocalFontFiles(paths) {
     const families = fontFileFamilies(p);
     const primary = families[0];
     if (!primary) continue;
-    const ext = (0, import_node_path15.basename)(p).match(/\.(ttc|otc|otf)$/i)?.[1]?.toLowerCase() ?? "ttf";
-    const styleTag = /bold\s*italic/i.test((0, import_node_path15.basename)(p)) ? "-BoldItalic" : /bold/i.test((0, import_node_path15.basename)(p)) ? "-Bold" : /italic|oblique/i.test((0, import_node_path15.basename)(p)) ? "-Italic" : "";
-    const dest = (0, import_node_path15.join)(dir, `${primary.replace(/[\\/:]/g, "")}${styleTag}.${ext}`);
+    const ext = (0, import_node_path16.basename)(p).match(/\.(ttc|otc|otf)$/i)?.[1]?.toLowerCase() ?? "ttf";
+    const styleTag = /bold\s*italic/i.test((0, import_node_path16.basename)(p)) ? "-BoldItalic" : /bold/i.test((0, import_node_path16.basename)(p)) ? "-Bold" : /italic|oblique/i.test((0, import_node_path16.basename)(p)) ? "-Italic" : "";
+    const dest = (0, import_node_path16.join)(dir, `${primary.replace(/[\\/:]/g, "")}${styleTag}.${ext}`);
     try {
-      (0, import_node_fs10.copyFileSync)(p, dest);
+      (0, import_node_fs11.copyFileSync)(p, dest);
       installed.push(...families);
     } catch {
     }
@@ -217645,11 +217815,11 @@ function missingCatalogFonts(opened) {
 }
 
 // vendor/happyoffice/apps/slides/src/main/presenter-show.ts
-var import_electron6 = require("electron");
+var import_electron8 = require("electron");
 var presenterShows = /* @__PURE__ */ new Map();
 var audiencePresenter = /* @__PURE__ */ new Map();
 function presenterHostWindow(wc) {
-  return import_electron6.BrowserWindow.fromWebContents(wc) ?? windowRefs.shellWindow;
+  return import_electron8.BrowserWindow.fromWebContents(wc) ?? windowRefs.shellWindow;
 }
 function fullScreenOnDisplay(win, bounds) {
   if (process.platform === "darwin") {
@@ -217674,7 +217844,7 @@ function closePresenterShow(presenterId) {
   }
 }
 function registerPresenterIpc() {
-  import_electron6.ipcMain.handle("slides:presenter-start", (e) => {
+  import_electron8.ipcMain.handle("slides:presenter-start", (e) => {
     const existing = presenterShows.get(e.sender.id);
     if (existing) return { audience: existing.audienceWin != null };
     const show = { presenterWc: e.sender, audienceWin: null, lastSync: null };
@@ -217682,10 +217852,10 @@ function registerPresenterIpc() {
     e.sender.once("destroyed", () => closePresenterShow(e.sender.id));
     const session = sessions.get(e.sender.id);
     const host = presenterHostWindow(e.sender);
-    const hostDisplay = host ? import_electron6.screen.getDisplayMatching(host.getBounds()) : import_electron6.screen.getPrimaryDisplay();
-    const external = import_electron6.screen.getAllDisplays().find((d) => d.id !== hostDisplay.id);
+    const hostDisplay = host ? import_electron8.screen.getDisplayMatching(host.getBounds()) : import_electron8.screen.getPrimaryDisplay();
+    const external = import_electron8.screen.getAllDisplays().find((d) => d.id !== hostDisplay.id);
     if (!external || !session) return { audience: false };
-    const win = new import_electron6.BrowserWindow({
+    const win = new import_electron8.BrowserWindow({
       ...external.bounds,
       frame: false,
       show: false,
@@ -217716,24 +217886,24 @@ function registerPresenterIpc() {
     void win.loadURL(rendererUrl(runtime.rendererDevUrl, "slides", { mode: "audience" }));
     return { audience: true };
   });
-  import_electron6.ipcMain.on("slides:presenter-sync", (e, state) => {
+  import_electron8.ipcMain.on("slides:presenter-sync", (e, state) => {
     const show = presenterShows.get(e.sender.id);
     if (!show) return;
     show.lastSync = state;
     const wc = show.audienceWin?.webContents;
     if (wc && !wc.isDestroyed()) wc.send("slides:show-sync", state);
   });
-  import_electron6.ipcMain.on("slides:presenter-ink", (e, ev) => {
+  import_electron8.ipcMain.on("slides:presenter-ink", (e, ev) => {
     const wc = presenterShows.get(e.sender.id)?.audienceWin?.webContents;
     if (wc && !wc.isDestroyed()) wc.send("slides:show-ink", ev);
   });
-  import_electron6.ipcMain.handle("slides:presenter-swap", (e) => {
+  import_electron8.ipcMain.handle("slides:presenter-swap", (e) => {
     const show = presenterShows.get(e.sender.id);
     const aWin = show?.audienceWin;
     const host = presenterHostWindow(e.sender);
     if (!show || !aWin || aWin.isDestroyed() || !host) return false;
-    const aDisplay = import_electron6.screen.getDisplayMatching(aWin.getBounds());
-    const hDisplay = import_electron6.screen.getDisplayMatching(host.getBounds());
+    const aDisplay = import_electron8.screen.getDisplayMatching(aWin.getBounds());
+    const hDisplay = import_electron8.screen.getDisplayMatching(host.getBounds());
     if (aDisplay.id === hDisplay.id) return false;
     fullScreenOnDisplay(aWin, hDisplay.bounds);
     if (host.isFullScreen()) {
@@ -217751,14 +217921,14 @@ function registerPresenterIpc() {
     }
     return true;
   });
-  import_electron6.ipcMain.handle("slides:presenter-end", (e) => {
+  import_electron8.ipcMain.handle("slides:presenter-end", (e) => {
     closePresenterShow(e.sender.id);
   });
-  import_electron6.ipcMain.handle("slides:audience-ready", (e) => {
+  import_electron8.ipcMain.handle("slides:audience-ready", (e) => {
     const pid = audiencePresenter.get(e.sender.id);
     return (pid != null ? presenterShows.get(pid)?.lastSync : null) ?? null;
   });
-  import_electron6.ipcMain.on("slides:audience-nav", (e, action) => {
+  import_electron8.ipcMain.on("slides:audience-nav", (e, action) => {
     const pid = audiencePresenter.get(e.sender.id);
     const wc = pid != null ? presenterShows.get(pid)?.presenterWc : null;
     if (wc && !wc.isDestroyed()) wc.send("slides:audience-nav", action);
@@ -217766,13 +217936,13 @@ function registerPresenterIpc() {
 }
 
 // vendor/happyoffice/apps/slides/src/main/attachments-ipc.ts
-var import_electron7 = require("electron");
-var import_node_fs11 = require("node:fs");
-var import_node_path18 = require("node:path");
+var import_electron9 = require("electron");
+var import_node_fs12 = require("node:fs");
+var import_node_path19 = require("node:path");
 
 // vendor/happyoffice/packages/file-parse/src/parse.ts
-var import_promises6 = require("node:fs/promises");
-var import_node_path17 = require("node:path");
+var import_promises7 = require("node:fs/promises");
+var import_node_path18 = require("node:path");
 
 // vendor/happyoffice/packages/file-parse/src/doc.ts
 var import_word_extractor = __toESM(require_word(), 1);
@@ -227724,7 +227894,7 @@ function run(text) {
     text
   };
 }
-function join14(pieces, sep5 = "") {
+function join15(pieces, sep5 = "") {
   return {
     omml: pieces.map((p) => p.omml).join(sep5 === "" ? "" : run(sep5).omml),
     text: pieces.map((p) => p.text).join(sep5)
@@ -227780,7 +227950,7 @@ function parseArgs(p) {
   for (; ; ) {
     const seq = parseSeq2(p, true);
     if (!seq) return null;
-    args.push(join14(seq));
+    args.push(join15(seq));
     const ch2 = p.src[p.i];
     if (ch2 === ",") {
       p.i++;
@@ -227845,7 +228015,7 @@ function parseCommandInner(p) {
       const both = argOf("bc");
       const beg = both ?? argOf("lc") ?? "(";
       const end = both ? closingOf(both) : argOf("rc") ?? ")";
-      const body = join14(args, ",");
+      const body = join15(args, ",");
       return {
         omml: `<m:d><m:dPr>${val("begChr", beg)}${val("endChr", end)}</m:dPr>${slot("e", body)}</m:d>`,
         text: `${beg}${body.text}${end}`
@@ -227868,9 +228038,9 @@ function parseCommandInner(p) {
       };
     }
     case "l":
-      return join14(args, ",");
+      return join15(args, ",");
     case "o":
-      return join14(args);
+      return join15(args);
     case "r": {
       if (args.length >= 2) {
         const [deg, body2] = args;
@@ -227903,7 +228073,7 @@ function parseCommandInner(p) {
       const sides = { to: "hideTop", bo: "hideBot", le: "hideLeft", ri: "hideRight" };
       const named = Object.keys(sides).filter((k) => has(k));
       const hidden = named.length ? Object.entries(sides).filter(([k]) => !named.includes(k)).map(([, tag]) => val(tag, "1")).join("") : "";
-      const body = join14(args, ",");
+      const body = join15(args, ",");
       return {
         omml: `<m:borderBox><m:borderBoxPr>${hidden}</m:borderBoxPr>${slot("e", body)}</m:borderBox>`,
         text: body.text
@@ -227922,7 +228092,7 @@ function eqFieldToOmml(instr) {
   const p = { src: m[1].replace(/\\\*\s*[A-Za-z]+/g, "").trim(), i: 0, depth: 0 };
   const seq = parseSeq2(p, false);
   if (!seq || p.i < p.src.length) return null;
-  const body = join14(seq);
+  const body = join15(seq);
   if (body.omml === "") return null;
   return { omml: `<m:oMath>${body.omml}</m:oMath>`, text: body.text };
 }
@@ -235312,12 +235482,12 @@ function runText(block) {
 
 // vendor/happyoffice/packages/file-parse/src/pdf.ts
 var import_node_module3 = require("node:module");
-var import_node_path16 = require("node:path");
+var import_node_path17 = require("node:path");
 function standardFontDataUrl() {
   try {
-    const require2 = (0, import_node_module3.createRequire)("file:///Users/cheney/Documents/trae_projects/happy-friday-lite/resources/office/main/slides-main.cjs");
+    const require2 = (0, import_node_module3.createRequire)(__fridayBundleUrl);
     const pdfPath = require2.resolve("pdfjs-dist/legacy/build/pdf.mjs");
-    return `${(0, import_node_path16.join)((0, import_node_path16.dirname)(pdfPath), "..", "..", "standard_fonts")}/`;
+    return `${(0, import_node_path17.join)((0, import_node_path17.dirname)(pdfPath), "..", "..", "standard_fonts")}/`;
   } catch {
     return void 0;
   }
@@ -235732,27 +235902,27 @@ var TEXT_EXTS = /* @__PURE__ */ new Set([
   "py"
 ]);
 async function parseFileToText(filePath) {
-  const ext = (0, import_node_path17.extname)(filePath).slice(1).toLowerCase();
+  const ext = (0, import_node_path18.extname)(filePath).slice(1).toLowerCase();
   const imageMime = IMAGE_MIMES[ext];
   if (imageMime) return { ok: true, kind: "image", mime: imageMime };
   try {
     if (TEXT_EXTS.has(ext)) {
-      return { ok: true, kind: "text", text: await (0, import_promises6.readFile)(filePath, "utf-8") };
+      return { ok: true, kind: "text", text: await (0, import_promises7.readFile)(filePath, "utf-8") };
     }
     switch (ext) {
       case "doc":
-        return { ok: true, kind: "text", text: await docToText(await (0, import_promises6.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await docToText(await (0, import_promises7.readFile)(filePath)) };
       case "docx":
-        return { ok: true, kind: "text", text: await docxToText(await (0, import_promises6.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await docxToText(await (0, import_promises7.readFile)(filePath)) };
       case "ppt":
-        return { ok: true, kind: "text", text: await pptToText(await (0, import_promises6.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await pptToText(await (0, import_promises7.readFile)(filePath)) };
       case "pptx":
-        return { ok: true, kind: "text", text: await pptxToText(await (0, import_promises6.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await pptxToText(await (0, import_promises7.readFile)(filePath)) };
       case "xlsx":
       case "xlsm":
-        return { ok: true, kind: "text", text: await xlsxToText(await (0, import_promises6.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await xlsxToText(await (0, import_promises7.readFile)(filePath)) };
       case "pdf":
-        return { ok: true, kind: "text", text: await pdfToText(await (0, import_promises6.readFile)(filePath)) };
+        return { ok: true, kind: "text", text: await pdfToText(await (0, import_promises7.readFile)(filePath)) };
     }
   } catch (e) {
     return { ok: false, kind: "text", error: e instanceof Error ? e.message : String(e) };
@@ -235816,11 +235986,11 @@ var ATTACHMENT_IMAGE_MIME = {
 var ATTACHMENT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 var attachmentTextCache = /* @__PURE__ */ new Map();
 function statAttachment(filePath) {
-  const name = (0, import_node_path18.basename)(filePath);
+  const name = (0, import_node_path19.basename)(filePath);
   const ext = name.split(".").pop()?.toLowerCase() ?? "";
   if (!ATTACHMENT_EXTS.has(ext)) return { error: `${name}: ${tm("errUnsupportedExt", { ext })}` };
   try {
-    const stat3 = (0, import_node_fs11.statSync)(filePath);
+    const stat3 = (0, import_node_fs12.statSync)(filePath);
     if (!stat3.isFile()) return { error: `${name}: ${tm("errNotFile")}` };
     if (stat3.size > ATTACHMENT_MAX_BYTES) {
       return {
@@ -235851,15 +236021,15 @@ function savePastedImage(data, ext) {
   if (!ATTACHMENT_IMAGE_EXTS.has(cleanExt)) return null;
   const bytes = data instanceof ArrayBuffer ? Buffer.from(data) : ArrayBuffer.isView(data) ? Buffer.from(data.buffer, data.byteOffset, data.byteLength) : null;
   if (!bytes || bytes.byteLength === 0) return null;
-  const dir = (0, import_node_path18.join)(import_electron7.app.getPath("temp"), "genoffice-pasted");
-  (0, import_node_fs11.mkdirSync)(dir, { recursive: true });
+  const dir = (0, import_node_path19.join)(import_electron9.app.getPath("temp"), "genoffice-pasted");
+  (0, import_node_fs12.mkdirSync)(dir, { recursive: true });
   const stamp = (/* @__PURE__ */ new Date()).toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "-");
-  const filePath = (0, import_node_path18.join)(dir, `pasted-${stamp}-${++pastedImageSeq}.${cleanExt}`);
-  (0, import_node_fs11.writeFileSync)(filePath, bytes);
+  const filePath = (0, import_node_path19.join)(dir, `pasted-${stamp}-${++pastedImageSeq}.${cleanExt}`);
+  (0, import_node_fs12.writeFileSync)(filePath, bytes);
   return filePath;
 }
 async function extractAttachmentText(filePath) {
-  const stat3 = (0, import_node_fs11.statSync)(filePath);
+  const stat3 = (0, import_node_fs12.statSync)(filePath);
   const stamp = `${stat3.mtimeMs}:${stat3.size}`;
   const cached = attachmentTextCache.get(filePath);
   if (cached && cached.stamp === stamp) return cached.text;
@@ -235876,7 +236046,7 @@ async function extractAttachmentText(filePath) {
   return parsed2.text;
 }
 function registerAttachmentIpc() {
-  import_electron7.ipcMain.handle("slides:files-pick", async () => {
+  import_electron9.ipcMain.handle("slides:files-pick", async () => {
     const parent = dialogParent();
     const options = {
       title: tm("dlgAddAttachment"),
@@ -235886,15 +236056,15 @@ function registerAttachmentIpc() {
       ],
       properties: ["openFile", "multiSelections"]
     };
-    const r = await showOpenDialogWithMemory(import_electron7.dialog, parent, options);
+    const r = await showOpenDialogWithMemory(import_electron9.dialog, parent, options);
     if (r.canceled || r.filePaths.length === 0) return null;
     return collectAttachments(r.filePaths);
   });
-  import_electron7.ipcMain.handle("slides:files-add", (_e, paths) => collectAttachments(paths));
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle("slides:files-add", (_e, paths) => collectAttachments(paths));
+  import_electron9.ipcMain.handle(
     "slides:files-read",
     async (_e, filePath, offset, maxChars) => {
-      const name = (0, import_node_path18.basename)(filePath);
+      const name = (0, import_node_path19.basename)(filePath);
       const ext = name.split(".").pop()?.toLowerCase() ?? "";
       if (!ATTACHMENT_EXTS.has(ext)) return { ok: false, error: tm("errUnsupportedExt", { ext }) };
       if (ATTACHMENT_IMAGE_EXTS.has(ext)) {
@@ -235916,22 +236086,22 @@ function registerAttachmentIpc() {
       }
     }
   );
-  import_electron7.ipcMain.handle("slides:files-read-image", (_e, filePath) => {
-    const name = (0, import_node_path18.basename)(filePath);
+  import_electron9.ipcMain.handle("slides:files-read-image", (_e, filePath) => {
+    const name = (0, import_node_path19.basename)(filePath);
     const ext = name.split(".").pop()?.toLowerCase() ?? "";
     const mime = ATTACHMENT_IMAGE_MIME[ext];
     if (!mime) return { ok: false, error: `${name}: ${tm("errNotImage")}` };
     try {
-      const stat3 = (0, import_node_fs11.statSync)(filePath);
+      const stat3 = (0, import_node_fs12.statSync)(filePath);
       if (stat3.size > ATTACHMENT_IMAGE_MAX_BYTES) {
         return { ok: false, error: `${name}: ${tm("errImageTooLarge")}` };
       }
-      return { ok: true, base64: (0, import_node_fs11.readFileSync)(filePath).toString("base64"), mime };
+      return { ok: true, base64: (0, import_node_fs12.readFileSync)(filePath).toString("base64"), mime };
     } catch {
       return { ok: false, error: `${name}: ${tm("errUnreadable")}` };
     }
   });
-  import_electron7.ipcMain.handle(
+  import_electron9.ipcMain.handle(
     "slides:files-add-pasted-image",
     (_e, data, ext) => {
       const filePath = savePastedImage(data, ext);
@@ -235957,17 +236127,17 @@ var freezeDialogOpen = /* @__PURE__ */ new Set();
 async function handleRendererFreeze(wc) {
   const ts = Date.now();
   try {
-    const appMetrics = import_electron8.app.getAppMetrics();
+    const appMetrics = import_electron10.app.getAppMetrics();
     const diagnostics = {
       at: (/* @__PURE__ */ new Date()).toISOString(),
       webContentsId: wc.id,
       sessionPath: sessions.get(wc.id)?.path ?? null,
       dirty: slidesIsDirty(wc.id),
       appMetrics,
-      gpuFeatureStatus: import_electron8.app.getGPUFeatureStatus()
+      gpuFeatureStatus: import_electron10.app.getGPUFeatureStatus()
     };
-    await (0, import_promises7.writeFile)(
-      (0, import_node_path19.join)(import_electron8.app.getPath("userData"), `freeze-diagnostics-${ts}.json`),
+    await (0, import_promises8.writeFile)(
+      (0, import_node_path20.join)(import_electron10.app.getPath("userData"), `freeze-diagnostics-${ts}.json`),
       JSON.stringify(diagnostics, null, 2)
     );
     if (process.platform === "darwin") {
@@ -235978,8 +236148,8 @@ async function handleRendererFreeze(wc) {
       ];
       for (const [label, pid] of targets) {
         if (!pid) continue;
-        const out = (0, import_node_path19.join)(import_electron8.app.getPath("userData"), `freeze-stacks-${ts}-${label}-${pid}.txt`);
-        (0, import_node_child_process3.execFile)("/usr/bin/sample", [String(pid), "3", "-file", out], () => {
+        const out = (0, import_node_path20.join)(import_electron10.app.getPath("userData"), `freeze-stacks-${ts}-${label}-${pid}.txt`);
+        (0, import_node_child_process4.execFile)("/usr/bin/sample", [String(pid), "3", "-file", out], () => {
         });
       }
     }
@@ -235988,7 +236158,7 @@ async function handleRendererFreeze(wc) {
   if (freezeDialogOpen.has(wc.id)) return;
   freezeDialogOpen.add(wc.id);
   try {
-    const parent = import_electron8.BrowserWindow.fromWebContents(wc);
+    const parent = import_electron10.BrowserWindow.fromWebContents(wc);
     const options = {
       type: "warning",
       message: tm("freezeTitle"),
@@ -235997,7 +236167,7 @@ async function handleRendererFreeze(wc) {
       defaultId: 0,
       cancelId: 0
     };
-    const { response } = parent ? await import_electron8.dialog.showMessageBox(parent, options) : await import_electron8.dialog.showMessageBox(options);
+    const { response } = parent ? await import_electron10.dialog.showMessageBox(parent, options) : await import_electron10.dialog.showMessageBox(options);
     if (response === 1 && !wc.isDestroyed()) {
       wc.forcefullyCrashRenderer();
       wc.reload();
@@ -236011,7 +236181,7 @@ function trackSlidesWebContents(wc) {
   wc.on("unresponsive", () => void handleRendererFreeze(wc));
   wc.setWindowOpenHandler(({ url }) => {
     const target = safeExternalUrl(url);
-    if (target) void import_electron8.shell.openExternal(target);
+    if (target) void import_electron10.shell.openExternal(target);
     return { action: "deny" };
   });
   wc.once("destroyed", () => {
@@ -236035,16 +236205,16 @@ function setSlidesOpenedHook(fn) {
 var standaloneWindows = /* @__PURE__ */ new Map();
 function syncAttachedPaths(session, path) {
   for (const id of attachedIds(session)) {
-    const wc = import_electron8.webContents.fromId(id);
+    const wc = import_electron10.webContents.fromId(id);
     if (!wc || wc.isDestroyed()) continue;
     slidesOpenedHook?.(wc, path);
     wc.send("slides:renamed", path);
     const win = standaloneWindows.get(id);
-    if (win && !win.isDestroyed()) win.setTitle((0, import_node_path19.basename)(path));
+    if (win && !win.isDestroyed()) win.setTitle((0, import_node_path20.basename)(path));
   }
 }
 async function saveSessionDeckTo(session, filePath) {
-  await (0, import_promises7.mkdir)((0, import_node_path19.dirname)(filePath), { recursive: true });
+  await (0, import_promises8.mkdir)((0, import_node_path20.dirname)(filePath), { recursive: true });
   await savePptxToFile(session.opened, filePath);
   session.path = filePath;
   autosaveBackoff.delete(filePath);
@@ -236054,18 +236224,18 @@ async function saveSessionDeckTo(session, filePath) {
   commitSaved(session.opened);
   session.metaDirty = false;
 }
-var RECENT_PATH = () => (0, import_node_path19.join)(import_electron8.app.getPath("userData"), "slides-recent.json");
+var RECENT_PATH = () => (0, import_node_path20.join)(import_electron10.app.getPath("userData"), "slides-recent.json");
 function commentAuthorName() {
   try {
-    return (0, import_node_os7.userInfo)().username || "User";
+    return (0, import_node_os8.userInfo)().username || "User";
   } catch {
     return "User";
   }
 }
 async function readRecent() {
   try {
-    const raw = await (0, import_promises7.readFile)(RECENT_PATH(), "utf8");
-    return JSON.parse(raw).filter((p) => (0, import_node_fs12.existsSync)(p));
+    const raw = await (0, import_promises8.readFile)(RECENT_PATH(), "utf8");
+    return JSON.parse(raw).filter((p) => (0, import_node_fs13.existsSync)(p));
   } catch {
     return [];
   }
@@ -236075,15 +236245,15 @@ async function pushRecent(path) {
   const cur = await readRecent();
   const next = [path, ...cur.filter((p) => p !== path)].slice(0, 10);
   try {
-    await (0, import_promises7.writeFile)(RECENT_PATH(), JSON.stringify(next), "utf8");
+    await (0, import_promises8.writeFile)(RECENT_PATH(), JSON.stringify(next), "utf8");
   } catch {
   }
 }
 async function replaceSlidesRecentFile(oldPath, newPath) {
   try {
-    const raw = await (0, import_promises7.readFile)(RECENT_PATH(), "utf8");
+    const raw = await (0, import_promises8.readFile)(RECENT_PATH(), "utf8");
     const cur = JSON.parse(raw);
-    await (0, import_promises7.writeFile)(
+    await (0, import_promises8.writeFile)(
       RECENT_PATH(),
       JSON.stringify(cur.map((p) => p === oldPath ? newPath : p)),
       "utf8"
@@ -236096,8 +236266,8 @@ function slidesFileRenamed(wc, oldPath, newPath) {
   if (session && session.path === oldPath) session.path = newPath;
   wc.send("slides:renamed", newPath);
 }
-var autosaveDir = () => (0, import_node_path19.join)(import_electron8.app.getPath("userData"), "slides-autosave");
-var autosavePathFor = (filePath) => (0, import_node_path19.join)(autosaveDir(), `${(0, import_node_crypto8.createHash)("sha1").update(filePath).digest("hex").slice(0, 16)}.pptx`);
+var autosaveDir = () => (0, import_node_path20.join)(import_electron10.app.getPath("userData"), "slides-autosave");
+var autosavePathFor = (filePath) => (0, import_node_path20.join)(autosaveDir(), `${(0, import_node_crypto8.createHash)("sha1").update(filePath).digest("hex").slice(0, 16)}.pptx`);
 function sessionDirty(session) {
   return !!session.metaDirty || session.opened.deck.slides.some(
     (s) => s.structureDirty || s.elements.some((el) => el.dirty || el.dirtyTransform)
@@ -236109,7 +236279,7 @@ var autosaveRunning = false;
 var untitledRecovery = /* @__PURE__ */ new Map();
 function dropUntitledRecovery(wcId) {
   const draft = untitledRecovery.get(wcId);
-  if (draft) void (0, import_promises7.rm)(draft, { force: true }).catch(() => {
+  if (draft) void (0, import_promises8.rm)(draft, { force: true }).catch(() => {
   });
   untitledRecovery.delete(wcId);
 }
@@ -236128,7 +236298,7 @@ setInterval(() => {
       } else {
         let draft = untitledRecovery.get(wcId);
         if (!draft) {
-          draft = (0, import_node_path19.join)(getDraftsDir(), newDraftFilename());
+          draft = (0, import_node_path20.join)(getDraftsDir(), newDraftFilename());
           untitledRecovery.set(wcId, draft);
         }
         target = draft;
@@ -236140,7 +236310,7 @@ setInterval(() => {
         continue;
       }
       try {
-        await (0, import_promises7.mkdir)((0, import_node_path19.dirname)(target), { recursive: true });
+        await (0, import_promises8.mkdir)((0, import_node_path20.dirname)(target), { recursive: true });
         await savePptxToFile(session.opened, target);
         autosaveBackoff.delete(backoffKey);
       } catch (error) {
@@ -236154,10 +236324,10 @@ setInterval(() => {
 }, 3e4);
 var closeSaveWaiters = /* @__PURE__ */ new Map();
 var autoSavePrefByWc = /* @__PURE__ */ new Map();
-import_electron8.ipcMain.on("slides:autosave-pref", (event, on) => {
+import_electron10.ipcMain.on("slides:autosave-pref", (event, on) => {
   autoSavePrefByWc.set(event.sender.id, on === true);
 });
-import_electron8.ipcMain.on("slides:close-save-result", (event, ok) => {
+import_electron10.ipcMain.on("slides:close-save-result", (event, ok) => {
   const waiter = closeSaveWaiters.get(event.sender.id);
   if (!waiter) return;
   closeSaveWaiters.delete(event.sender.id);
@@ -236196,11 +236366,11 @@ async function requestSlidesClose(contents, parent) {
     cancelId: 2,
     noLink: true
   };
-  const { response } = parent && !parent.isDestroyed() ? await import_electron8.dialog.showMessageBox(parent, options) : await import_electron8.dialog.showMessageBox(options);
+  const { response } = parent && !parent.isDestroyed() ? await import_electron10.dialog.showMessageBox(parent, options) : await import_electron10.dialog.showMessageBox(options);
   if (response === 2) return false;
   if (response === 1) {
     const session = sessions.get(contents.id);
-    if (session?.path) void (0, import_promises7.rm)(autosavePathFor(session.path), { force: true }).catch(() => {
+    if (session?.path) void (0, import_promises8.rm)(autosavePathFor(session.path), { force: true }).catch(() => {
     });
     dropUntitledRecovery(contents.id);
     return true;
@@ -236209,16 +236379,16 @@ async function requestSlidesClose(contents, parent) {
 }
 function discardSlidesRecovery(contents) {
   const session = sessions.get(contents.id);
-  if (session?.path) void (0, import_promises7.rm)(autosavePathFor(session.path), { force: true }).catch(() => {
+  if (session?.path) void (0, import_promises8.rm)(autosavePathFor(session.path), { force: true }).catch(() => {
   });
   dropUntitledRecovery(contents.id);
 }
 async function maybeRecoverBytes(path, original) {
   const asPath = autosavePathFor(path);
   try {
-    const [asStat, origStat] = await Promise.all([(0, import_promises7.stat)(asPath), (0, import_promises7.stat)(path)]);
+    const [asStat, origStat] = await Promise.all([(0, import_promises8.stat)(asPath), (0, import_promises8.stat)(path)]);
     if (asStat.mtimeMs <= origStat.mtimeMs) {
-      await (0, import_promises7.rm)(asPath, { force: true });
+      await (0, import_promises8.rm)(asPath, { force: true });
       return { bytes: original, recovered: false };
     }
   } catch {
@@ -236233,18 +236403,18 @@ async function maybeRecoverBytes(path, original) {
     message: tm("autosaveFoundTitle"),
     detail: tm("autosaveFoundBody")
   };
-  const r = parent ? await import_electron8.dialog.showMessageBox(parent, options) : await import_electron8.dialog.showMessageBox(options);
+  const r = parent ? await import_electron10.dialog.showMessageBox(parent, options) : await import_electron10.dialog.showMessageBox(options);
   if (r.response === 0) {
-    const bytes = await (0, import_promises7.readFile)(asPath);
+    const bytes = await (0, import_promises8.readFile)(asPath);
     return { bytes: new Uint8Array(bytes), recovered: true };
   }
-  await (0, import_promises7.rm)(asPath, { force: true });
+  await (0, import_promises8.rm)(asPath, { force: true });
   return { bytes: original, recovered: false };
 }
 async function rejectLegacyPpt(path) {
   let head;
   try {
-    const fh = await (0, import_promises7.open)(path, "r");
+    const fh = await (0, import_promises8.open)(path, "r");
     try {
       head = Buffer.alloc(8);
       await fh.read(head, 0, 8, 0);
@@ -236257,7 +236427,7 @@ async function rejectLegacyPpt(path) {
   if (!isCfbHeader(head)) return false;
   let kind = "legacy";
   try {
-    kind = cfbKind(await (0, import_promises7.readFile)(path)) ?? "legacy";
+    kind = cfbKind(await (0, import_promises8.readFile)(path)) ?? "legacy";
   } catch {
   }
   const parent = dialogParent();
@@ -236267,8 +236437,8 @@ async function rejectLegacyPpt(path) {
     message: tm(kind === "encrypted" ? "encryptedPptxTitle" : "legacyPptTitle"),
     detail: tm(kind === "encrypted" ? "encryptedPptxBody" : "legacyPptBody")
   };
-  if (parent) await import_electron8.dialog.showMessageBox(parent, options);
-  else await import_electron8.dialog.showMessageBox(options);
+  if (parent) await import_electron10.dialog.showMessageBox(parent, options);
+  else await import_electron10.dialog.showMessageBox(options);
   return true;
 }
 function adoptEmbeddedFonts(opened) {
@@ -236289,9 +236459,9 @@ function adoptEmbeddedFonts(opened) {
   }
 }
 async function openAndBuild(wc, path, fitWidthPx) {
-  const wanted = (0, import_node_path19.resolve)(path);
+  const wanted = (0, import_node_path20.resolve)(path);
   for (const [id, existing] of sessions) {
-    if (id === wc.id || !existing.path || (0, import_node_path19.resolve)(existing.path) !== wanted) continue;
+    if (id === wc.id || !existing.path || (0, import_node_path20.resolve)(existing.path) !== wanted) continue;
     sessions.set(wc.id, existing);
     scheduleHistoryNotify(existing);
     await pushRecent(path);
@@ -236303,7 +236473,7 @@ async function openAndBuild(wc, path, fitWidthPx) {
       defaultFont: deckDefaultFont(existing.opened)
     };
   }
-  const raw = await (0, import_promises7.readFile)(path);
+  const raw = await (0, import_promises8.readFile)(path);
   const { bytes, recovered } = await maybeRecoverBytes(path, new Uint8Array(raw));
   await shapedMetricsReady();
   const opened = await openPptx(bytes);
@@ -236329,7 +236499,7 @@ async function openAndBuild(wc, path, fitWidthPx) {
   };
 }
 function getDraftsDir() {
-  return configuredDefaultSaveDir(import_electron8.app);
+  return configuredDefaultSaveDir(import_electron10.app);
 }
 function newDraftFilename() {
   const d = /* @__PURE__ */ new Date();
@@ -236347,25 +236517,25 @@ function sanitizeDraftBaseName(raw) {
 function pickDraftPath(draftsDir, deckName) {
   const base = sanitizeDraftBaseName(deckName);
   if (base) {
-    let candidate = (0, import_node_path19.join)(draftsDir, `${base}.pptx`);
-    for (let i = 2; (0, import_node_fs12.existsSync)(candidate) && i < 100; i++) {
-      candidate = (0, import_node_path19.join)(draftsDir, `${base}-${i}.pptx`);
+    let candidate = (0, import_node_path20.join)(draftsDir, `${base}.pptx`);
+    for (let i = 2; (0, import_node_fs13.existsSync)(candidate) && i < 100; i++) {
+      candidate = (0, import_node_path20.join)(draftsDir, `${base}-${i}.pptx`);
     }
-    if (!(0, import_node_fs12.existsSync)(candidate)) return candidate;
+    if (!(0, import_node_fs13.existsSync)(candidate)) return candidate;
   }
-  return (0, import_node_path19.join)(draftsDir, newDraftFilename());
+  return (0, import_node_path20.join)(draftsDir, newDraftFilename());
 }
 async function saveDraftAfterGenerate(wc, session, bytes, mode, deckName) {
   try {
     const draftsDir = getDraftsDir();
-    if (!(0, import_node_fs12.existsSync)(draftsDir)) (0, import_node_fs12.mkdirSync)(draftsDir, { recursive: true });
+    if (!(0, import_node_fs13.existsSync)(draftsDir)) (0, import_node_fs13.mkdirSync)(draftsDir, { recursive: true });
     let draftPath;
     if (mode === "append" && session.path && session.path.startsWith(draftsDir)) {
       draftPath = session.path;
     } else {
       draftPath = pickDraftPath(draftsDir, deckName);
     }
-    await (0, import_promises7.writeFile)(draftPath, Buffer.from(bytes));
+    await (0, import_promises8.writeFile)(draftPath, Buffer.from(bytes));
     session.path = draftPath;
     await pushRecent(draftPath);
     slidesOpenedHook?.(wc, draftPath);
@@ -236580,20 +236750,20 @@ function openExportedPdf(path) {
   } catch (err) {
     console.warn("[slides] Failed to open exported PDF:", err);
   }
-  import_electron8.shell.showItemInFolder(path);
+  import_electron10.shell.showItemInFolder(path);
 }
 var ipcRegistered = false;
 function registerSlidesIpc() {
   if (ipcRegistered) return;
   ipcRegistered = true;
-  void cleanupExpiredGeneratedPages(import_electron8.app.getPath("temp"));
-  import_electron8.ipcMain.removeHandler("app:get-language");
-  import_electron8.ipcMain.handle("app:get-language", () => getUiLang());
-  void import_electron8.app.whenReady().then(() => {
+  void cleanupExpiredGeneratedPages(import_electron10.app.getPath("temp"));
+  import_electron10.ipcMain.removeHandler("app:get-language");
+  import_electron10.ipcMain.handle("app:get-language", () => getUiLang());
+  void import_electron10.app.whenReady().then(() => {
     try {
-      import_electron8.session.defaultSession.setDisplayMediaRequestHandler(
+      import_electron10.session.defaultSession.setDisplayMediaRequestHandler(
         (_request, callback) => {
-          import_electron8.desktopCapturer.getSources({ types: ["screen", "window"] }).then((sources) => {
+          import_electron10.desktopCapturer.getSources({ types: ["screen", "window"] }).then((sources) => {
             if (sources[0]) callback({ video: sources[0] });
             else callback({});
           }).catch(() => callback({}));
@@ -236603,8 +236773,8 @@ function registerSlidesIpc() {
     } catch {
     }
   });
-  import_electron8.ipcMain.handle("slides:private-font-faces", () => listPrivateFontFaces());
-  import_electron8.ipcMain.handle("slides:private-font-data", (_e, id) => getPrivateFontData(id));
+  import_electron10.ipcMain.handle("slides:private-font-faces", () => listPrivateFontFaces());
+  import_electron10.ipcMain.handle("slides:private-font-data", (_e, id) => getPrivateFontData(id));
   initFontStore();
   const afterFontsChanged = () => {
     resetFontMetrics();
@@ -236617,13 +236787,13 @@ function registerSlidesIpc() {
         size: { cx: session.opened.deck.size.cx, cy: session.opened.deck.size.cy }
       };
       for (const id of attachedIds(session))
-        import_electron8.webContents.fromId(id)?.send("slides:deck-changed", payload);
+        import_electron10.webContents.fromId(id)?.send("slides:deck-changed", payload);
       void wcId;
     }
-    for (const wc of import_electron8.webContents.getAllWebContents()) wc.send("slides:fonts-changed");
+    for (const wc of import_electron10.webContents.getAllWebContents()) wc.send("slides:fonts-changed");
   };
-  import_electron8.ipcMain.handle("slides:font-catalog", () => listFontCatalog());
-  import_electron8.ipcMain.handle("slides:font-download", async (_e, family) => {
+  import_electron10.ipcMain.handle("slides:font-catalog", () => listFontCatalog());
+  import_electron10.ipcMain.handle("slides:font-download", async (_e, family) => {
     try {
       await downloadFontFamily(family);
       afterFontsChanged();
@@ -236632,8 +236802,8 @@ function registerSlidesIpc() {
       return { ok: false, error: err instanceof Error ? err.message : String(err) };
     }
   });
-  import_electron8.ipcMain.handle("slides:font-install-local", async () => {
-    const r = await showOpenDialogWithMemory(import_electron8.dialog, dialogParent(), {
+  import_electron10.ipcMain.handle("slides:font-install-local", async () => {
+    const r = await showOpenDialogWithMemory(import_electron10.dialog, dialogParent(), {
       properties: ["openFile", "multiSelections"],
       filters: [{ name: "Fonts", extensions: ["ttf", "otf", "ttc", "otc"] }]
     });
@@ -236642,7 +236812,7 @@ function registerSlidesIpc() {
     if (families.length) afterFontsChanged();
     return { families };
   });
-  import_electron8.ipcMain.handle("slides:font-missing", (e) => {
+  import_electron10.ipcMain.handle("slides:font-missing", (e) => {
     const session = sessions.get(e.sender.id);
     return session ? missingCatalogFonts(session.opened) : [];
   });
@@ -236657,28 +236827,29 @@ function registerSlidesIpc() {
       session.undoStack.pop();
       return null;
     }
+    session.metaDirty = true;
     return r;
   };
-  import_electron8.ipcMain.handle("slides:open", async (e, fitWidthPx) => {
+  import_electron10.ipcMain.handle("slides:open", async (e, fitWidthPx) => {
     const parent = dialogParent();
     const options = {
       properties: ["openFile"],
       filters: [{ name: "PowerPoint", extensions: ["pptx", "ppt"] }]
     };
-    const r = await showOpenDialogWithMemory(import_electron8.dialog, parent, options);
+    const r = await showOpenDialogWithMemory(import_electron10.dialog, parent, options);
     if (r.canceled || !r.filePaths[0]) return null;
     if (await rejectLegacyPpt(r.filePaths[0])) return null;
     return openAndBuild(e.sender, r.filePaths[0], fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:open-path", async (e, path, fitWidthPx) => {
-    if (!path || !(0, import_node_fs12.existsSync)(path)) return null;
+  import_electron10.ipcMain.handle("slides:open-path", async (e, path, fitWidthPx) => {
+    if (!path || !(0, import_node_fs13.existsSync)(path)) return null;
     if (await rejectLegacyPpt(path)) return null;
     return openAndBuild(e.sender, path, fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:consume-pending-open", async (e, fitWidthPx) => {
+  import_electron10.ipcMain.handle("slides:consume-pending-open", async (e, fitWidthPx) => {
     vibFlip.get(e.sender.id)?.("#00000000");
     const queued = pendingByWc.get(e.sender.id) ?? pendingOpenPath;
-    if (queued && (0, import_node_fs12.existsSync)(queued)) {
+    if (queued && (0, import_node_fs13.existsSync)(queued)) {
       const dropQueued = () => {
         if (pendingByWc.get(e.sender.id) === queued) pendingByWc.delete(e.sender.id);
         if (pendingOpenPath === queued) pendingOpenPath = null;
@@ -236703,7 +236874,7 @@ function registerSlidesIpc() {
     }
     return null;
   });
-  import_electron8.ipcMain.handle("slides:edit-text", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-text", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     pushHistory(session);
@@ -236731,7 +236902,7 @@ function registerSlidesIpc() {
     );
     return syncAutofitScale(session, op.slideIndex, op.sourceId, rendered);
   });
-  import_electron8.ipcMain.handle("slides:set-element-font", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-element-font", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const font = {
@@ -236764,7 +236935,7 @@ function registerSlidesIpc() {
     }
     return rendered;
   });
-  import_electron8.ipcMain.handle("slides:set-element-paragraph-format", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-element-paragraph-format", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const format2 = {
@@ -236809,7 +236980,7 @@ function registerSlidesIpc() {
     }
     return rendered;
   });
-  import_electron8.ipcMain.handle("slides:edit-transform", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-transform", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -236869,7 +237040,7 @@ function registerSlidesIpc() {
     }
     return rebuildSlide(session, op.slideIndex);
   });
-  import_electron8.ipcMain.handle("slides:edit-connector-endpoints", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-connector-endpoints", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const baseWidthPx = session.opened.deck.size.cx / EMU_PER_PX_962;
@@ -236889,12 +237060,12 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:get-render-slides", (e) => {
+  import_electron10.ipcMain.handle("slides:get-render-slides", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     return session.opened.deck.slides.map((_, i) => rebuildSlide(session, i));
   });
-  import_electron8.ipcMain.handle("slides:batch-edit-transform", (e, op) => {
+  import_electron10.ipcMain.handle("slides:batch-edit-transform", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const baseWidthPx = session.opened.deck.size.cx / EMU_PER_PX_962;
@@ -236911,12 +237082,12 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:apply-txn", (e, req) => {
+  import_electron10.ipcMain.handle("slides:apply-txn", (e, req) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     return applySessionTxn(session, req);
   });
-  import_electron8.ipcMain.handle("slides:apply-edit-script", (e, op) => {
+  import_electron10.ipcMain.handle("slides:apply-edit-script", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const ops = mapScriptOps(session.opened, op);
@@ -236946,8 +237117,8 @@ function registerSlidesIpc() {
     return rendered ? { slide: rendered } : null;
   });
   const cloudSlideEnabled = () => process.env.GENOFFICE_CLOUD_SLIDE !== "0" && !!gskApiKey();
-  import_electron8.ipcMain.handle("slides:cloud-gen-status", () => ({ enabled: cloudSlideEnabled() }));
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle("slides:cloud-gen-status", () => ({ enabled: cloudSlideEnabled() }));
+  import_electron10.ipcMain.handle(
     "slides:cloud-page-generate",
     async (_e, op) => {
       if (!cloudSlideEnabled()) return { ok: false, error: "cloud slide generation is disabled" };
@@ -236967,10 +237138,10 @@ function registerSlidesIpc() {
         console.log(
           `[cloud-slide] page generated: tier=${tier} model=${model} bytes=${bytes.length} ms=${Date.now() - started2}`
         );
-        const dir = (0, import_node_path19.join)(import_electron8.app.getPath("temp"), "genoffice-cloud-pages");
-        (0, import_node_fs12.mkdirSync)(dir, { recursive: true });
-        const path = (0, import_node_path19.join)(dir, `${(0, import_node_crypto8.randomUUID)()}.pptx`);
-        await (0, import_promises7.writeFile)(path, bytes);
+        const dir = (0, import_node_path20.join)(import_electron10.app.getPath("temp"), "genoffice-cloud-pages");
+        (0, import_node_fs13.mkdirSync)(dir, { recursive: true });
+        const path = (0, import_node_path20.join)(dir, `${(0, import_node_crypto8.randomUUID)()}.pptx`);
+        await (0, import_promises8.writeFile)(path, bytes);
         issuedCloudPages.add(path);
         return { ok: true, marker: CLOUD_PAGE_PREFIX + path };
       } catch (err) {
@@ -236978,7 +237149,7 @@ function registerSlidesIpc() {
       }
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:local-page-generate",
     async (_e, op) => {
       const parsed2 = parsePageSpec(String(op?.specJson ?? ""));
@@ -236997,7 +237168,7 @@ function registerSlidesIpc() {
           },
           imageDims: (bytes2) => {
             try {
-              const s = import_electron8.nativeImage.createFromBuffer(Buffer.from(bytes2)).getSize();
+              const s = import_electron10.nativeImage.createFromBuffer(Buffer.from(bytes2)).getSize();
               return s.width > 0 && s.height > 0 ? s : null;
             } catch {
               return null;
@@ -237007,10 +237178,10 @@ function registerSlidesIpc() {
         console.log(
           `[local-slide] page generated: bytes=${bytes.length} imageFails=${imageFailures.length} ms=${Date.now() - started2}`
         );
-        const dir = (0, import_node_path19.join)(import_electron8.app.getPath("temp"), "genoffice-local-pages");
-        (0, import_node_fs12.mkdirSync)(dir, { recursive: true });
-        const path = (0, import_node_path19.join)(dir, `${(0, import_node_crypto8.randomUUID)()}.pptx`);
-        await (0, import_promises7.writeFile)(path, bytes);
+        const dir = (0, import_node_path20.join)(import_electron10.app.getPath("temp"), "genoffice-local-pages");
+        (0, import_node_fs13.mkdirSync)(dir, { recursive: true });
+        const path = (0, import_node_path20.join)(dir, `${(0, import_node_crypto8.randomUUID)()}.pptx`);
+        await (0, import_promises8.writeFile)(path, bytes);
         issuedCloudPages.add(path);
         return {
           ok: true,
@@ -237022,14 +237193,14 @@ function registerSlidesIpc() {
       }
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:land-generated-pages",
     async (e, pageMarkers, fitWidthPx, mode, atIndex, deckName) => {
       const readCloudPage = async (marker) => {
         if (!marker.startsWith(CLOUD_PAGE_PREFIX)) throw new Error("expected a cloud page marker");
         const path = marker.slice(CLOUD_PAGE_PREFIX.length);
         if (!issuedCloudPages.has(path)) throw new Error("unknown cloud page marker");
-        return { bytes: new Uint8Array(await (0, import_promises7.readFile)(path)) };
+        return { bytes: new Uint8Array(await (0, import_promises8.readFile)(path)) };
       };
       const assembleDeck = async () => {
         const perPage = await Promise.all(pageMarkers.map(readCloudPage));
@@ -237198,7 +237369,7 @@ function registerSlidesIpc() {
       }
     }
   );
-  import_electron8.ipcMain.handle("slides:new-blank", async (e, fitWidthPx) => {
+  import_electron10.ipcMain.handle("slides:new-blank", async (e, fitWidthPx) => {
     const opened = await openPptx(await createBlankPptx());
     sessions.set(e.sender.id, { path: "", opened, fitWidthPx, undoStack: [], redoStack: [] });
     scheduleHistoryNotify(sessions.get(e.sender.id));
@@ -237209,7 +237380,7 @@ function registerSlidesIpc() {
       defaultFont: deckDefaultFont(opened)
     };
   });
-  import_electron8.ipcMain.handle("slides:add-element", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-element", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const baseWidthPx = session.opened.deck.size.cx / EMU_PER_PX_962;
@@ -237238,7 +237409,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:delete-element", (e, op) => {
+  import_electron10.ipcMain.handle("slides:delete-element", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     pushHistory(session);
@@ -237251,7 +237422,7 @@ function registerSlidesIpc() {
     }
     return rebuildSlide(session, op.slideIndex);
   });
-  import_electron8.ipcMain.handle("slides:edit-stroke", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-stroke", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const patch = op.stroke ? {
@@ -237285,7 +237456,7 @@ function registerSlidesIpc() {
     }
     return rebuildSlide(session, op.slideIndex);
   });
-  import_electron8.ipcMain.handle("slides:flip-elements", (e, op) => {
+  import_electron10.ipcMain.handle("slides:flip-elements", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237301,7 +237472,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:edit-picture-src-rect", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-picture-src-rect", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     let box;
@@ -237328,7 +237499,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:group-elements", (e, op) => {
+  import_electron10.ipcMain.handle("slides:group-elements", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237338,7 +237509,7 @@ function registerSlidesIpc() {
     const renderSlide = rebuildSlide(session, op.slideIndex);
     return renderSlide ? { slide: renderSlide, groupId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:ungroup-element", (e, op) => {
+  import_electron10.ipcMain.handle("slides:ungroup-element", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237346,7 +237517,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:edit-background", async (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-background", async (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slides = session.opened.deck.slides;
@@ -237355,7 +237526,7 @@ function registerSlidesIpc() {
     if (op.kind === "image") {
       let source;
       if (op.pick !== false) {
-        const r = await showOpenDialogWithMemory(import_electron8.dialog, dialogParent(), {
+        const r = await showOpenDialogWithMemory(import_electron10.dialog, dialogParent(), {
           title: tm("dlgInsertImage"),
           properties: ["openFile"],
           filters: [
@@ -237366,7 +237537,7 @@ function registerSlidesIpc() {
           ]
         });
         if (r.canceled || !r.filePaths[0]) return null;
-        const bytes = await (0, import_promises7.readFile)(r.filePaths[0]);
+        const bytes = await (0, import_promises8.readFile)(r.filePaths[0]);
         source = {
           bytes: new Uint8Array(bytes),
           ext: r.filePaths[0].split(".").pop().toLowerCase()
@@ -237420,7 +237591,7 @@ function registerSlidesIpc() {
     session.fitWidthPx = op.fitWidthPx;
     return buildAllRenderSlides(session.opened, op.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:edit-image-fill", async (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-image-fill", async (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -237431,7 +237602,7 @@ function registerSlidesIpc() {
       bytes = new Uint8Array(Buffer.from(op.source.base64, "base64"));
       ext = op.source.ext.toLowerCase();
     } else {
-      const r = await showOpenDialogWithMemory(import_electron8.dialog, dialogParent(), {
+      const r = await showOpenDialogWithMemory(import_electron10.dialog, dialogParent(), {
         title: tm("dlgInsertImage"),
         properties: ["openFile"],
         filters: [
@@ -237442,7 +237613,7 @@ function registerSlidesIpc() {
         ]
       });
       if (r.canceled || !r.filePaths[0]) return null;
-      bytes = new Uint8Array(await (0, import_promises7.readFile)(r.filePaths[0]));
+      bytes = new Uint8Array(await (0, import_promises8.readFile)(r.filePaths[0]));
       ext = r.filePaths[0].split(".").pop().toLowerCase();
     }
     pushHistory(session);
@@ -237472,8 +237643,8 @@ function registerSlidesIpc() {
     }
     return rebuildSlide(session, op.slideIndex);
   });
-  import_electron8.ipcMain.handle("slides:pick-picture-file", async () => {
-    const r = await showOpenDialogWithMemory(import_electron8.dialog, dialogParent(), {
+  import_electron10.ipcMain.handle("slides:pick-picture-file", async () => {
+    const r = await showOpenDialogWithMemory(import_electron10.dialog, dialogParent(), {
       title: tm("dlgReplacePicture"),
       properties: ["openFile"],
       filters: [
@@ -237486,11 +237657,11 @@ function registerSlidesIpc() {
     if (r.canceled || !r.filePaths[0]) return null;
     const filePath = r.filePaths[0];
     return {
-      base64: (await (0, import_promises7.readFile)(filePath)).toString("base64"),
+      base64: (await (0, import_promises8.readFile)(filePath)).toString("base64"),
       ext: filePath.split(".").pop().toLowerCase()
     };
   });
-  import_electron8.ipcMain.handle("slides:insert-image", async (e, slideIndex, fitWidthPx) => {
+  import_electron10.ipcMain.handle("slides:insert-image", async (e, slideIndex, fitWidthPx) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[slideIndex];
@@ -237506,10 +237677,10 @@ function registerSlidesIpc() {
         }
       ]
     };
-    const r = await showOpenDialogWithMemory(import_electron8.dialog, parent, options);
+    const r = await showOpenDialogWithMemory(import_electron10.dialog, parent, options);
     if (r.canceled || !r.filePaths[0]) return null;
     const filePath = r.filePaths[0];
-    const bytes = await (0, import_promises7.readFile)(filePath);
+    const bytes = await (0, import_promises8.readFile)(filePath);
     const ext = filePath.split(".").pop().toLowerCase();
     const deckSize = session.opened.deck.size;
     let natural = { width: 4, height: 3 };
@@ -237517,7 +237688,7 @@ function registerSlidesIpc() {
       const decoded = tiffToPng(new Uint8Array(bytes));
       if (decoded) natural = { width: decoded.width, height: decoded.height };
     } else {
-      const img = import_electron8.nativeImage.createFromPath(filePath);
+      const img = import_electron10.nativeImage.createFromPath(filePath);
       if (!img.isEmpty()) natural = img.getSize();
     }
     const maxW = deckSize.cx / 2;
@@ -237547,7 +237718,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: txn.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:edit-fill", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-fill", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const fill = typeof op.fill === "string" ? op.fill : {
@@ -237576,7 +237747,7 @@ function registerSlidesIpc() {
     }
     return rebuildSlide(session, op.slideIndex);
   });
-  import_electron8.ipcMain.handle("slides:add-slide", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-slide", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237595,16 +237766,16 @@ function registerSlidesIpc() {
       index: op.sourceIndex + 1
     };
   });
-  import_electron8.ipcMain.handle("slides:copy-slide", (e, slideIndex, pngBase64) => {
+  import_electron10.ipcMain.handle("slides:copy-slide", (e, slideIndex, pngBase64) => {
     const session = sessions.get(e.sender.id);
     if (!session) return false;
     const bundle = copySlide(session.opened, slideIndex);
     if (!bundle) return false;
     slideClipboard = { bundle, ...pngBase64 ? { png: pngBase64 } : {} };
-    import_electron8.clipboard.writeBuffer("io.genoffice.slides.slide", Buffer.from("1"));
+    import_electron10.clipboard.writeBuffer("io.genoffice.slides.slide", Buffer.from("1"));
     return true;
   });
-  import_electron8.ipcMain.handle("slides:has-slide-clipboard", () => slideClipboard !== null);
+  import_electron10.ipcMain.handle("slides:has-slide-clipboard", () => slideClipboard !== null);
   const performSlidePaste = (session, op) => {
     if (!slideClipboard) return null;
     if (op.mode === "picture" && !slideClipboard.png) return null;
@@ -237627,7 +237798,7 @@ function registerSlidesIpc() {
       ...rec.created?.[0] ? { sourceId: rec.created[0] } : {}
     };
   };
-  import_electron8.ipcMain.handle("slides:paste-slide", (e, op) => {
+  import_electron10.ipcMain.handle("slides:paste-slide", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session || !slideClipboard) return null;
     pushHistory(session);
@@ -237642,7 +237813,7 @@ function registerSlidesIpc() {
     });
     return r;
   });
-  import_electron8.ipcMain.handle("slides:repaste-slide", (e, op) => {
+  import_electron10.ipcMain.handle("slides:repaste-slide", (e, op) => {
     const session = sessions.get(e.sender.id);
     const rec = lastSlidePaste.get(e.sender.id);
     if (!session || !slideClipboard || !rec) return null;
@@ -237663,7 +237834,7 @@ function registerSlidesIpc() {
     rec.undoLen = session.undoStack.length;
     return r;
   });
-  import_electron8.ipcMain.handle("slides:add-blank-slide", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-blank-slide", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237684,7 +237855,7 @@ function registerSlidesIpc() {
       layoutPath.slice(BUILTIN_LAYOUT_PREFIX.length)
     ) ?? void 0;
   };
-  import_electron8.ipcMain.handle("slides:add-slide-with-layout", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-slide-with-layout", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     pushHistory(session);
@@ -237702,7 +237873,7 @@ function registerSlidesIpc() {
       index: op.sourceIndex + 1
     };
   });
-  import_electron8.ipcMain.handle("slides:get-layouts", (e) => {
+  import_electron10.ipcMain.handle("slides:get-layouts", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const layouts = listSlideLayouts(session.opened.archive);
@@ -237727,7 +237898,7 @@ function registerSlidesIpc() {
     session.metaDirty = true;
     return buildMasterRenderSlide(session);
   };
-  import_electron8.ipcMain.handle("slides:master-enter", (e, fitWidthPx) => {
+  import_electron10.ipcMain.handle("slides:master-enter", (e, fitWidthPx) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     session.fitWidthPx = fitWidthPx;
@@ -237745,7 +237916,7 @@ function registerSlidesIpc() {
     }
     return items.length ? { items } : null;
   });
-  import_electron8.ipcMain.handle("slides:master-open", (e, partPath) => {
+  import_electron10.ipcMain.handle("slides:master-open", (e, partPath) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = parseMasterPart(session.opened.archive, partPath);
@@ -237753,13 +237924,13 @@ function registerSlidesIpc() {
     session.masterEdit = { partPath, slide };
     return buildMasterRenderSlide(session);
   });
-  import_electron8.ipcMain.handle("slides:master-close", (e) => {
+  import_electron10.ipcMain.handle("slides:master-close", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     session.masterEdit = null;
     return buildAllRenderSlides(session.opened, session.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:master-edit-text", (e, op) => {
+  import_electron10.ipcMain.handle("slides:master-edit-text", (e, op) => {
     const session = sessions.get(e.sender.id);
     const me = session?.masterEdit;
     if (!session || !me) return null;
@@ -237771,7 +237942,7 @@ function registerSlidesIpc() {
     if (!r) return null;
     return masterEditDone(session);
   });
-  import_electron8.ipcMain.handle("slides:master-edit-transform", (e, op) => {
+  import_electron10.ipcMain.handle("slides:master-edit-transform", (e, op) => {
     const session = sessions.get(e.sender.id);
     const me = session?.masterEdit;
     if (!session || !me) return null;
@@ -237810,7 +237981,7 @@ function registerSlidesIpc() {
     if (!r) return null;
     return masterEditDone(session);
   });
-  import_electron8.ipcMain.handle("slides:master-edit-fill", (e, op) => {
+  import_electron10.ipcMain.handle("slides:master-edit-fill", (e, op) => {
     const session = sessions.get(e.sender.id);
     const me = session?.masterEdit;
     if (!session || !me) return null;
@@ -237831,7 +238002,7 @@ function registerSlidesIpc() {
     if (!r) return null;
     return masterEditDone(session);
   });
-  import_electron8.ipcMain.handle("slides:master-edit-stroke", (e, op) => {
+  import_electron10.ipcMain.handle("slides:master-edit-stroke", (e, op) => {
     const session = sessions.get(e.sender.id);
     const me = session?.masterEdit;
     if (!session || !me) return null;
@@ -237843,7 +238014,7 @@ function registerSlidesIpc() {
     if (!r) return null;
     return masterEditDone(session);
   });
-  import_electron8.ipcMain.handle("slides:master-delete-element", (e, op) => {
+  import_electron10.ipcMain.handle("slides:master-delete-element", (e, op) => {
     const session = sessions.get(e.sender.id);
     const me = session?.masterEdit;
     if (!session || !me) return null;
@@ -237854,7 +238025,7 @@ function registerSlidesIpc() {
     if (!r) return null;
     return masterEditDone(session);
   });
-  import_electron8.ipcMain.handle("slides:edit-picture-opacity", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-picture-opacity", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237868,7 +238039,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:set-slide-size", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-slide-size", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, { ops: [{ op: "setSlideSize", cx: op.cx, cy: op.cy }] });
@@ -237876,11 +238047,11 @@ function registerSlidesIpc() {
     session.metaDirty = true;
     return buildAllRenderSlides(session.opened, session.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:get-slide-size", (e) => {
+  import_electron10.ipcMain.handle("slides:get-slide-size", (e) => {
     const session = sessions.get(e.sender.id);
     return session ? { ...session.opened.deck.size } : null;
   });
-  import_electron8.ipcMain.handle("slides:set-slide-layout", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-slide-layout", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     pushHistory(session);
@@ -237900,7 +238071,7 @@ function registerSlidesIpc() {
     }
     return rebuildSlide(session, op.slideIndex);
   });
-  import_electron8.ipcMain.handle("slides:find-replace", (e, op) => {
+  import_electron10.ipcMain.handle("slides:find-replace", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237920,13 +238091,13 @@ function registerSlidesIpc() {
     const count = r.records[0].after.count;
     return { count, slides: buildAllRenderSlides(session.opened, session.fitWidthPx) };
   });
-  import_electron8.ipcMain.handle("slides:delete-slide", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:delete-slide", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, { ops: [{ op: "deleteSlide", target: { slide: slideIndex } }] });
     return r ? buildAllRenderSlides(session.opened, session.fitWidthPx) : null;
   });
-  import_electron8.ipcMain.handle("slides:edit-table-cell", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-table-cell", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237942,7 +238113,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:table-merge", (e, op) => {
+  import_electron10.ipcMain.handle("slides:table-merge", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237960,7 +238131,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].after.elementId } : null;
   });
-  import_electron8.ipcMain.handle("slides:table-structure", (e, op) => {
+  import_electron10.ipcMain.handle("slides:table-structure", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -237978,7 +238149,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].after.elementId } : null;
   });
-  import_electron8.ipcMain.handle("slides:set-table-row-height", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-table-row-height", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const baseWidthPx = session.opened.deck.size.cx / EMU_PER_PX_962;
@@ -237995,7 +238166,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:set-table-cell-anchor", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-table-cell-anchor", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -238011,7 +238182,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:set-table-col-width", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-table-col-width", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const baseWidthPx = session.opened.deck.size.cx / EMU_PER_PX_962;
@@ -238028,7 +238199,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:edit-table-style", (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-table-style", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -238048,7 +238219,7 @@ function registerSlidesIpc() {
     const newId = session.opened.deck.slides[op.slideIndex]?.elements[elIdx]?.id ?? null;
     return { slide: rebuilt, sourceId: newId };
   });
-  import_electron8.ipcMain.handle("slides:edit-chart", async (e, op) => {
+  import_electron10.ipcMain.handle("slides:edit-chart", async (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -238065,7 +238236,7 @@ function registerSlidesIpc() {
         message: tm("chartSimplifyTitle"),
         detail: tm("chartSimplifyBody")
       };
-      const r2 = parent ? await import_electron8.dialog.showMessageBox(parent, options) : await import_electron8.dialog.showMessageBox(options);
+      const r2 = parent ? await import_electron10.dialog.showMessageBox(parent, options) : await import_electron10.dialog.showMessageBox(options);
       if (r2.response !== 0) return null;
     }
     const patch = {
@@ -238095,18 +238266,18 @@ function registerSlidesIpc() {
     const newId = session.opened.deck.slides[op.slideIndex]?.elements[elIdx]?.id ?? null;
     return { slide: rebuilt, sourceId: newId };
   });
-  import_electron8.ipcMain.handle("slides:chart-color-schemes", (e) => {
+  import_electron10.ipcMain.handle("slides:chart-color-schemes", (e) => {
     const session = sessions.get(e.sender.id);
     return session ? chartColorSchemes(session.opened) : null;
   });
-  import_electron8.ipcMain.handle("slides:get-chart-data", (e, slideIndex, sourceId) => {
+  import_electron10.ipcMain.handle("slides:get-chart-data", (e, slideIndex, sourceId) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[slideIndex];
     if (!slide) return null;
     return getChartElementData(slide, sourceId);
   });
-  import_electron8.ipcMain.handle("slides:reorder-element", (e, op) => {
+  import_electron10.ipcMain.handle("slides:reorder-element", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -238116,7 +238287,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:change-shape",
     (e, op) => {
       const session = sessions.get(e.sender.id);
@@ -238134,7 +238305,7 @@ function registerSlidesIpc() {
       return r ? rebuildSlide(session, op.slideIndex) : null;
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:set-shape-adjust",
     (e, op) => {
       const session = sessions.get(e.sender.id);
@@ -238170,7 +238341,7 @@ function registerSlidesIpc() {
       return rebuildSlide(session, op.slideIndex);
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:set-text-anchor",
     (e, op) => {
       const session = sessions.get(e.sender.id);
@@ -238187,7 +238358,7 @@ function registerSlidesIpc() {
       return r ? rebuildSlide(session, op.slideIndex) : null;
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:set-text-body-props",
     (e, op) => {
       const session = sessions.get(e.sender.id);
@@ -238211,7 +238382,7 @@ function registerSlidesIpc() {
       return syncAutofitScale(session, op.slideIndex, op.sourceId, rendered);
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:set-effects",
     (e, op) => {
       const session = sessions.get(e.sender.id);
@@ -238230,28 +238401,28 @@ function registerSlidesIpc() {
   );
   const clipboardMarker = (format2) => {
     try {
-      return import_electron8.clipboard.readBuffer(format2).length > 0;
+      return import_electron10.clipboard.readBuffer(format2).length > 0;
     } catch {
       return false;
     }
   };
-  import_electron8.ipcMain.handle("slides:clipboard-external", () => {
+  import_electron10.ipcMain.handle("slides:clipboard-external", () => {
     if (slideClipboard && clipboardMarker("io.genoffice.slides.slide")) return { kind: "slide" };
     if (elementClipboard && clipboardMarker("io.genoffice.slides.elements"))
       return { kind: "internal" };
-    const img = import_electron8.clipboard.readImage();
+    const img = import_electron10.clipboard.readImage();
     if (!img.isEmpty()) return { kind: "image", base64: img.toPNG().toString("base64"), ext: "png" };
-    const text = import_electron8.clipboard.readText();
+    const text = import_electron10.clipboard.readText();
     if (text.trim()) return { kind: "text", text };
     return { kind: "none" };
   });
-  import_electron8.ipcMain.handle("slides:clipboard-probe", () => {
+  import_electron10.ipcMain.handle("slides:clipboard-probe", () => {
     if (slideClipboard && clipboardMarker("io.genoffice.slides.slide")) return true;
     if (elementClipboard && clipboardMarker("io.genoffice.slides.elements")) return true;
-    if (import_electron8.clipboard.availableFormats().some((f) => f.startsWith("image/"))) return true;
-    return import_electron8.clipboard.readText().trim().length > 0;
+    if (import_electron10.clipboard.availableFormats().some((f) => f.startsWith("image/"))) return true;
+    return import_electron10.clipboard.readText().trim().length > 0;
   });
-  import_electron8.ipcMain.handle("slides:copy-elements", (e, op) => {
+  import_electron10.ipcMain.handle("slides:copy-elements", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return 0;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -238262,11 +238433,11 @@ function registerSlidesIpc() {
         items,
         cascade: newPasteCascade(op.cut ? null : pageKey(e.sender.id, op.slideIndex))
       };
-      import_electron8.clipboard.writeBuffer("io.genoffice.slides.elements", Buffer.from("1"));
+      import_electron10.clipboard.writeBuffer("io.genoffice.slides.elements", Buffer.from("1"));
     }
     return items.length;
   });
-  import_electron8.ipcMain.handle("slides:paste-elements", (e, op) => {
+  import_electron10.ipcMain.handle("slides:paste-elements", (e, op) => {
     const session = sessions.get(e.sender.id);
     const clip = elementClipboard;
     if (!session || !clip?.items.length) return null;
@@ -238293,7 +238464,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceIds: r.records[0].created } : null;
   });
-  import_electron8.ipcMain.handle("slides:duplicate-elements", (e, op) => {
+  import_electron10.ipcMain.handle("slides:duplicate-elements", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -238319,7 +238490,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceIds: r.records[0].created } : null;
   });
-  import_electron8.ipcMain.handle("slides:add-table", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-table", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     if (!session.opened.deck.slides[op.slideIndex]) return null;
@@ -238342,7 +238513,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:add-ink", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-ink", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -238373,7 +238544,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:add-chart", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-chart", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session || !session.opened.deck.slides[op.slideIndex]) return null;
     const baseWidthPx = session.opened.deck.size.cx / EMU_PER_PX_962;
@@ -238398,7 +238569,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:add-smartart", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-smartart", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session || !session.opened.deck.slides[op.slideIndex]) return null;
     const baseWidthPx = session.opened.deck.size.cx / EMU_PER_PX_962;
@@ -238420,7 +238591,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:add-image-bytes", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-image-bytes", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -238450,7 +238621,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:replace-picture-bytes", (e, op) => {
+  import_electron10.ipcMain.handle("slides:replace-picture-bytes", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const slide = session.opened.deck.slides[op.slideIndex];
@@ -238469,7 +238640,7 @@ function registerSlidesIpc() {
     if (!r) return { error: "unsupported", ext: op.ext };
     return rebuildSlide(session, op.slideIndex);
   });
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:insert-media",
     async (e, slideIndex, kind, fitWidthPx) => {
       const session = sessions.get(e.sender.id);
@@ -238481,10 +238652,10 @@ function registerSlidesIpc() {
         properties: ["openFile"],
         filters
       };
-      const r = await showOpenDialogWithMemory(import_electron8.dialog, parent, options);
+      const r = await showOpenDialogWithMemory(import_electron10.dialog, parent, options);
       if (r.canceled || !r.filePaths[0]) return null;
       const filePath = r.filePaths[0];
-      const bytes = await (0, import_promises7.readFile)(filePath);
+      const bytes = await (0, import_promises8.readFile)(filePath);
       const ext = filePath.split(".").pop().toLowerCase();
       const fileName = filePath.split("/").pop();
       if (kind === "video") {
@@ -238501,14 +238672,14 @@ function registerSlidesIpc() {
             message: tm("mediaUnsupportedTitle"),
             detail
           };
-          if (parent) await import_electron8.dialog.showMessageBox(parent, warn3);
-          else await import_electron8.dialog.showMessageBox(warn3);
+          if (parent) await import_electron10.dialog.showMessageBox(parent, warn3);
+          else await import_electron10.dialog.showMessageBox(warn3);
         }
       }
       let poster;
       if (kind === "video") {
         try {
-          const thumb = await import_electron8.nativeImage.createThumbnailFromPath(filePath, {
+          const thumb = await import_electron10.nativeImage.createThumbnailFromPath(filePath, {
             width: 960,
             height: 540
           });
@@ -238570,7 +238741,7 @@ function registerSlidesIpc() {
     aac: "audio/aac",
     ogg: "audio/ogg"
   };
-  import_electron8.ipcMain.handle("slides:media-data", (e, slideIndex, sourceId) => {
+  import_electron10.ipcMain.handle("slides:media-data", (e, slideIndex, sourceId) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[slideIndex];
     if (!session || !slide) return null;
@@ -238588,7 +238759,7 @@ function registerSlidesIpc() {
       dataUrl: `data:${mime};base64,${Buffer.from(bytes).toString("base64")}`
     };
   });
-  import_electron8.ipcMain.handle("slides:add-media-bytes", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-media-bytes", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session || !session.opened.deck.slides[op.slideIndex]) return null;
     const deckSize = session.opened.deck.size;
@@ -238617,7 +238788,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, op.slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: r.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:insert-model3d", async (e, slideIndex, fitWidthPx) => {
+  import_electron10.ipcMain.handle("slides:insert-model3d", async (e, slideIndex, fitWidthPx) => {
     const session = sessions.get(e.sender.id);
     if (!session || !session.opened.deck.slides[slideIndex]) return null;
     const parent = dialogParent();
@@ -238626,14 +238797,14 @@ function registerSlidesIpc() {
       properties: ["openFile"],
       filters: [{ name: tm("filter3d"), extensions: ["glb", "gltf"] }]
     };
-    const r = await showOpenDialogWithMemory(import_electron8.dialog, parent, options);
+    const r = await showOpenDialogWithMemory(import_electron10.dialog, parent, options);
     if (r.canceled || !r.filePaths[0]) return null;
     const filePath = r.filePaths[0];
-    const bytes = await (0, import_promises7.readFile)(filePath);
+    const bytes = await (0, import_promises8.readFile)(filePath);
     const ext = filePath.split(".").pop().toLowerCase();
     let poster;
     try {
-      const thumb = await import_electron8.nativeImage.createThumbnailFromPath(filePath, { width: 640, height: 640 });
+      const thumb = await import_electron10.nativeImage.createThumbnailFromPath(filePath, { width: 640, height: 640 });
       if (!thumb.isEmpty()) poster = { bytes: new Uint8Array(thumb.toPNG()), ext: "png" };
     } catch {
     }
@@ -238663,7 +238834,7 @@ function registerSlidesIpc() {
     const rebuilt = rebuildSlide(session, slideIndex);
     return rebuilt ? { slide: rebuilt, sourceId: txn.records[0].created[0] } : null;
   });
-  import_electron8.ipcMain.handle("slides:set-link", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-link", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -238671,12 +238842,12 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:get-link", (e, slideIndex, sourceId) => {
+  import_electron10.ipcMain.handle("slides:get-link", (e, slideIndex, sourceId) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     return getElementLink(session.opened, slideIndex, sourceId);
   });
-  import_electron8.ipcMain.handle("slides:get-slide-links", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-slide-links", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     if (!session) return [];
     return getSlideLinks(session.opened, slideIndex).map(({ elementId, target }) => ({
@@ -238684,7 +238855,7 @@ function registerSlidesIpc() {
       target
     }));
   });
-  import_electron8.ipcMain.handle("slides:get-run-links", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-run-links", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     if (!session) return [];
     return getRunLinks(session.opened, slideIndex).map(({ elementId, ...rest }) => ({
@@ -238692,7 +238863,7 @@ function registerSlidesIpc() {
       ...rest
     }));
   });
-  import_electron8.ipcMain.handle("slides:apply-header-footer", (e, op) => {
+  import_electron10.ipcMain.handle("slides:apply-header-footer", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -238712,12 +238883,12 @@ function registerSlidesIpc() {
     session.fitWidthPx = op.fitWidthPx;
     return buildAllRenderSlides(session.opened, op.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:get-header-footer", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-header-footer", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[slideIndex];
     return slide ? readHeaderFooter(slide) : { footer: null, slideNum: false, date: null };
   });
-  import_electron8.ipcMain.handle("slides:apply-theme", (e, op) => {
+  import_electron10.ipcMain.handle("slides:apply-theme", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const payload = {
@@ -238745,7 +238916,7 @@ function registerSlidesIpc() {
     session.fitWidthPx = op.fitWidthPx;
     return buildAllRenderSlides(session.opened, op.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:set-transition", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-transition", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return false;
     const slides = session.opened.deck.slides;
@@ -238756,12 +238927,12 @@ function registerSlidesIpc() {
     });
     return r !== null;
   });
-  import_electron8.ipcMain.handle("slides:get-transition", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-transition", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[slideIndex];
     return slide ? getSlideTransition(slide) : "none";
   });
-  import_electron8.ipcMain.handle("slides:set-advance-times", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-advance-times", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return false;
     const slides = session.opened.deck.slides;
@@ -238776,7 +238947,7 @@ function registerSlidesIpc() {
     });
     return r !== null;
   });
-  import_electron8.ipcMain.handle("slides:get-animations", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-animations", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[slideIndex];
     if (!slide) return [];
@@ -238811,7 +238982,7 @@ function registerSlidesIpc() {
     }
     return out;
   });
-  import_electron8.ipcMain.handle("slides:get-shape-keys", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-shape-keys", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[slideIndex];
     if (!slide) return [];
@@ -238821,7 +238992,7 @@ function registerSlidesIpc() {
       name: el.name ?? ""
     }));
   });
-  import_electron8.ipcMain.handle("slides:set-animations", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-animations", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return false;
     const r = sessionTxn(session, {
@@ -238829,7 +239000,7 @@ function registerSlidesIpc() {
     });
     return r !== null;
   });
-  import_electron8.ipcMain.handle("slides:set-hidden", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-hidden", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -238837,7 +239008,7 @@ function registerSlidesIpc() {
     });
     return r ? rebuildSlide(session, op.slideIndex) : null;
   });
-  import_electron8.ipcMain.handle("slides:get-sections", (e) => {
+  import_electron10.ipcMain.handle("slides:get-sections", (e) => {
     const session = sessions.get(e.sender.id);
     return session ? getSections(session.opened) : [];
   });
@@ -238849,25 +239020,25 @@ function registerSlidesIpc() {
     session.metaDirty = true;
     return r.records[0].after;
   };
-  import_electron8.ipcMain.handle("slides:set-sections", (e, sections) => {
+  import_electron10.ipcMain.handle("slides:set-sections", (e, sections) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     if (!sectionShim(e, { op: "setSections", sections })) return null;
     return getSections(session.opened);
   });
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:add-section",
     (e, op) => sectionShim(e, { op: "addSection", atSlideIndex: op.atSlideIndex, name: op.name })
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:rename-section",
     (e, op) => sectionShim(e, { op: "renameSection", id: op.id, name: op.name })
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:remove-section",
     (e, op) => sectionShim(e, { op: "removeSection", id: op.id })
   );
-  import_electron8.ipcMain.handle("slides:move-slide", (e, op) => {
+  import_electron10.ipcMain.handle("slides:move-slide", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const r = sessionTxn(session, {
@@ -238880,7 +239051,7 @@ function registerSlidesIpc() {
       sections: getSections(session.opened)
     };
   });
-  import_electron8.ipcMain.handle("slides:move-section", (e, op) => {
+  import_electron10.ipcMain.handle("slides:move-section", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const sections = sectionShim(e, { op: "moveSection", id: op.id, dir: op.dir });
@@ -238890,12 +239061,12 @@ function registerSlidesIpc() {
       sections
     };
   });
-  import_electron8.ipcMain.handle("slides:get-notes", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-notes", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[slideIndex];
     return session && slide ? getSlideNotes(session.opened.archive, slide.path) : "";
   });
-  import_electron8.ipcMain.handle("slides:set-notes", (e, op) => {
+  import_electron10.ipcMain.handle("slides:set-notes", (e, op) => {
     const session = sessions.get(e.sender.id);
     if (!session) return false;
     const r = sessionTxn(session, {
@@ -238904,12 +239075,12 @@ function registerSlidesIpc() {
     if (r) session.metaDirty = true;
     return r !== null;
   });
-  import_electron8.ipcMain.handle("slides:get-comments", (e, slideIndex) => {
+  import_electron10.ipcMain.handle("slides:get-comments", (e, slideIndex) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[slideIndex];
     return session && slide ? getSlideComments(session.opened.archive, slide.path) : [];
   });
-  import_electron8.ipcMain.handle("slides:add-comment", (e, op) => {
+  import_electron10.ipcMain.handle("slides:add-comment", (e, op) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[op.slideIndex];
     if (!session || !slide) return null;
@@ -238927,7 +239098,7 @@ function registerSlidesIpc() {
     session.metaDirty = true;
     return getSlideComments(session.opened.archive, slide.path);
   });
-  import_electron8.ipcMain.handle("slides:delete-comment", (e, op) => {
+  import_electron10.ipcMain.handle("slides:delete-comment", (e, op) => {
     const session = sessions.get(e.sender.id);
     const slide = session?.opened.deck.slides[op.slideIndex];
     if (!session || !slide) return null;
@@ -238945,31 +239116,31 @@ function registerSlidesIpc() {
     session.metaDirty = true;
     return getSlideComments(session.opened.archive, slide.path);
   });
-  import_electron8.ipcMain.handle("slides:native-clipboard", (e, op) => {
+  import_electron10.ipcMain.handle("slides:native-clipboard", (e, op) => {
     if (op === "cut") e.sender.cut();
     else if (op === "copy") e.sender.copy();
     else e.sender.paste();
   });
-  import_electron8.ipcMain.handle("slides:history-batch-begin", (e) => {
+  import_electron10.ipcMain.handle("slides:history-batch-begin", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session) return false;
     beginHistoryBatch(session);
     return true;
   });
-  import_electron8.ipcMain.handle("slides:history-batch-end", (e) => {
+  import_electron10.ipcMain.handle("slides:history-batch-end", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session) return null;
     const before = endHistoryBatch(session);
     return before ? registerAiSnapshot(session, before) : null;
   });
-  import_electron8.ipcMain.handle("slides:ai-snapshot-restore", (e, id) => {
+  import_electron10.ipcMain.handle("slides:ai-snapshot-restore", (e, id) => {
     const session = sessions.get(e.sender.id);
     if (!session || session.masterEdit || session.historyBatch) return null;
     if (!restoreAiSnapshot(session, id)) return null;
     scheduleDeckBroadcast(session);
     return buildAllRenderSlides(session.opened, session.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:undo", (e) => {
+  import_electron10.ipcMain.handle("slides:undo", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session || session.masterEdit) return null;
     settleStaleHistoryBatch(session);
@@ -238980,7 +239151,7 @@ function registerSlidesIpc() {
     scheduleDeckBroadcast(session);
     return buildAllRenderSlides(session.opened, session.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:redo", (e) => {
+  import_electron10.ipcMain.handle("slides:redo", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session || session.masterEdit) return null;
     settleStaleHistoryBatch(session);
@@ -238991,19 +239162,19 @@ function registerSlidesIpc() {
     scheduleDeckBroadcast(session);
     return buildAllRenderSlides(session.opened, session.fitWidthPx);
   });
-  import_electron8.ipcMain.handle("slides:is-dirty", (e) => {
+  import_electron10.ipcMain.handle("slides:is-dirty", (e) => {
     const session = sessions.get(e.sender.id);
     if (!session) return false;
     return !!session.metaDirty || session.opened.deck.slides.some(
       (s) => s.structureDirty || s.elements.some((el) => el.dirty || el.dirtyTransform)
     );
   });
-  import_electron8.ipcMain.handle("slides:save", async (e) => {
+  import_electron10.ipcMain.handle("slides:save", async (e) => {
     const session = sessions.get(e.sender.id);
     if (!session) return { ok: false, error: "no file open" };
     if (!session.path) {
       const draftsDir = getDraftsDir();
-      if (!(0, import_node_fs12.existsSync)(draftsDir)) (0, import_node_fs12.mkdirSync)(draftsDir, { recursive: true });
+      if (!(0, import_node_fs13.existsSync)(draftsDir)) (0, import_node_fs13.mkdirSync)(draftsDir, { recursive: true });
       session.path = pickDraftPath(draftsDir, tm("untitledDeck"));
       await pushRecent(session.path);
       slidesOpenedHook?.(e.sender, session.path);
@@ -239011,7 +239182,7 @@ function registerSlidesIpc() {
     try {
       await savePptxToFile(session.opened, session.path);
       autosaveBackoff.delete(session.path);
-      void (0, import_promises7.rm)(autosavePathFor(session.path), { force: true }).catch(() => {
+      void (0, import_promises8.rm)(autosavePathFor(session.path), { force: true }).catch(() => {
       });
       dropUntitledRecovery(e.sender.id);
       commitSaved(session.opened);
@@ -239025,7 +239196,7 @@ function registerSlidesIpc() {
       return { ok: false, error: String(err) };
     }
   });
-  import_electron8.ipcMain.handle("slides:save-as", async (e, defaultName) => {
+  import_electron10.ipcMain.handle("slides:save-as", async (e, defaultName) => {
     const session = sessions.get(e.sender.id);
     if (!session) return { ok: false, error: "no file open" };
     const parent = dialogParent();
@@ -239033,7 +239204,7 @@ function registerSlidesIpc() {
       defaultPath: saveAsSuggestion(session.path, defaultName),
       filters: [{ name: "PowerPoint", extensions: ["pptx"] }]
     };
-    const r = await showSaveDialogWithMemory(import_electron8.dialog, parent, options, getDraftsDir());
+    const r = await showSaveDialogWithMemory(import_electron10.dialog, parent, options, getDraftsDir());
     if (r.canceled || !r.filePath) return { ok: false };
     try {
       await savePptxToFile(session.opened, r.filePath);
@@ -239053,25 +239224,25 @@ function registerSlidesIpc() {
       return { ok: false, error: String(err) };
     }
   });
-  import_electron8.ipcMain.handle("slides:pick-export-dir", async () => {
+  import_electron10.ipcMain.handle("slides:pick-export-dir", async () => {
     const parent = dialogParent();
     const options = {
       title: tm("dlgPickExportDir"),
       buttonLabel: tm("btnExport"),
       properties: ["openDirectory", "createDirectory"]
     };
-    const r = await showOpenDialogWithMemory(import_electron8.dialog, parent, options);
+    const r = await showOpenDialogWithMemory(import_electron10.dialog, parent, options);
     return r.canceled || !r.filePaths[0] ? null : r.filePaths[0];
   });
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:export-images",
     async (_e, op) => {
       try {
         const pad = op.pngsBase64.length >= 100 ? 3 : 2;
         const paths = [];
         for (let i = 0; i < op.pngsBase64.length; i++) {
-          const p = (0, import_node_path19.join)(op.dir, `${op.baseName}-${String(i + 1).padStart(pad, "0")}.png`);
-          await (0, import_promises7.writeFile)(p, Buffer.from(op.pngsBase64[i], "base64"));
+          const p = (0, import_node_path20.join)(op.dir, `${op.baseName}-${String(i + 1).padStart(pad, "0")}.png`);
+          await (0, import_promises8.writeFile)(p, Buffer.from(op.pngsBase64[i], "base64"));
           paths.push(p);
         }
         return { ok: true, paths };
@@ -239080,24 +239251,24 @@ function registerSlidesIpc() {
       }
     }
   );
-  import_electron8.ipcMain.handle("slides:pick-export-pdf-path", async (_e, defaultName) => {
+  import_electron10.ipcMain.handle("slides:pick-export-pdf-path", async (_e, defaultName) => {
     const parent = dialogParent();
     const options = {
       title: tm("dlgExportPdf"),
       defaultPath: defaultName,
       filters: [{ name: "PDF", extensions: ["pdf"] }]
     };
-    const r = await showSaveDialogWithMemory(import_electron8.dialog, parent, options, getDraftsDir());
+    const r = await showSaveDialogWithMemory(import_electron10.dialog, parent, options, getDraftsDir());
     return r.canceled || !r.filePath ? null : r.filePath;
   });
-  import_electron8.ipcMain.handle("slides:export-pdf", async (_e, op) => {
+  import_electron10.ipcMain.handle("slides:export-pdf", async (_e, op) => {
     return exportSlidesPdf({
       ...op,
-      createWindow: () => new import_electron8.BrowserWindow({ show: false, webPreferences: { sandbox: true } }),
+      createWindow: () => new import_electron10.BrowserWindow({ show: false, webPreferences: { sandbox: true } }),
       openExportedPdf
     });
   });
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "slides:print",
     async (e, op) => {
       const html = buildPrintDocumentHtml({
@@ -239108,17 +239279,9 @@ function registerSlidesIpc() {
         ...op.orientation ? { orientation: op.orientation } : {},
         ...op.frame ? { frame: true } : {}
       });
-      const owner = import_electron8.BrowserWindow.fromWebContents(e.sender) ?? dialogParent();
-      const win = new import_electron8.BrowserWindow({
-        show: false,
-        ...owner && !owner.isDestroyed() ? { parent: owner } : {},
-        ...process.platform === "win32" ? {
-          width: 900,
-          height: 700,
-          autoHideMenuBar: true,
-          closable: false,
-          skipTaskbar: true
-        } : {},
+      const owner = import_electron10.BrowserWindow.fromWebContents(e.sender) ?? dialogParent();
+      const win = createSystemPrintWindow(owner, {
+        title: tm("menuPrint"),
         webPreferences: { sandbox: true }
       });
       try {
@@ -239127,16 +239290,22 @@ function registerSlidesIpc() {
           "Promise.all([document.fonts.ready, ...Array.from(document.images).map((i) => i.decode().catch(() => {}))])",
           true
         );
-        if (process.platform === "win32") {
+        if (process.platform !== "win32") {
           win.show();
           win.focus();
         }
-        const result = await new Promise((resolve5) => {
-          win.webContents.print(
-            { silent: false, printBackground: true },
-            (success, failureReason) => resolve5({ success, failureReason })
-          );
-        });
+        const result = await printWithSystemDialog(win.webContents, {
+          ...parsePrintJobSettings(op.job),
+          silent: false,
+          printBackground: true,
+          landscape: printPageLandscape({
+            layout: op.layout ?? "full",
+            ratio: op.widthPx / op.heightPx,
+            ...op.orientation ? { orientation: op.orientation } : {}
+          }),
+          margins: { marginType: "none" },
+          pageSize: printPageSizeMicrons({ layout: op.layout ?? "full", ratio: op.widthPx / op.heightPx })
+        }, owner);
         if (!result.success) {
           if (result.failureReason === "Print job canceled") return { ok: false };
           return { ok: false, error: result.failureReason };
@@ -239146,16 +239315,17 @@ function registerSlidesIpc() {
         return { ok: false, error: String(err) };
       } finally {
         if (!win.isDestroyed()) win.destroy();
+        if (!e.sender.isDestroyed() && owner?.isEnabled()) e.sender.focus();
       }
     }
   );
-  import_electron8.ipcMain.handle("slides:recent", () => readRecent());
-  import_electron8.ipcMain.handle("slides:consume-headless-export", (e) => {
+  import_electron10.ipcMain.handle("slides:recent", () => readRecent());
+  import_electron10.ipcMain.handle("slides:consume-headless-export", (e) => {
     const target = headlessExportTargets.get(e.sender.id) ?? null;
     headlessExportTargets.delete(e.sender.id);
     return target;
   });
-  import_electron8.ipcMain.on("slides:headless-export-done", (e, result) => {
+  import_electron10.ipcMain.on("slides:headless-export-done", (e, result) => {
     const settle = headlessExportWaiters.get(e.sender.id);
     if (!settle) return;
     headlessExportWaiters.delete(e.sender.id);
@@ -239166,8 +239336,8 @@ function registerSlidesIpc() {
     });
   });
   let showFsRelease = null;
-  import_electron8.ipcMain.handle("slides:show-fullscreen", (e, on) => {
-    const win = import_electron8.BrowserWindow.fromWebContents(e.sender) ?? windowRefs.shellWindow;
+  import_electron10.ipcMain.handle("slides:show-fullscreen", (e, on) => {
+    const win = import_electron10.BrowserWindow.fromWebContents(e.sender) ?? windowRefs.shellWindow;
     if (!win || win.isDestroyed()) return;
     const wc = e.sender;
     if (showFsRelease) {
@@ -239203,13 +239373,18 @@ function registerSlidesIpc() {
 var slidesProjectStore = null;
 var slidesProjectIpcRegistered = false;
 function getSlidesProjectStore() {
-  if (!slidesProjectStore) slidesProjectStore = new ProjectStore(import_electron8.app.getPath("userData"));
+  if (!slidesProjectStore) slidesProjectStore = new ProjectStore(import_electron10.app.getPath("userData"));
   return slidesProjectStore;
+}
+async function exportSlidesSnapshot(contentsId) {
+  const session = sessions.get(contentsId);
+  if (!session) throw new Error("OFFICE_EXPORT_SNAPSHOT_MISSING");
+  return savePptx(session.opened);
 }
 function registerProjectIpc() {
   if (slidesProjectIpcRegistered) return;
   slidesProjectIpcRegistered = true;
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "project:resolveChat",
     (_event, args) => {
       const store = getSlidesProjectStore();
@@ -239220,7 +239395,7 @@ function registerProjectIpc() {
       return store.resolveChatForFile(args.filePath);
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "project:appendChat",
     (_event, args) => {
       const msg = {
@@ -239233,13 +239408,13 @@ function registerProjectIpc() {
       getSlidesProjectStore().appendChatMessage(args.projectId, args.chatId, msg);
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "project:loadChat",
     (_event, args) => {
       return getSlidesProjectStore().loadChat(args.projectId, args.chatId, args.limit ?? 200);
     }
   );
-  import_electron8.ipcMain.handle(
+  import_electron10.ipcMain.handle(
     "project:rebindChat",
     (_event, args) => {
       const store = getSlidesProjectStore();
@@ -239255,7 +239430,7 @@ var headlessExportTargets = /* @__PURE__ */ new Map();
 var headlessExportWaiters = /* @__PURE__ */ new Map();
 async function exportSlidesPdfHeadless(input, outPath, timeoutMs = 3e5) {
   registerSlidesIpc();
-  const win = new import_electron8.BrowserWindow({
+  const win = new import_electron10.BrowserWindow({
     show: false,
     width: 1280,
     height: 840,
@@ -239295,7 +239470,7 @@ async function exportSlidesPdfHeadless(input, outPath, timeoutMs = 3e5) {
   }
 }
 function createSlidesWindow(openPath) {
-  const win = new import_electron8.BrowserWindow({
+  const win = new import_electron10.BrowserWindow({
     width: 1280,
     height: 840,
     title: "GenOffice Slides",
@@ -239328,7 +239503,7 @@ function createSlidesWindow(openPath) {
   });
   void win.loadURL(rendererUrl(runtime.rendererDevUrl, "slides"));
   if (openPath) {
-    win.setTitle((0, import_node_path19.basename)(openPath));
+    win.setTitle((0, import_node_path20.basename)(openPath));
     win.webContents.once("did-finish-load", async () => {
       try {
         const result = await openAndBuild(win.webContents, openPath, 1280);
@@ -239350,7 +239525,7 @@ function armVibrancy(view) {
   view.webContents.once("destroyed", () => vibFlip.delete(wcId));
 }
 function createSlidesView(openPath) {
-  const view = new import_electron8.WebContentsView({
+  const view = new import_electron10.WebContentsView({
     webPreferences: {
       preload: runtime.preloadPath,
       contextIsolation: true,
@@ -239361,7 +239536,7 @@ function createSlidesView(openPath) {
   registerSlidesIpc();
   trackSlidesWebContents(view.webContents);
   armVibrancy(view);
-  if (openPath && (0, import_node_fs12.existsSync)(openPath)) pendingByWc.set(view.webContents.id, openPath);
+  if (openPath && (0, import_node_fs13.existsSync)(openPath)) pendingByWc.set(view.webContents.id, openPath);
   void view.webContents.loadURL(rendererUrl(runtime.rendererDevUrl, "slides", { mode: "tab" }));
   return view;
 }
@@ -239374,7 +239549,7 @@ function setSlidesCloseTabHook(fn) {
   closeActiveTabHook = fn;
 }
 function buildSlidesMenu() {
-  const send = (cmd) => (windowRefs.activeWebContents ?? import_electron8.BrowserWindow.getFocusedWindow()?.webContents)?.send(
+  const send = (cmd) => (windowRefs.activeWebContents ?? import_electron10.BrowserWindow.getFocusedWindow()?.webContents)?.send(
     "slides:menu",
     cmd
   );
@@ -239391,7 +239566,7 @@ function buildSlidesMenu() {
           // the shared session (openAndBuild), so both windows co-edit live
           label: tm("menuOpenNewWindow"),
           click: () => {
-            const wc = windowRefs.activeWebContents ?? import_electron8.BrowserWindow.getFocusedWindow()?.webContents;
+            const wc = windowRefs.activeWebContents ?? import_electron10.BrowserWindow.getFocusedWindow()?.webContents;
             const path = wc ? sessions.get(wc.id)?.path : void 0;
             if (path) createSlidesWindow(path);
           }
@@ -239444,10 +239619,10 @@ function buildSlidesMenu() {
     },
     helpMenuTemplate(labels)
   ];
-  return import_electron8.Menu.buildFromTemplate(template);
+  return import_electron10.Menu.buildFromTemplate(template);
 }
 function installSlidesMenu() {
-  import_electron8.Menu.setApplicationMenu(buildSlidesMenu());
+  import_electron10.Menu.setApplicationMenu(buildSlidesMenu());
 }
 async function applyMainProcessProxy() {
   const setDispatcher = async (proxyUrl) => {
@@ -239466,8 +239641,8 @@ async function applyMainProcessProxy() {
     return;
   }
   try {
-    await import_electron8.app.whenReady();
-    const resolved = await import_electron8.session.defaultSession.resolveProxy("https://www.genspark.ai/");
+    await import_electron10.app.whenReady();
+    const resolved = await import_electron10.session.defaultSession.resolveProxy("https://www.genspark.ai/");
     const m = /PROXY\s+([^;]+)/i.exec(resolved || "");
     if (m) {
       await setDispatcher(`http://${m[1].trim()}`);
@@ -239480,24 +239655,24 @@ async function applyMainProcessProxy() {
 }
 function startSlidesStandalone() {
   registerRendererScheme();
-  installNavigationGuard(import_electron8.app);
-  installContextMenu(import_electron8.app, () => contextMenuLabels(getUiLang()));
-  if (!import_electron8.app.isPackaged && process.env.SLIDES_CDP_PORT) {
-    import_electron8.app.commandLine.appendSwitch("remote-debugging-port", process.env.SLIDES_CDP_PORT);
-    import_electron8.app.commandLine.appendSwitch("remote-allow-origins", "*");
+  installNavigationGuard(import_electron10.app);
+  installContextMenu(import_electron10.app, () => contextMenuLabels(getUiLang()));
+  if (!import_electron10.app.isPackaged && process.env.SLIDES_CDP_PORT) {
+    import_electron10.app.commandLine.appendSwitch("remote-debugging-port", process.env.SLIDES_CDP_PORT);
+    import_electron10.app.commandLine.appendSwitch("remote-allow-origins", "*");
   }
-  if (!import_electron8.app.isPackaged && process.env.GENOFFICE_USER_DATA) {
-    import_electron8.app.setPath("userData", process.env.GENOFFICE_USER_DATA);
+  if (!import_electron10.app.isPackaged && process.env.GENOFFICE_USER_DATA) {
+    import_electron10.app.setPath("userData", process.env.GENOFFICE_USER_DATA);
   }
   void applyMainProcessProxy();
-  if (!import_electron8.app.requestSingleInstanceLock()) {
-    import_electron8.app.quit();
+  if (!import_electron10.app.requestSingleInstanceLock()) {
+    import_electron10.app.quit();
     return;
   }
-  import_electron8.app.on("open-file", (event, path) => {
+  import_electron10.app.on("open-file", (event, path) => {
     event.preventDefault();
-    if (import_electron8.app.isReady()) {
-      const win = import_electron8.BrowserWindow.getAllWindows()[0];
+    if (import_electron10.app.isReady()) {
+      const win = import_electron10.BrowserWindow.getAllWindows()[0];
       if (win) {
         openAndBuild(win.webContents, path, 1280).then(
           (r) => win.webContents.send("slides:opened", r)
@@ -239507,19 +239682,19 @@ function startSlidesStandalone() {
     } else pendingOpenPath = path;
   });
   const argPath = process.argv.find((a) => a.toLowerCase().endsWith(".pptx"));
-  if (argPath && (0, import_node_fs12.existsSync)(argPath)) pendingOpenPath = argPath;
-  import_electron8.app.whenReady().then(async () => {
-    installRendererProtocol({ slides: (0, import_node_path19.join)(__dirname, "../renderer") });
-    setUiLang(normalizeLang(process.env.GENOFFICE_LANG ?? import_electron8.app.getLocale()));
+  if (argPath && (0, import_node_fs13.existsSync)(argPath)) pendingOpenPath = argPath;
+  import_electron10.app.whenReady().then(async () => {
+    installRendererProtocol({ slides: (0, import_node_path20.join)(__dirname, "../renderer") });
+    setUiLang(normalizeLang(process.env.GENOFFICE_LANG ?? import_electron10.app.getLocale()));
     registerSlidesIpc();
     registerAiIpc();
     registerProjectIpc();
-    import_electron8.Menu.setApplicationMenu(buildSlidesMenu());
+    import_electron10.Menu.setApplicationMenu(buildSlidesMenu());
     const win = createSlidesWindow(pendingOpenPath);
-    import_electron8.app.on("activate", () => {
-      if (import_electron8.BrowserWindow.getAllWindows().length === 0) createSlidesWindow();
+    import_electron10.app.on("activate", () => {
+      if (import_electron10.BrowserWindow.getAllWindows().length === 0) createSlidesWindow();
     });
-    if (!import_electron8.app.isPackaged && process.env.SLIDES_SMOKE_SHOT) {
+    if (!import_electron10.app.isPackaged && process.env.SLIDES_SMOKE_SHOT) {
       win.webContents.once("did-finish-load", async () => {
         await new Promise((r) => setTimeout(r, 1800));
         try {
@@ -239534,12 +239709,12 @@ function startSlidesStandalone() {
         } catch (e) {
           console.error("SMOKE_ERR", e);
         }
-        import_electron8.app.quit();
+        import_electron10.app.quit();
       });
     }
   });
-  import_electron8.app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") import_electron8.app.quit();
+  import_electron10.app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") import_electron10.app.quit();
   });
 }
 // Annotate the CommonJS export names for ESM import in node:
@@ -239551,6 +239726,7 @@ function startSlidesStandalone() {
   createSlidesWindow,
   discardSlidesRecovery,
   exportSlidesPdfHeadless,
+  exportSlidesSnapshot,
   installSlidesMenu,
   registerAiIpc,
   registerProjectIpc,
