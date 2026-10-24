@@ -16,6 +16,7 @@ SHA256：`23570D494CE8ADB41F98661F5043E33071FD77B2E795EBEDDB341AD7EC2686B1`
 - 21 项 Office/剪贴板回归测试通过，主前端构建通过。
 - 候选 `win-unpacked/Happy Friday Lite.exe` 使用独立 user-data 目录存活 9 秒启动检查通过；未触碰当前已安装实例。
 - GitHub fork 发布分支：`https://github.com/yingchao4399/happy-friday-lite/tree/codex/friday-3.0.6-preview.2`；Release：`https://github.com/yingchao4399/happy-friday-lite/releases/tag/v3.0.6-preview.2`。
+- 追加 Windows 最终目录校验：`node scripts/verify-packaged-native-modules.mjs --appDir release/win-unpacked` 通过，确认 DSH Harness 导入、`node-addon-require-builtin`，以及 `system-print.exe`、`xlsx-sidecar.exe`、`ocr/win-ocr.exe` 均为可识别 PE 文件。
 
 ## 仍未达到整轮计划完成条件
 
@@ -26,7 +27,7 @@ SHA256：`23570D494CE8ADB41F98661F5043E33071FD77B2E795EBEDDB341AD7EC2686B1`
 5. DSH 安装图标启动、最小任务、升级后重启；真实用户数据升级/回退/卸载/重装。
 6. 背诵音频真实口音/噪声/常用编码、配置模型服务质量和安装版端到端验收。
 7. 完整 notices 仍有 25 个组件需要人工核对；安装器未签名。
-8. GitHub 源码提交、子模块可重建、发布和下载链接核验尚未完成。
+8. GitHub fork 源码提交、子模块分支、Release 资产和下载链接已完成；向原始 `cheney-plus` 仓库直接推送因账号权限返回 403，未宣称已推送上游。
 
 ## 本轮明确后移
 
