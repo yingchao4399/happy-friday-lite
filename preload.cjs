@@ -276,6 +276,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'chat-rag-sources',
       'chat-done',
       'chat-error',
+      'chat-session-created',
       'session-title-updated',
       'config-changed',
       'backup-progress',
