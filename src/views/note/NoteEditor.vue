@@ -1033,10 +1033,20 @@ const NoteAttachment = Node.create({
       mime: { default: '' },
     };
   },
-  parseHTML() { return [{ tag: 'a[data-note-attachment]' }]; },
+  parseHTML() {
+    return [{
+      tag: 'a[data-note-attachment]',
+      getAttrs: (element) => ({
+        title: element.textContent || element.getAttribute('title') || '',
+        src: element.getAttribute('href') || '',
+        mime: element.getAttribute('data-mime') || '',
+      }),
+    }];
+  },
   renderHTML({ HTMLAttributes }) {
     const { title, ...attrs } = HTMLAttributes;
-    return ['p', { class: 'note-attachment' }, ['a', { ...attrs, 'data-note-attachment': 'true', download: true }, title || '附件']];
+    const { mime, ...linkAttrs } = attrs;
+    return ['p', { class: 'note-attachment' }, ['a', { ...linkAttrs, 'data-note-attachment': 'true', 'data-mime': mime || '', download: true }, title || '附件']];
   },
 });
 
@@ -1055,10 +1065,30 @@ const NoteReference = Node.create({
       mode: { default: 'live' },
     };
   },
-  parseHTML() { return [{ tag: 'div[data-note-reference]' }]; },
+  parseHTML() {
+    return [{
+      tag: 'div[data-note-reference]',
+      getAttrs: (element) => ({
+        kind: element.getAttribute('data-kind') || 'note',
+        sourceId: element.getAttribute('data-source-id') || '',
+        sourceUri: element.getAttribute('data-source-uri') || '',
+        title: element.getAttribute('data-title') || element.textContent || '',
+        mode: element.getAttribute('data-mode') || 'live',
+      }),
+    }];
+  },
   renderHTML({ HTMLAttributes }) {
-    const { title, ...attrs } = HTMLAttributes;
-    return ['div', { ...attrs, 'data-note-reference': 'true', class: 'note-reference-block' }, title || '引用内容'];
+    const { title, kind, sourceId, sourceUri, mode, ...attrs } = HTMLAttributes;
+    return ['div', {
+      ...attrs,
+      'data-note-reference': 'true',
+      'data-kind': kind || 'note',
+      'data-source-id': sourceId || '',
+      'data-source-uri': sourceUri || '',
+      'data-title': title || '',
+      'data-mode': mode || 'live',
+      class: 'note-reference-block',
+    }, title || '引用内容'];
   },
 });
 
