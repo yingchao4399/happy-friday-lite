@@ -119,8 +119,9 @@ if (peerMode) {
       main.webContents.sendInputEvent({ type: 'mouseDown', ...point, button: 'right', clickCount: 1 })
       main.webContents.sendInputEvent({ type: 'mouseUp', ...point, button: 'right', clickCount: 1 })
       await until(() => opened, '笔记正文没有右键菜单')
-      const label = Menu.buildFromTemplate([{ role: 'copy' }]).items[0].label
-      const copy = opened.items.find(item => item.label === label)
+      const noteLanguage = await run('document.documentElement.lang || "zh-CN"')
+      const copyLabel = String(noteLanguage).toLowerCase().startsWith('zh') ? '复制' : 'Copy'
+      const copy = opened.items.find(item => item.label === copyLabel)
       assert.ok(copy?.enabled, '笔记正文复制菜单不可用')
       copy.click()
       await until(() => clipboard.readText() === noteText, '笔记菜单复制失败')
