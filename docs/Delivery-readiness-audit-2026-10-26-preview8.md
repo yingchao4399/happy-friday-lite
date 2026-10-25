@@ -14,6 +14,7 @@
 - 安装包 SHA256：`9C280C61076FCC43D9F22E3747C96A8C5F0C32AD33AE4FA107E59056C84FE6A2`。
 - 最终 `win-unpacked` 原生检查通过：Harness 导入、Node 原生绑定、3 个 Windows PE helper。
 - 隔离用户目录启动 12 秒未闪退；测试进程已关闭，未触碰已有用户进程。
+- 用户提供的 `红书_4.pdf`（1042 页，18,234,244 字节）已用打包版 PDF 探针通过：首屏 5.7 秒、连续滚动 10 秒 p95 18.1 ms、最大帧停顿 66.8 ms、无超过 100 ms 的帧停顿；第 15 页字符选区与来源页校验通过，原文件 SHA256 未变化，关闭后 PDF 页面已销毁。证据：`app-data/diagnostics/performance/pdf-preview8-packaged-final.log`。
 
 ## 仍需完成或验证
 
