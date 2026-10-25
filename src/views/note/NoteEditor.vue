@@ -85,6 +85,26 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
             {{ t('note.toolbar.image') }}
           </div>
+          <div class="menu-item" @click="addVideo">
+            <span class="menu-item-glyph">▶</span>
+            {{ t('note.toolbar.video') }}
+          </div>
+          <div class="menu-item" @click="addAudio">
+            <span class="menu-item-glyph">♫</span>
+            {{ t('note.toolbar.audio') }}
+          </div>
+          <div class="menu-item" @click="addAttachment">
+            <span class="menu-item-glyph">↗</span>
+            {{ t('note.toolbar.attachment') }}
+          </div>
+          <div class="menu-item" @click="openNoteInsertDialog">
+            <span class="menu-item-glyph">▤</span>
+            {{ t('note.toolbar.note') }}
+          </div>
+          <div class="menu-item" @click="openKnowledgeInsertDialog">
+            <span class="menu-item-glyph">▥</span>
+            {{ t('note.toolbar.knowledge') }}
+          </div>
           <div class="menu-item" @click="addFormula">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h8a4 4 0 0 1 0 8H6"></path><path d="M6 12h10a4 4 0 0 1 0 8H6"></path><path d="M6 4v16"></path></svg>
             {{ t('note.toolbar.formula') }}
@@ -495,6 +515,10 @@
               @keyup.enter="confirmImage"
               class="form-input"
             />
+          </div>
+          <div class="form-group image-local-actions">
+            <button class="btn btn-secondary" type="button" @click="chooseLocalImage">{{ t('note.imageDialog.chooseLocal') }}</button>
+            <span v-if="selectedLocalImageName" class="form-hint">{{ selectedLocalImageName }}</span>
           </div>
         </div>
         <div class="dialog-footer">
@@ -948,6 +972,93 @@ const CustomParagraph = Paragraph.extend({
 const InlineCode = Code.extend({
   excludes: '',
 });
+
+// 笔记媒体节点：正文只保存来源路径和显示元数据，避免把视频/音频二进制写进数据库。
+// 图片仍沿用官方 Image 节点；本地图片导入时转成受控 data URL，保证旧笔记和导出兼容。
+const NoteVideo = Node.create({
+  name: 'noteVideo',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      src: { default: '' },
+      title: { default: '' },
+      poster: { default: '' },
+    };
+  },
+  parseHTML() { return [{ tag: 'video[data-note-video]' }]; },
+  renderHTML({ HTMLAttributes }) {
+    return ['video', { ...HTMLAttributes, 'data-note-video': 'true', controls: true, preload: 'metadata' }];
+  },
+});
+
+const NoteAudio = Node.create({
+  name: 'noteAudio',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      src: { default: '' },
+      title: { default: '' },
+    };
+  },
+  parseHTML() { return [{ tag: 'audio[data-note-audio]' }]; },
+  renderHTML({ HTMLAttributes }) {
+    return ['audio', { ...HTMLAttributes, 'data-note-audio': 'true', controls: true, preload: 'metadata' }];
+  },
+});
+
+const NoteAttachment = Node.create({
+  name: 'noteAttachment',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      src: { default: '' },
+      title: { default: '' },
+      mime: { default: '' },
+    };
+  },
+  parseHTML() { return [{ tag: 'a[data-note-attachment]' }]; },
+  renderHTML({ HTMLAttributes }) {
+    const { title, ...attrs } = HTMLAttributes;
+    return ['p', { class: 'note-attachment' }, ['a', { ...attrs, 'data-note-attachment': 'true', download: true }, title || '附件']];
+  },
+});
+
+const NoteReference = Node.create({
+  name: 'noteReference',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      kind: { default: 'note' },
+      sourceId: { default: '' },
+      sourceUri: { default: '' },
+      title: { default: '' },
+      mode: { default: 'live' },
+    };
+  },
+  parseHTML() { return [{ tag: 'div[data-note-reference]' }]; },
+  renderHTML({ HTMLAttributes }) {
+    const { title, ...attrs } = HTMLAttributes;
+    return ['div', { ...attrs, 'data-note-reference': 'true', class: 'note-reference-block' }, title || '引用内容'];
+  },
+});
+
+const fileUrlForNote = (filePath) => {
+  if (!filePath) return '';
+  if (/^(?:file|https?):\/\//i.test(filePath)) return filePath;
+  return `file://${encodeURI(String(filePath).replace(/\\/g, '/'))}`;
+};
 
 const prepareEditorContent = (content) => {
   const container = document.createElement('div');
@@ -1526,12 +1637,89 @@ const removeLink = () => {
 const showImageDialog = ref(false);
 const imageUrl = ref('');
 const imageAlt = ref('');
+const selectedLocalImageName = ref('');
 const imageUrlInput = ref(null);
+
+const fileMime = (filePath) => {
+  const ext = String(filePath || '').toLowerCase().split('.').pop();
+  const map = {
+    png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp',
+    svg: 'image/svg+xml', mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', mkv: 'video/x-matroska',
+    mp3: 'audio/mpeg', wav: 'audio/wav', m4a: 'audio/mp4', ogg: 'audio/ogg', flac: 'audio/flac',
+  };
+  return map[ext] || 'application/octet-stream';
+};
+
+const arrayBufferToDataUrl = (buffer, mime) => {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const step = 0x8000;
+  for (let i = 0; i < bytes.length; i += step) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + step));
+  }
+  return `data:${mime};base64,${btoa(binary)}`;
+};
+
+const chooseLocalPath = async (filters) => {
+  const selected = await electronService.invoke('open-file-dialog', {
+    properties: ['openFile'],
+    filters,
+  });
+  return typeof selected === 'string' ? selected : null;
+};
+
+const insertMediaNode = (type, filePath) => {
+  if (!filePath || !editor.value) return;
+  const title = String(filePath).split(/[\\/]/).pop() || t('note.untitled');
+  const attrs = { src: fileUrlForNote(filePath), title, mime: fileMime(filePath) };
+  editor.value.chain().focus().insertContent({ type, attrs }).run();
+};
+
+const importLocalFileIntoEditor = async (filePath) => {
+  if (!filePath || !editor.value) return false;
+  const mime = fileMime(filePath);
+  const name = String(filePath).split(/[\\/]/).pop() || t('note.untitled');
+  if (mime.startsWith('image/')) {
+    const result = await electronService.invoke('kb-read-file-buffer', { filePath });
+    if (!result?.success || !result.data) throw new Error(result?.error || 'IMAGE_READ_FAILED');
+    editor.value.chain().focus().setImage({ src: arrayBufferToDataUrl(result.data, mime), alt: name }).run();
+  } else if (mime.startsWith('video/')) {
+    insertMediaNode('noteVideo', filePath);
+  } else if (mime.startsWith('audio/')) {
+    insertMediaNode('noteAudio', filePath);
+  } else {
+    insertMediaNode('noteAttachment', filePath);
+  }
+  return true;
+};
+
+const getDroppedFilePath = (file) => {
+  try {
+    return window.electronAPI?.getPathForFile?.(file) || file?.path || '';
+  } catch {
+    return file?.path || '';
+  }
+};
+
+const handleEditorDrop = (_view, event) => {
+  const files = Array.from(event?.dataTransfer?.files || []);
+  if (!files.length) return false;
+  event.preventDefault();
+  Promise.all(files.map(file => {
+    const filePath = getDroppedFilePath(file);
+    return importLocalFileIntoEditor(filePath).catch(error => {
+      console.error('插入拖拽资源失败:', error);
+      return false;
+    });
+  })).catch(() => {});
+  return true;
+};
 
 const addImage = () => {
   runInsertAction(() => {
     imageUrl.value = '';
     imageAlt.value = '';
+    selectedLocalImageName.value = '';
     showImageDialog.value = true;
     nextTick(() => imageUrlInput.value?.focus());
   });
@@ -1541,6 +1729,42 @@ const closeImageDialog = () => {
   showImageDialog.value = false;
   imageUrl.value = '';
   imageAlt.value = '';
+  selectedLocalImageName.value = '';
+};
+
+const chooseLocalImage = async () => {
+  const filePath = await chooseLocalPath([{ name: t('note.imageDialog.filter'), extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'] }]);
+  if (!filePath) return;
+  try {
+    const result = await electronService.invoke('kb-read-file-buffer', { filePath });
+    if (!result?.success || !result.data) throw new Error(result?.error || 'IMAGE_READ_FAILED');
+    imageUrl.value = arrayBufferToDataUrl(result.data, fileMime(filePath));
+    selectedLocalImageName.value = String(filePath).split(/[\\/]/).pop() || filePath;
+    if (!imageAlt.value) imageAlt.value = selectedLocalImageName.value;
+  } catch (error) {
+    alert(`${t('note.imageDialog.readFailed')}: ${error.message || error}`);
+  }
+};
+
+const addVideo = async () => {
+  runInsertAction(async () => {
+    const filePath = await chooseLocalPath([{ name: t('note.media.videoFilter'), extensions: ['mp4', 'webm', 'mov', 'mkv', 'avi'] }]);
+    if (filePath) insertMediaNode('noteVideo', filePath);
+  });
+};
+
+const addAudio = async () => {
+  runInsertAction(async () => {
+    const filePath = await chooseLocalPath([{ name: t('note.media.audioFilter'), extensions: ['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'] }]);
+    if (filePath) insertMediaNode('noteAudio', filePath);
+  });
+};
+
+const addAttachment = async () => {
+  runInsertAction(async () => {
+    const filePath = await chooseLocalPath([{ name: t('note.media.allFiles'), extensions: ['*'] }]);
+    if (filePath) insertMediaNode('noteAttachment', filePath);
+  });
 };
 
 const confirmImage = () => {
@@ -2033,6 +2257,7 @@ const fillQuickPrompt = (text) => {
 // 引用笔记/文件、引用知识库相关
 const showNoteDialog = ref(false);
 const showKbFileDialog = ref(false);
+const noteInsertMode = ref('chat');
 const attachments = ref([]);
 let attachmentIdCounter = 0;
 const kbList = ref(JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)));
@@ -2301,6 +2526,15 @@ const loadKbListFromDisk = async () => {
 // 引用笔记/文件、引用知识库相关事件处理
 const handleNoteConfirm = (selectedNotes) => {
   if (!selectedNotes || selectedNotes.length === 0) return;
+  if (noteInsertMode.value === 'editor') {
+    for (const note of selectedNotes) {
+      const html = note.content || `<p>${String(note.contentText || note.title || '').replace(/[<&>]/g, '')}</p>`;
+      editor.value?.chain().focus().insertContent(html).run();
+    }
+    showNoteDialog.value = false;
+    noteInsertMode.value = 'chat';
+    return;
+  }
   for (const note of selectedNotes) {
     attachments.value.push({
       id: ++attachmentIdCounter,
@@ -2317,6 +2551,12 @@ const handleNoteConfirm = (selectedNotes) => {
 };
 
 const handleKbFileSelect = (file) => {
+  if (noteInsertMode.value === 'editor') {
+    if (file?.path) insertMediaNode('noteAttachment', file.path);
+    showKbFileDialog.value = false;
+    noteInsertMode.value = 'chat';
+    return;
+  }
   attachments.value.push({
     id: ++attachmentIdCounter,
     type: 'kb-file',
@@ -2327,6 +2567,20 @@ const handleKbFileSelect = (file) => {
   showKbFileDialog.value = false;
   nextTick(() => {
     chatInputBoxRef.value?.focus();
+  });
+};
+
+const openNoteInsertDialog = () => {
+  runInsertAction(() => {
+    noteInsertMode.value = 'editor';
+    showNoteDialog.value = true;
+  });
+};
+
+const openKnowledgeInsertDialog = () => {
+  runInsertAction(() => {
+    noteInsertMode.value = 'editor';
+    showKbFileDialog.value = true;
   });
 };
 
@@ -2666,6 +2920,10 @@ const editor = useEditor({
         class: 'editor-image',
       },
     }),
+    NoteVideo,
+    NoteAudio,
+    NoteAttachment,
+    NoteReference,
     Placeholder.configure({
       placeholder: ({ node }) => node.type.name === 'noteTitle'
         ? t('note.titlePlaceholder')
@@ -2805,7 +3063,15 @@ const editor = useEditor({
     },
     handleDOMEvents: {
       contextmenu: handleEditorContextMenu,
+      click: (_view, event) => {
+        const anchor = event.target?.closest?.('a.text-link');
+        if (!anchor?.href) return false;
+        event.preventDefault();
+        electronService.invoke('open-external', anchor.href).catch(() => {});
+        return true;
+      },
     },
+    handleDrop: handleEditorDrop,
     handlePaste: (view, event, _slice) => {
       // 在代码块内粘贴时，使用默认纯文本粘贴
       const { state } = view;
@@ -2815,6 +3081,19 @@ const editor = useEditor({
         if ($head.node(d).type.name === 'codeBlock') {
           return false;
         }
+      }
+
+      const files = Array.from(event.clipboardData.files || []);
+      if (files.length) {
+        event.preventDefault();
+        Promise.all(files.map(file => {
+          const filePath = getDroppedFilePath(file);
+          return importLocalFileIntoEditor(filePath).catch(error => {
+            console.error('粘贴媒体失败:', error);
+            return false;
+          });
+        })).catch(() => {});
+        return true;
       }
 
       const text = event.clipboardData.getData('text/plain');
@@ -4300,6 +4579,42 @@ const fixEmptyTableCells = (html) => {
   height: auto;
   border-radius: 8px;
   margin: 0.8em 0;
+}
+
+:deep(.prose-editor video[data-note-video]),
+:deep(.prose-editor audio[data-note-audio]) {
+  display: block;
+  max-width: 100%;
+  width: min(720px, 100%);
+  margin: 0.8em 0;
+  border-radius: 8px;
+  background: #111827;
+}
+
+:deep(.prose-editor .note-attachment),
+:deep(.prose-editor .note-reference-block) {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.7em 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+}
+
+:deep(.prose-editor .note-attachment a) {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+:deep(.prose-editor .note-attachment a::before) {
+  content: '📎 ';
+}
+
+:deep(.prose-editor .note-reference-block) {
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent-color, #3b82f6);
 }
 
 :deep(.prose-editor mark) {

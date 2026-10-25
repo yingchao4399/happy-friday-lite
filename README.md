@@ -6,6 +6,12 @@
 
 An Electron + Vue 3 desktop personal knowledge assistant that combines an AI agent, RAG knowledge retrieval, rich-text notes, and a calendar. All data is stored locally with privacy as a priority.
 
+## 3.0.6-preview.8 official integration and note/header-footer enhancements
+
+- Fully integrates the official 3.0.6 tab/session isolation, streaming isolation, uncontrolled inputs, streaming renderer, sidebar performance, Office bundle and HarfBuzz fixes.
+- Note insertion now supports local images, video, audio, file attachments, notes and knowledge-base content, including drag-and-drop, clipboard paste and clickable links.
+- Word header/footer editing opens by double-click and provides page numbers, date/time, filename, borders, different-first/odd-even pages and distance controls.
+
 ## 3.0.6-preview.7 performance repair
 
 - Use Electron's built-in disk SQLite instead of keeping and exporting the entire database in WebAssembly. Existing SQLite files remain readable; backups use consistent online snapshots.

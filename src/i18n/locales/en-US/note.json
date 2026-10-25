@@ -94,6 +94,11 @@
     "insert": "Insert",
     "table": "Table",
     "image": "Image",
+    "video": "Video",
+    "audio": "Audio",
+    "attachment": "File attachment",
+    "note": "Note",
+    "knowledge": "Knowledge content",
     "formula": "Formula",
     "codeBlock": "Code block",
     "horizontalRule": "Horizontal rule",
@@ -190,7 +195,15 @@
     "descriptionPlaceholder": "Image description",
     "insertBtn": "Insert",
     "insert": "Insert",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "chooseLocal": "Choose local image",
+    "filter": "Images",
+    "readFailed": "Failed to read image"
+  },
+  "media": {
+    "videoFilter": "Video files",
+    "audioFilter": "Audio files",
+    "allFiles": "All files"
   },
   "formulaDialog": {
     "insertTitle": "Insert formula",

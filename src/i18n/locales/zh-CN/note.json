@@ -94,6 +94,11 @@
     "insert": "插入",
     "table": "表格",
     "image": "图片",
+    "video": "视频",
+    "audio": "音频",
+    "attachment": "文件附件",
+    "note": "笔记",
+    "knowledge": "知识库内容",
     "formula": "公式",
     "codeBlock": "代码块",
     "horizontalRule": "分割线",
@@ -190,7 +195,15 @@
     "descriptionPlaceholder": "图片描述",
     "insertBtn": "插入",
     "insert": "插入",
-    "cancel": "取消"
+    "cancel": "取消",
+    "chooseLocal": "选择本地图片",
+    "filter": "图片",
+    "readFailed": "读取图片失败"
+  },
+  "media": {
+    "videoFilter": "视频文件",
+    "audioFilter": "音频文件",
+    "allFiles": "所有文件"
   },
   "formulaDialog": {
     "insertTitle": "插入公式",
