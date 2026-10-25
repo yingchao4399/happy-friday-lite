@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'create_note',
       'import_note',
       'update_note',
+      'note-resource-import',
       'toggle_note_pinned',
       'delete_note',
       'search_notes',

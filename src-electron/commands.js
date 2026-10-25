@@ -1,6 +1,7 @@
 import { app, ipcMain, shell, dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
+import { importNoteResource } from './note-resources.js'
 import TurndownService from 'turndown'
 import { CancellationTokens } from './cancellation.js'
 import { loadConfig, saveConfig, getDataDir } from './config.js'
@@ -608,6 +609,11 @@ export function registerCommands(mainWindow) {
     }
     return updated
   })
+
+  ipcMain.handle('note-resource-import', (_event, args) => importNoteResource({
+    noteId: args?.noteId,
+    filePath: args?.filePath,
+  }))
 
   ipcMain.handle('delete_note', (_event, args) => {
     const result = deleteNoteToTrash(args.noteId)

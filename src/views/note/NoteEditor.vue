@@ -101,9 +101,17 @@
             <span class="menu-item-glyph">▤</span>
             {{ t('note.toolbar.note') }}
           </div>
+          <div class="menu-item" @click="openNoteReferenceDialog">
+            <span class="menu-item-glyph">↗</span>
+            {{ t('note.toolbar.noteReference') }}
+          </div>
           <div class="menu-item" @click="openKnowledgeInsertDialog">
             <span class="menu-item-glyph">▥</span>
             {{ t('note.toolbar.knowledge') }}
+          </div>
+          <div class="menu-item" @click="openKnowledgeReferenceDialog">
+            <span class="menu-item-glyph">↗</span>
+            {{ t('note.toolbar.knowledgeReference') }}
           </div>
           <div class="menu-item" @click="addFormula">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h8a4 4 0 0 1 0 8H6"></path><path d="M6 12h10a4 4 0 0 1 0 8H6"></path><path d="M6 4v16"></path></svg>
@@ -1675,20 +1683,29 @@ const insertMediaNode = (type, filePath) => {
   editor.value.chain().focus().insertContent({ type, attrs }).run();
 };
 
+const importManagedAsset = async (filePath) => {
+  const result = await electronService.invoke('note-resource-import', { noteId: props.noteId, filePath });
+  if (!result?.ok) throw new Error(result?.error || 'NOTE_RESOURCE_IMPORT_FAILED');
+  return result;
+};
+
 const importLocalFileIntoEditor = async (filePath) => {
   if (!filePath || !editor.value) return false;
   const mime = fileMime(filePath);
   const name = String(filePath).split(/[\\/]/).pop() || t('note.untitled');
+  const asset = await importManagedAsset(filePath);
   if (mime.startsWith('image/')) {
-    const result = await electronService.invoke('kb-read-file-buffer', { filePath });
-    if (!result?.success || !result.data) throw new Error(result?.error || 'IMAGE_READ_FAILED');
-    editor.value.chain().focus().setImage({ src: arrayBufferToDataUrl(result.data, mime), alt: name }).run();
+    if (asset.dataUrl) {
+      editor.value.chain().focus().setImage({ src: asset.dataUrl, alt: name }).run();
+    } else {
+      editor.value.chain().focus().setImage({ src: asset.url, alt: name }).run();
+    }
   } else if (mime.startsWith('video/')) {
-    insertMediaNode('noteVideo', filePath);
+    insertMediaNode('noteVideo', asset.path);
   } else if (mime.startsWith('audio/')) {
-    insertMediaNode('noteAudio', filePath);
+    insertMediaNode('noteAudio', asset.path);
   } else {
-    insertMediaNode('noteAttachment', filePath);
+    insertMediaNode('noteAttachment', asset.path);
   }
   return true;
 };
@@ -1736,9 +1753,8 @@ const chooseLocalImage = async () => {
   const filePath = await chooseLocalPath([{ name: t('note.imageDialog.filter'), extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'] }]);
   if (!filePath) return;
   try {
-    const result = await electronService.invoke('kb-read-file-buffer', { filePath });
-    if (!result?.success || !result.data) throw new Error(result?.error || 'IMAGE_READ_FAILED');
-    imageUrl.value = arrayBufferToDataUrl(result.data, fileMime(filePath));
+    const result = await importManagedAsset(filePath);
+    imageUrl.value = result.dataUrl || result.url;
     selectedLocalImageName.value = String(filePath).split(/[\\/]/).pop() || filePath;
     if (!imageAlt.value) imageAlt.value = selectedLocalImageName.value;
   } catch (error) {
@@ -1749,21 +1765,21 @@ const chooseLocalImage = async () => {
 const addVideo = async () => {
   runInsertAction(async () => {
     const filePath = await chooseLocalPath([{ name: t('note.media.videoFilter'), extensions: ['mp4', 'webm', 'mov', 'mkv', 'avi'] }]);
-    if (filePath) insertMediaNode('noteVideo', filePath);
+    if (filePath) insertMediaNode('noteVideo', (await importManagedAsset(filePath)).path);
   });
 };
 
 const addAudio = async () => {
   runInsertAction(async () => {
     const filePath = await chooseLocalPath([{ name: t('note.media.audioFilter'), extensions: ['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'] }]);
-    if (filePath) insertMediaNode('noteAudio', filePath);
+    if (filePath) insertMediaNode('noteAudio', (await importManagedAsset(filePath)).path);
   });
 };
 
 const addAttachment = async () => {
   runInsertAction(async () => {
     const filePath = await chooseLocalPath([{ name: t('note.media.allFiles'), extensions: ['*'] }]);
-    if (filePath) insertMediaNode('noteAttachment', filePath);
+    if (filePath) insertMediaNode('noteAttachment', (await importManagedAsset(filePath)).path);
   });
 };
 
@@ -2526,6 +2542,17 @@ const loadKbListFromDisk = async () => {
 // 引用笔记/文件、引用知识库相关事件处理
 const handleNoteConfirm = (selectedNotes) => {
   if (!selectedNotes || selectedNotes.length === 0) return;
+  if (noteInsertMode.value === 'reference') {
+    for (const note of selectedNotes) {
+      editor.value?.chain().focus().insertContent({
+        type: 'noteReference',
+        attrs: { kind: 'note', sourceId: note.id, sourceUri: `friday://notes/${encodeURIComponent(note.id)}`, title: note.title || t('note.untitledNote'), mode: 'live' },
+      }).run();
+    }
+    showNoteDialog.value = false;
+    noteInsertMode.value = 'chat';
+    return;
+  }
   if (noteInsertMode.value === 'editor') {
     for (const note of selectedNotes) {
       const html = note.content || `<p>${String(note.contentText || note.title || '').replace(/[<&>]/g, '')}</p>`;
@@ -2551,6 +2578,17 @@ const handleNoteConfirm = (selectedNotes) => {
 };
 
 const handleKbFileSelect = (file) => {
+  if (noteInsertMode.value === 'reference') {
+    if (file?.path) {
+      editor.value?.chain().focus().insertContent({
+        type: 'noteReference',
+        attrs: { kind: 'knowledge', sourceId: file.path, sourceUri: file.path, title: file.name || file.path, mode: 'live' },
+      }).run();
+    }
+    showKbFileDialog.value = false;
+    noteInsertMode.value = 'chat';
+    return;
+  }
   if (noteInsertMode.value === 'editor') {
     if (file?.path) insertMediaNode('noteAttachment', file.path);
     showKbFileDialog.value = false;
@@ -2577,9 +2615,23 @@ const openNoteInsertDialog = () => {
   });
 };
 
+const openNoteReferenceDialog = () => {
+  runInsertAction(() => {
+    noteInsertMode.value = 'reference';
+    showNoteDialog.value = true;
+  });
+};
+
 const openKnowledgeInsertDialog = () => {
   runInsertAction(() => {
     noteInsertMode.value = 'editor';
+    showKbFileDialog.value = true;
+  });
+};
+
+const openKnowledgeReferenceDialog = () => {
+  runInsertAction(() => {
+    noteInsertMode.value = 'reference';
     showKbFileDialog.value = true;
   });
 };
