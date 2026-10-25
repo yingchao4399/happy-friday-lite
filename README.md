@@ -6,6 +6,13 @@
 
 An Electron + Vue 3 desktop personal knowledge assistant that combines an AI agent, RAG knowledge retrieval, rich-text notes, and a calendar. All data is stored locally with privacy as a priority.
 
+## 3.0.6-preview.10 note resources, charts, and per-page headers/footers
+
+- Every page header and footer now has its own double-click hit area. Editing shows the local Header/Footer marker and dashed boundary, then switches the official Header & Footer ribbon tab; the misleading hover-only first-page chip is gone.
+- Images can be resized directly in the note body by dragging the bottom-right handle, with aspect ratio preserved by default and Shift for free resizing. Fit-to-page, original size, and the full image editor remain available.
+- Charts use a data-table-first editor with row insertion/removal, label/value/error editing, axis and label visibility controls, and a direct resize handle.
+- Note attachment preview is unified: PDF, Markdown, text, and database files use the preview window; Word, Excel, and PowerPoint files open in the built-in Office reader/editor. Media and attachments keep open-original and open-location actions.
+
 ## 3.0.6-preview.9 note resource editing
 
 - Note images open in a dedicated editor with zoom, pan, crop, rotation, drawing, mosaic, text annotations, and output sizing.

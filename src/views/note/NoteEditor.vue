@@ -373,6 +373,14 @@
       </div>
     </div>
 
+    <div v-if="selectedImage && !shareMode" class="note-image-inline-toolbar" role="toolbar">
+      <span class="note-image-inline-label">{{ t('note.imageEditor.title') }}</span>
+      <button type="button" class="btn btn-secondary" @click="fitSelectedImage">{{ t('note.imageEditor.fit') }}</button>
+      <button type="button" class="btn btn-secondary" @click="resetSelectedImageSize">{{ t('note.imageEditor.originalSize') }}</button>
+      <button type="button" class="btn btn-primary" @click="openSelectedImageEditor">{{ t('note.imageEditor.edit') }}</button>
+      <span class="note-image-inline-hint">{{ t('note.imageEditor.dragHint') }}</span>
+    </div>
+
     <div v-if="backlinks.length && !shareMode" class="note-backlinks-bar">
       <span class="note-backlinks-label">{{ t('note.backlinks.title') }}</span>
       <button v-for="link in backlinks" :key="link.id" type="button" class="note-backlink" :title="link.title" @click="openBacklink(link)">
@@ -654,10 +662,10 @@
           <div v-else class="note-media-attachment-preview">
             <div class="note-media-attachment-icon">↗</div>
             <div class="note-media-attachment-name">{{ mediaPreview.title }}</div>
-            <div class="note-media-attachment-actions">
-              <button type="button" class="btn btn-secondary" @click="openMediaExternal">{{ t('note.media.open') }}</button>
-              <button type="button" class="btn btn-secondary" @click="openMediaLocation">{{ t('note.media.openLocation') }}</button>
-            </div>
+          </div>
+          <div v-if="mediaPreview.kind === 'video' || mediaPreview.kind === 'audio' || mediaPreview.kind === 'attachment'" class="note-media-attachment-actions note-media-preview-actions">
+            <button type="button" class="btn btn-primary" @click="openMediaExternal">{{ t('note.media.open') }}</button>
+            <button type="button" class="btn btn-secondary" @click="openMediaLocation">{{ t('note.media.openLocation') }}</button>
           </div>
         </div>
       </div>
@@ -669,6 +677,16 @@
       <button type="button" @click="openContextMedia">{{ t('note.media.open') }}</button>
       <button type="button" @click="openContextMediaLocation">{{ t('note.media.openLocation') }}</button>
       <button type="button" class="danger" @click="deleteContextMedia">{{ t('note.media.delete') }}</button>
+    </div>
+
+    <div v-if="filePreview.visible" class="note-file-preview-overlay" @click.self="closeFilePreview">
+      <div class="note-file-preview-window">
+        <div class="note-file-preview-header">
+          <span>{{ filePreview.file.name }}</span>
+          <button type="button" class="note-media-preview-close" @click="closeFilePreview">×</button>
+        </div>
+        <FileViewer :file="filePreview.file" />
+      </div>
     </div>
 
     <Transition name="sidebar-slide">
@@ -867,6 +885,7 @@ import NoteChartNodeView from './NoteChartNodeView.vue';
 import KbDirSelectDialog from '@/views/knowledge/components/KbDirSelectDialog.vue';
 import SelectNoteDialog from '@/views/knowledge/components/SelectNoteDialog.vue';
 import KbFileDialog from '@/views/knowledge/components/KbFileDialog.vue';
+import FileViewer from '@/views/knowledge/components/FileViewer.vue';
 import { DEFAULT_CATEGORIES } from '@/views/knowledge/constants';
 import { useAppStore } from '@/store';
 import { useNoteStore } from '@/store/modules/note';
@@ -1160,6 +1179,8 @@ const NoteChart = Node.create({
       width: { default: 620 },
       height: { default: 320 },
       responsive: { default: true },
+      showGrid: { default: true },
+      showLabels: { default: true },
     };
   },
   parseHTML() { return [{ tag: 'div[data-note-chart]' }]; },
@@ -1241,6 +1262,7 @@ const imageEditorHeight = ref(0);
 const imageEditorPos = ref(null);
 const mediaPreview = ref({ visible: false, kind: '', src: '', path: '', title: '' });
 const mediaContextMenu = ref({ visible: false, kind: '', src: '', path: '', title: '', pos: null, style: {} });
+const filePreview = ref({ visible: false, file: { path: '', name: '', type: 'unknown' } });
 let marpUnlisteners = [];
 const noteStore = useNoteStore();
 const backlinks = ref([]);
@@ -1592,8 +1614,109 @@ const saveImageEditorResult = ({ src, width, height, alt }) => {
   closeImageEditor();
 };
 
+const updateSelectedImageSize = (width, height) => {
+  const instance = editor.value;
+  const target = selectedImage.value;
+  if (!instance || !target || typeof target.pos !== 'number') return;
+  const node = instance.state.doc.nodeAt(target.pos);
+  if (!node || node.type.name !== 'image') return;
+  instance.view.dispatch(instance.state.tr.setNodeMarkup(target.pos, undefined, {
+    ...node.attrs,
+    width: width == null ? null : String(Math.round(width)),
+    height: height == null ? null : String(Math.round(height)),
+  }));
+};
+
+const fitSelectedImage = () => {
+  const instance = editor.value;
+  const target = selectedImage.value;
+  if (!instance || !target) return;
+  const img = instance.view.nodeDOM(target.pos);
+  const wrapper = instance.view.dom.closest('.editor-wrapper');
+  const naturalWidth = Number(img?.naturalWidth) || Number.parseInt(target.attrs?.width, 10) || 640;
+  const naturalHeight = Number(img?.naturalHeight) || Number.parseInt(target.attrs?.height, 10) || 360;
+  const maxWidth = Math.max(160, (wrapper?.clientWidth || 760) - 64);
+  const width = Math.min(naturalWidth, maxWidth);
+  updateSelectedImageSize(width, width * naturalHeight / Math.max(1, naturalWidth));
+};
+
+const resetSelectedImageSize = () => updateSelectedImageSize(null, null);
+
+const openSelectedImageEditor = () => {
+  const instance = editor.value;
+  const target = selectedImage.value;
+  if (!instance || !target) return;
+  const node = instance.state.doc.nodeAt(target.pos);
+  if (node?.type.name === 'image') {
+    openImageEditor({ node, pos: target.pos, src: node.attrs.src, title: node.attrs.alt || t('note.imageEditor.title') });
+  }
+};
+
+let imageResizeCleanup = null;
+const handleImageResizeMouseDown = (view, event) => {
+  if (event.button !== 0 || !(event.target instanceof Element)) return false;
+  const image = event.target.closest('img.editor-image, img');
+  if (!image || !view.dom.contains(image)) return false;
+  const rect = image.getBoundingClientRect();
+  const handleSize = 22;
+  if (rect.right - event.clientX > handleSize || rect.bottom - event.clientY > handleSize) return false;
+  const pos = view.posAtDOM(image, 0);
+  const node = view.state.doc.nodeAt(pos);
+  if (!node || node.type.name !== 'image') return false;
+  const startWidth = rect.width;
+  const startHeight = rect.height;
+  const ratio = startWidth > 1 && startHeight > 1 ? startHeight / startWidth : 1;
+  const startX = event.clientX;
+  const startY = event.clientY;
+  const onMove = (moveEvent) => {
+    const width = Math.max(80, startWidth + (moveEvent.clientX - startX));
+    const height = moveEvent.shiftKey ? Math.max(60, startHeight + (moveEvent.clientY - startY)) : Math.max(60, width * ratio);
+    const current = view.state.doc.nodeAt(pos);
+    if (!current || current.type.name !== 'image') return;
+    view.dispatch(view.state.tr.setNodeMarkup(pos, undefined, { ...current.attrs, width: String(Math.round(width)), height: String(Math.round(height)) }));
+  };
+  const onUp = () => {
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    imageResizeCleanup = null;
+  };
+  imageResizeCleanup?.();
+  imageResizeCleanup = onUp;
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp, { once: true });
+  event.preventDefault();
+  event.stopPropagation();
+  return true;
+};
+
+const closeFilePreview = () => { filePreview.value = { ...filePreview.value, visible: false }; };
+const attachmentTypeFromPath = (filePath) => {
+  const ext = String(filePath || '').split(/[?#]/)[0].split('.').pop()?.toLowerCase() || '';
+  if (ext === 'pdf') return 'pdf';
+  if (['md', 'markdown'].includes(ext)) return 'markdown';
+  if (['html', 'htm'].includes(ext)) return 'html';
+  if (['db', 'sqlite', 'sqlite3'].includes(ext)) return 'database';
+  if (['txt', 'log', 'csv', 'json', 'xml', 'sql'].includes(ext)) return 'text';
+  return 'office';
+};
+const openAttachmentPreview = async (target) => {
+  const filePath = target?.path || notePathFromUrl(target?.src);
+  if (!filePath) return;
+  const type = attachmentTypeFromPath(filePath);
+  if (type === 'office') {
+    await electronService.invoke('office-open-file', { filePath }).catch(() => {});
+    closeMediaContextMenu();
+    return;
+  }
+  filePreview.value = { visible: true, file: { path: filePath, name: target.title || filePath.split(/[\\/]/).pop(), type } };
+  closeMediaContextMenu();
+};
 const openMediaPreview = (target) => {
   if (!target || target.kind === 'image') return;
+  if (target.kind === 'attachment') {
+    openAttachmentPreview(target).catch(() => {});
+    return;
+  }
   mediaPreview.value = { visible: true, kind: target.kind, src: target.src, path: target.path, title: target.title };
   closeMediaContextMenu();
 };
@@ -1601,8 +1724,12 @@ const openMediaPreview = (target) => {
 const closeMediaPreview = () => { mediaPreview.value = { ...mediaPreview.value, visible: false }; };
 const openMediaExternal = () => {
   const target = mediaPreview.value;
-  if (!target.path && !target.src) return;
-  electronService.invoke('kb-open-file-external', { filePath: target.path || target.src }).catch(() => {});
+  const source = target.path || notePathFromUrl(target.src);
+  if (!source) return;
+  const action = /^https?:\/\//i.test(source)
+    ? electronService.invoke('open-external', source)
+    : electronService.invoke('kb-open-file-external', { filePath: source });
+  action.catch(() => {});
 };
 const openMediaLocation = () => {
   const target = mediaPreview.value;
@@ -1623,7 +1750,15 @@ const showMediaContextMenu = (target, event) => {
 };
 const editContextImage = () => openImageEditor({ node: editor.value?.state.doc.nodeAt(mediaContextMenu.value.pos), pos: mediaContextMenu.value.pos, src: mediaContextMenu.value.src, title: mediaContextMenu.value.title });
 const previewContextMedia = () => openMediaPreview(mediaContextMenu.value);
-const openContextMedia = () => { const target = mediaContextMenu.value; electronService.invoke('kb-open-file-external', { filePath: target.path || target.src }).catch(() => {}); closeMediaContextMenu(); };
+const openContextMedia = () => {
+  const target = mediaContextMenu.value;
+  const source = target.path || notePathFromUrl(target.src);
+  const action = /^https?:\/\//i.test(source)
+    ? electronService.invoke('open-external', source)
+    : electronService.invoke('kb-open-file-external', { filePath: source });
+  action.catch(() => {});
+  closeMediaContextMenu();
+};
 const openContextMediaLocation = () => { const target = mediaContextMenu.value; if (target.path) electronService.invoke('kb-open-in-explorer', { path: target.path }).catch(() => {}); closeMediaContextMenu(); };
 const deleteContextMedia = () => {
   const target = mediaContextMenu.value;
@@ -1744,6 +1879,7 @@ const emptyToolbarState = () => ({
 // reactiveState（每个事务后都会 trigger），导致按字符重渲染。这里只在事务回调中
 // 生成快照，签名变化时才写回响应式对象，普通连续输入不会引起编辑器组件 re-render。
 const toolbarState = ref(emptyToolbarState());
+const selectedImage = ref(null);
 
 const readToolbarState = (instance) => {
   if (!instance) return emptyToolbarState();
@@ -1800,6 +1936,11 @@ let lastSyncedHtml = '';
 
 const syncToolbarState = (instance) => {
   const next = readToolbarState(instance);
+  const selection = instance?.state?.selection;
+  const selectedNode = selection?.node;
+  selectedImage.value = selectedNode?.type?.name === 'image'
+    ? { pos: selection.from, attrs: { ...selectedNode.attrs } }
+    : null;
   const signature = getToolbarStateSignature(next);
   if (signature === toolbarStateSignature) return;
   toolbarStateSignature = signature;
@@ -3403,6 +3544,7 @@ const editor = useEditor({
     },
     handleDOMEvents: {
       contextmenu: handleEditorContextMenu,
+      mousedown: handleImageResizeMouseDown,
       click: (view, event) => {
         const mediaTarget = getMediaTarget(view, event.target instanceof Element ? event.target : null);
         if (mediaTarget?.kind === 'image') {
@@ -3853,6 +3995,8 @@ const addChart = () => {
       width: 620,
       height: 320,
       responsive: true,
+      showGrid: true,
+      showLabels: true,
     },
   }).run());
 };
@@ -3935,6 +4079,8 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  imageResizeCleanup?.();
+  imageResizeCleanup = null;
   saveChatSession();
   document.removeEventListener('click', handleClickOutside);
   document.removeEventListener('contextmenu', handleDocumentContextMenu);
@@ -4178,6 +4324,7 @@ const fixEmptyTableCells = (html) => {
 .note-media-preview-body { display: flex; align-items: center; justify-content: center; min-height: 220px; max-height: calc(88vh - 48px); padding: 24px; background: var(--bg-secondary, #f8fafc); }
 .note-media-preview-video { display: block; max-width: 100%; max-height: calc(88vh - 120px); border-radius: 6px; background: #000; }
 .note-media-preview-audio { width: min(620px, 100%); }
+.note-media-preview-actions { width: 100%; justify-content: center; padding-top: 12px; }
 .note-media-attachment-preview { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 36px; }
 .note-media-attachment-icon { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 14px; color: var(--accent-color, #2563eb); background: var(--accent-light, #eff6ff); font-size: 28px; }
 .note-media-attachment-name { max-width: 620px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
@@ -4196,12 +4343,22 @@ const fixEmptyTableCells = (html) => {
 .note-media-context-menu button { display: block; width: 100%; padding: 7px 10px; border: 0; border-radius: 5px; text-align: left; font: inherit; font-size: 12px; color: var(--text-primary, #334155); background: transparent; cursor: pointer; }
 .note-media-context-menu button:hover { background: var(--bg-hover, #f1f5f9); }
 .note-media-context-menu button.danger { color: #dc2626; }
+.note-file-preview-overlay { position: fixed; inset: 0; z-index: 10040; display: flex; align-items: center; justify-content: center; padding: 28px; background: rgba(15, 23, 42, .58); }
+.note-file-preview-window { display: flex; flex-direction: column; width: min(1180px, 96vw); height: min(820px, 92vh); overflow: hidden; border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; background: var(--bg-primary, #fff); box-shadow: 0 24px 80px rgba(15, 23, 42, .3); }
+.note-file-preview-header { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 14px; border-bottom: 1px solid var(--border-color, #e2e8f0); color: var(--text-primary, #1e293b); font-size: 13px; font-weight: 600; }
+.note-file-preview-window :deep(.file-viewer-overlay) { min-height: 0; flex: 1; }
 
 .note-backlinks-bar { display: flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 12px; overflow-x: auto; border-bottom: 1px solid var(--border-color, #eef2f7); color: var(--text-tertiary, #64748b); font-size: 11px; }
 .note-backlinks-label { flex: 0 0 auto; font-weight: 600; }
 .note-backlink { display: inline-flex; align-items: center; gap: 4px; max-width: 180px; padding: 4px 7px; overflow: hidden; border: 1px solid var(--border-color, #e2e8f0); border-radius: 5px; color: var(--text-secondary, #475569); background: var(--bg-secondary, #f8fafc); font: inherit; cursor: pointer; }
 .note-backlink span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .note-backlink:hover { color: var(--accent-color, #2563eb); border-color: var(--accent-light, #bfdbfe); background: var(--bg-hover, #eff6ff); }
+.note-image-inline-toolbar { display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 5px 12px; border-bottom: 1px solid var(--border-color, #e2e8f0); background: var(--bg-secondary, #f8fafc); }
+.note-image-inline-label { color: var(--text-secondary, #475569); font-size: 12px; font-weight: 600; }
+.note-image-inline-toolbar .btn { min-height: 26px; padding: 3px 9px; font-size: 11px; }
+.note-image-inline-hint { margin-left: auto; color: var(--text-tertiary, #94a3b8); font-size: 11px; }
+.ProseMirror img.editor-image { max-width: 100%; cursor: pointer; }
+.ProseMirror img.editor-image.ProseMirror-selectednode { outline: 2px solid var(--accent-color, #2563eb); outline-offset: 3px; cursor: nwse-resize; }
 
 @media (max-width: 900px) {
   .table-context-toolbar {

@@ -116,6 +116,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'get-resource-preview',
       'transcribe-resource-local',
       'kb-read-file-buffer',
+      'kb-read-sqlite',
       'kb-open-file-external',
       'file-assoc-get-status',
       'file-assoc-set',

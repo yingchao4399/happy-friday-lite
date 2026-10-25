@@ -7,17 +7,32 @@
       <label>{{ t('note.chart.width') }}<input v-model.number="draft.width" type="number" min="240" max="1200" /></label>
       <label>{{ t('note.chart.height') }}<input v-model.number="draft.height" type="number" min="160" max="800" /></label>
       <label class="chart-check"><input v-model="draft.responsive" type="checkbox" />{{ t('note.chart.responsive') }}</label>
-      <label class="chart-data-label">{{ t('note.chart.data') }}<textarea v-model="dataDraft" rows="3" spellcheck="false" /></label>
+      <label class="chart-check"><input v-model="draft.showGrid" type="checkbox" />{{ t('note.chart.showGrid') }}</label>
+      <label class="chart-check"><input v-model="draft.showLabels" type="checkbox" />{{ t('note.chart.showLabels') }}</label>
+      <div class="chart-data-editor">
+        <div class="chart-data-editor-head">
+          <span>{{ t('note.chart.data') }}</span>
+          <button type="button" class="chart-action" @click="addRow">＋ {{ t('note.chart.addRow') }}</button>
+        </div>
+        <div class="chart-data-grid chart-data-grid-head"><span>{{ t('note.chart.label') }}</span><span>{{ t('note.chart.value') }}</span><span>{{ t('note.chart.error') }}</span><span></span></div>
+        <div v-for="(row, index) in draftRows" :key="`draft-${index}`" class="chart-data-grid">
+          <input v-model="row.label" type="text" @input="syncJsonFromRows" />
+          <input v-model.number="row.value" type="number" step="any" @input="syncJsonFromRows" />
+          <input v-model.number="row.error" type="number" min="0" step="any" @input="syncJsonFromRows" />
+          <button type="button" class="chart-row-remove" :disabled="draftRows.length <= 1" @click="removeRow(index)">×</button>
+        </div>
+      </div>
+      <label class="chart-data-label chart-advanced-data">{{ t('note.chart.advancedData') }}<textarea v-model="dataDraft" rows="3" spellcheck="false" /></label>
       <p v-if="dataError" class="chart-data-error">{{ dataError }}</p>
       <button type="button" class="chart-action primary" @click="applyDraft">{{ t('note.chart.apply') }}</button>
       <button type="button" class="chart-action" @click="editing = false">{{ t('note.chart.cancel') }}</button>
     </div>
     <div class="note-chart-title" v-if="config.title">{{ config.title }}</div>
     <svg v-if="!isTableLike" class="note-chart-svg" :style="chartSvgStyle" :viewBox="`0 0 600 320`" role="img" :aria-label="config.title || t('note.chart.title')">
-      <g class="chart-grid"><line x1="54" y1="24" x2="54" y2="274" /><line x1="54" y1="274" x2="576" y2="274" /></g>
+      <g v-if="config.showGrid !== false" class="chart-grid"><line x1="54" y1="24" x2="54" y2="274" /><line x1="54" y1="274" x2="576" y2="274" /></g>
       <template v-if="isBarLike">
         <rect v-for="(item, index) in rows" :key="`bar-${index}`" class="chart-bar" :fill="config.color" :x="barX(index)" :y="barY(item.value)" :width="barWidth" :height="barHeight(item.value)" rx="3" />
-        <text v-for="(item, index) in rows" :key="`bar-label-${index}`" class="chart-label" :x="barX(index) + barWidth / 2" y="294" text-anchor="middle">{{ item.label }}</text>
+        <text v-if="config.showLabels !== false" v-for="(item, index) in rows" :key="`bar-label-${index}`" class="chart-label" :x="barX(index) + barWidth / 2" y="294" text-anchor="middle">{{ item.label }}</text>
       </template>
       <template v-else-if="isBox">
         <line class="chart-error" x1="315" :y1="boxStats.minY" x2="315" :y2="boxStats.maxY" />
@@ -39,7 +54,7 @@
       </template>
       <template v-else-if="isPie">
         <path v-for="(slice, index) in pieSlices" :key="`pie-${index}`" :d="slice.path" :fill="palette[index % palette.length]" class="chart-pie-slice" />
-        <text v-for="(slice, index) in pieSlices" :key="`pie-label-${index}`" class="chart-label" :x="slice.labelX" :y="slice.labelY" text-anchor="middle">{{ slice.label }}</text>
+        <text v-if="config.showLabels !== false" v-for="(slice, index) in pieSlices" :key="`pie-label-${index}`" class="chart-label" :x="slice.labelX" :y="slice.labelY" text-anchor="middle">{{ slice.label }}</text>
       </template>
       <template v-else-if="isRadar">
         <polygon class="chart-radar-grid" :points="radarGrid" />
@@ -53,16 +68,17 @@
         <polygon v-if="isArea" class="chart-area" :points="`${linePointString} 576,274 54,274`" :fill="config.color" />
         <polyline class="chart-line" :points="linePointString" :stroke="config.color" />
         <circle v-for="(point, index) in linePoints" :key="`line-${index}`" class="chart-point" :cx="point.x" :cy="point.y" r="4" :fill="config.color" />
-        <text v-for="(item, index) in rows" :key="`line-label-${index}`" class="chart-label" :x="linePoints[index]?.x || 0" y="294" text-anchor="middle">{{ item.label }}</text>
+        <text v-if="config.showLabels !== false" v-for="(item, index) in rows" :key="`line-label-${index}`" class="chart-label" :x="linePoints[index]?.x || 0" y="294" text-anchor="middle">{{ item.label }}</text>
       </template>
     </svg>
     <table v-else class="note-chart-table"><thead><tr><th>{{ t('note.chart.label') }}</th><th>{{ t('note.chart.value') }}</th></tr></thead><tbody><tr v-for="(item, index) in tableRows" :key="index"><td>{{ item.label }}</td><td>{{ item.value }}</td></tr></tbody></table>
     <button v-if="!editing" type="button" class="chart-edit-hint" @click.stop="editing = true">{{ t('note.chart.doubleClick') }}</button>
+    <span v-if="selected && !editing" class="chart-resize-handle" :title="t('note.chart.resize')" @pointerdown.prevent.stop="beginResize" />
   </NodeViewWrapper>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { useI18n } from 'vue-i18n'
 
@@ -73,15 +89,27 @@ const palette = ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0891b2
 const editing = ref(false)
 const dataDraft = ref('')
 const dataError = ref('')
-const config = computed(() => ({ kind: 'bar', title: '', color: '#2563eb', width: 620, height: 320, responsive: true, ...props.node.attrs, rows: parseRows(props.node.attrs.data) }))
+const draftRows = ref([])
+const config = computed(() => ({ kind: 'bar', title: '', color: '#2563eb', width: 620, height: 320, responsive: true, showGrid: true, showLabels: true, ...props.node.attrs, rows: parseRows(props.node.attrs.data) }))
 const draft = ref({ ...config.value })
 watch(() => props.node.attrs, () => {
   if (!editing.value) {
     draft.value = { ...config.value }
+    draftRows.value = config.value.rows.map(row => ({ ...row }))
     dataDraft.value = JSON.stringify(config.value.rows, null, 2)
     dataError.value = ''
   }
 }, { deep: true, immediate: true })
+
+const addRow = () => {
+  draftRows.value.push({ label: `系列 ${draftRows.value.length + 1}`, value: 0, error: 0 })
+}
+const removeRow = (index) => {
+  if (draftRows.value.length <= 1) return
+  draftRows.value.splice(index, 1)
+  syncJsonFromRows()
+}
+const syncJsonFromRows = () => { dataDraft.value = JSON.stringify(draftRows.value, null, 2) }
 
 function parseRows(value) {
   try {
@@ -160,10 +188,35 @@ const violinPath = computed(() => {
 })
 const wrapperStyle = computed(() => ({ width: config.value.responsive ? '100%' : `${config.value.width}px`, maxWidth: `${config.value.width}px` }))
 
+let resizeCleanup = null
+const beginResize = (event) => {
+  resizeCleanup?.()
+  const startX = event.clientX
+  const startY = event.clientY
+  const startWidth = Number(config.value.width) || 620
+  const startHeight = Number(config.value.height) || 320
+  const ratio = startHeight / Math.max(1, startWidth)
+  const onMove = (moveEvent) => {
+    const width = Math.max(240, Math.min(1200, startWidth + moveEvent.clientX - startX))
+    const height = moveEvent.shiftKey ? Math.max(160, Math.min(800, startHeight + moveEvent.clientY - startY)) : Math.max(160, Math.min(800, width * ratio))
+    props.updateAttributes?.({ width: Math.round(width), height: Math.round(height), responsive: false })
+  }
+  const onUp = () => {
+    window.removeEventListener('pointermove', onMove)
+    window.removeEventListener('pointerup', onUp)
+    resizeCleanup = null
+  }
+  window.addEventListener('pointermove', onMove)
+  window.addEventListener('pointerup', onUp, { once: true })
+  resizeCleanup = onUp
+}
+
+onBeforeUnmount(() => resizeCleanup?.())
+
 const applyDraft = () => {
   let rowsValue
   try {
-    const parsed = JSON.parse(dataDraft.value || '[]')
+    const parsed = dataDraft.value.trim() ? JSON.parse(dataDraft.value || '[]') : draftRows.value
     if (!Array.isArray(parsed) || !parsed.length) throw new Error('empty')
     rowsValue = parsed.map((item, index) => ({ label: String(item.label ?? item.name ?? index + 1), value: Number(item.value ?? item.y ?? 0) || 0, error: Math.max(0, Number(item.error ?? item.yError ?? 0) || 0) }))
     dataError.value = ''
@@ -171,13 +224,14 @@ const applyDraft = () => {
     dataError.value = t('note.chart.invalidData')
     return
   }
-  props.updateAttributes?.({ kind: draft.value.kind, title: draft.value.title, color: draft.value.color, width: Number(draft.value.width) || 620, height: Number(draft.value.height) || 320, responsive: !!draft.value.responsive, data: JSON.stringify(rowsValue) })
+  props.updateAttributes?.({ kind: draft.value.kind, title: draft.value.title, color: draft.value.color, width: Number(draft.value.width) || 620, height: Number(draft.value.height) || 320, responsive: !!draft.value.responsive, showGrid: draft.value.showGrid !== false, showLabels: draft.value.showLabels !== false, data: JSON.stringify(rowsValue) })
   editing.value = false
 }
 </script>
 
 <style scoped>
 .note-chart-node { position: relative; margin: 14px 0; padding: 10px; border: 1px solid transparent; border-radius: 8px; background: var(--bg-secondary, #f8fafc); }
+.note-chart-node.selected { user-select: none; }
 .note-chart-node.selected { border-color: var(--accent-light, #bfdbfe); }
 .note-chart-title { margin: 4px 0 8px; text-align: center; font-size: 13px; font-weight: 600; }
 .note-chart-svg { display: block; width: 100%; min-height: 180px; overflow: visible; }
@@ -189,5 +243,14 @@ const applyDraft = () => {
 .note-chart-table { width: 100%; border-collapse: collapse; font-size: 12px; } .note-chart-table th, .note-chart-table td { padding: 6px 9px; border: 1px solid var(--border-color, #e2e8f0); text-align: left; }
 .chart-edit-hint { position: absolute; right: 8px; top: 8px; border: 0; border-radius: 5px; padding: 4px 7px; color: var(--text-tertiary, #64748b); background: var(--bg-primary, #fff); font-size: 10px; opacity: 0; cursor: pointer; } .note-chart-node:hover .chart-edit-hint { opacity: 1; }
 .note-chart-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: -2px -2px 10px; padding: 8px; border: 1px solid var(--border-color, #e2e8f0); border-radius: 7px; background: var(--bg-primary, #fff); }
+.chart-data-editor { flex: 1 1 100%; min-width: 320px; padding: 8px; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; background: var(--bg-secondary, #f8fafc); }
+.chart-data-editor-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; color: var(--text-secondary, #475569); font-size: 11px; font-weight: 600; }
+.chart-data-grid { display: grid; grid-template-columns: minmax(120px, 1.5fr) minmax(70px, .8fr) minmax(70px, .8fr) 26px; gap: 5px; margin-top: 5px; }
+.chart-data-grid-head { color: var(--text-tertiary, #64748b); font-size: 10px; }
+.chart-data-grid input { min-width: 0; padding: 5px 6px; border: 1px solid var(--border-color, #cbd5e1); border-radius: 4px; background: var(--bg-primary, #fff); color: inherit; font: inherit; font-size: 11px; }
+.chart-row-remove { border: 0; border-radius: 4px; color: #b91c1c; background: transparent; cursor: pointer; font-size: 16px; }
+.chart-row-remove:disabled { opacity: .35; cursor: default; }
+.chart-advanced-data { flex: 1 1 100%; }
 .note-chart-toolbar label { display: flex; align-items: center; gap: 4px; color: var(--text-secondary, #475569); font-size: 11px; } .note-chart-toolbar select, .note-chart-toolbar input[type=text], .note-chart-toolbar input[type=number], .note-chart-toolbar textarea { max-width: 100px; padding: 4px 6px; border: 1px solid var(--border-color, #cbd5e1); border-radius: 4px; background: var(--bg-primary, #fff); color: inherit; font: inherit; } .note-chart-toolbar textarea { width: 190px; max-width: min(260px, 40vw); resize: vertical; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; } .note-chart-toolbar input[type=color] { width: 24px; height: 22px; padding: 0; border: 0; } .chart-check { white-space: nowrap; } .chart-data-label { align-items: flex-start !important; } .chart-data-error { flex-basis: 100%; margin: 0; color: #b91c1c; font-size: 11px; } .chart-action { padding: 5px 9px; border: 1px solid var(--border-color, #cbd5e1); border-radius: 5px; color: var(--text-secondary, #475569); background: var(--bg-primary, #fff); font-size: 11px; cursor: pointer; } .chart-action.primary { color: #fff; border-color: var(--accent-color, #2563eb); background: var(--accent-color, #2563eb); }
+.chart-resize-handle { position: absolute; right: 2px; bottom: 2px; width: 14px; height: 14px; border-right: 2px solid var(--accent-color, #2563eb); border-bottom: 2px solid var(--accent-color, #2563eb); cursor: nwse-resize; opacity: .8; }
 </style>

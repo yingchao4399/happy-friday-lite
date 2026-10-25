@@ -1,4 +1,5 @@
 import { app, ipcMain, shell, dialog } from 'electron'
+import { DatabaseSync } from 'node:sqlite'
 import fs from 'fs'
 import path from 'path'
 import { importNoteResource } from './note-resources.js'
@@ -1284,6 +1285,27 @@ export function registerCommands(mainWindow) {
       return { success: true, data: arrayBuffer }
     } catch (e) {
       return { success: false, error: e.message }
+    }
+  })
+
+  ipcMain.handle('kb-read-sqlite', async (_event, args) => {
+    const filePath = args.filePath
+    if (!filePath || !fs.existsSync(filePath)) return { success: false, error: 'File not found' }
+    let database
+    try {
+      database = new DatabaseSync(filePath, { readOnly: true })
+      const tables = database.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
+      const result = tables.map(({ name }) => {
+        const identifier = String(name).replaceAll('"', '""')
+        const columns = database.prepare(`PRAGMA table_info("${identifier}")`).all().map((column) => ({ name: String(column.name), type: String(column.type || '') }))
+        const rows = database.prepare(`SELECT * FROM "${identifier}" LIMIT 200`).all().map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [key, typeof value === 'bigint' ? String(value) : value])))
+        return { name: String(name), columns, rows }
+      })
+      return { success: true, tables: result }
+    } catch (error) {
+      return { success: false, error: error?.message || '无法读取数据库' }
+    } finally {
+      try { database?.close() } catch {}
     }
   })
 

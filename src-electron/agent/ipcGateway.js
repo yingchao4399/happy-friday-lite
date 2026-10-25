@@ -7,7 +7,7 @@ import path from 'node:path'
 import { getDataDir } from '../config.js'
 
 const readable = /^(get[_-]|list[_-]|search[_-]|check[_-]|rag-get-|agent-list-|kb-(?:list|read|get|search)|obsidian-(?:get|list)|session-get$)/
-const externalBusiness = /^(?:(?:get|search|create|import|update|delete|restore|save)_(?:notes?|notebooks?|drawing|schedule|sessions?|messages?)|kb-(?:read-file(?:-buffer)?|read-dir|search-files|create-dir|mkdir|copy-file|copy-folder|copy-drop-items|save-webpage|save-note|delete-dir|rename-dir)|automation-(?:get|list|create|update|delete|run)|office-(?:open-file|new|close|get-state|get-recents|is-dirty|export))([_-]|$)/
+const externalBusiness = /^(?:(?:get|search|create|import|update|delete|restore|save)_(?:notes?|notebooks?|drawing|schedule|sessions?|messages?)|kb-(?:read-file(?:-buffer)?|read-sqlite|read-dir|search-files|create-dir|mkdir|copy-file|copy-folder|copy-drop-items|save-webpage|save-note|delete-dir|rename-dir)|automation-(?:get|list|create|update|delete|run)|office-(?:open-file|new|close|get-state|get-recents|is-dirty|export))([_-]|$)/
 
 function assertKnowledgeDirectory(candidate) {
   if (typeof candidate !== 'string' || !candidate) throw new Error('知识库目录参数无效')
@@ -30,7 +30,7 @@ function assertKnowledgeDirectory(candidate) {
 function authorizeKnowledgePaths(channel, args) {
   if (!channel.startsWith('kb-')) return
   const value = args[0] || {}
-  if (/^kb-read-file(?:-buffer)?$/.test(channel)) {
+  if (/^kb-read-file(?:-buffer)?$/.test(channel) || channel === 'kb-read-sqlite') {
     if (typeof value.filePath !== 'string') throw new Error('文件路径无效')
     getResource(pathToFileURL(value.filePath).href)
   } else if (['kb-copy-file', 'kb-copy-folder', 'kb-copy-drop-items'].includes(channel)) {
@@ -64,7 +64,7 @@ export function installIpcCapabilityGateway(ipcMain, getMainWindow) {
   const handle = ipcMain.handle.bind(ipcMain)
   ipcMain.handle = (channel, handler) => {
     const name = `app_${channel.replace(/[^a-zA-Z0-9_]/g, '_')}`
-    const read = readable.test(channel) || ['trash-list', 'clipboard-list', 'clipboard-image', 'clipboard-settings-get', 'clipboard-organization-get', 'clipboard-ai-options'].includes(channel) || /^office-(?:get-state|get-recents|is-dirty|open-file)$/.test(channel)
+    const read = readable.test(channel) || ['trash-list', 'clipboard-list', 'clipboard-image', 'clipboard-settings-get', 'clipboard-organization-get', 'clipboard-ai-options', 'kb-read-sqlite'].includes(channel) || /^office-(?:get-state|get-recents|is-dirty|open-file)$/.test(channel)
     const exposed = externalBusiness.test(channel)
     registerTool({
       name,

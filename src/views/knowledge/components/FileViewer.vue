@@ -77,9 +77,10 @@
         @active-section="activeTocId = $event"
       />
       <TextViewer
-        v-else
+        v-else-if="file.type !== 'database'"
         :file-path="file.path"
       />
+      <DatabaseViewer v-else :file-path="file.path" />
       </div>
     </div>
   </div>
@@ -93,6 +94,7 @@ import MarkdownViewer from './MarkdownViewer.vue';
 import NoteViewer from './NoteViewer.vue';
 import HtmlViewer from './HtmlViewer.vue';
 import TextViewer from './TextViewer.vue';
+import DatabaseViewer from './DatabaseViewer.vue';
 import DocumentToc from './DocumentToc.vue';
 import { getFileIconComponent } from '../utils';
 

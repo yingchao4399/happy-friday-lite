@@ -39,7 +39,9 @@ async function main() {
     for (const color of ['red', 'blue']) images.push('data:image/png;base64,' + (await sharp({ create: { width: 60, height: 40, channels: 4, background: color } }).png().toBuffer()).toString('base64'))
     const item = { id: 'rich-note', kind: 'html', plainText: '归档验收\n主动回忆与间隔复习', html: '<h2>归档验收</h2><p><strong>主动回忆</strong>与间隔复习</p><table><tr><th>日期</th><th>方法</th></tr><tr><td>第七天</td><td>闭卷自测</td></tr></table><p><img src="' + images[0] + '"></p><p><img src="' + images[1] + '"></p>', sensitivity: 'normal', sourceApp: 'Acceptance fixture', hash: 'rich-note-source', capturedAt: new Date().toISOString() }
     db.queryAllRaw('INSERT INTO clipboard_items VALUES (?,?,?,?)', [item.id, JSON.stringify(item), item.capturedAt, null])
-    harnessDir = fs.mkdtempSync(path.join(root, '.clipboard-note-ui-probe-'))
+    // Vite intentionally refuses dot-prefixed URL segments; keep the isolated
+    // harness inside the source tree but use a normal directory name.
+    harnessDir = fs.mkdtempSync(path.join(root, 'clipboard-note-ui-probe-'))
     win = new BrowserWindow({ show: false, width: 1100, height: 850, webPreferences: { offscreen: true, backgroundThrottling: false, preload: path.join(root, 'preload.cjs'), contextIsolation: true, nodeIntegration: false } })
     registerClipboardCommands(win)
     ipcMain.handle('kb-get-data-dir', () => null)
