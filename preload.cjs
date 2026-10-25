@@ -31,6 +31,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'open-file-dialog',
       'get_notes',
       'get_note',
+      'note-link-upsert',
+      'note-links-list',
       'create_note',
       'import_note',
       'update_note',

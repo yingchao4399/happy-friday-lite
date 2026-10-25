@@ -6,6 +6,13 @@
 
 An Electron + Vue 3 desktop personal knowledge assistant that combines an AI agent, RAG knowledge retrieval, rich-text notes, and a calendar. All data is stored locally with privacy as a priority.
 
+## 3.0.6-preview.9 note resource editing
+
+- Note images open in a dedicated editor with zoom, pan, crop, rotation, drawing, mosaic, text annotations, and output sizing.
+- Video, audio, and attachment nodes share preview, open-file, and open-containing-folder actions.
+- Notes can insert editable chart nodes for bar, column, line, area, pie, scatter, histogram, waterfall, funnel, radar, combo, and three-line table layouts.
+- Note references create bidirectional resource links and expose backlinks; structured media and chart nodes remain readable to the AI note tools.
+
 ## 3.0.6-preview.8 official integration and note/header-footer enhancements
 
 - Fully integrates the official 3.0.6 tab/session isolation, streaming isolation, uncontrolled inputs, streaming renderer, sidebar performance, Office bundle and HarfBuzz fixes.

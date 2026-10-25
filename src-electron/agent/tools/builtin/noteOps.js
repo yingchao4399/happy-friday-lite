@@ -37,6 +37,21 @@ const htmlToMarkdown = (html) => {
   }
 }
 
+// 将媒体、附件、图表和动态引用转换成明确的结构化说明，避免 Turndown 把
+// 自定义节点折叠成空白，导致 Agent 看不到笔记里的可操作资源。
+const structuredResources = (html) => {
+  if (!html) return []
+  const resources = []
+  const attr = (source, name) => source.match(new RegExp(`${name}=["']([^"']*)["']`, 'i'))?.[1] || ''
+  for (const match of html.matchAll(/<img\b[^>]*>/gi)) resources.push(`图片：${attr(match[0], 'alt') || '未命名'}；来源：${attr(match[0], 'src')}`)
+  for (const match of html.matchAll(/<video\b[^>]*>/gi)) resources.push(`视频：${attr(match[0], 'title') || '未命名'}；来源：${attr(match[0], 'src')}`)
+  for (const match of html.matchAll(/<audio\b[^>]*>/gi)) resources.push(`音频：${attr(match[0], 'title') || '未命名'}；来源：${attr(match[0], 'src')}`)
+  for (const match of html.matchAll(/<a\b[^>]*data-note-attachment[^>]*>([\s\S]*?)<\/a>/gi)) resources.push(`附件：${match[1].replace(/<[^>]+>/g, '').trim() || '未命名'}；来源：${attr(match[0], 'href')}`)
+  for (const match of html.matchAll(/<div\b[^>]*data-note-reference[^>]*>([\s\S]*?)<\/div>/gi)) resources.push(`引用：${match[1].replace(/<[^>]+>/g, '').trim() || attr(match[0], 'data-title')}；来源：${attr(match[0], 'data-source-uri')}; 模式：${attr(match[0], 'data-mode') || 'live'}`)
+  for (const match of html.matchAll(/<div\b[^>]*data-note-chart[^>]*>/gi)) resources.push(`图表：类型=${attr(match[0], 'kind') || 'bar'}；标题=${attr(match[0], 'title') || ''}；数据=${attr(match[0], 'data') || '[]'}`)
+  return resources
+}
+
 // ========== search_notes ==========
 
 const searchNotesSchema = z.object({
@@ -114,7 +129,9 @@ async function getNoteHandler(args, ctx) {
 
   // 数据库中 note.content 是 HTML 格式，转为 Markdown 便于 LLM 阅读和用户理解
   const markdownContent = htmlToMarkdown(note.content)
-  return `【笔记 ${note.id}】${note.title}\n\n${markdownContent}`
+  const resources = structuredResources(note.content)
+  const resourceBlock = resources.length ? `\n\n【结构化资源】\n${resources.map(item => `- ${item}`).join('\n')}` : ''
+  return `【笔记 ${note.id}】${note.title}\n\n${markdownContent}${resourceBlock}`
 }
 
 registerTool({

@@ -49,6 +49,7 @@
         :note-id="noteId"
         :share-mode="isShareMode"
         @change="onEditorChange"
+        @open-note="openLinkedNote"
       />
     </div>
 
@@ -93,6 +94,18 @@ const charCount = ref(0);
 const lastSavedTime = ref('');
 const moreMenuVisible = ref(false);
 const moreMenuStyle = reactive({ left: '0px', top: '0px' });
+
+const loadNote = async (id) => {
+  if (!id || isShareMode.value) return;
+  await noteStore.flushPendingSave();
+  const note = await noteStore.fetchNote(id);
+  if (!note || noteId.value !== id) return;
+  noteTitle.value = note.title || t('note.untitledNote');
+  noteContent.value = note.content || '';
+  updateStats(extractPlainText(noteContent.value).replace(/\s+/g, ' ').trim());
+  isSaved.value = true;
+  lastSavedTime.value = '';
+};
 
 const onEditorChange = (content) => {
   noteContent.value = content;
@@ -154,6 +167,10 @@ const handleCopyContent = () => {
   moreMenuVisible.value = false;
 };
 
+const openLinkedNote = (id) => {
+  if (id) router.push({ name: 'note-edit', params: { id } });
+};
+
 const handleDelete = async () => {
   moreMenuVisible.value = false;
   const id = noteId.value;
@@ -176,6 +193,12 @@ watch(() => noteStore.saving, (saving) => {
   }
 });
 
+// Vue Router reuses NoteEdit when only :id changes. Reload the target note so
+// clicking a backlink never leaves the previous note mounted in the editor.
+watch(noteId, (id, previousId) => {
+  if (id && id !== previousId) loadNote(id);
+});
+
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside);
   const id = noteId.value;
@@ -196,12 +219,7 @@ onMounted(async () => {
     return;
   }
 
-  const note = await noteStore.fetchNote(id);
-  if (note) {
-    noteTitle.value = note.title;
-    noteContent.value = note.content;
-    updateStats(extractPlainText(noteContent.value).replace(/\s+/g, ' ').trim());
-  }
+  await loadNote(id);
 });
 
 onBeforeUnmount(async () => {

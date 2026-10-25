@@ -81,6 +81,10 @@
               </div>
             </div>
           </div>
+          <div class="menu-item" @click="addChart">
+            <span class="menu-item-glyph">▥</span>
+            {{ t('note.toolbar.chart') }}
+          </div>
           <div class="menu-item" @click="addImage">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
             {{ t('note.toolbar.image') }}
@@ -369,6 +373,14 @@
       </div>
     </div>
 
+    <div v-if="backlinks.length && !shareMode" class="note-backlinks-bar">
+      <span class="note-backlinks-label">{{ t('note.backlinks.title') }}</span>
+      <button v-for="link in backlinks" :key="link.id" type="button" class="note-backlink" :title="link.title" @click="openBacklink(link)">
+        <Link2 :size="13" :stroke-width="2" />
+        <span>{{ link.title }}</span>
+      </button>
+    </div>
+
     <Transition name="note-search-fade">
       <div v-if="searchVisible" class="note-search-bar" :class="{ 'share-mode': shareMode }">
         <Search :size="15" :stroke-width="2" class="note-search-icon" />
@@ -620,6 +632,45 @@
     </div>
     </div>
 
+    <NoteImageEditorDialog
+      :visible="showImageEditor"
+      :src="imageEditorSource"
+      :alt="imageEditorAlt"
+      :width="imageEditorWidth"
+      :height="imageEditorHeight"
+      @close="closeImageEditor"
+      @save="saveImageEditorResult"
+    />
+
+    <div v-if="mediaPreview.visible" class="note-media-preview-overlay" @click.self="closeMediaPreview">
+      <div class="note-media-preview-dialog">
+        <div class="note-media-preview-header">
+          <span class="note-media-preview-title">{{ mediaPreview.title }}</span>
+          <button type="button" class="note-media-preview-close" @click="closeMediaPreview">×</button>
+        </div>
+        <div class="note-media-preview-body">
+          <video v-if="mediaPreview.kind === 'video'" :src="mediaPreview.src" controls autoplay class="note-media-preview-video" />
+          <audio v-else-if="mediaPreview.kind === 'audio'" :src="mediaPreview.src" controls autoplay class="note-media-preview-audio" />
+          <div v-else class="note-media-attachment-preview">
+            <div class="note-media-attachment-icon">↗</div>
+            <div class="note-media-attachment-name">{{ mediaPreview.title }}</div>
+            <div class="note-media-attachment-actions">
+              <button type="button" class="btn btn-secondary" @click="openMediaExternal">{{ t('note.media.open') }}</button>
+              <button type="button" class="btn btn-secondary" @click="openMediaLocation">{{ t('note.media.openLocation') }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="mediaContextMenu.visible" class="note-media-context-menu" :style="mediaContextMenu.style" role="menu">
+      <button v-if="mediaContextMenu.kind === 'image'" type="button" @click="editContextImage">{{ t('note.imageEditor.edit') }}</button>
+      <button v-if="mediaContextMenu.kind !== 'image'" type="button" @click="previewContextMedia">{{ t('note.media.preview') }}</button>
+      <button type="button" @click="openContextMedia">{{ t('note.media.open') }}</button>
+      <button type="button" @click="openContextMediaLocation">{{ t('note.media.openLocation') }}</button>
+      <button type="button" class="danger" @click="deleteContextMedia">{{ t('note.media.delete') }}</button>
+    </div>
+
     <Transition name="sidebar-slide">
       <div v-if="showAISidebar" class="ai-chat-sidebar" :style="{ width: sidebarWidth + 'px' }">
         <div class="sidebar-resize-handle" @mousedown="startResize"></div>
@@ -811,6 +862,8 @@ import { VueNodeViewRenderer } from '@tiptap/vue-3';
 import CodeBlockComponent from './CodeBlockComponent.vue';
 import MarpPresentation from './MarpPresentation.vue';
 import NoteBubbleMenu from './NoteBubbleMenu.vue';
+import NoteImageEditorDialog from './NoteImageEditorDialog.vue';
+import NoteChartNodeView from './NoteChartNodeView.vue';
 import KbDirSelectDialog from '@/views/knowledge/components/KbDirSelectDialog.vue';
 import SelectNoteDialog from '@/views/knowledge/components/SelectNoteDialog.vue';
 import KbFileDialog from '@/views/knowledge/components/KbFileDialog.vue';
@@ -856,7 +909,7 @@ const props = defineProps({
   shareMode: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['update:modelValue', 'change', 'toggle-toc', 'close-sidebar', 'close-toc']);
+const emit = defineEmits(['update:modelValue', 'change', 'toggle-toc', 'close-sidebar', 'close-toc', 'open-note']);
 
 const searchVisible = ref(false);
 const searchQuery = ref('');
@@ -1092,6 +1145,49 @@ const NoteReference = Node.create({
   },
 });
 
+const NoteChart = Node.create({
+  name: 'noteChart',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      kind: { default: 'bar' },
+      title: { default: '' },
+      color: { default: '#2563eb' },
+      data: { default: JSON.stringify([{ label: 'A', value: 42 }, { label: 'B', value: 68 }, { label: 'C', value: 51 }, { label: 'D', value: 84 }]) },
+      width: { default: 620 },
+      height: { default: 320 },
+      responsive: { default: true },
+    };
+  },
+  parseHTML() { return [{ tag: 'div[data-note-chart]' }]; },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', { ...HTMLAttributes, 'data-note-chart': 'true', class: 'note-chart-block' }];
+  },
+  addNodeView() { return VueNodeViewRenderer(NoteChartNodeView); },
+});
+
+// 图片节点保留尺寸与编辑后的来源，便于保存后重载时还原编辑结果。
+const NoteImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        parseHTML: element => element.getAttribute('width') || element.style.width || null,
+        renderHTML: attributes => attributes.width ? { width: attributes.width } : {},
+      },
+      height: {
+        default: null,
+        parseHTML: element => element.getAttribute('height') || element.style.height || null,
+        renderHTML: attributes => attributes.height ? { height: attributes.height } : {},
+      },
+    };
+  },
+});
+
 const fileUrlForNote = (filePath) => {
   if (!filePath) return '';
   if (/^(?:file|https?):\/\//i.test(filePath)) return filePath;
@@ -1137,8 +1233,39 @@ const presentationSource = ref('');
 const presentationFormat = ref('html');
 const showMarpGenerateConfirm = ref(false);
 const isGeneratingMarp = ref(false);
+const showImageEditor = ref(false);
+const imageEditorSource = ref('');
+const imageEditorAlt = ref('');
+const imageEditorWidth = ref(0);
+const imageEditorHeight = ref(0);
+const imageEditorPos = ref(null);
+const mediaPreview = ref({ visible: false, kind: '', src: '', path: '', title: '' });
+const mediaContextMenu = ref({ visible: false, kind: '', src: '', path: '', title: '', pos: null, style: {} });
 let marpUnlisteners = [];
 const noteStore = useNoteStore();
+const backlinks = ref([]);
+
+const loadBacklinks = async () => {
+  if (!props.noteId || !window.electronAPI) { backlinks.value = []; return; }
+  try {
+    const links = await window.electronAPI.invoke('note-links-list', { noteId: props.noteId });
+    const entries = [];
+    for (const link of Array.isArray(links) ? links : []) {
+      const otherUri = link.fromUri?.includes(encodeURIComponent(props.noteId)) ? link.toUri : link.fromUri;
+      const match = String(otherUri || '').match(/^friday:\/\/notes\/(.+)$/);
+      const otherId = match ? decodeURIComponent(match[1]) : '';
+      if (!otherId || otherId === props.noteId || entries.some(item => item.id === otherId)) continue;
+      const note = noteStore.notes.find(item => item.id === otherId) || await noteStore.fetchNote(otherId);
+      entries.push({ id: otherId, title: note?.title || t('note.untitledNote') });
+    }
+    backlinks.value = entries;
+  } catch (error) {
+    console.warn('加载双向链接失败:', error);
+    backlinks.value = [];
+  }
+};
+
+const openBacklink = (link) => emit('open-note', link.id);
 
 const togglePresentation = () => {
   if (showPresentation.value) {
@@ -1384,8 +1511,134 @@ const hideTableContextMenu = () => {
   tableToolbarStyle.value = { ...tableToolbarStyle.value, visibility: 'hidden' };
 };
 
+const closeMediaContextMenu = () => {
+  mediaContextMenu.value = { ...mediaContextMenu.value, visible: false };
+};
+
+const notePathFromUrl = (url) => {
+  if (!url) return '';
+  try {
+    if (String(url).startsWith('file://')) return decodeURIComponent(new URL(url).pathname).replace(/^\/(?:[A-Za-z]:)/, value => value.slice(1));
+  } catch (_error) { /* 保留原始路径 */ }
+  return String(url);
+};
+
+const getMediaTarget = (view, target) => {
+  const element = target?.closest?.('img.editor-image, img, video[data-note-video], audio[data-note-audio], a[data-note-attachment]');
+  if (!element || !view.dom.contains(element)) return null;
+  const pos = view.posAtDOM(element, 0);
+  const mediaTypes = ['image', 'noteVideo', 'noteAudio', 'noteAttachment'];
+  let node = view.state.doc.nodeAt(pos);
+  let nodePos = pos;
+  // Atom nodes rendered as a wrapper (attachments render <p><a>) can map the
+  // child DOM element to the position immediately inside the wrapper. Probe
+  // adjacent document positions before walking the resolved ancestors.
+  if (!node || !mediaTypes.includes(node.type.name)) {
+    for (const candidatePos of [pos - 1, pos + 1]) {
+      if (candidatePos < 0 || candidatePos > view.state.doc.content.size) continue;
+      const candidate = view.state.doc.nodeAt(candidatePos);
+      if (candidate && mediaTypes.includes(candidate.type.name)) {
+        node = candidate;
+        nodePos = candidatePos;
+        break;
+      }
+    }
+  }
+  const resolved = view.state.doc.resolve(Math.max(0, Math.min(pos, view.state.doc.content.size)));
+  if (!node || !['image', 'noteVideo', 'noteAudio', 'noteAttachment'].includes(node.type.name)) {
+    for (let depth = resolved.depth; depth > 0; depth -= 1) {
+      const candidate = resolved.node(depth);
+      if (mediaTypes.includes(candidate.type.name)) {
+        node = candidate;
+        nodePos = resolved.before(depth);
+        break;
+      }
+    }
+  }
+  const kind = element.matches('img') ? 'image' : element.matches('video') ? 'video' : element.matches('audio') ? 'audio' : 'attachment';
+  const src = element.getAttribute('src') || element.getAttribute('href') || node?.attrs?.src || '';
+  return { element, pos: nodePos, node, kind, src, path: notePathFromUrl(src), title: node?.attrs?.title || element.getAttribute('title') || element.textContent?.trim() || t('note.media.untitled') };
+};
+
+const openImageEditor = (target) => {
+  if (!target?.node || target.node.type.name !== 'image') return;
+  imageEditorPos.value = target.pos;
+  imageEditorSource.value = target.node.attrs.src || target.src;
+  imageEditorAlt.value = target.node.attrs.alt || target.title || '';
+  imageEditorWidth.value = Number.parseInt(target.node.attrs.width, 10) || 0;
+  imageEditorHeight.value = Number.parseInt(target.node.attrs.height, 10) || 0;
+  showImageEditor.value = true;
+  closeMediaContextMenu();
+};
+
+const closeImageEditor = () => {
+  showImageEditor.value = false;
+  imageEditorPos.value = null;
+};
+
+const saveImageEditorResult = ({ src, width, height, alt }) => {
+  const position = imageEditorPos.value;
+  const instance = editor.value;
+  if (!instance || typeof position !== 'number') return;
+  const node = instance.state.doc.nodeAt(position);
+  if (!node || node.type.name !== 'image') return;
+  instance.view.dispatch(instance.state.tr.setNodeMarkup(position, undefined, {
+    ...node.attrs,
+    src,
+    alt: alt || node.attrs.alt || '',
+    width: width || null,
+    height: height || null,
+  }));
+  closeImageEditor();
+};
+
+const openMediaPreview = (target) => {
+  if (!target || target.kind === 'image') return;
+  mediaPreview.value = { visible: true, kind: target.kind, src: target.src, path: target.path, title: target.title };
+  closeMediaContextMenu();
+};
+
+const closeMediaPreview = () => { mediaPreview.value = { ...mediaPreview.value, visible: false }; };
+const openMediaExternal = () => {
+  const target = mediaPreview.value;
+  if (!target.path && !target.src) return;
+  electronService.invoke('kb-open-file-external', { filePath: target.path || target.src }).catch(() => {});
+};
+const openMediaLocation = () => {
+  const target = mediaPreview.value;
+  if (!target.path) return;
+  electronService.invoke('kb-open-in-explorer', { path: target.path }).catch(() => {});
+};
+
+const showMediaContextMenu = (target, event) => {
+  mediaContextMenu.value = {
+    visible: true,
+    kind: target.kind,
+    src: target.src,
+    path: target.path,
+    title: target.title,
+    pos: target.pos,
+    style: { left: `${Math.max(8, event.clientX)}px`, top: `${Math.max(8, event.clientY)}px` },
+  };
+};
+const editContextImage = () => openImageEditor({ node: editor.value?.state.doc.nodeAt(mediaContextMenu.value.pos), pos: mediaContextMenu.value.pos, src: mediaContextMenu.value.src, title: mediaContextMenu.value.title });
+const previewContextMedia = () => openMediaPreview(mediaContextMenu.value);
+const openContextMedia = () => { const target = mediaContextMenu.value; electronService.invoke('kb-open-file-external', { filePath: target.path || target.src }).catch(() => {}); closeMediaContextMenu(); };
+const openContextMediaLocation = () => { const target = mediaContextMenu.value; if (target.path) electronService.invoke('kb-open-in-explorer', { path: target.path }).catch(() => {}); closeMediaContextMenu(); };
+const deleteContextMedia = () => {
+  const target = mediaContextMenu.value;
+  if (typeof target.pos === 'number' && editor.value) editor.value.chain().focus().deleteRange({ from: target.pos, to: target.pos + (editor.value.state.doc.nodeAt(target.pos)?.nodeSize || 1) }).run();
+  closeMediaContextMenu();
+};
+
 const handleEditorContextMenu = (view, event) => {
   const target = event.target instanceof Element ? event.target : null;
+  const mediaTarget = getMediaTarget(view, target);
+  if (mediaTarget && !props.shareMode) {
+    event.preventDefault();
+    showMediaContextMenu(mediaTarget, event);
+    return true;
+  }
   const cell = target?.closest('td, th');
   if (!cell || !view.dom.contains(cell) || props.shareMode) {
     hideTableContextMenu();
@@ -1435,6 +1688,7 @@ const handleEditorContextMenu = (view, event) => {
 const handleDocumentContextMenu = (event) => {
   const target = event.target instanceof Element ? event.target : null;
   const editorElement = editorContentRef.value?.$el || editorContentRef.value;
+  if (!target?.closest('.note-media-context-menu')) closeMediaContextMenu();
   if (!target?.closest('.table-context-toolbar') && !editorElement?.contains?.(target)) {
     hideTableContextMenu();
   }
@@ -2578,6 +2832,9 @@ const handleNoteConfirm = (selectedNotes) => {
         type: 'noteReference',
         attrs: { kind: 'note', sourceId: note.id, sourceUri: `friday://notes/${encodeURIComponent(note.id)}`, title: note.title || t('note.untitledNote'), mode: 'live' },
       }).run();
+      if (props.noteId && note.id !== props.noteId) {
+        window.electronAPI?.invoke('note-link-upsert', { fromNoteId: props.noteId, toNoteId: note.id }).then(loadBacklinks).catch(() => {});
+      }
     }
     showNoteDialog.value = false;
     noteInsertMode.value = 'chat';
@@ -2996,7 +3253,7 @@ const editor = useEditor({
     Highlight.configure({
       multicolor: true,
     }),
-    Image.configure({
+    NoteImage.configure({
       allowBase64: true,
       HTMLAttributes: {
         class: 'editor-image',
@@ -3006,6 +3263,7 @@ const editor = useEditor({
     NoteAudio,
     NoteAttachment,
     NoteReference,
+    NoteChart,
     Placeholder.configure({
       placeholder: ({ node }) => node.type.name === 'noteTitle'
         ? t('note.titlePlaceholder')
@@ -3145,7 +3403,25 @@ const editor = useEditor({
     },
     handleDOMEvents: {
       contextmenu: handleEditorContextMenu,
-      click: (_view, event) => {
+      click: (view, event) => {
+        const mediaTarget = getMediaTarget(view, event.target instanceof Element ? event.target : null);
+        if (mediaTarget?.kind === 'image') {
+          event.preventDefault();
+          openImageEditor(mediaTarget);
+          return true;
+        }
+        if (mediaTarget?.kind === 'video' || mediaTarget?.kind === 'audio') {
+          // 原生控件上的播放按钮保持浏览器行为；点击空白区域打开更大的预览。
+          if (!(event.target instanceof Element && event.target.closest('video, audio')?.matches(':focus'))) {
+            openMediaPreview(mediaTarget);
+          }
+          return false;
+        }
+        if (mediaTarget?.kind === 'attachment') {
+          event.preventDefault();
+          openMediaPreview(mediaTarget);
+          return true;
+        }
         const anchor = event.target?.closest?.('a.text-link');
         if (!anchor?.href) return false;
         event.preventDefault();
@@ -3561,12 +3837,33 @@ const insertTable = (rows, cols) => {
   });
 };
 
+const addChart = () => {
+  runInsertAction(() => editor.value?.chain().focus().insertContent({
+    type: 'noteChart',
+    attrs: {
+      kind: 'bar',
+      title: t('note.chart.defaultTitle'),
+      color: '#2563eb',
+      data: JSON.stringify([
+        { label: t('note.chart.sampleA'), value: 42 },
+        { label: t('note.chart.sampleB'), value: 68 },
+        { label: t('note.chart.sampleC'), value: 51 },
+        { label: t('note.chart.sampleD'), value: 84 },
+      ]),
+      width: 620,
+      height: 320,
+      responsive: true,
+    },
+  }).run());
+};
+
 const toolbarOverflowTools = computed(() => [
   { key: 'undo', section: 'history', icon: Undo2, label: t('note.toolbar.undo'), disabled: () => !toolbarState.value.canUndo, run: () => editor.value?.chain().focus().undo().run() },
   { key: 'redo', section: 'history', icon: Redo2, label: t('note.toolbar.redo'), disabled: () => !toolbarState.value.canRedo, run: () => editor.value?.chain().focus().redo().run() },
   { key: 'clear', section: 'history', icon: Eraser, label: t('note.toolbar.clearFormat'), run: clearFormatting },
   { key: 'link', section: 'history', icon: Link2, label: t('note.toolbar.link'), disabled: () => !toolbarState.value.hasSelection, run: addLink },
   { key: 'table', section: 'insert', icon: Table2, label: t('note.toolbar.table'), run: () => insertTable(3, 3) },
+  { key: 'chart', section: 'insert', icon: Table2, label: t('note.toolbar.chart'), run: addChart },
   { key: 'image', section: 'insert', icon: ToolbarImage, label: t('note.toolbar.image'), run: addImage },
   { key: 'formula', section: 'insert', icon: Sigma, label: t('note.toolbar.formula'), run: addFormula },
   { key: 'code', section: 'insert', icon: Code2, label: t('note.toolbar.codeBlock'), run: insertCodeBlock },
@@ -3603,6 +3900,8 @@ watch(() => props.modelValue, (newValue) => {
     nextTick(syncSearchState);
   }
 });
+
+watch(() => props.noteId, () => { loadBacklinks(); }, { immediate: true });
 
 watch(() => appStore.noteFimCompletion, (enabled) => {
   if (!enabled) {
@@ -3653,6 +3952,7 @@ onBeforeUnmount(() => {
 
 const handleClickOutside = (event) => {
   const target = event.target;
+  if (!target.closest('.note-media-context-menu')) closeMediaContextMenu();
   if (!target.closest('.dropdown-wrapper')) {
     closeAllMenus();
   }
@@ -3842,6 +4142,66 @@ const fixEmptyTableCells = (html) => {
   background: #fef2f2;
   color: #b91c1c;
 }
+
+.note-media-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, .58);
+  backdrop-filter: blur(3px);
+}
+
+.note-media-preview-dialog {
+  width: min(860px, 92vw);
+  max-height: 88vh;
+  overflow: hidden;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 12px;
+  background: var(--bg-primary, #fff);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .3);
+}
+
+.note-media-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.note-media-preview-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
+.note-media-preview-close { border: 0; background: transparent; color: var(--text-tertiary, #94a3b8); font-size: 23px; cursor: pointer; }
+.note-media-preview-body { display: flex; align-items: center; justify-content: center; min-height: 220px; max-height: calc(88vh - 48px); padding: 24px; background: var(--bg-secondary, #f8fafc); }
+.note-media-preview-video { display: block; max-width: 100%; max-height: calc(88vh - 120px); border-radius: 6px; background: #000; }
+.note-media-preview-audio { width: min(620px, 100%); }
+.note-media-attachment-preview { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 36px; }
+.note-media-attachment-icon { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 14px; color: var(--accent-color, #2563eb); background: var(--accent-light, #eff6ff); font-size: 28px; }
+.note-media-attachment-name { max-width: 620px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.note-media-attachment-actions { display: flex; gap: 8px; }
+
+.note-media-context-menu {
+  position: fixed;
+  z-index: 10030;
+  min-width: 156px;
+  padding: 5px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  background: var(--bg-primary, #fff);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, .18);
+}
+.note-media-context-menu button { display: block; width: 100%; padding: 7px 10px; border: 0; border-radius: 5px; text-align: left; font: inherit; font-size: 12px; color: var(--text-primary, #334155); background: transparent; cursor: pointer; }
+.note-media-context-menu button:hover { background: var(--bg-hover, #f1f5f9); }
+.note-media-context-menu button.danger { color: #dc2626; }
+
+.note-backlinks-bar { display: flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 12px; overflow-x: auto; border-bottom: 1px solid var(--border-color, #eef2f7); color: var(--text-tertiary, #64748b); font-size: 11px; }
+.note-backlinks-label { flex: 0 0 auto; font-weight: 600; }
+.note-backlink { display: inline-flex; align-items: center; gap: 4px; max-width: 180px; padding: 4px 7px; overflow: hidden; border: 1px solid var(--border-color, #e2e8f0); border-radius: 5px; color: var(--text-secondary, #475569); background: var(--bg-secondary, #f8fafc); font: inherit; cursor: pointer; }
+.note-backlink span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note-backlink:hover { color: var(--accent-color, #2563eb); border-color: var(--accent-light, #bfdbfe); background: var(--bg-hover, #eff6ff); }
 
 @media (max-width: 900px) {
   .table-context-toolbar {

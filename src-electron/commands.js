@@ -587,6 +587,25 @@ export function registerCommands(mainWindow) {
     return db.getNote(args.noteId)
   })
 
+  ipcMain.handle('note-link-upsert', (_event, args) => {
+    const fromNoteId = String(args?.fromNoteId || '')
+    const toNoteId = String(args?.toNoteId || '')
+    if (!fromNoteId || !toNoteId || fromNoteId === toNoteId) throw new Error('笔记链接目标无效')
+    const fromUri = `friday://notes/${encodeURIComponent(fromNoteId)}`
+    const toUri = `friday://notes/${encodeURIComponent(toNoteId)}`
+    const relation = args?.relation || 'note-bidirectional'
+    const first = db.linkResources(fromUri, toUri, relation, args?.evidence || '', 'note-editor')
+    const second = db.linkResources(toUri, fromUri, relation, args?.evidence || '', 'note-editor')
+    return { ok: true, links: [first, second] }
+  })
+
+  ipcMain.handle('note-links-list', (_event, args) => {
+    const noteId = String(args?.noteId || '')
+    if (!noteId) return []
+    const uri = `friday://notes/${encodeURIComponent(noteId)}`
+    return db.getResourceLinks(uri).filter(link => link.relation === 'note-bidirectional')
+  })
+
   ipcMain.handle('toggle_note_pinned', (_event, args) => {
     if (typeof args?.isPinned !== 'boolean') throw new Error('置顶参数无效')
     return db.setNotePinned(args.noteId, args.isPinned)
