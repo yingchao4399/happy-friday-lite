@@ -6,6 +6,27 @@
 
 An Electron + Vue 3 desktop personal knowledge assistant that combines an AI agent, RAG knowledge retrieval, rich-text notes, and a calendar. All data is stored locally with privacy as a priority.
 
+## 3.0.6-preview.12 Typewriter Nocturne original-shell integration
+
+- Adds the original Typewriter Nocturne shell at `/typewriter`, pinned to upstream commit `e19d64ef42b9241b462439e22d7b905b266633e1`.
+- Keeps the original 3D machine, paper shaders, lamp, sounds, ink, cursors, Press, Archive, Studio and paper-clip scrollbar.
+- Notes and Terminal are separate content plugins. Notes edit the same Friday note ID and autosave back to the Notes module; Terminal uses a real PowerShell/Bash/Zsh PTY.
+- Includes Chinese/English settings labels, Markdown/code import into Notes, Archive PNG export, terminal restart, and crash-safe local draft recovery.
+
+## 3.0.6-preview.11 header/footer and note image interaction fixes
+
+- Header/footer editing uses a separate coordinate layer on every sheet. Double-click the top/bottom margin to enter, use ribbon menus without leaving, and double-click the body or close to exit.
+- Distance inputs accept full decimal values. Section settings target the page being edited, with separate first-page and odd/even content.
+- Header, footer, page number, date/time, fields, rules and navigation expose working menus. Header rules offer color, width and text spacing controls.
+- Header and footer galleries each offer eight previews: blank, three columns, title, ruled, color band, title/date, page number, and page/total. Page numbers support top, bottom and current position, with plain, total, dash and accent styles.
+- Date/time offers eight formats, language selection and Word-updatable fields. Document info inserts author, filename, path, title, subject, keywords and comments, with editable display values for missing properties.
+- Local header/footer templates can be saved, applied and removed, with storage errors shown. Explicit template replacement/removal clears old tables and logos; ordinary text edits preserve them. Date and filename field instructions survive save/reopen.
+- Manual zoom remains selected; page-width and whole-page fit modes continue following window changes.
+- Note images use a dedicated NodeView with four corner resize handles, persisted dimensions and double-click access to the image editor.
+- Charts now use an on-demand Apache ECharts renderer: horizontal bars, columns, lines, areas, pie, real X/Y scatter, histogram, cumulative waterfall, funnel, radar, combo, grouped columns, box, violin, error bars, stem-and-leaf, and three-line tables each use their own semantics. The editor reuses Friday dialogs and buttons, preserves series/X/samples/error data, and supports live preview, validation, alignment, axes, legends, resize, and save/reopen.
+- Video and audio NodeViews provide inline controls, modal preview, open-original, and reveal-in-folder actions. Windows/UNC paths, spaces, and special characters round-trip safely, with visible playback errors.
+- Development acceptance reports: `docs-header-footer.json`, `note-image-resize.json`, `note-chart.json`, and `note-media.json`; all 138 application tests, the frontend build, and Office typecheck pass.
+
 ## 3.0.6-preview.10 note resources, charts, and per-page headers/footers
 
 - Every page header and footer now has its own double-click hit area. Editing shows the local Header/Footer marker and dashed boundary, then switches the official Header & Footer ribbon tab; the misleading hover-only first-page chip is gone.
@@ -327,7 +348,6 @@ PDF selection now reports page, text item and character positions, and annotatio
 ## Recitation preview: local transcription and correction
 
 Audio import, managed playback, Windows local transcription, timestamps/confidence, reference alignment, study plans and three question types are connected. Users can correct segments while retaining original recognition, timestamps and model confidence. Retry cancellation preserves valid earlier results. Questions jump to their audio source; sessions survive reopening. DeepSeek chat-only models are not offered as speech models. Local recognition can be inaccurate and needs review; no-reference sessions do not invent accuracy or repetition counts. See `docs/Recitation-acceptance-2026-10-24.md` for development evidence and remaining installation gates.
-
-## Typewriter workspace
+# Typewriter workspace
 
 Happy Friday Lite includes an independent `/typewriter` workspace. It reuses Typewriter Nocturne's paper, lighting, 3D typewriter, sound and terminal surface, while running local PowerShell/Bash sessions through Friday's Electron IPC boundary. The workspace includes bilingual settings, Markdown/code entry points, Press and Archive, and remains independent from Friday's AI, RAG and note business logic.

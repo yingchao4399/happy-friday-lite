@@ -42692,10 +42692,11 @@ async function saveDocx(parsed2, finalBlocks, options = {}) {
   await planHeaderFooter("footer", options.footerEven, void 0, "even");
   const sectionRefTags = /* @__PURE__ */ new Map();
   for (const edit of options.sectionHf ?? []) {
+    const view = edit.view ?? "default";
     const block = parsed2.blocks.find((b2) => b2.docxIndex === edit.lastBlockIndex);
     const sectPr = block?.originalXml?.match(/<w:sectPr[^>]*\/>|<w:sectPr[\s\S]*?<\/w:sectPr>/)?.[0] ?? "";
     const refs = sectPr.match(new RegExp(`<w:${edit.kind}Reference[^>]*/>`, "g")) ?? [];
-    const existing = refs.find((r) => r.includes('w:type="default"')) ?? refs.find((r) => r.includes('w:type="odd"')) ?? refs.find((r) => !/w:type="/.test(r));
+    const existing = refs.find((r) => r.includes(`w:type="${view}"`)) ?? (view === "default" ? refs.find((r) => r.includes('w:type="odd"')) ?? refs.find((r) => !/w:type="/.test(r)) : void 0);
     const rId = existing ? /r:id="([^"]+)"/.exec(existing)?.[1] : void 0;
     const target = rId ? relTargets.get(rId) : void 0;
     if (target) {
@@ -42716,7 +42717,7 @@ async function saveDocx(parsed2, finalBlocks, options = {}) {
         `<Override PartName="/word/${filename}" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${edit.kind}+xml"/>`
       );
       const tags = sectionRefTags.get(edit.lastBlockIndex) ?? [];
-      tags.push(`<w:${edit.kind}Reference w:type="default" r:id="${newRId}"/>`);
+      tags.push(`<w:${edit.kind}Reference w:type="${view}" r:id="${newRId}"/>`);
       sectionRefTags.set(edit.lastBlockIndex, tags);
     }
   }
@@ -193380,6 +193381,15 @@ var init_zh3 = __esm({
   "../../apps/docs/src/renderer/i18n/ribbon/zh.ts"() {
     "use strict";
     zh3 = {
+      ribbonHfRemove: "\u79FB\u9664\u5F53\u524D\u9875\u7709/\u9875\u811A",
+      ribbonHfLine: "\u9875\u7709\u6A2A\u7EBF",
+      ribbonHfLineSpacing: "\u4E0E\u6587\u5B57\u95F4\u8DDD",
+      ribbonHfTotalPages: "\u603B\u9875\u6570",
+      ribbonHfSwitch: "\u9875\u7709\u9875\u811A\u5207\u6362",
+      ribbonHfPrevious: "\u4E0A\u4E00\u9875",
+      ribbonHfNext: "\u4E0B\u4E00\u9875",
+      ribbonHfNavigate: "\u5BFC\u822A",
+      ribbonHfPosition: "\u4F4D\u7F6E",
       ribbonAiCreditNote: "\u5C06\u8C03\u7528 AI \u5E76\u6D88\u8017\u989D\u5EA6",
       ribbonAiRewriteConfirm: "\u6B64\u64CD\u4F5C\u5C06\u8C03\u7528 AI\uFF1A\u4F1A\u6D88\u8017\u989D\u5EA6\uFF0C\u5E76\u53EF\u80FD\u6539\u5199\u6574\u7BC7\u5185\u5BB9\u3002\u662F\u5426\u7EE7\u7EED\uFF1F\uFF08\u786E\u8BA4\u540E\u4E0D\u518D\u63D0\u793A\uFF09",
       // Tabs
@@ -194103,6 +194113,16 @@ var init_en4 = __esm({
   "../../apps/docs/src/renderer/i18n/ribbon/en.ts"() {
     "use strict";
     en3 = {
+      ribbonHfRemove: "Remove header/footer",
+      ribbonHfLine: "Header rule",
+      ribbonHfLineSpacing: "Text spacing",
+      ribbonHfTotalPages: "Total pages",
+      ribbonHfSwitch: "Switch header/footer",
+      ribbonHfPrevious: "Previous page",
+      ribbonHfNext: "Next page",
+      ribbonHfNavigate: "Navigation",
+      ribbonHfPosition: "Position",
+      ribbonHfPlaceholder: "Type {label} text",
       ribbonAiCreditNote: "Uses AI and consumes credits",
       ribbonAiRewriteConfirm: "This action calls the AI assistant: it consumes credits and may rewrite the entire content. Continue? (You will not be asked again.)",
       ribbonTabFile: "File",
@@ -194356,7 +194376,6 @@ var init_en4 = __esm({
       ribbonHeaderTip: "Edit header",
       ribbonFooter: "Footer",
       ribbonFooterTip: "Edit footer",
-      ribbonHfPlaceholder: "Type {label} text",
       ribbonPageNumber: "Page Number",
       ribbonPnTopLeft: "Top Left",
       ribbonPnTopCenter: "Top Center",

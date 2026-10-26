@@ -1,0 +1,93 @@
+{
+  "checks": [
+    {
+      "name": "新建真实笔记、正文输入、自动保存、击键声与光标联动",
+      "feedback": {
+        "keys": 5,
+        "audio": 5,
+        "energy": 0.8449773788452148,
+        "state": "running",
+        "cols": [
+          0,
+          0,
+          2,
+          2,
+          3,
+          3,
+          4,
+          4,
+          30,
+          30
+        ],
+        "motion": "moving"
+      }
+    },
+    {
+      "name": "原版回形针：长笔记显示、真实指针拖动滚动、四种金属材质"
+    },
+    {
+      "name": "选取原有笔记、更新同一 ID、保留图表、无多余副本",
+      "id": "2257259b-0e4d-40b3-b8b5-bb2ace8b525b"
+    },
+    {
+      "name": "原版二级菜单、中英切换、字体/纸张/羽毛笔设置、外壳保持同实例"
+    },
+    {
+      "name": "原版 Press 打印动画、六种丝带、真实 Archive 保存/重命名/删除、PNG 文件签名"
+    },
+    {
+      "name": "独立 PowerShell 插件、真实命令计算回显、切换不重建外壳"
+    },
+    {
+      "name": "终端回形针拖动、终端退出后重新启动"
+    },
+    {
+      "name": "从终端切回笔记、内容恢复、PTY 释放"
+    },
+    {
+      "name": "完整机身实际绘制",
+      "render": {
+        "render": "low",
+        "machine": "drawn",
+        "motion": "still",
+        "keys": "7"
+      }
+    },
+    {
+      "name": "中文空格路径 Markdown 直接导入笔记、不发送 Shell、不产生 PTY"
+    },
+    {
+      "name": "真实 RouterView/KeepAlive 路由切换、返回后重新读取同 ID 笔记"
+    },
+    {
+      "name": "Focus/Effects 切换保持编辑器实例和内容"
+    },
+    {
+      "name": "数据库写入失败保留输入、Ctrl+S 重试保存同一笔记"
+    }
+  ],
+  "platform": "win32",
+  "electron": "42.2.0",
+  "feedback": {
+    "keys": 5,
+    "audio": 5,
+    "energy": 0.8449773788452148,
+    "state": "running",
+    "cols": [
+      0,
+      0,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      30,
+      30
+    ],
+    "motion": "moving"
+  },
+  "ok": true,
+  "errors": [],
+  "generatedAt": "2026-10-26T14:31:53.424Z"
+}

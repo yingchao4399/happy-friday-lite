@@ -19,7 +19,7 @@ export type KeyLike = Pick<KeyboardEvent, 'key' | 'code' | 'isComposing' | 'meta
 const CANDIDATE_KEYS = /^(Arrow(Up|Down|Left|Right)|Page(Up|Down)|Tab|Minus|Equal|Comma|Period)$/;
 
 const isTerminalInput = (target: EventTarget | null) =>
-  target instanceof HTMLTextAreaElement && target.classList.contains('xterm-helper-textarea');
+  target instanceof HTMLTextAreaElement && (target.classList.contains('xterm-helper-textarea') || target.classList.contains('tn-note-input'));
 
 /** The kind of a keydown, or null for keys that strike no type (shortcuts, modifiers). */
 export function keyKind(event: KeyLike): KeyKind | null {

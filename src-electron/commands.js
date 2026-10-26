@@ -1243,8 +1243,14 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('kb-open-in-explorer', async (_event, args) => {
     if (args.path) {
-      await shell.openPath(args.path)
+      if (fs.statSync(args.path).isDirectory()) {
+        const error = await shell.openPath(args.path)
+        if (error) throw new Error(error)
+      } else {
+        shell.showItemInFolder(args.path)
+      }
     }
+    return true
   })
 
   // 打开日志目录（系统文件管理器），供安装后用户查看运行日志
@@ -1327,7 +1333,8 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('kb-open-file-external', async (_event, args) => {
     if (args.filePath) {
-      await shell.openPath(args.filePath)
+      const error = await shell.openPath(args.filePath)
+      if (error) throw new Error(error)
     }
     return true
   })

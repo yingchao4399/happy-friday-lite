@@ -204,6 +204,8 @@
     "readFailed": "Failed to read image"
   },
   "media": {
+    "actionFailed": "Unable to open. Check that the file exists and has an associated application.",
+    "noLocalFile": "This content has no local file to open.",
     "videoFilter": "Video files",
     "audioFilter": "Audio files",
     "allFiles": "All files",
@@ -211,7 +213,8 @@
     "open": "Open",
     "openLocation": "Open containing folder",
     "delete": "Delete",
-    "untitled": "Untitled attachment"
+    "untitled": "Untitled attachment",
+    "playFailed": "Unable to play this media. Check that the file exists and its codec is supported, or open it in the system player."
   },
   "chart": {
     "type": "Type",
@@ -223,11 +226,11 @@
     "originalSize": "Original size",
     "dragHint": "Drag the bottom-right corner to resize",
     "responsive": "Responsive width",
-      "showGrid": "Show axes",
-      "showLabels": "Show labels",
-      "resize": "Drag the bottom-right corner to resize",
-    "data": "Data (JSON)",
-    "invalidData": "Data must be a non-empty JSON array",
+    "showGrid": "Show axes",
+    "showLabels": "Show labels",
+    "resize": "Drag the bottom-right corner to resize",
+    "data": "Chart data",
+    "invalidData": "Enter 1–2000 valid rows with finite values and X coordinates.",
     "apply": "Apply",
     "cancel": "Cancel",
     "doubleClick": "Double-click to edit chart",
@@ -259,12 +262,61 @@
       "errorBar": "Error bars",
       "stemLeaf": "Stem-and-leaf",
       "table": "Three-line table"
+    },
+    "edit": "Edit chart",
+    "preview": "Live preview",
+    "dataGrid": "Data table",
+    "series": "Series",
+    "defaultSeries": "Data",
+    "trend": "Trend",
+    "outliers": "Outliers",
+    "samples": "Raw samples",
+    "samplesHint": "Comma separated, e.g. 1, 2, 3",
+    "total": "Total",
+    "removeRow": "Remove row",
+    "alignment": "Alignment",
+    "align": {
+      "left": "Left",
+      "center": "Center",
+      "right": "Right"
+    },
+    "bins": "Bins (0 for automatic)",
+    "xTitle": "X axis title",
+    "yTitle": "Y axis title",
+    "showLegend": "Show legend",
+    "smooth": "Smooth lines",
+    "stem": "Stem",
+    "leaf": "Leaf",
+    "stemKey": "Key: 1 | 2 means 12; −1 | 2 means −12. Leaf unit: 1.",
+    "loading": "Loading chart…",
+    "renderFailed": "Unable to render the chart. Check the data and retry.",
+    "invalidSamples": "Samples must be numeric lists, up to 10000 per row and 50000 in total.",
+    "invalidError": "Errors must be nonnegative numbers.",
+    "invalidType": "Choose a supported chart type.",
+    "nonnegativeData": "Pie, funnel and radar charts require nonnegative values.",
+    "positiveData": "At least one value must be greater than zero.",
+    "radarData": "Radar charts require at least three distinct dimensions.",
+    "integerData": "Stem and leaf plots require integer samples. Convert units first.",
+    "duplicateCategory": "Category names must be unique within a series.",
+    "help": {
+      "general": "Categories identify axis groups. Rows in the same series form a data set; multiple series appear side by side. Double click a chart in the note to edit it again.",
+      "scatter": "X and value are the horizontal and vertical coordinates. A blank X uses the row number. Series group points; negative coordinates are preserved.",
+      "histogram": "Values or comma separated raw samples are binned into frequencies. Zero bins selects automatic binning. The maximum falls in the last bin.",
+      "box": "Each sample list forms a group, or rows with the same series form one sample. Quartiles use linear interpolation; whiskers use 1.5 times the IQR.",
+      "violin": "Enter raw sample lists or rows grouped by series. Width represents Gaussian kernel density with an automatically calculated bandwidth.",
+      "waterfall": "Values are increments or decrements. A total starts at zero and sets the cumulative starting value for subsequent steps.",
+      "errorBar": "Value is the center; error is a symmetric plus/minus interval. Bounds are value minus/plus error.",
+      "combo": "The first series uses bars and the others use lines. A single series displays both bars and a trend line.",
+      "stemLeaf": "Enter integer samples. Tens form stems, units form leaves. Negative stems are marked separately; the leaf unit is 1."
     }
   },
   "backlinks": {
     "title": "Backlinks"
   },
   "imageEditor": {
+    "fit": "Fit to page width",
+    "originalSize": "Original size",
+    "dragHint": "Click to resize using corner handles; double-click to preview and edit",
     "title": "Edit image",
     "edit": "Edit image",
     "loading": "Loading image…",
@@ -288,7 +340,8 @@
     "height": "Height",
     "hint": "Scroll to zoom; drag to inspect; choose a tool and work on the image.",
     "unsaved": "Unsaved changes",
-    "save": "Save changes"
+    "save": "Save changes",
+    "resize": "Resize image"
   },
   "formulaDialog": {
     "insertTitle": "Insert formula",
@@ -389,5 +442,6 @@
     "modelNotConfigured": "No model configured, please add your model in settings",
     "messageEmpty": "Message is empty, cannot save",
     "appendedToNote": "Appended to end of note"
-  }
+  },
+  "attachmentPreviewFailed": "Unable to preview attachment. Check that the file exists and can be opened."
 }

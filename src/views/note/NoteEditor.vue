@@ -373,6 +373,7 @@
       </div>
     </div>
 
+    <div v-if="mediaError" class="note-operation-error" role="alert">{{ mediaError }}<button type="button" @click="mediaError = ''">×</button></div>
     <div v-if="selectedImage && !shareMode" class="note-image-inline-toolbar" role="toolbar">
       <span class="note-image-inline-label">{{ t('note.imageEditor.title') }}</span>
       <button type="button" class="btn btn-secondary" @click="fitSelectedImage">{{ t('note.imageEditor.fit') }}</button>
@@ -657,8 +658,8 @@
           <button type="button" class="note-media-preview-close" @click="closeMediaPreview">×</button>
         </div>
         <div class="note-media-preview-body">
-          <video v-if="mediaPreview.kind === 'video'" :src="mediaPreview.src" controls autoplay class="note-media-preview-video" />
-          <audio v-else-if="mediaPreview.kind === 'audio'" :src="mediaPreview.src" controls autoplay class="note-media-preview-audio" />
+          <video v-if="mediaPreview.kind === 'video'" :src="mediaPreview.src" controls autoplay class="note-media-preview-video" @error="mediaError = t('note.media.playFailed')" />
+          <audio v-else-if="mediaPreview.kind === 'audio'" :src="mediaPreview.src" controls autoplay class="note-media-preview-audio" @error="mediaError = t('note.media.playFailed')" />
           <div v-else class="note-media-attachment-preview">
             <div class="note-media-attachment-icon">↗</div>
             <div class="note-media-attachment-name">{{ mediaPreview.title }}</div>
@@ -667,6 +668,7 @@
             <button type="button" class="btn btn-primary" @click="openMediaExternal">{{ t('note.media.open') }}</button>
             <button type="button" class="btn btn-secondary" @click="openMediaLocation">{{ t('note.media.openLocation') }}</button>
           </div>
+          <p v-if="mediaError" class="note-operation-error" role="alert">{{ mediaError }}</p>
         </div>
       </div>
     </div>
@@ -818,13 +820,14 @@
 import { ref, computed, watch, onBeforeUnmount, onMounted, nextTick } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import { Extension, Node } from '@tiptap/core';
-import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state';
+import { Plugin, PluginKey, TextSelection, NodeSelection } from '@tiptap/pm/state';
+import { useRouter } from 'vue-router';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import {
   AlignCenter, AlignLeft, AlignRight, Bold, Code2, Eraser, Heading,
   Highlighter, Image as ToolbarImage, Italic, Link2, List, ListChecks, ListOrdered,
   Columns3, Combine, Minus, Palette, PanelLeft, PanelTop, Quote, Redo2, Rows3, Sigma, Split,
-  PaintRoller,
+  PaintRoller, Search, X,
   Repeat, Strikethrough, Table2, Trash2, Underline as ToolbarUnderline, Undo2,
 } from 'lucide-vue-next';
 import UserMessage from '@/components/chat/UserMessage.vue';
@@ -881,7 +884,10 @@ import CodeBlockComponent from './CodeBlockComponent.vue';
 import MarpPresentation from './MarpPresentation.vue';
 import NoteBubbleMenu from './NoteBubbleMenu.vue';
 import NoteImageEditorDialog from './NoteImageEditorDialog.vue';
+import NoteImageNodeView from './NoteImageNodeView.vue';
 import NoteChartNodeView from './NoteChartNodeView.vue';
+import NoteMediaNodeView from './NoteMediaNodeView.vue';
+import { fileUrlForNote, notePathFromUrl } from './media-path.js';
 import KbDirSelectDialog from '@/views/knowledge/components/KbDirSelectDialog.vue';
 import SelectNoteDialog from '@/views/knowledge/components/SelectNoteDialog.vue';
 import KbFileDialog from '@/views/knowledge/components/KbFileDialog.vue';
@@ -897,6 +903,8 @@ const EDITOR_MARKED_OPTIONS = { gfm: true, breaks: false };
 
 const { t } = useI18n();
 const appStore = useAppStore();
+const router = useRouter();
+const mediaError = ref('');
 
 const lowlight = createLowlight();
 lowlight.register('javascript', javascript);
@@ -1061,6 +1069,8 @@ const NoteVideo = Node.create({
   atom: true,
   selectable: true,
   draggable: true,
+  addOptions() { return { onPreview: null, onOpen: null, onReveal: null }; },
+  addNodeView() { return VueNodeViewRenderer(NoteMediaNodeView); },
   addAttributes() {
     return {
       src: { default: '' },
@@ -1080,6 +1090,8 @@ const NoteAudio = Node.create({
   atom: true,
   selectable: true,
   draggable: true,
+  addOptions() { return { onPreview: null, onOpen: null, onReveal: null }; },
+  addNodeView() { return VueNodeViewRenderer(NoteMediaNodeView); },
   addAttributes() {
     return {
       src: { default: '' },
@@ -1116,9 +1128,8 @@ const NoteAttachment = Node.create({
     }];
   },
   renderHTML({ HTMLAttributes }) {
-    const { title, ...attrs } = HTMLAttributes;
-    const { mime, ...linkAttrs } = attrs;
-    return ['p', { class: 'note-attachment' }, ['a', { ...linkAttrs, 'data-note-attachment': 'true', 'data-mime': mime || '', download: true }, title || '附件']];
+    const { title, src, mime, ...linkAttrs } = HTMLAttributes;
+    return ['p', { class: 'note-attachment' }, ['a', { ...linkAttrs, href: src, 'data-note-attachment': 'true', 'data-mime': mime || '', download: true }, title || t('note.media.untitled')]];
   },
 });
 
@@ -1176,11 +1187,17 @@ const NoteChart = Node.create({
       title: { default: '' },
       color: { default: '#2563eb' },
       data: { default: JSON.stringify([{ label: 'A', value: 42 }, { label: 'B', value: 68 }, { label: 'C', value: 51 }, { label: 'D', value: 84 }]) },
-      width: { default: 620 },
-      height: { default: 320 },
-      responsive: { default: true },
-      showGrid: { default: true },
-      showLabels: { default: true },
+      width: { default: 620, parseHTML: element => Number(element.getAttribute('width')) || 620 },
+      height: { default: 320, parseHTML: element => Number(element.getAttribute('height')) || 320 },
+      responsive: { default: true, parseHTML: element => element.getAttribute('responsive') !== 'false' },
+      showGrid: { default: true, parseHTML: element => element.getAttribute('showGrid') !== 'false' },
+      showLabels: { default: true, parseHTML: element => element.getAttribute('showLabels') !== 'false' },
+      showLegend: { default: true, parseHTML: element => element.getAttribute('showLegend') !== 'false' },
+      smooth: { default: false, parseHTML: element => element.getAttribute('smooth') === 'true' },
+      align: { default: 'left' },
+      xTitle: { default: '' },
+      yTitle: { default: '' },
+      bins: { default: 0, parseHTML: element => Number(element.getAttribute('bins')) || 0 },
     };
   },
   parseHTML() { return [{ tag: 'div[data-note-chart]' }]; },
@@ -1192,6 +1209,8 @@ const NoteChart = Node.create({
 
 // 图片节点保留尺寸与编辑后的来源，便于保存后重载时还原编辑结果。
 const NoteImage = Image.extend({
+  addOptions() { return { ...this.parent?.(), onPreview: null }; },
+  addNodeView() { return VueNodeViewRenderer(NoteImageNodeView); },
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -1208,12 +1227,6 @@ const NoteImage = Image.extend({
     };
   },
 });
-
-const fileUrlForNote = (filePath) => {
-  if (!filePath) return '';
-  if (/^(?:file|https?):\/\//i.test(filePath)) return filePath;
-  return `file://${encodeURI(String(filePath).replace(/\\/g, '/'))}`;
-};
 
 const prepareEditorContent = (content) => {
   const container = document.createElement('div');
@@ -1537,14 +1550,6 @@ const closeMediaContextMenu = () => {
   mediaContextMenu.value = { ...mediaContextMenu.value, visible: false };
 };
 
-const notePathFromUrl = (url) => {
-  if (!url) return '';
-  try {
-    if (String(url).startsWith('file://')) return decodeURIComponent(new URL(url).pathname).replace(/^\/(?:[A-Za-z]:)/, value => value.slice(1));
-  } catch (_error) { /* 保留原始路径 */ }
-  return String(url);
-};
-
 const getMediaTarget = (view, target) => {
   const element = target?.closest?.('img.editor-image, img, video[data-note-video], audio[data-note-audio], a[data-note-attachment]');
   if (!element || !view.dom.contains(element)) return null;
@@ -1631,7 +1636,8 @@ const fitSelectedImage = () => {
   const instance = editor.value;
   const target = selectedImage.value;
   if (!instance || !target) return;
-  const img = instance.view.nodeDOM(target.pos);
+  const imageDom = instance.view.nodeDOM(target.pos);
+  const img = imageDom?.matches?.('img') ? imageDom : imageDom?.querySelector?.('img');
   const wrapper = instance.view.dom.closest('.editor-wrapper');
   const naturalWidth = Number(img?.naturalWidth) || Number.parseInt(target.attrs?.width, 10) || 640;
   const naturalHeight = Number(img?.naturalHeight) || Number.parseInt(target.attrs?.height, 10) || 360;
@@ -1652,43 +1658,6 @@ const openSelectedImageEditor = () => {
   }
 };
 
-let imageResizeCleanup = null;
-const handleImageResizeMouseDown = (view, event) => {
-  if (event.button !== 0 || !(event.target instanceof Element)) return false;
-  const image = event.target.closest('img.editor-image, img');
-  if (!image || !view.dom.contains(image)) return false;
-  const rect = image.getBoundingClientRect();
-  const handleSize = 22;
-  if (rect.right - event.clientX > handleSize || rect.bottom - event.clientY > handleSize) return false;
-  const pos = view.posAtDOM(image, 0);
-  const node = view.state.doc.nodeAt(pos);
-  if (!node || node.type.name !== 'image') return false;
-  const startWidth = rect.width;
-  const startHeight = rect.height;
-  const ratio = startWidth > 1 && startHeight > 1 ? startHeight / startWidth : 1;
-  const startX = event.clientX;
-  const startY = event.clientY;
-  const onMove = (moveEvent) => {
-    const width = Math.max(80, startWidth + (moveEvent.clientX - startX));
-    const height = moveEvent.shiftKey ? Math.max(60, startHeight + (moveEvent.clientY - startY)) : Math.max(60, width * ratio);
-    const current = view.state.doc.nodeAt(pos);
-    if (!current || current.type.name !== 'image') return;
-    view.dispatch(view.state.tr.setNodeMarkup(pos, undefined, { ...current.attrs, width: String(Math.round(width)), height: String(Math.round(height)) }));
-  };
-  const onUp = () => {
-    window.removeEventListener('pointermove', onMove);
-    window.removeEventListener('pointerup', onUp);
-    imageResizeCleanup = null;
-  };
-  imageResizeCleanup?.();
-  imageResizeCleanup = onUp;
-  window.addEventListener('pointermove', onMove);
-  window.addEventListener('pointerup', onUp, { once: true });
-  event.preventDefault();
-  event.stopPropagation();
-  return true;
-};
-
 const closeFilePreview = () => { filePreview.value = { ...filePreview.value, visible: false }; };
 const attachmentTypeFromPath = (filePath) => {
   const ext = String(filePath || '').split(/[?#]/)[0].split('.').pop()?.toLowerCase() || '';
@@ -1704,8 +1673,10 @@ const openAttachmentPreview = async (target) => {
   if (!filePath) return;
   const type = attachmentTypeFromPath(filePath);
   if (type === 'office') {
-    await electronService.invoke('office-open-file', { filePath }).catch(() => {});
+    const result = await electronService.invoke('office-open-file', { filePath });
+    if (!result?.success || !result.viewId) throw new Error(result?.error?.message || result?.error || t('note.attachmentPreviewFailed'));
     closeMediaContextMenu();
+    await router.push(`/office/${String(result.viewId).replace('-', '/')}`);
     return;
   }
   filePreview.value = { visible: true, file: { path: filePath, name: target.title || filePath.split(/[\\/]/).pop(), type } };
@@ -1713,8 +1684,9 @@ const openAttachmentPreview = async (target) => {
 };
 const openMediaPreview = (target) => {
   if (!target || target.kind === 'image') return;
+  mediaError.value = '';
   if (target.kind === 'attachment') {
-    openAttachmentPreview(target).catch(() => {});
+    openAttachmentPreview(target).catch(error => { mediaError.value = error.message || t('note.attachmentPreviewFailed'); });
     return;
   }
   mediaPreview.value = { visible: true, kind: target.kind, src: target.src, path: target.path, title: target.title };
@@ -1722,19 +1694,26 @@ const openMediaPreview = (target) => {
 };
 
 const closeMediaPreview = () => { mediaPreview.value = { ...mediaPreview.value, visible: false }; };
-const openMediaExternal = () => {
-  const target = mediaPreview.value;
+const performMediaAction = async (target, reveal = false) => {
   const source = target.path || notePathFromUrl(target.src);
-  if (!source) return;
-  const action = /^https?:\/\//i.test(source)
-    ? electronService.invoke('open-external', source)
-    : electronService.invoke('kb-open-file-external', { filePath: source });
-  action.catch(() => {});
+  mediaError.value = '';
+  try {
+    if (!source || (reveal && /^(?:https?|data|blob):/i.test(source)) || /^(?:data|blob):/i.test(source)) {
+      throw new Error(t('note.media.noLocalFile'));
+    }
+    const channel = reveal ? 'kb-open-in-explorer' : /^https?:\/\//i.test(source) ? 'open-external' : 'kb-open-file-external';
+    const result = await electronService.request(channel, channel === 'open-external' ? source : reveal ? { path: source } : { filePath: source });
+    if (result == null) throw new Error(t('note.media.actionFailed'));
+    if (result?.success === false || result?.ok === false) throw new Error(result.error?.message || result.error || t('note.media.actionFailed'));
+  } catch (error) {
+    mediaError.value = error.message || t('note.media.actionFailed');
+  }
+};
+const openMediaExternal = () => {
+  return performMediaAction(mediaPreview.value);
 };
 const openMediaLocation = () => {
-  const target = mediaPreview.value;
-  if (!target.path) return;
-  electronService.invoke('kb-open-in-explorer', { path: target.path }).catch(() => {});
+  return performMediaAction(mediaPreview.value, true);
 };
 
 const showMediaContextMenu = (target, event) => {
@@ -1752,14 +1731,10 @@ const editContextImage = () => openImageEditor({ node: editor.value?.state.doc.n
 const previewContextMedia = () => openMediaPreview(mediaContextMenu.value);
 const openContextMedia = () => {
   const target = mediaContextMenu.value;
-  const source = target.path || notePathFromUrl(target.src);
-  const action = /^https?:\/\//i.test(source)
-    ? electronService.invoke('open-external', source)
-    : electronService.invoke('kb-open-file-external', { filePath: source });
-  action.catch(() => {});
+  performMediaAction(target);
   closeMediaContextMenu();
 };
-const openContextMediaLocation = () => { const target = mediaContextMenu.value; if (target.path) electronService.invoke('kb-open-in-explorer', { path: target.path }).catch(() => {}); closeMediaContextMenu(); };
+const openContextMediaLocation = () => { performMediaAction(mediaContextMenu.value, true); closeMediaContextMenu(); };
 const deleteContextMedia = () => {
   const target = mediaContextMenu.value;
   if (typeof target.pos === 'number' && editor.value) editor.value.chain().focus().deleteRange({ from: target.pos, to: target.pos + (editor.value.state.doc.nodeAt(target.pos)?.nodeSize || 1) }).run();
@@ -3396,12 +3371,13 @@ const editor = useEditor({
     }),
     NoteImage.configure({
       allowBase64: true,
+      onPreview: target => openImageEditor(target),
       HTMLAttributes: {
         class: 'editor-image',
       },
     }),
-    NoteVideo,
-    NoteAudio,
+    NoteVideo.configure({ onPreview: openMediaPreview, onOpen: target => performMediaAction(target), onReveal: target => performMediaAction(target, true) }),
+    NoteAudio.configure({ onPreview: openMediaPreview, onOpen: target => performMediaAction(target), onReveal: target => performMediaAction(target, true) }),
     NoteAttachment,
     NoteReference,
     NoteChart,
@@ -3544,12 +3520,16 @@ const editor = useEditor({
     },
     handleDOMEvents: {
       contextmenu: handleEditorContextMenu,
-      mousedown: handleImageResizeMouseDown,
+      dblclick: (view, event) => {
+        const target = getMediaTarget(view, event.target instanceof Element ? event.target : null);
+        if (target?.kind !== 'image') return false;
+        event.preventDefault(); openImageEditor(target); return true;
+      },
       click: (view, event) => {
         const mediaTarget = getMediaTarget(view, event.target instanceof Element ? event.target : null);
         if (mediaTarget?.kind === 'image') {
           event.preventDefault();
-          openImageEditor(mediaTarget);
+          view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, mediaTarget.pos)));
           return true;
         }
         if (mediaTarget?.kind === 'video' || mediaTarget?.kind === 'audio') {
@@ -4079,8 +4059,6 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  imageResizeCleanup?.();
-  imageResizeCleanup = null;
   saveChatSession();
   document.removeEventListener('click', handleClickOutside);
   document.removeEventListener('contextmenu', handleDocumentContextMenu);
@@ -4321,7 +4299,9 @@ const fixEmptyTableCells = (html) => {
 
 .note-media-preview-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
 .note-media-preview-close { border: 0; background: transparent; color: var(--text-tertiary, #94a3b8); font-size: 23px; cursor: pointer; }
-.note-media-preview-body { display: flex; align-items: center; justify-content: center; min-height: 220px; max-height: calc(88vh - 48px); padding: 24px; background: var(--bg-secondary, #f8fafc); }
+.note-operation-error { display: flex; justify-content: space-between; padding: 9px 14px; color: var(--danger-color, #b91c1c); background: var(--bg-secondary); font-size: 13px; }
+.note-operation-error button { border: 0; background: transparent; color: inherit; cursor: pointer; }
+.note-media-preview-body { display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center; min-height: 220px; max-height: calc(88vh - 48px); padding: 24px; background: var(--bg-secondary, #f8fafc); }
 .note-media-preview-video { display: block; max-width: 100%; max-height: calc(88vh - 120px); border-radius: 6px; background: #000; }
 .note-media-preview-audio { width: min(620px, 100%); }
 .note-media-preview-actions { width: 100%; justify-content: center; padding-top: 12px; }

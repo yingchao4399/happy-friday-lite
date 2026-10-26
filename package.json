@@ -13,13 +13,14 @@
     "preview": "vite preview",
     "electron:dev": "node scripts/fix-dsh-directory-picker-electron.mjs && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "node scripts/prebuild-install.mjs x64 && node scripts/prebuild-clean.mjs x64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --linux --x64 --config.npmRebuild=false && node scripts/verify-packaged-native-modules.mjs x64 && node scripts/prebuild-install.mjs",
-    "electron:build:win": "npm run verify:dsh && vite build && electron-builder --win --x64 --config.npmRebuild=false --publish=never",
+    "electron:build:win": "npm run verify:dsh && node scripts/build-typewriter-host.mjs && vite build && electron-builder --win --x64 --config.npmRebuild=false --publish=never",
     "electron:build:arm64": "node scripts/prebuild-install.mjs arm64 && node scripts/prebuild-clean.mjs arm64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --linux --arm64 --config.npmRebuild=false && node scripts/verify-packaged-native-modules.mjs arm64 && node scripts/prebuild-install.mjs",
     "electron:build:all": "npm run electron:build && npm run electron:build:arm64",
     "electron:build:mac": "node scripts/prebuild-install.mjs darwin arm64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --mac --arm64 --config.npmRebuild=false --publish=never",
     "start": "node scripts/fix-dsh-directory-picker-electron.mjs && electron .",
     "office:build": "node scripts/build-office.mjs",
-    "postinstall": "node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && node scripts/dedupe-nested-deps.mjs"
+    "postinstall": "node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && node scripts/dedupe-nested-deps.mjs",
+    "prebuild": "node scripts/build-typewriter-host.mjs"
   },
   "dependencies": {
     "@cfworker/json-schema": "4.1.1",
@@ -56,6 +57,10 @@
     "@deepseek-ai/dsh-util-time": "0.1.5-rc.2",
     "@deepseek-ai/dsh-workflow": "0.1.5-rc.2",
     "@deepseek-ai/schemastery": "3.18.2",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/courier-prime": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
     "@hono/node-server": "2.0.12",
     "@langchain/community": "^1.1.28",
     "@langchain/core": "^1.1.0",
@@ -71,33 +76,30 @@
     "cheerio": "^1.2.0",
     "clsx": "2.1.1",
     "deepagents": "^1.10.5",
+    "echarts": "6.0.0",
     "epub2": "^3.0.2",
     "html-to-text": "^9.0.5",
     "js-yaml": "4.2.0",
     "mammoth": "^1.12.0",
     "markdown-it-emoji": "^3.1.0",
     "marked": "^18.0.3",
+    "node-pty": "^1.2.0-beta.15",
     "officeparser": "^6.1.1",
     "pdf-parse": "^1.1.1",
     "pptxgenjs": "^4.0.1",
     "qrcode": "^1.5.4",
     "sharp": "^0.35.3",
     "sql.js": "^1.14.1",
+    "three": "^0.160.0",
     "turndown": "^7.2.4",
     "xlsx": "^0.18.5",
-    "zod": "^3.24.0",
-    "@fontsource/cormorant-garamond": "^5.3.0",
-    "@fontsource/courier-prime": "^5.3.0",
-    "@fontsource/eb-garamond": "^5.3.0",
-    "@fontsource/ibm-plex-mono": "^5.3.0",
-    "node-pty": "^1.2.0-beta.15",
-    "three": "^0.160.0",
     "xterm": "^5.3.0",
     "xterm-addon-canvas": "^0.5.0",
     "xterm-addon-fit": "^0.8.0",
     "xterm-addon-image": "^0.5.0",
     "xterm-addon-unicode11": "^0.6.0",
-    "xterm-addon-webgl": "^0.16.0"
+    "xterm-addon-webgl": "^0.16.0",
+    "zod": "^3.24.0"
   },
   "optionalDependencies": {
     "@deepseek-ai/node-addon-system-linux-arm64": "0.1.2",
@@ -186,6 +188,10 @@
       {
         "from": "resources/office/wasm",
         "to": "wasm"
+      },
+      {
+        "from": "resources/typewriter-licenses",
+        "to": "typewriter-licenses"
       }
     ],
     "asar": false,

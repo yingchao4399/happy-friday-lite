@@ -1,0 +1,167 @@
+{
+  "repository": "https://github.com/Chaosnap/Typewriter-Nocturne",
+  "commit": "e19d64ef42b9241b462439e22d7b905b266633e1",
+  "strategy": "Original React shell embedded inside Vue; independent content plugins",
+  "files": [
+    {
+      "upstream": "app/nocturne/apply-config.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/apply-config.ts"
+    },
+    {
+      "upstream": "app/nocturne/carriage-physics.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/carriage-physics.ts"
+    },
+    {
+      "upstream": "app/nocturne/channels.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/channels.ts"
+    },
+    {
+      "upstream": "app/nocturne/color.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/color.ts"
+    },
+    {
+      "upstream": "app/nocturne/folio.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/folio.ts"
+    },
+    {
+      "upstream": "app/nocturne/light-model.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/light-model.ts"
+    },
+    {
+      "upstream": "app/nocturne/lighting-math.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/lighting-math.ts"
+    },
+    {
+      "upstream": "app/nocturne/papers.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/papers.ts"
+    },
+    {
+      "upstream": "app/nocturne/settings.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/settings.ts"
+    },
+    {
+      "upstream": "app/nocturne/stage-layout.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/stage-layout.ts"
+    },
+    {
+      "upstream": "app/nocturne/themes.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/themes.ts"
+    },
+    {
+      "upstream": "app/nocturne/types.ts",
+      "adapted": "src/features/typewriter/nocturne-core/app/nocturne/types.ts"
+    },
+    {
+      "upstream": "lib/nocturne/bus.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/bus.ts"
+    },
+    {
+      "upstream": "lib/nocturne/components/block-cursor.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/block-cursor.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/controls.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/controls.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/font-picker.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/font-picker.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/icons.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/icons.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/pull-cord.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/pull-cord.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/quill-cursor.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/quill-cursor.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/scroll-clip.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/scroll-clip.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/shell.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/shell.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/studio.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/studio.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/components/toolbar.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/components/toolbar.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/lighting/glow-layer.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/lighting/glow-layer.ts"
+    },
+    {
+      "upstream": "lib/nocturne/lighting/gpu.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/lighting/gpu.ts"
+    },
+    {
+      "upstream": "lib/nocturne/lighting/paper-light.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/lighting/paper-light.ts"
+    },
+    {
+      "upstream": "lib/nocturne/machine/textures.js",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/machine/textures.js"
+    },
+    {
+      "upstream": "lib/nocturne/machine/types.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/machine/types.ts"
+    },
+    {
+      "upstream": "lib/nocturne/machine/typewriter-machine.js",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/machine/typewriter-machine.js"
+    },
+    {
+      "upstream": "lib/nocturne/print/archive.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/print/archive.ts"
+    },
+    {
+      "upstream": "lib/nocturne/print/folio-canvas.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/print/folio-canvas.ts"
+    },
+    {
+      "upstream": "lib/nocturne/print/press.tsx",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/print/press.tsx"
+    },
+    {
+      "upstream": "lib/nocturne/print/seal.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/print/seal.ts"
+    },
+    {
+      "upstream": "lib/nocturne/stage-controller.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/stage-controller.ts"
+    },
+    {
+      "upstream": "lib/nocturne/terminal-bridge.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/terminal-bridge.ts"
+    },
+    {
+      "upstream": "lib/nocturne/theme-css.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/theme-css.ts"
+    },
+    {
+      "upstream": "lib/nocturne/typewriter/ink-layer.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/typewriter/ink-layer.ts"
+    },
+    {
+      "upstream": "lib/nocturne/typewriter/keys.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/typewriter/keys.ts"
+    },
+    {
+      "upstream": "lib/nocturne/typewriter/selection-layer.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/typewriter/selection-layer.ts"
+    },
+    {
+      "upstream": "lib/nocturne/typewriter/sound-engine.ts",
+      "adapted": "src/features/typewriter/nocturne-core/lib/nocturne/typewriter/sound-engine.ts"
+    }
+  ]
+}

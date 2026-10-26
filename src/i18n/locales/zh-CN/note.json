@@ -204,6 +204,8 @@
     "readFailed": "读取图片失败"
   },
   "media": {
+    "actionFailed": "无法打开，请检查文件是否存在或是否已安装关联程序。",
+    "noLocalFile": "这条内容没有可打开的本地文件。",
     "videoFilter": "视频文件",
     "audioFilter": "音频文件",
     "allFiles": "所有文件",
@@ -211,7 +213,8 @@
     "open": "打开",
     "openLocation": "打开所在位置",
     "delete": "删除",
-    "untitled": "未命名附件"
+    "untitled": "未命名附件",
+    "playFailed": "无法播放此媒体，请检查文件是否存在及编码是否受支持；也可以打开原文件使用系统播放器。"
   },
   "chart": {
     "type": "类型",
@@ -223,11 +226,11 @@
     "originalSize": "恢复原始尺寸",
     "dragHint": "拖动图片右下角可调整大小",
     "responsive": "自适应宽度",
-      "showGrid": "显示坐标轴",
-      "showLabels": "显示标签",
-      "resize": "拖动右下角调整图表大小",
-    "data": "数据（JSON）",
-    "invalidData": "数据必须是非空 JSON 数组",
+    "showGrid": "显示坐标轴",
+    "showLabels": "显示标签",
+    "resize": "拖动右下角调整图表大小",
+    "data": "图表数据",
+    "invalidData": "请输入 1–2000 行有效数据；数值与 X 必须为有限数字。",
     "apply": "应用",
     "cancel": "取消",
     "doubleClick": "双击编辑图表",
@@ -259,12 +262,61 @@
       "errorBar": "误差线图",
       "stemLeaf": "茎叶图",
       "table": "三线表"
+    },
+    "edit": "编辑图表",
+    "preview": "实时预览",
+    "dataGrid": "数据表",
+    "series": "系列",
+    "defaultSeries": "数据",
+    "trend": "趋势",
+    "outliers": "离群值",
+    "samples": "原始样本",
+    "samplesHint": "用逗号分隔，例如 1, 2, 3",
+    "total": "合计",
+    "removeRow": "删除此行",
+    "alignment": "位置",
+    "align": {
+      "left": "靠左",
+      "center": "居中",
+      "right": "靠右"
+    },
+    "bins": "分箱数量（0 为自动）",
+    "xTitle": "横轴标题",
+    "yTitle": "纵轴标题",
+    "showLegend": "显示图例",
+    "smooth": "平滑曲线",
+    "stem": "茎",
+    "leaf": "叶",
+    "stemKey": "读法：1 | 2 表示 12；−1 | 2 表示 −12。叶单位为 1。",
+    "loading": "正在加载图表…",
+    "renderFailed": "图表未能绘制，请检查数据后重试。",
+    "invalidSamples": "样本必须为数字列表，每行不超过 10000 个，总数不超过 50000 个。",
+    "invalidError": "误差必须为大于等于 0 的数字。",
+    "invalidType": "请选择支持的图表类型。",
+    "nonnegativeData": "饼图、漏斗图和雷达图需要非负数值。",
+    "positiveData": "至少需要一个大于 0 的数值。",
+    "radarData": "雷达图至少需要三个不同维度。",
+    "integerData": "茎叶图需要整数样本；请先换算到合适单位。",
+    "duplicateCategory": "同一系列下的分类名称不能重复，请更改分类或系列。",
+    "help": {
+      "general": "分类填写横轴类别；相同系列构成一组数据，不同系列自动并列显示。双击正文中的图表可再次编辑。",
+      "scatter": "X 与数值分别为横纵坐标；未填 X 时使用行号。系列用于分组，保留负值。",
+      "histogram": "数值或原始样本用于频数分箱，样本列可用逗号分隔。0 箱采用自动分箱，最大边界计入最后一箱。",
+      "box": "每个样本列表对应一个分组；也可用相同系列的多行数值组成样本。采用线性插值四分位和 1.5 倍四分位距须。",
+      "violin": "输入原始样本列表或同系列的多行数值。图形宽度表示高斯核密度估计，带宽自动计算。",
+      "waterfall": "数值表示本步增减；勾选合计时该行从零绘制到指定数值，并作为后续累计起点。",
+      "errorBar": "数值为中心值，误差为正负对称误差；上下界为数值减/加误差。",
+      "combo": "第一个系列绘制为柱，其他系列为线；单系列同时显示柱与趋势线。",
+      "stemLeaf": "输入整数样本，按十位分茎、个位分叶；负值单独标明，叶单位为 1。"
     }
   },
   "backlinks": {
     "title": "双向链接"
   },
   "imageEditor": {
+    "fit": "自适应页面宽度",
+    "originalSize": "恢复原始尺寸",
+    "dragHint": "单击图片后拖动四角调整大小；双击可预览和编辑图片",
     "title": "编辑图片",
     "edit": "编辑图片",
     "loading": "正在加载图片…",
@@ -288,7 +340,8 @@
     "height": "高度",
     "hint": "滚轮缩放；拖动图片查看局部；选择工具后在图片上操作。",
     "unsaved": "有未保存修改",
-    "save": "保存修改"
+    "save": "保存修改",
+    "resize": "调整图片大小"
   },
   "formulaDialog": {
     "insertTitle": "插入公式",
@@ -389,5 +442,6 @@
     "modelNotConfigured": "未配置大模型，请先在设置中添加自己的模型",
     "messageEmpty": "消息内容为空，无法保存",
     "appendedToNote": "已追加到笔记末尾"
-  }
+  },
+  "attachmentPreviewFailed": "附件预览失败，请检查文件是否存在或有权限打开"
 }

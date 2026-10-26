@@ -259,7 +259,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'typewriter-terminal-resize',
       'typewriter-terminal-kill',
       'typewriter-terminal-list',
-      'typewriter-file-save'
+      'typewriter-file-save',
+      'typewriter-archive-list',
+      'typewriter-archive-save',
+      'typewriter-archive-remove',
+      'typewriter-archive-rename',
+      'typewriter-archive-export-image',
+      'typewriter-archive-reveal'
     ]
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, ...args)
