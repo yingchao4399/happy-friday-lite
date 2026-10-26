@@ -10,9 +10,11 @@ import HarnessIcon from '@/components/icons/HarnessIcon.vue'
 import AutomationIcon from '@/components/icons/AutomationIcon.vue'
 import HistoryIcon from '@/components/icons/HistoryIcon.vue'
 import SettingsIcon from '@/components/icons/SettingsIcon.vue'
+import TypewriterIcon from '@/components/icons/TypewriterIcon.vue'
 import { Clipboard, Headphones, Trash2 } from 'lucide-vue-next'
 
 export const sidebarMenuConfig = [
+  { key: 'typewriter', path: '/typewriter', icon: 'TypewriterIcon', iconComponent: TypewriterIcon, i18nKey: 'typewriter.title' },
   { key: 'note', path: '/note', icon: 'NoteIcon', iconComponent: NoteIcon, i18nKey: 'note.title' },
   { key: 'drawing', path: '/drawing', icon: 'DrawingIcon', iconComponent: DrawingIcon, i18nKey: 'drawing.title' },
   { key: 'knowledge', path: '/knowledge', icon: 'KnowledgeIcon', iconComponent: KnowledgeIcon, i18nKey: 'knowledge.title' },

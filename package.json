@@ -1,6 +1,6 @@
 {
   "name": "happy-friday-lite",
-  "version": "3.0.6-preview.10",
+  "version": "3.0.6-preview.11",
   "description": "Happy Friday Lite - Electron + Vue3",
   "author": "Chen Jie <chenjie.plus@qq.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -85,7 +85,19 @@
     "sql.js": "^1.14.1",
     "turndown": "^7.2.4",
     "xlsx": "^0.18.5",
-    "zod": "^3.24.0"
+    "zod": "^3.24.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/courier-prime": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "node-pty": "^1.2.0-beta.15",
+    "three": "^0.160.0",
+    "xterm": "^5.3.0",
+    "xterm-addon-canvas": "^0.5.0",
+    "xterm-addon-fit": "^0.8.0",
+    "xterm-addon-image": "^0.5.0",
+    "xterm-addon-unicode11": "^0.6.0",
+    "xterm-addon-webgl": "^0.16.0"
   },
   "optionalDependencies": {
     "@deepseek-ai/node-addon-system-linux-arm64": "0.1.2",

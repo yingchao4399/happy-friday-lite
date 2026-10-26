@@ -49,6 +49,7 @@ import { registerRecitationCommands } from './recitation-ipc.js'
 import { deleteNoteToTrash, deleteResourceToTrash, listTrashEntries, restoreTrashEntry, exportTrashEntry, permanentlyDeleteTrashEntry } from './trash.js'
 import { saveKnowledgeNoteReference } from './knowledge-note-reference.js'
 import { listKnowledgeCategories, createKnowledgeCategory, renameKnowledgeCategory, moveKnowledgeCategory, deleteKnowledgeCategory, moveKnowledgeBase, validateKnowledgeName } from './knowledge-categories.js'
+import { registerTypewriterTerminalCommands } from './typewriter-terminal.js'
 
 const cancelTokens = new CancellationTokens()
 
@@ -162,13 +163,14 @@ function syncNoteRefOnDelete(noteId) {
 
 export function registerCommands(mainWindow) {
   console.log('[Commands] Starting to register all IPC handlers...')
+  registerTypewriterTerminalCommands(mainWindow)
 
   ipcMain.handle('get-config', () => {
     return loadConfig()
   })
 
   ipcMain.handle('module-order-save', (_event, args) => {
-    const allowed = new Set(['clipboard', 'recitation', 'note', 'drawing', 'knowledge', 'office', 'schedule', 'automation', 'harness'])
+    const allowed = new Set(['typewriter', 'clipboard', 'recitation', 'note', 'drawing', 'knowledge', 'office', 'schedule', 'automation', 'harness'])
     if (!Array.isArray(args?.ids) || args.ids.some(id => !allowed.has(id))) throw new Error('模块排序参数无效')
     const ids = [...new Set(args.ids)]
     const config = loadConfig()

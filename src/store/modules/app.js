@@ -17,6 +17,7 @@ export const useAppStore = defineStore('app', {
       ppt: 'internal'
     },
     sidebarModules: {
+      typewriter: true,
       trash: true,
       clipboard: true,
       recitation: true,
@@ -62,6 +63,7 @@ export const useAppStore = defineStore('app', {
     },
     setSidebarModules(modules = {}) {
       this.sidebarModules = {
+        typewriter: modules.typewriter !== false,
         trash: modules.trash !== false,
         clipboard: modules.clipboard !== false,
         recitation: modules.recitation !== false,

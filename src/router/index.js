@@ -2,6 +2,11 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 export const routes = [
   {
+    path: '/typewriter',
+    name: 'typewriter',
+    component: () => import('@/views/typewriter/TypewriterView.vue')
+  },
+  {
     path: '/trash',
     name: 'trash',
     component: () => import('@/views/trash/TrashView.vue')

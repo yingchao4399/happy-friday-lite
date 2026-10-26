@@ -327,3 +327,7 @@ PDF 选区新增页码、最小文本项和字符位置，批注几何只读取�
 ## 背诵预览：本机转写与人工校对
 
 音频导入、受管播放、Windows 本机转写、时间戳/置信度、参考文本对齐、复习计划及三种题型已接通。可以逐段校对并保留原始识别、时间和模型置信度；重试转写时取消不会清空此前有效结果。题目可以回跳音频来源，重开后保留记录。DeepSeek 等仅支持聊天的模型不会被当成音频模型。本机识别存在误差，需要核对；无参考文本时不虚构准确率和背诵遍数。开发证据和剩余安装门禁见 `docs/Recitation-acceptance-2026-10-24.md`。
+
+## Typewriter 独立拟真工作区
+
+Happy Friday Lite 现在包含独立的 `/typewriter` 打字机工作区。它复用了 Typewriter Nocturne 的纸张、灯光、3D 打字机、声音和终端表层，并通过 Friday 的 Electron IPC 运行本地 PowerShell/Bash 等真实 Shell。工作区支持中英文设置、Markdown/代码入口、Press 和 Archive；它与 Friday 的 AI、RAG 和笔记业务保持独立。

@@ -1,0 +1,1342 @@
+/* Typewriter Nocturne: the stage round Hyper's terminals.
+ *
+ * Colours come from validated design tokens (lib/nocturne/theme-css.ts) as custom properties.
+ * In the classic theme every wrapper below is a transparent, full-size box, so Hyper's layout is
+ * exactly as upstream. Every canvas ignores the pointer; xterm.js receives all input. */
+
+.tn-root {
+  position: absolute;
+  inset: 0;
+}
+
+.tn-nocturne {
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+  background:
+    radial-gradient(ellipse 60% 55% at var(--tn-light-x) 30%, var(--tn-light-glow), transparent 72%),
+    radial-gradient(ellipse 120% 95% at 50% 35%, var(--tn-room), var(--tn-room-edge));
+}
+
+/* ------------------------------------------------------------------ Hyper's header */
+
+.tn-nocturne .header_header,
+.tn-nocturne .header_windowHeader,
+.tn-nocturne .tabs_nav {
+  background-color: transparent !important;
+}
+
+.tn-nocturne .header_appTitle,
+.tn-nocturne .tab_text {
+  font-family: var(--tn-font-ui);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--tn-panel-muted);
+}
+
+.tn-nocturne .tab_textActive .tab_textInner {
+  color: var(--tn-panel-ink);
+}
+
+/* The new-tab button: a gilt sheet icon, and the profile list as a small Studio panel. */
+.tn-nocturne .tabs_nav .new_tab {
+  color: var(--tn-accent);
+  opacity: 0.75;
+  padding: 0 12px;
+}
+
+.tn-nocturne .tabs_nav .new_tab:hover {
+  opacity: 1;
+}
+
+.tn-nocturne .tabs_nav .profile_dropdown {
+  top: 36px;
+  right: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tn-panel-line) !important;
+  border-radius: 8px;
+  background: var(--tn-panel-bg) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+}
+
+.tn-nocturne .tabs_nav .profile_dropdown_item {
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+  font-size: 14px;
+  font-style: italic;
+  text-transform: none;
+  border-bottom-color: var(--tn-panel-line);
+}
+
+.tn-nocturne .tabs_nav .profile_dropdown_item:last-child {
+  border-bottom-width: 0;
+}
+
+.tn-nocturne .tabs_nav .profile_dropdown_item:hover {
+  color: var(--tn-accent);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ------------------------------------------------------------------ stage and sheet */
+
+.tn-stage {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.tn-classic .tn-stage {
+  top: 0;
+}
+
+.tn-nocturne .tn-stage {
+  overflow: hidden;
+}
+
+@media (min-width: 1100px) {
+  /* The Studio docks on wide windows: the stage shrinks so paper and machine stay in view. */
+  .tn-studio-open .tn-stage {
+    right: 332px;
+  }
+}
+
+.tn-sheet,
+.tn-text {
+  position: absolute;
+  inset: 0;
+}
+
+.tn-nocturne .tn-sheet,
+.tn-nocturne .tn-text {
+  right: auto;
+  bottom: auto;
+}
+
+.tn-nocturne .tn-sheet {
+  overflow: hidden;
+  background: var(--tn-sheet);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 34px 70px -24px rgba(0, 0, 0, 0.75);
+}
+
+.tn-nocturne .tn-text .terms_terms {
+  margin-top: 0 !important;
+  animation: none !important;
+}
+
+.tn-nocturne .tn-text .terms_termsShifted {
+  margin-top: 34px !important;
+}
+
+.tn-focus .tn-sheet {
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------ light, glow, ink, machine */
+
+.tn-layer,
+.tn-machine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.tn-paper-light {
+  mix-blend-mode: multiply;
+}
+
+.tn-glow {
+  mix-blend-mode: screen;
+}
+
+.tn-machine {
+  z-index: 2;
+}
+
+.tn-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse 85% 80% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.42) 100%);
+}
+
+.tn-classic .tn-layer,
+.tn-classic .tn-machine,
+.tn-classic .tn-vignette,
+.tn-quiet .tn-vignette,
+.tn-no-light .tn-paper-light,
+.tn-no-light .tn-glow,
+.tn-no-ink .tn-ink,
+.tn-no-ink .tn-selection,
+.tn-basic .tn-paper-light,
+.tn-basic .tn-glow {
+  display: none;
+}
+
+.tn-layer[hidden] {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ bail rollers, scrollbar */
+
+.tn-roller {
+  position: absolute;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tn-roller:focus-visible {
+  outline: 1px dotted var(--tn-accent);
+}
+
+/* The block cursor, a blot of ink on the sheet under the paper light: a soft, slightly irregular
+ * edge where the ink soaked into the paper, a darker rim where it pooled, and the character under
+ * it in the paper's colour. Dark paper takes a pale ink. */
+.tn-block-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.tn-ink-blot,
+.tn-ink-halo {
+  position: absolute;
+  inset: 7% 0.5px;
+  background: var(--tn-cursor);
+}
+
+.tn-ink-blot {
+  border-radius: 22% 14% 18% 12% / 12% 20% 10% 18%;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.22),
+    inset 0 0 3px rgba(0, 0, 0, 0.28),
+    0 0 1.2px var(--tn-cursor);
+  filter: blur(0.3px);
+}
+
+.tn-block-cursor[data-appearance='dark'] .tn-ink-blot {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.25),
+    inset 0 0 3px rgba(255, 255, 255, 0.3),
+    0 0 1.2px var(--tn-cursor);
+}
+
+.tn-ink-halo {
+  border-radius: 40%;
+  opacity: 0;
+  filter: blur(2.5px);
+}
+
+.tn-ink-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tn-sheet);
+  font-family: var(--tn-font-mono);
+  font-size: var(--tn-ink-size);
+  font-weight: var(--tn-ink-weight);
+  font-variant-ligatures: none;
+  line-height: 1;
+  white-space: pre;
+}
+
+.tn-ink-glyph[data-bold='true'] {
+  font-weight: var(--tn-ink-weight-bold);
+}
+
+.tn-ink-glyph[data-italic='true'] {
+  font-style: italic;
+}
+
+/* Without focus the ink lifts away and leaves a faint outline of the cell. */
+.tn-block-cursor[data-focused='false'] .tn-ink-blot,
+.tn-block-cursor[data-focused='false'] .tn-ink-halo,
+.tn-block-cursor[data-focused='false'] .tn-ink-glyph {
+  display: none;
+}
+
+.tn-block-cursor[data-focused='false']::after {
+  content: '';
+  position: absolute;
+  inset: 7% 0.5px;
+  border: 1px solid var(--tn-cursor);
+  border-radius: 2px;
+  opacity: 0.45;
+}
+
+/* The quill cursor, drawn over xterm's invisible bar: a raven quill on light paper, a swan quill on
+ * dark paper, with a gilt nib in the theme's metal. Units inside the drawing are its own. */
+.tn-quill {
+  --tn-quill-edge: #120e0c;
+  --tn-quill-body: #2b2420;
+  --tn-quill-sheen: #5f5753;
+  --tn-quill-barb: rgba(168, 152, 138, 0.42);
+  --tn-quill-rachis: #e4d8c0;
+  --tn-quill-down: rgba(70, 60, 54, 0.65);
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  display: none;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0.8px 1.6px 1px rgba(0, 0, 0, 0.3));
+  animation: tn-quill-breathe 1.2s ease-in-out infinite alternate;
+}
+
+.tn-quill[data-appearance='dark'] {
+  --tn-quill-edge: #9d9485;
+  --tn-quill-body: #ebe4d6;
+  --tn-quill-sheen: #fffdf8;
+  --tn-quill-barb: rgba(140, 128, 108, 0.5);
+  --tn-quill-rachis: #fffdf6;
+  --tn-quill-down: rgba(236, 229, 216, 0.75);
+}
+
+.tn-quill svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The pen sways a little about its nib, as a hand holding it never keeps quite still. */
+.tn-quill-sway {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: tn-quill-sway 3.4s ease-in-out infinite alternate;
+}
+
+.tn-quill-vane {
+  fill: url(#tn-quill-vane);
+}
+
+.tn-quill-barbs {
+  fill: none;
+  stroke: var(--tn-quill-barb);
+  stroke-width: 0.28;
+  stroke-linecap: round;
+}
+
+.tn-quill-rachis {
+  fill: var(--tn-quill-rachis);
+}
+
+.tn-quill-rachis-light {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 0.22;
+  opacity: 0.55;
+}
+
+.tn-quill-down {
+  fill: none;
+  stroke: var(--tn-quill-down);
+  stroke-width: 0.35;
+  stroke-linecap: round;
+}
+
+.tn-quill-engraving {
+  fill: none;
+  stroke: var(--tn-metal-lo);
+  stroke-width: 0.3;
+}
+
+.tn-quill-hole {
+  fill: var(--tn-metal-lo);
+}
+
+/* A light that runs up the vane, from the foot to the tip. */
+.tn-quill-shine {
+  fill: #fff;
+  opacity: 0.2;
+  transform: translateY(0);
+  animation: tn-quill-shine 2.8s ease-in-out infinite;
+}
+
+.tn-quill-glint {
+  fill: #fff;
+  opacity: 0;
+  animation: tn-quill-glint 2.8s ease-in-out infinite;
+}
+
+/* Without focus the quill rests, dimmed and still. */
+.tn-quill[data-focused='false'] {
+  opacity: 0.4;
+  animation: none;
+}
+
+.tn-quill[data-focused='false'] .tn-quill-sway,
+.tn-quill[data-focused='false'] .tn-quill-shine,
+.tn-quill[data-focused='false'] .tn-quill-glint {
+  animation: none;
+}
+
+@keyframes tn-quill-breathe {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.62;
+  }
+}
+
+@keyframes tn-quill-sway {
+  from {
+    transform: rotate(-1.6deg);
+  }
+
+  to {
+    transform: rotate(1.6deg);
+  }
+}
+
+@keyframes tn-quill-shine {
+  0% {
+    transform: translateY(0);
+  }
+
+  65%,
+  100% {
+    transform: translateY(-66px);
+  }
+}
+
+@keyframes tn-quill-glint {
+  0%,
+  55%,
+  100% {
+    opacity: 0;
+  }
+
+  70% {
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tn-quill,
+  .tn-quill-sway,
+  .tn-quill-shine,
+  .tn-quill-glint {
+    animation: none;
+  }
+}
+
+/* The terminal's own scrollbar gives way to the clip or the bar; wheel and keys still scroll. */
+.tn-scroll-custom .xterm-viewport::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.tn-scroll {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  touch-action: none;
+  cursor: grab;
+  will-change: transform;
+}
+
+.tn-scroll:active {
+  cursor: grabbing;
+}
+
+.tn-scroll-bar {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.tn-dark .tn-scroll-bar {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.tn-scroll-clip svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The clip's wire, in drawing units (100 across): a tube about 2.6 units thick. */
+.tn-scroll-clip path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tn-clip-edge {
+  stroke-width: 3.3;
+}
+
+.tn-clip-body {
+  stroke-width: 2.6;
+}
+
+.tn-clip-light {
+  stroke-width: 0.9;
+  opacity: 0.9;
+}
+
+/* Small specular glints along the highlight, as polished wire catches a lamp. */
+.tn-clip-glint {
+  stroke: #fff;
+  stroke-width: 0.55;
+  stroke-dasharray: 1.6 11 0.8 17;
+  opacity: 0.85;
+}
+
+.tn-clip-shadow {
+  stroke: rgba(28, 18, 8, 0.42);
+  stroke-width: 3;
+  transform: translate(1px, 1.9px);
+}
+
+.tn-clip-pressed {
+  stroke: rgba(40, 28, 16, 0.07);
+  stroke-width: 2.2;
+}
+
+.tn-dark .tn-clip-shadow {
+  stroke: rgba(0, 0, 0, 0.6);
+}
+
+/* ------------------------------------------------------------------ tools */
+
+.tn-tools {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tn-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tn-accent);
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.tn-tool:hover,
+.tn-tool:focus-visible {
+  opacity: 1;
+  border-color: var(--tn-panel-line);
+  outline: none;
+}
+
+.tn-tool[aria-pressed='true'] {
+  opacity: 1;
+  border-color: var(--tn-panel-line);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tn-tool svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tn-focus .tn-tools {
+  opacity: 0.35;
+}
+
+.tn-focus .tn-tools:hover {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ Studio */
+
+.tn-studio {
+  position: absolute;
+  z-index: 10;
+  top: 46px;
+  right: 12px;
+  width: 308px;
+  max-height: calc(100% - 58px);
+  overflow-y: auto;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 12px;
+  background: var(--tn-panel-bg);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+}
+
+.tn-studio-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tn-studio-head h2 {
+  margin: 0 0 2px;
+  font-family: var(--tn-font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 24px;
+}
+
+.tn-eyebrow {
+  font-variant: small-caps;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+  color: var(--tn-panel-muted);
+}
+
+.tn-close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tn-panel-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tn-close:hover,
+.tn-close:focus-visible {
+  border-color: var(--tn-panel-line);
+  color: var(--tn-panel-ink);
+  outline: none;
+}
+
+.tn-section {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--tn-panel-line);
+}
+
+.tn-section-title {
+  margin: 0;
+  font-weight: 500;
+  font-style: italic;
+  font-size: 17px;
+}
+
+.tn-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.tn-card {
+  display: grid;
+  gap: 5px;
+  padding: 6px 4px 7px;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tn-card[aria-pressed='true'] {
+  border-color: var(--tn-accent);
+  box-shadow: inset 0 0 0 1px var(--tn-accent);
+}
+
+.tn-card:focus-visible {
+  outline: 1px dotted var(--tn-accent);
+  outline-offset: 2px;
+}
+
+.tn-card-swatch {
+  height: 22px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+/* ------------------------------------------------------------------ controls */
+
+.tn-note {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--tn-panel-muted);
+}
+
+.tn-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tn-color {
+  width: 38px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tn-color::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.tn-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+.tn-label,
+.tn-value {
+  font-family: var(--tn-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tn-panel-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tn-value {
+  letter-spacing: 0.04em;
+  color: var(--tn-panel-ink);
+}
+
+.tn-slider {
+  display: grid;
+  gap: 3px;
+}
+
+.tn-slider-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tn-slider input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  background:
+    linear-gradient(var(--tn-panel-muted), var(--tn-panel-muted)) 0 50% / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--tn-panel-muted) 0 1px, transparent 1px 10%) 0 50% / 100% 9px no-repeat;
+  cursor: pointer;
+}
+
+.tn-slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 9px;
+  height: 18px;
+  border: 1px solid var(--tn-metal-lo);
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--tn-metal-hi), var(--tn-metal) 55%, var(--tn-metal-lo));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.tn-slider input[type='range']:focus-visible {
+  outline: 1px dotted var(--tn-accent);
+  outline-offset: 3px;
+}
+
+.tn-switch {
+  position: relative;
+  flex: none;
+  width: 38px;
+  height: 20px;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tn-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--tn-panel-muted);
+  transition: transform 140ms ease;
+}
+
+.tn-switch[aria-checked='true'] {
+  border-color: var(--tn-accent);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tn-switch[aria-checked='true']::after {
+  transform: translateX(18px);
+  background: radial-gradient(circle at 35% 35%, var(--tn-metal-hi), var(--tn-metal) 60%, var(--tn-metal-lo));
+}
+
+.tn-switch:focus-visible {
+  outline: 1px dotted var(--tn-accent);
+  outline-offset: 2px;
+}
+
+.tn-segmented {
+  display: flex;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tn-segmented button {
+  flex: 1;
+  padding: 5px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--tn-panel-muted);
+  font-family: var(--tn-font-ui);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tn-segmented button + button {
+  border-left: 1px solid var(--tn-panel-line);
+}
+
+.tn-segmented button[aria-pressed='true'] {
+  color: var(--tn-panel-ink);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tn-input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+  font-size: 14px;
+}
+
+.tn-input option {
+  color: #111;
+}
+
+.tn-button {
+  padding: 6px 12px;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tn-button:hover,
+.tn-button:focus-visible {
+  border-color: var(--tn-accent);
+  outline: none;
+}
+
+.tn-button-primary {
+  border-color: var(--tn-accent);
+  background: rgba(255, 255, 255, 0.07);
+  font-style: italic;
+  font-size: 16px;
+}
+
+.tn-font-custom {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* ------------------------------------------------------------------ the lamp's pull cord */
+
+.tn-cord {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 6px;
+  width: 52px;
+  height: 400px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.tn-cord:active {
+  cursor: grabbing;
+}
+
+.tn-cord svg {
+  display: block;
+  width: 52px;
+  height: 400px;
+  overflow: visible;
+  filter: drop-shadow(1px 5px 4px rgba(0, 0, 0, 0.5));
+}
+
+.tn-cord:focus-visible {
+  outline: 1px dotted var(--tn-accent);
+  outline-offset: 2px;
+}
+
+/* Gold cords laced down the tassel's mould: a dark rim and a bright core make each one round. */
+.tn-tassel-cord {
+  fill: none;
+  stroke: var(--tn-metal);
+  stroke-width: 0.85;
+  stroke-linecap: round;
+  filter: drop-shadow(0.35px 0.5px 0.3px rgba(30, 4, 6, 0.8));
+}
+
+.tn-cord-binding {
+  fill: none;
+  stroke: var(--tn-metal-hi);
+  stroke-width: 0.9;
+  opacity: 0.85;
+}
+
+.tn-cord-glint {
+  fill: rgba(255, 255, 255, 0.5);
+}
+
+.tn-cord[aria-pressed='false'] .tn-cord-glint {
+  fill: rgba(255, 255, 255, 0.2);
+}
+
+.tn-focus .tn-cord {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ the Press */
+
+.tn-press {
+  position: absolute;
+  z-index: 12;
+  top: 46px;
+  left: 50%;
+  bottom: 14px;
+  width: min(1080px, calc(100% - 28px));
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  overflow: hidden;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 12px;
+  background: var(--tn-panel-bg);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 30px 80px -24px rgba(0, 0, 0, 0.85);
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+}
+
+/* One column that never grows wider than the panel: a long line of terminal text or a wide control
+ * must not make the panel scroll sideways and hide its left edge. */
+.tn-press-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px 18px 18px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-right: 1px solid var(--tn-panel-line);
+}
+
+.tn-press-side h2 {
+  margin: 0 0 2px;
+  font-family: var(--tn-font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 24px;
+}
+
+.tn-press-form,
+.tn-press-archive,
+.tn-press-options-body,
+.tn-press-seal-options {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+.tn-press-form,
+.tn-press-archive {
+  display: grid;
+  gap: 10px;
+}
+
+.tn-press-text {
+  min-height: 220px;
+  resize: vertical;
+  font-family: var(--tn-font-mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.tn-press-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* What a terminal source will print, in place of the snippet box. */
+.tn-press-taken .tn-note {
+  margin: 0;
+}
+
+.tn-press-excerpt {
+  max-width: 100%;
+  margin: 6px 0 0;
+  padding: 6px 0 6px 10px;
+  overflow: hidden;
+  border-left: 2px solid var(--tn-panel-line);
+  color: var(--tn-panel-muted);
+  font-family: var(--tn-font-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: pre;
+  text-overflow: ellipsis;
+  -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent);
+  mask-image: linear-gradient(90deg, #000 80%, transparent);
+}
+
+.tn-press-options {
+  border-top: 1px solid var(--tn-panel-line);
+  border-bottom: 1px solid var(--tn-panel-line);
+  padding: 8px 0;
+}
+
+.tn-press-options summary {
+  cursor: pointer;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--tn-panel-ink);
+}
+
+.tn-press-options-body {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tn-press-seal {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.tn-seal-preview {
+  width: 76px;
+  height: 76px;
+}
+
+.tn-press-seal-options {
+  display: grid;
+  gap: 8px;
+}
+
+.tn-monogram {
+  width: 54px;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: var(--tn-font-display);
+  font-size: 17px;
+  letter-spacing: 0.08em;
+}
+
+.tn-ribbons {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.tn-ribbon {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 3px 0;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tn-ribbon[aria-pressed='true'] {
+  border-color: var(--tn-accent);
+  box-shadow: inset 0 0 0 1px var(--tn-accent);
+}
+
+.tn-ribbon:focus-visible {
+  outline: 1px dotted var(--tn-accent);
+  outline-offset: 2px;
+}
+
+.tn-ribbon-chip {
+  display: block;
+  width: 40px;
+  max-width: 100%;
+  height: 54px;
+  object-fit: contain;
+}
+
+.tn-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tn-swatch {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.tn-swatch[aria-pressed='true'] {
+  outline: 2px solid var(--tn-accent);
+  outline-offset: 2px;
+}
+
+.tn-swatch:focus-visible {
+  outline: 1px dotted var(--tn-accent);
+  outline-offset: 3px;
+}
+
+.tn-archive-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tn-archive-tools .tn-button {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.tn-button[aria-pressed='true'] {
+  border-color: var(--tn-accent);
+}
+
+.tn-button-danger:not(:disabled) {
+  border-color: #b8553f;
+  color: #f0a08c;
+}
+
+.tn-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.tn-press-sheet {
+  position: relative;
+  overflow-y: auto;
+  padding: 22px;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 220, 160, 0.06), rgba(0, 0, 0, 0.35));
+}
+
+.tn-press-sheet canvas {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.tn-press-sheet canvas[hidden] {
+  display: none;
+}
+
+.tn-press-badge {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: max-content;
+  margin: 0 auto 10px;
+  padding: 3px 12px;
+  border: 1px solid var(--tn-panel-line);
+  border-radius: 999px;
+  background: var(--tn-panel-bg);
+  color: var(--tn-panel-muted);
+  font-style: italic;
+  font-size: 13px;
+}
+
+.tn-press-hint {
+  margin: 30% auto 0;
+  text-align: center;
+  font-style: italic;
+  color: var(--tn-panel-muted);
+}
+
+.tn-folios {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tn-folio {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.tn-folio-selected {
+  border-color: var(--tn-accent);
+}
+
+.tn-folio-open {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  min-width: 0;
+  column-gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--tn-panel-ink);
+  font-family: var(--tn-font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+
+.tn-folio-open:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tn-folio-number {
+  grid-row: span 2;
+  align-self: center;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: #c0503a;
+}
+
+.tn-folio-title {
+  overflow: hidden;
+  font-style: italic;
+  font-size: 15px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tn-folio-date {
+  font-size: 12px;
+  color: var(--tn-panel-muted);
+}
+
+.tn-folio-delete {
+  min-width: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--tn-panel-muted);
+  font-family: var(--tn-font-ui);
+  cursor: pointer;
+}
+
+.tn-folio-delete:hover {
+  color: #e07a64;
+}
+
+.tn-folio-action {
+  min-width: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--tn-panel-muted);
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.tn-folio:hover .tn-folio-action,
+.tn-folio-action:focus-visible {
+  opacity: 1;
+}
+
+.tn-folio-action:hover {
+  color: var(--tn-accent);
+}
+
+.tn-folio-check {
+  align-self: center;
+  margin: 0 2px 0 8px;
+  accent-color: var(--tn-accent);
+}
+
+.tn-folio-rename {
+  flex: 1;
+  margin: 4px;
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .tn-press {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .tn-studio {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    max-height: 46%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tn-switch::after {
+    transition: none;
+  }
+}

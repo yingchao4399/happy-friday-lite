@@ -327,3 +327,7 @@ PDF selection now reports page, text item and character positions, and annotatio
 ## Recitation preview: local transcription and correction
 
 Audio import, managed playback, Windows local transcription, timestamps/confidence, reference alignment, study plans and three question types are connected. Users can correct segments while retaining original recognition, timestamps and model confidence. Retry cancellation preserves valid earlier results. Questions jump to their audio source; sessions survive reopening. DeepSeek chat-only models are not offered as speech models. Local recognition can be inaccurate and needs review; no-reference sessions do not invent accuracy or repetition counts. See `docs/Recitation-acceptance-2026-10-24.md` for development evidence and remaining installation gates.
+
+## Typewriter workspace
+
+Happy Friday Lite includes an independent `/typewriter` workspace. It reuses Typewriter Nocturne's paper, lighting, 3D typewriter, sound and terminal surface, while running local PowerShell/Bash sessions through Friday's Electron IPC boundary. The workspace includes bilingual settings, Markdown/code entry points, Press and Archive, and remains independent from Friday's AI, RAG and note business logic.

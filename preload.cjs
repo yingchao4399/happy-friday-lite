@@ -253,7 +253,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'obsidian-delete-source',
       'obsidian-test-connection',
       'obsidian-sync-now',
-      'obsidian-render-markdown'
+      'obsidian-render-markdown',
+      'typewriter-terminal-create',
+      'typewriter-terminal-write',
+      'typewriter-terminal-resize',
+      'typewriter-terminal-kill',
+      'typewriter-terminal-list',
+      'typewriter-file-save'
     ]
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, ...args)
@@ -319,6 +325,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
       , 'resource-changed'
       , 'document-selection-changed'
       , 'trash-changed'
+      , 'typewriter-terminal-data'
+      , 'typewriter-terminal-exit'
+      , 'typewriter-terminal-error'
     ]
     if (validChannels.includes(channel)) {
       const subscription = (event, ...args) => callback(...args)
