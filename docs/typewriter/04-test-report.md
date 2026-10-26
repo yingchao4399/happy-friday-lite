@@ -20,4 +20,6 @@
 - `artifacts/typewriter/unit.log`：`108` 项 Typewriter 核心与语言测试。
 - `artifacts/typewriter/all-tests.log`：`226` 项项目测试。
 
-安装包仍需在生成后运行 unpacked native audit 和一次独立安装包启动验收；这两项不以源码 build 代替。
+- `node scripts/verify-packaged-native-modules.mjs x64 --appDir release/win-unpacked`：通过；node-addon binding、3 个 Windows PE helper 和打包 Harness 均已验证。
+- `release/win-unpacked/Happy Friday Lite.exe --friday-data-dir=<temporary>`：独立启动 12 秒保持运行后正常关闭。
+- 安装包：`Happy.Friday.Lite-3.0.6-preview.12-win-x64-setup.exe`，218,959,366 bytes，SHA-256 `3D029A8035BCEFF0446A0E3F0D7C008B64B769E2E86B9BF36614A5EE1D57ADB8`。GitHub `latest.yml` 已按实际规范化资产名校验。
