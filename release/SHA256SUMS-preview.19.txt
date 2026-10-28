@@ -1,2 +1,2 @@
-1aa16fb291b3dafe5029c2c6fd3d26f56e487aa7c9c170f35cd559bdf0180518  Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe
-16ae7caa1f2bd7d75827fa3eed1585406c88f14c259a9cbc60bab18d5ad22a6c  Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe.blockmap
+1aa16fb291b3dafe5029c2c6fd3d26f56e487aa7c9c170f35cd559bdf0180518  Happy-Friday-Lite-3.0.6.02-preview.19-win-x64-setup.exe
+16ae7caa1f2bd7d75827fa3eed1585406c88f14c259a9cbc60bab18d5ad22a6c  Happy-Friday-Lite-3.0.6.02-preview.19-win-x64-setup.exe.blockmap

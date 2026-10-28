@@ -423,12 +423,12 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Happy-Friday-Lite-3.0.6.01-preview.19-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.6.02-preview.19-win-${arch}-setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Happy-Friday-Lite-3.0.6.01-preview.19-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.6.02-preview.19-win-${arch}-setup.${ext}"
     },
     "linux": {
       "icon": "build/icons/icon.png",
@@ -440,5 +440,5 @@
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     }
   },
-  "releaseVersion": "3.0.6.01-preview.19"
+  "releaseVersion": "3.0.6.02-preview.19"
 }

@@ -1,13 +1,13 @@
 # Happy Friday Lite
 
-## 3.0.6.01-preview.19 AI Core 运行时与对话连续性
+## 3.0.6.02-preview.19 AI Core 运行时与对话连续性
 
 - 补齐 AI Core 任务运行时：真实就绪检查、能力计划、审批、取消、回读验证、幂等和安全撤销。
 - Office AI 推理统一经过敏感能力入口，并保留请求/线程上下文、流式回调和取消信号。
 - Friday 各 AI 对话及 Docs、Sheets、Slides、PDF、Markdown、HTML 面板新增各自的历史入口；历史记录从项目存储读取并可恢复。
 - AI 创建的 Office 文件按生成标题或正文内容自动命名，覆盖 Docs、Sheets、Slides、PDF、Markdown、HTML。
 - 增加笔记到 Word 的可验证任务流程，包含来源关联、回读验证与带条件撤销。
-- 技术版本为 `3.0.6-preview.19`，发布标签为 `3.0.6.01-preview.19`。
+- 技术版本为 `3.0.6-preview.19`，发布标签为 `3.0.6.02-preview.19`。
 
 ## 3.0.6.01-preview.18 AI Core 首版基础
 
@@ -22,7 +22,7 @@
 
 根因、实际验证及限制见 [Preview 17 修复报告](docs/typewriter/07-preview17-root-cause-report.md)。
 
-Windows x64 安装包：[3.0.6.01-preview.19](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.01-preview.19/Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe)；SHA256：[Preview.19 校验文件](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.01-preview.19/SHA256SUMS-preview.19.txt)。Electron 内部使用合法技术版本 `3.0.6-preview.19`。
+Windows x64 安装包：[3.0.6.02-preview.19](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.02-preview.19/Happy-Friday-Lite-3.0.6.02-preview.19-win-x64-setup.exe)；SHA256：[Preview.19 校验文件](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.02-preview.19/SHA256SUMS-preview.19.txt)。Electron 内部使用合法技术版本 `3.0.6-preview.19`。
 
 ## Preview 16：命令、插件与 Obsidian 兼容工作区
 
