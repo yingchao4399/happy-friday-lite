@@ -76,6 +76,17 @@ const cancelTokens = new CancellationTokens()
 // 活跃的 Agent 调用映射：requestId → { agent, config, threadId }
 const activeInvocations = new Map()
 
+// 会话标题只取用户实际请求，避免把日程/知识库的系统提示写进历史标题。
+// 这是确定性的本地派生，不把正文额外发送给模型；用户仍可在历史列表中改名。
+function deriveSessionTitle(message, scope) {
+  let text = String(message || '').trim()
+  const marker = text.lastIndexOf(']\n\n')
+  if (marker >= 0) text = text.slice(marker + 3).trim()
+  text = text.replace(/^\[[^\]]{0,240}\]\s*/, '').replace(/\s+/g, ' ').trim()
+  if (!text) return scope === 'schedule-agent' ? '日程对话' : '新 Agent 对话'
+  return Array.from(text).slice(0, 32).join('') + (Array.from(text).length > 32 ? '…' : '')
+}
+
 /**
  * 注册所有 Agent IPC 通道
  * @param {Object} mainWindow Electron 主窗口
@@ -85,7 +96,7 @@ export function registerAgentCommands(mainWindow, ipcMain = defaultIpcMain) {
 
   // ========== agent-invoke: 发起 Agent 调用 ==========
   ipcMain.handle('agent-invoke', async (_event, args) => {
-    const { requestId, sessionId, model, message, enableThinking, attachments, folderPath } = args
+    const { requestId, sessionId, model, message, enableThinking, attachments, folderPath, runtimeInstructions = '', scope = 'friday-agent', scopeKey = null } = args
     log.info(`====== agent-invoke 开始: requestId=${requestId} ======`)
     log.info(`model=${model?.modelName}, enableThinking=${!!enableThinking}, sessionId=${sessionId || '(new)'}, folderPath=${folderPath || '(none)'}`)
 
@@ -96,15 +107,16 @@ export function registerAgentCommands(mainWindow, ipcMain = defaultIpcMain) {
     try {
       // 1. 会话管理：复用 sessions 表（前端兼容），同时在 agent_threads 表记录
       if (!currentSessionId) {
-        const session = db.createSession(message.slice(0, 20) || '新 Agent 对话', 'agent')
+        const session = db.createSession(deriveSessionTitle(message, scope), 'agent', scope, scopeKey)
         currentSessionId = session.id
         isNewSession = true
         log.info(`创建新会话: ${currentSessionId}`)
       } else {
-        const existing = db.getSession(currentSessionId)
+        const existing = db.getSession(currentSessionId, scope, scopeKey)
         if (!existing) {
           throw new Error(`会话不存在: ${currentSessionId}`)
         }
+        if (existing.scope !== scope || (existing.scopeKey || null) !== (scopeKey || null)) throw new Error('Agent session scope mismatch')
       }
 
       // 在 agent_threads 表也记录一份（独立追踪 Agent 会话）
@@ -125,7 +137,7 @@ export function registerAgentCommands(mainWindow, ipcMain = defaultIpcMain) {
       }
 
       // 3. 获取历史消息构建 Agent 输入
-      const dbMessages = db.getMessages(currentSessionId)
+      const dbMessages = db.getMessages(currentSessionId, scope, scopeKey)
       // 移除最后一条用户消息（避免重复，因为我们会在 input 中传）
       const historyMessages = dbMessages.slice(0, -1).map(m => ({
         role: m.role,
@@ -147,7 +159,8 @@ export function registerAgentCommands(mainWindow, ipcMain = defaultIpcMain) {
         requestId,
         threadId: currentSessionId,
         dataDir: getDataDir(),
-        folderPath: folderPath || ''
+        folderPath: folderPath || '',
+        runtimeInstructions
       }
       const { agent, rootDir } = await createAgentWithContext(modelConfig, runtimeCtx)
       log.info(`Agent 创建完成, rootDir=${rootDir}`)

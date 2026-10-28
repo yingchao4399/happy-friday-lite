@@ -99,6 +99,8 @@ export type FontId =
   | 'hack-nf'
   | 'meslo-nf'
   | 'caskaydia-nf'
+  | 'fira-code'
+  | 'sarasa-mono-sc'
   | 'custom';
 /** `quill`: a quill pen at the insertion point, drawn over xterm's own (invisible) cursor. */
 export type CursorStyle = 'quill' | 'block' | 'bar' | 'underline';
@@ -158,6 +160,10 @@ export type LightingSettings = {
 };
 
 export type TypographySettings = {
+  inkMode: 'paper' | 'preset' | 'custom';
+  inkPreset: 'carbon' | 'brown' | 'blue' | 'navy' | 'wine' | 'green';
+  inkColor: string;
+  contrastPolicy: 'auto' | 'exact';
   preset: TypographyPresetId | 'custom';
   font: FontId;
   /** Used when `font` is `custom`; restricted to a safe font-family grammar. */
@@ -233,6 +239,7 @@ export type FolioFont = 'typewriter' | 'sonnet' | 'display' | 'plex' | 'terminal
 
 /** How a folio is printed: its paper, its seal, the face of its text and the signature. */
 export type FolioStyle = {
+  inkColor?: string;
   paper: FolioPaperId;
   sealColor: SealColor;
   /** One or two letters pressed into the seal. */

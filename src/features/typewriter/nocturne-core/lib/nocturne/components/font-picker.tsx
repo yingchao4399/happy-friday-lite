@@ -3,7 +3,11 @@ import {tr} from '../i18n';
 // the computer. A custom family is validated against a safe font-family grammar before it reaches
 // CSS or xterm.js.
 
-import React, {useState} from 'react';
+import {i18n} from '@/i18n';
+import {electronService} from '@/services/electron';
+import {ensureTypeface, loadPrivateFont} from '@/features/fonts/loader';
+import {fontStack} from '../../../app/nocturne/settings';
+import React, {useEffect, useState} from 'react';
 
 import {FONTS, isSafeFontFamily} from '../../../app/nocturne/settings';
 import type {FontId, TypographySettings} from '../../../app/nocturne/types';
@@ -33,6 +37,29 @@ type FontPickerProps = {
 };
 
 export function FontPicker({typography, onChange}: FontPickerProps) {
+  const t = (key: string) => String(i18n.global.t(`typewriter.fonts.${key}`));
+  const [busy, setBusy] = useState(false);
+  const [extra, setExtra] = useState<any[]>([]);
+  useEffect(() => { if(window.electronAPI) void electronService.request('fonts-list').then(setExtra).catch(() => {}); }, []);
+  const choose = async (patch: Partial<TypographySettings>) => {
+    setBusy(true); setStatus(t('loading'));
+    try { await ensureTypeface(fontStack({...typography, ...patch})); onChange(patch); setStatus(''); }
+    catch { setStatus(t('failed')); } finally { setBusy(false); }
+  };
+  const download = async (font: any) => {
+    setBusy(true); setStatus(t('loading'));
+    try { const result = font.installed ? font : await electronService.request('fonts-download', {id:font.id});
+      await loadPrivateFont(result); await choose({font:'custom',customFamily:result.family});
+      setExtra(await electronService.request('fonts-list'));
+    } catch {setStatus(t('failed'));} finally {setBusy(false);}
+  };
+  const importFont = async () => {
+    if(!draft.trim()) return;
+    setBusy(true);
+    try { const font=await electronService.request('fonts-import',{family:draft.trim()});
+      if(font){await loadPrivateFont(font);await choose({font:'custom',customFamily:font.family});setExtra(await electronService.request('fonts-list'));}
+    }catch{setStatus(t('failed'));}finally{setBusy(false);}
+  };
   const [draft, setDraft] = useState(typography.customFamily);
   const [installed, setInstalled] = useState<string[]>([]);
   const [status, setStatus] = useState('');
@@ -49,7 +76,7 @@ export function FontPicker({typography, onChange}: FontPickerProps) {
       return;
     }
     setStatus('');
-    onChange({font: 'custom', customFamily: family});
+    void choose({font: 'custom', customFamily: family});
   };
 
   const findInstalled = async () => {
@@ -79,7 +106,8 @@ export function FontPicker({typography, onChange}: FontPickerProps) {
         id="tn-font"
         className="tn-input"
         value={typography.font}
-        onChange={(event) => onChange({font: event.currentTarget.value as FontId})}
+        disabled={busy}
+        onChange={(event) => void choose({font: event.currentTarget.value as FontId})}
       >
         {FONTS.map((font) => (
           <option key={font.id} value={font.id}>
@@ -109,6 +137,11 @@ export function FontPicker({typography, onChange}: FontPickerProps) {
           <button type="button" className="tn-button" onClick={() => void findInstalled()}>{tr("Find installed fonts")}</button>
         </div>
       ) : null}
+      <details><summary className="tn-label">{t('manage')}</summary>
+        {extra.map(font => <button type="button" className="tn-button" key={font.id} disabled={busy} onClick={() => void download(font)}>{font.family} · {t(font.installed ? 'installed' : 'download')}</button>)}
+        <input className="tn-input" value={draft} aria-label={t('family')} placeholder={t('family')} onChange={e=>setDraft(e.target.value)} />
+        <button type="button" className="tn-button" disabled={busy || !draft.trim()} onClick={() => void importFont()}>{t('import')}</button>
+      </details>
       {status ? <p className="tn-note">{tr(status)}</p> : null}
       <p className="tn-note">{tr("Nerd Font icons are bundled and appear with every typeface.")}</p>
     </div>

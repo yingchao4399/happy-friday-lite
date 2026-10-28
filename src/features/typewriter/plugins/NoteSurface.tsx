@@ -4,6 +4,10 @@ import {fontStack} from '../nocturne-core/app/nocturne/settings';
 import {emit} from '../nocturne-core/lib/nocturne/bus';
 import {useNocturneSettings} from '../nocturne-core/lib/nocturne/store';
 import {activateContent} from '../content-plugin';
+import {activateEditor} from '@/features/commands/editor-context';
+import {createWikiPopup} from '@/features/notes/wiki-suggest';
+import {noteLinkAt} from '@/features/notes/link-target';
+import {consumeNoteLocation} from '@/features/notes/location';
 import {i18n} from '@/i18n';
 
 export function NoteSurface({document: source, onChange}: {document: any; onChange: (text: string) => void}) {
@@ -79,16 +83,48 @@ export function NoteSurface({document: source, onChange}: {document: any; onChan
     const request = () => { if (!frame) frame = requestAnimationFrame(publish); };
     schedule.current = request;
     const observer = new ResizeObserver(request); observer.observe(el);
+    const deactivateEditor=activateEditor({kind:'typewriter',noteId:()=>source.id,getValue:()=>current.current,getSelection:()=>({from:el.selectionStart,to:el.selectionEnd}),replaceSelection:(text:string)=>{el.setRangeText(text,el.selectionStart,el.selectionEnd,'end');current.current=el.value;setValue(el.value);onChange(el.value);schedule.current();},focus:()=>el.focus()});
     const deactivate = activateContent({focus: () => el.focus(),
       text: (kind: string) => kind === 'selection' ? current.current.slice(el.selectionStart, el.selectionEnd) : current.current,
       scroll: (to: string | number) => { el.scrollTop = to === 'top' ? 0 : to === 'bottom' ? el.scrollHeight : Number(to) * parseFloat(getComputedStyle(el).lineHeight); request(); },
       flush: () => source.flush()});
     document.addEventListener('selectionchange', request);
+    const locate=(event:any)=>{
+      if(event.detail?.noteId!==source.id || event.detail.surface!=='typewriter')return;
+      consumeNoteLocation(source.id,'typewriter');
+      const heading=String(event.detail.heading||'').replace(/^#/, '');const snippet=String(event.detail.snippet||'').trim();let offset=0,at=-1;
+      for(const line of current.current.split('\n')){if((heading&&line.replace(/^\s*#{1,6}\s+/, '').trim()===heading)||(!heading&&snippet&&line.trim()&&snippet.includes(line.trim()))){at=offset;break;}offset+=line.length+1;}
+      if(at>=0){el.focus();el.setSelectionRange(at,at);el.scrollTop=current.current.slice(0,at).split('\n').length*parseFloat(getComputedStyle(el).lineHeight)-el.clientHeight/3;request();}
+    };
+    window.addEventListener('friday:note-locate',locate);
+    const initialLocation=consumeNoteLocation(source.id,'typewriter');
+    if(initialLocation)requestAnimationFrame(()=>locate({detail:initialLocation}));
+    const refresh=(event:any)=>{if(event.detail?.noteId!==source.id)return;const a=el.selectionStart,b=el.selectionEnd;current.current=event.detail.text;setValue(event.detail.text);el.value=event.detail.text;el.setSelectionRange(Math.min(a,el.value.length),Math.min(b,el.value.length));request();};
+    window.addEventListener('friday:note-document',refresh);
+    window.addEventListener('friday:typography-ready', request);
     el.focus(); request();
     return () => { cancelAnimationFrame(frame); observer.disconnect(); deactivate();
-      document.removeEventListener('selectionchange', request); };
+      window.removeEventListener('friday:note-locate',locate);
+      window.removeEventListener('friday:note-document',refresh);
+      window.removeEventListener('friday:typography-ready', request);
+      deactivateEditor();document.removeEventListener('selectionchange', request); };
   }, [source.id]);
   useEffect(() => { schedule.current(); }, [settings, value]);
+  useEffect(() => {
+    const el=input.current!;const popup=createWikiPopup();
+    const update=()=>{
+      const match=/\[\[([^\]\n]{0,80})$/.exec(el.value.slice(0,el.selectionStart));
+      if(!match || el.selectionStart!==el.selectionEnd){popup.close();return;}
+      const end=el.selectionStart,start=end-match[0].length;
+      const rect=el.getBoundingClientRect();
+      popup.update(match[1],{left:rect.left,bottom:rect.top+40},(note:any)=>{
+        el.setRangeText(`[${note.title}](friday://notes/${encodeURIComponent(note.id)})`,start,end,'end');
+        current.current=el.value;setValue(el.value);onChange(el.value);el.focus();schedule.current();
+      });
+    };
+    el.addEventListener('input',update);el.addEventListener('keydown',popup.keys,true);el.addEventListener('blur',popup.close);
+    return()=>{el.removeEventListener('input',update);el.removeEventListener('keydown',popup.keys,true);el.removeEventListener('blur',popup.close);popup.destroy();};
+  },[source.id]);
   function change(event: React.ChangeEvent<HTMLTextAreaElement>) {
     const next = event.target.value;
     let at = 0;
@@ -102,6 +138,12 @@ export function NoteSurface({document: source, onChange}: {document: any; onChan
     <div ref={mirror} className="tn-note-mirror" aria-hidden="true" />
     <textarea ref={input} className="tn-note-input" value={value} wrap="soft" spellCheck={false}
       aria-label={i18n.global.t('typewriter.noteInput')} onChange={change}
+      title={i18n.global.t('workspace.links.typingHint')}
+      onClick={event => {
+        if (!(event.ctrlKey || event.metaKey)) return;
+        const target = noteLinkAt(current.current, input.current!.selectionStart);
+        if (target) window.dispatchEvent(new CustomEvent('friday:open-note-link', {detail:target}));
+      }}
       onScroll={() => schedule.current()} onSelect={() => schedule.current()}
       onCompositionEnd={event => { const text = event.data || ''; if (text) inserted.current = {at: Math.max(0, input.current!.selectionEnd - text.length), text}; schedule.current(); }}
       onFocus={() => schedule.current()} onBlur={() => { schedule.current(); void source.flush().catch(() => {}); }}

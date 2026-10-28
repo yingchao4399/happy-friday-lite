@@ -362,6 +362,14 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               {{ t('note.toolbar.exportMarkdown') }}
             </div>
+            <div class="menu-item" :class="{ disabled: isExportingWord || !props.noteId }" @click="exportWordViaAiCore">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m8 15 2 3 2-3 2 3 2-3"/></svg>
+              {{ t(isExportingWord ? 'note.toolbar.exportingWord' : 'note.toolbar.exportWord') }}
+            </div>
+            <div v-if="lastWordTaskId" class="menu-item" :class="{ disabled: isUndoingWord }" @click="undoWordViaAiCore">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/></svg>
+              {{ t(isUndoingWord ? 'note.toolbar.undoingWord' : 'note.toolbar.undoWord') }}
+            </div>
 
           </div>
         </div>
@@ -701,6 +709,7 @@
             </div>
             <span class="sidebar-title">{{ t('note.aiSidebar.assistant') }}</span>
           </div>
+          <ScopedHistoryButton scope="note-agent" :scope-key="noteHistoryScopeKey" @select="selectNoteHistory" />
           <button class="sidebar-close-btn" @click="closeAISidebar">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -817,7 +826,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onBeforeUnmount, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onBeforeUnmount, onMounted, onActivated, nextTick } from 'vue';
+import {activateEditor} from '@/features/commands/editor-context';
+import {WikiSuggestions} from '@/features/notes/wiki-extension';
+import {parseNoteUri, resolveNoteTarget} from '@/features/notes/link-target';
+import {consumeNoteLocation} from '@/features/notes/location';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import { Extension, Node } from '@tiptap/core';
 import { Plugin, PluginKey, TextSelection, NodeSelection } from '@tiptap/pm/state';
@@ -835,6 +848,7 @@ import AIMessage from '@/components/chat/AIMessage.vue';
 import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessage.vue';
 import AgentMessageBlock from '@/views/friday/components/AgentMessageBlock.vue';
 import ChatInputBox from '@/components/chat/ChatInputBox.vue';
+import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
 import { electronService } from '@/services/electron';
 import { getChatSession, setChatSession } from '@/utils/chatSessionCache';
 import StarterKit from '@tiptap/starter-kit';
@@ -936,7 +950,38 @@ const props = defineProps({
   shareMode: { type: Boolean, default: false }
 });
 
+function createDraftNoteScopeKey() {
+  const id = window.crypto?.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2));
+  return 'draft:' + id;
+}
+
+function noteScopeStorageKey(noteId) {
+  return 'friday.note-ai-scope.' + noteId;
+}
+
+function resolveNoteHistoryScopeKey(noteId) {
+  if (!noteId) return createDraftNoteScopeKey();
+  try {
+    return window.localStorage.getItem(noteScopeStorageKey(noteId)) || noteId;
+  } catch {
+    return noteId;
+  }
+}
+
+const noteHistoryScopeKey = ref(resolveNoteHistoryScopeKey(props.noteId));
+
 const emit = defineEmits(['update:modelValue', 'change', 'toggle-toc', 'close-sidebar', 'close-toc', 'open-note']);
+
+function selectNoteHistory({ session, messages }) {
+  currentSessionId.value = session.id
+  chatMessages.value = (messages || []).map(message => {
+    const item = { ...message, content: message.content || '' }
+    if (message.metadata?.segments) item.segments = message.metadata.segments
+    if (message.metadata?.reasoning) item.reasoning = message.metadata.reasoning
+    return item
+  })
+  nextTick(() => scrollSidebarToBottom(true))
+}
 
 const searchVisible = ref(false);
 const searchQuery = ref('');
@@ -1171,6 +1216,8 @@ const NoteReference = Node.create({
       'data-title': title || '',
       'data-mode': mode || 'live',
       class: 'note-reference-block',
+      role: kind === 'note' ? 'link' : undefined,
+      tabindex: kind === 'note' ? '0' : undefined,
     }, title || '引用内容'];
   },
 });
@@ -1262,6 +1309,9 @@ const showTextColorMenu = ref(false);
 const showHeadingMenu = ref(false);
 const showTableSubmenu = ref(false);
 const showMoreMenu = ref(false);
+const isExportingWord = ref(false);
+const isUndoingWord = ref(false);
+const lastWordTaskId = ref('');
 const showPresentation = ref(false);
 const presentationSource = ref('');
 const presentationFormat = ref('html');
@@ -1283,16 +1333,8 @@ const backlinks = ref([]);
 const loadBacklinks = async () => {
   if (!props.noteId || !window.electronAPI) { backlinks.value = []; return; }
   try {
-    const links = await window.electronAPI.invoke('note-links-list', { noteId: props.noteId });
-    const entries = [];
-    for (const link of Array.isArray(links) ? links : []) {
-      const otherUri = link.fromUri?.includes(encodeURIComponent(props.noteId)) ? link.toUri : link.fromUri;
-      const match = String(otherUri || '').match(/^friday:\/\/notes\/(.+)$/);
-      const otherId = match ? decodeURIComponent(match[1]) : '';
-      if (!otherId || otherId === props.noteId || entries.some(item => item.id === otherId)) continue;
-      const note = noteStore.notes.find(item => item.id === otherId) || await noteStore.fetchNote(otherId);
-      entries.push({ id: otherId, title: note?.title || t('note.untitledNote') });
-    }
+    const result = await window.electronAPI.invoke('note-links-index', { noteId: props.noteId });
+    const entries = [...new Map((result?.incoming || []).map(link => [link.sourceNoteId, {id:link.sourceNoteId,title:link.title}])).values()];
     backlinks.value = entries;
   } catch (error) {
     console.warn('加载双向链接失败:', error);
@@ -1382,7 +1424,9 @@ const generateMarpContent = async () => {
       model,
       message,
       attachments: [],
-      enableThinking: false
+      enableThinking: false,
+      scope: 'note-agent',
+      scopeKey: noteHistoryScopeKey.value
     });
   } catch (err) {
     console.error('Marp generation invoke error:', err);
@@ -2443,6 +2487,77 @@ const exportMarkdown = async () => {
   }
 };
 
+const exportWordViaAiCore = async () => {
+  showMoreMenu.value = false;
+  if (!props.noteId || isExportingWord.value) return;
+  isExportingWord.value = true;
+  try {
+    await noteStore.flushPendingSave();
+    const note = noteStore.notes.find(item => item.id === props.noteId) || await noteStore.fetchNote(props.noteId);
+    if (!note) throw new Error('笔记不存在');
+    const title = String(note.title || extractTitleFromContent(editor.value?.getHTML?.() || '') || '未命名笔记').trim();
+    const selected = await electronService.saveFile({
+      defaultPath: `${title}.docx`,
+      filters: [{ name: 'Word', extensions: ['docx'] }]
+    });
+    const out = typeof selected === 'string' ? selected : selected?.filePath;
+    if (!out) return;
+    const requestId = `note-to-word-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const task = await electronService.aiCoreExecute({
+      intent: 'note_to_word',
+      idempotencyKey: `${requestId}:${props.noteId}:${out}`,
+      requestedCapabilities: ['note_to_word', 'office_inspect'],
+      input: { capabilityArgs: {
+        note_to_word: { noteId: props.noteId, out, title },
+        office_inspect: { filePath: { $from: 'note_to_word', field: 'out' } }
+      } },
+      context: {
+        spaceId: `note:${props.noteId}`,
+        sessionId: noteHistoryScopeKey.value,
+        resourceUris: [`friday://notes/${encodeURIComponent(props.noteId)}`],
+        scopes: ['read', 'write'],
+        requestId
+      }
+    });
+    if (!task?.id) throw new Error('AI Core 未返回任务');
+    if (task.status === 'awaiting_approval') {
+      const approved = window.confirm(t('note.toolbar.exportWordApproval', { title, out }));
+      if (!approved) {
+        await electronService.aiCoreCancelTask(task.id);
+        return;
+      }
+      await electronService.aiCoreApproveTask(task.id);
+    }
+    let current = task;
+    for (let i = 0; i < 480 && !['completed', 'failed', 'partially_completed', 'cancelled'].includes(current.status); i++) {
+      await new Promise(resolve => setTimeout(resolve, 250));
+      current = await electronService.aiCoreGetTask(task.id) || current;
+    }
+    if (current.status !== 'completed') throw new Error(current.error?.message || `任务未完成：${current.status}`);
+    lastWordTaskId.value = current.id;
+    await electronService.invoke('office-open-file', { filePath: out });
+  } catch (error) {
+    console.error('AI Core 笔记转 Word 失败:', error);
+    window.alert(t('note.toolbar.exportWordFailed', { error: error?.message || error }));
+  } finally {
+    isExportingWord.value = false;
+  }
+};
+
+const undoWordViaAiCore = async () => {
+  showMoreMenu.value = false;
+  if (!lastWordTaskId.value || isUndoingWord.value) return;
+  isUndoingWord.value = true;
+  try {
+    await electronService.aiCoreUndoTask(lastWordTaskId.value);
+    lastWordTaskId.value = '';
+  } catch (error) {
+    window.alert(t('note.toolbar.undoWordFailed', { error: error?.message || error }));
+  } finally {
+    isUndoingWord.value = false;
+  }
+};
+
 const openAIWrite = () => {
   if (showAISidebar.value) {
     closeAISidebar();
@@ -2879,7 +2994,9 @@ async function sendChatMessage(text) {
       model: model,
       message: fullMessage,
       attachments: backendAttachments,
-      enableThinking: false
+      enableThinking: false,
+      scope: 'note-agent',
+      scopeKey: noteHistoryScopeKey.value
     });
   } catch (err) {
     console.error('Chat invoke error:', err);
@@ -2949,7 +3066,7 @@ const handleNoteConfirm = (selectedNotes) => {
         attrs: { kind: 'note', sourceId: note.id, sourceUri: `friday://notes/${encodeURIComponent(note.id)}`, title: note.title || t('note.untitledNote'), mode: 'live' },
       }).run();
       if (props.noteId && note.id !== props.noteId) {
-        window.electronAPI?.invoke('note-link-upsert', { fromNoteId: props.noteId, toNoteId: note.id }).then(loadBacklinks).catch(() => {});
+
       }
     }
     showNoteDialog.value = false;
@@ -3344,6 +3461,7 @@ const textColorPalette = [
 
 const editor = useEditor({
   extensions: [
+    WikiSuggestions,
     NoteSearch,
     NoteTitle,
     StarterKit.configure({
@@ -3354,6 +3472,7 @@ const editor = useEditor({
       codeBlock: false,
       link: {
         openOnClick: false,
+        protocols: ['friday'],
         HTMLAttributes: {
           class: 'text-link',
         },
@@ -3519,6 +3638,12 @@ const editor = useEditor({
       return false;
     },
     handleDOMEvents: {
+      keydown: (_view,event) => {
+        if(event.key!=='Enter'&&event.key!==' ')return false;
+        const link=event.target?.closest?.('[data-note-reference][data-kind="note"], [data-note-link]');
+        if(!link)return false;
+        event.preventDefault();link.click();return true;
+      },
       contextmenu: handleEditorContextMenu,
       dblclick: (view, event) => {
         const target = getMediaTarget(view, event.target instanceof Element ? event.target : null);
@@ -3544,9 +3669,22 @@ const editor = useEditor({
           openMediaPreview(mediaTarget);
           return true;
         }
+        const reference = event.target?.closest?.('[data-note-reference][data-kind="note"]');
+        const wiki = event.target?.closest?.('[data-note-link]');
+        if (reference || wiki) {
+          event.preventDefault();
+          const target = reference ? reference.dataset.sourceUri || `friday://notes/${encodeURIComponent(reference.dataset.sourceId)}` : wiki.dataset.noteLink;
+          void resolveNoteTarget(target).then(link => emit('open-note', link)).catch(() => window.dispatchEvent(new CustomEvent('friday:show-links', {detail:'unresolved'})));
+          return true;
+        }
         const anchor = event.target?.closest?.('a.text-link');
         if (!anchor?.href) return false;
         event.preventDefault();
+        const internal = parseNoteUri(anchor.href);
+        if (internal) {
+          void resolveNoteTarget(anchor.href).then(link=>emit('open-note',link)).catch(()=>window.dispatchEvent(new CustomEvent('friday:show-links',{detail:'unresolved'})));
+          return true;
+        }
         electronService.invoke('open-external', anchor.href).catch(() => {});
         return true;
       },
@@ -3613,6 +3751,7 @@ const editor = useEditor({
       }
     },
   },
+  onFocus: activateCommandEditor,
   onUpdate: ({ editor }) => {
     syncToolbarState(editor);
     const html = editor.getHTML();
@@ -4019,13 +4158,28 @@ watch(() => props.modelValue, (newValue) => {
   if (newValue === lastSyncedHtml) return;
   const preparedContent = prepareEditorContent(newValue);
   if (editor.value && preparedContent !== editor.value.getHTML()) {
-    editor.value.commands.setContent(preparedContent);
+    editor.value.commands.setContent(preparedContent, {emitUpdate:false});
     lastSyncedHtml = editor.value.getHTML();
     nextTick(syncSearchState);
   }
 });
 
-watch(() => props.noteId, () => { loadBacklinks(); }, { immediate: true });
+watch(() => props.noteId, (noteId, previousNoteId) => {
+  loadBacklinks();
+  if (!noteId) {
+    if (previousNoteId) noteHistoryScopeKey.value = createDraftNoteScopeKey();
+    return;
+  }
+
+  if (noteHistoryScopeKey.value.startsWith('draft:')) {
+    try {
+      window.localStorage.setItem(noteScopeStorageKey(noteId), noteHistoryScopeKey.value);
+    } catch {}
+    return;
+  }
+
+  noteHistoryScopeKey.value = resolveNoteHistoryScopeKey(noteId);
+}, { immediate: true });
 
 watch(() => appStore.noteFimCompletion, (enabled) => {
   if (!enabled) {
@@ -4040,7 +4194,32 @@ watch(() => props.shareMode, (enabled) => {
   if (enabled) hideTableContextMenu();
 });
 
+function locateLinkedHeading(event) {
+  if(event.detail?.surface && event.detail.surface!=='note')return;
+  if(event.detail?.noteId !== props.noteId || !editor.value)return;
+  if(!editor.value.view.dom.getClientRects().length)return;
+  consumeNoteLocation(props.noteId);
+  const target=String(event.detail.heading||'').replace(/^#/, '');const snippet=String(event.detail.snippet||'').trim();let found=false;
+  editor.value.state.doc.descendants((node,pos)=>{
+    if(found)return false;
+    if((target&&node.type.name==='heading'&&node.textContent===target)||(!target&&snippet&&node.isTextblock&&snippet.includes(node.textContent)&&node.textContent.trim())){found=true;editor.value.chain().focus().setTextSelection(pos+1).scrollIntoView().run();return false;}
+  });
+}
+function consumeLinkedLocation() {
+  nextTick(()=>requestAnimationFrame(()=>{
+    if(!editor.value?.view.dom.getClientRects().length)return;
+    const link=consumeNoteLocation(props.noteId);
+    if(link)locateLinkedHeading({detail:link});
+  }));
+}
+onActivated(consumeLinkedLocation);
+let unlistenNoteLinks;
+let deactivateCommandEditor;
+function activateCommandEditor(){deactivateCommandEditor?.();deactivateCommandEditor=activateEditor({kind:'note',noteId:()=>props.noteId,getValue:()=>editor.value?.getText({blockSeparator:'\n'})||'',getSelection:()=>({from:editor.value.state.doc.textBetween(0,editor.value.state.selection.from,'\n').length,to:editor.value.state.doc.textBetween(0,editor.value.state.selection.to,'\n').length}),replaceSelection:text=>editor.value.chain().focus().insertContent({type:'text',text}).run(),focus:()=>editor.value.commands.focus()});}
 onMounted(() => {
+  unlistenNoteLinks=electronService.listen('note-changed',loadBacklinks);
+  window.addEventListener('friday:note-locate',locateLinkedHeading);
+  consumeLinkedLocation();
   document.addEventListener('click', handleClickOutside);
   document.addEventListener('contextmenu', handleDocumentContextMenu);
   setupChatListeners();
@@ -4059,6 +4238,8 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  deactivateCommandEditor?.();unlistenNoteLinks?.();
+  window.removeEventListener('friday:note-locate',locateLinkedHeading);
   saveChatSession();
   document.removeEventListener('click', handleClickOutside);
   document.removeEventListener('contextmenu', handleDocumentContextMenu);
@@ -5195,6 +5376,9 @@ const fixEmptyTableCells = (html) => {
   color: var(--text-secondary);
   border-left: 3px solid var(--accent-color, #3b82f6);
 }
+:deep(.prose-editor .note-reference-block[data-kind='note']),:deep(.prose-editor .friday-wiki-link){cursor:pointer}
+:deep(.prose-editor .friday-wiki-link){color:var(--accent-color);text-decoration:underline}
+:deep(.prose-editor .note-reference-block[data-kind='note']:hover){background:var(--bg-hover)}
 
 :deep(.prose-editor mark) {
   padding: 0.1em 0.2em;

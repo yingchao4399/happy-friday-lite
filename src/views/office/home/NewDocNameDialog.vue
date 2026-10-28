@@ -50,12 +50,19 @@ const meta = computed(() => TYPE_META[props.type] || null);
 const title = computed(() => (meta.value ? t(meta.value.titleKey) : ''));
 const ext = computed(() => meta.value?.ext || '');
 
+function automaticName(type) {
+  const labels = { docs: 'Word 文档', sheets: 'Excel 工作簿', slides: 'PowerPoint 演示', pdf: 'PDF 文档' };
+  const now = new Date();
+  const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  return `${labels[type] || 'Office 文档'} ${date}`;
+}
+
 watch(
   () => props.type,
   async (type) => {
     if (!type || !TYPE_META[type]) return;
-    // 默认名称 = 新建文档默认名；全选便于直接输入覆盖
-    name.value = t(TYPE_META[type].defaultKey);
+    // 自动生成可识别的标题；用户仍可直接覆盖。
+    name.value = automaticName(type);
     await nextTick();
     inputRef.value?.focus();
     inputRef.value?.select();
@@ -65,7 +72,7 @@ watch(
 function confirm() {
   if (!props.type) return;
   // 空输入回退默认名（去掉扩展名后缀展示，由主进程统一拼接）
-  emit('confirm', { type: props.type, name: name.value.trim() || t(TYPE_META[props.type].defaultKey) });
+  emit('confirm', { type: props.type, name: name.value.trim() || automaticName(props.type) });
 }
 </script>
 

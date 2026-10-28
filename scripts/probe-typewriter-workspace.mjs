@@ -8,6 +8,8 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import {fileURLToPath} from 'node:url'
 import * as db from '../src-electron/db.js'
+import {registerFontCommands} from '../src-electron/fonts.js'
+import {setDataDir as setConfigDir} from '../src-electron/config.js'
 import {registerTypewriterTerminalCommands} from '../src-electron/typewriter-terminal.js'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
@@ -16,6 +18,7 @@ app.setPath('userData', path.join(temp, 'profile'))
 app.on('window-all-closed', () => {})
 const output = path.join(root, 'artifacts/typewriter')
 fs.mkdirSync(output, {recursive:true})
+for(const method of ['log','error']){const original=console[method];console[method]=(...args)=>{fs.appendFileSync(path.join(output,'batch1-probe-live.log'),args.map(a=>typeof a==='string'?a:JSON.stringify(a)).join(' ')+'\n');original(...args)}}
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms))
 let win
 let rejectSave=false
@@ -59,7 +62,7 @@ app.whenReady().then(async()=>{
   const report={checks:[],platform:process.platform, electron:process.versions.electron}
   const timer=setTimeout(()=>app.exit(1),480000)
   try {
-    db.setDataDir(path.join(temp,'data')); await db.initDb()
+    db.setDataDir(path.join(temp,'data')); setConfigDir(path.join(temp,'data')); await db.initDb()
     const fixture=db.importNote(null,null,'原有笔记验收','<h2>已有正文</h2><p>Original text</p><div data-note-chart="true" kind="bar" title="保留图表"></div>','已有正文 Original text')
     const md=path.join(temp,'中文 文件.md');fs.writeFileSync(md,'# 文件导入\n\n正文测试，不能发送给 Shell。\n')
     ipcMain.handle('get_notes',()=>db.getNotes())
@@ -86,7 +89,8 @@ router.isReady().then(()=>app.mount('#app'));</script>`)
     win=new BrowserWindow({show:false,width:1496,height:1020,webPreferences:{preload:path.join(root,'preload.cjs'),contextIsolation:true,backgroundThrottling:false}})
     win.webContents.on('console-message',e=>{if(e.level==='error')errors.push(e.message.slice(0,1500))})
     dialog.showSaveDialog=async()=>({canceled:false,filePath:path.join(temp,'folio.png')})
-    registerTypewriterTerminalCommands(win)
+    registerTypewriterTerminalCommands(win); registerFontCommands(win)
+    ipcMain.handle('note-links-index',(_e,a)=>db.getNoteLinks(a.noteId))
     await win.loadFile(path.join(site,'typewriter-workspace-probe.html'));win.showInactive()
     await until('Boolean(document.querySelector("[data-action=new-note]"))')
     await click('[data-action=new-note]')
@@ -140,6 +144,21 @@ router.isReady().then(()=>app.mount('#app'));</script>`)
     assert.equal(await run('getComputedStyle(document.querySelector(".tn-note-input")).backgroundColor'),'rgba(0, 0, 0, 0)')
     assert.equal(await run('document.querySelector(".tn-stage")===originalStage'),true)
     report.checks.push({name:'原版二级菜单、中英切换、字体/纸张/羽毛笔设置、外壳保持同实例'})
+    const beforeFont=await run('document.querySelector(".tn-note-input")');
+    for(const font of ['jetbrains-mono','fira-code','sarasa-mono-sc']){
+      await run(`document.getElementById('tn-font').value=${JSON.stringify(font)};document.getElementById('tn-font').dispatchEvent(new Event('change',{bubbles:true}))`)
+      await until(`tw.settings.typography.font===${JSON.stringify(font)}`,30000)
+      assert.equal(await run('document.querySelector(".tn-stage")===originalStage'),true)
+    }
+    await run("tw.patchSettings({typography:{inkMode:'custom',inkColor:'#702738',contrastPolicy:'auto'}})")
+    await until('getComputedStyle(document.querySelector(".tn-note-input")).color==="rgb(112, 39, 56)"')
+    assert.equal(await run('document.fonts.check(\'15px "Sarasa Mono SC"\',"中文ABC")'),true)
+    await run("window.noteIdentity=document.querySelector('.tn-note-input');tw.patchSettings({paper:{style:'night'}})")
+    await pause(200)
+    assert.equal(await run("document.querySelector('.tn-note-input')===noteIdentity"),true)
+    await run("tw.patchSettings({paper:{style:'cotton'}})")
+    report.checks.push({name:'三款新增本地字体真实加载切换、中文离线字形、墨色及深浅纸张、舞台与编辑器保持实例'})
+
     await run(`document.querySelector('.tn-studio .tn-close').click()`)
     await click('.tn-tools .tn-tool:first-child')
     await until('Boolean(document.querySelector(".tn-press"))')

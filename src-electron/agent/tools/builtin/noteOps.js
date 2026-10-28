@@ -139,13 +139,13 @@ registerTool({
   description: '根据笔记 ID 获取笔记完整内容。',
   schema: getNoteSchema,
   handler: getNoteHandler,
-  meta: { requireApproval: false, exposedViaMcp: true }
+  meta: { requireApproval: false, exposedViaMcp: true, supportsReadback: true, readbackFor: ['create_note', 'update_note'] }
 })
 
 // ========== create_note ==========
 
 const createNoteSchema = z.object({
-  title: z.string().describe('笔记标题'),
+  title: z.string().optional().describe('笔记标题；不提供时从正文第一行或首个标题自动生成'),
   content: z.string().describe('笔记正文内容（Markdown 格式）'),
   knowledgeBaseId: z
     .string()
@@ -159,7 +159,8 @@ const createNoteSchema = z.object({
 
 async function createNoteHandler(args, ctx) {
   const { title, content, knowledgeBaseId = null, notebookId = null } = args
-  ctx.logger.info(`[create_note] title="${title}", kbId=${knowledgeBaseId}`)
+  const derivedTitle = String(title || content?.split(/\r?\n/).map(line => line.replace(/^\s*#+\s*/, '').trim()).find(Boolean) || '新建笔记').slice(0, 80)
+  ctx.logger.info(`[create_note] title="${derivedTitle}", kbId=${knowledgeBaseId}`)
 
   const { importNote } = await import('../../../db.js')
   // 将 Markdown 转为 HTML 存入 content 字段（编辑器期望 HTML 格式）
@@ -167,9 +168,9 @@ async function createNoteHandler(args, ctx) {
   // 从 HTML 提取纯文本用于搜索
   const contentText = htmlContent.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
 
-  const note = importNote(knowledgeBaseId, notebookId, title, htmlContent, contentText)
+  const note = importNote(knowledgeBaseId, notebookId, derivedTitle, htmlContent, contentText)
   ctx.logger.info(`[create_note] 已创建笔记: id=${note.id}`)
-  return `已创建笔记: id=${note.id}, title="${title}"`
+  return `已创建笔记: id=${note.id}, title="${derivedTitle}"`
 }
 
 registerTool({

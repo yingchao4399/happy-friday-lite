@@ -1,6 +1,6 @@
 import TurndownService from 'turndown'
 import { marked } from 'marked'
-import { electronService } from '@/services/electron'
+import {readNote,saveNote} from '@/features/notes/documents'
 
 export function noteToMarkdown(html) {
   const converter = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' })
@@ -42,6 +42,7 @@ export function createNoteDocument(noteStore, note, status = () => {}, initialSo
   const id = note.id
   const recoveryKey = `happy-friday-typewriter-draft:${id}`
   let baseline = note.content || ''
+  let revision = note.revision || 0
   try {
     const draft = JSON.parse(localStorage.getItem(recoveryKey) || 'null')
     if (draft?.base === baseline && typeof draft.text === 'string') source = draft.text
@@ -54,6 +55,13 @@ export function createNoteDocument(noteStore, note, status = () => {}, initialSo
   }
   const document = {
     id, viewId: crypto.randomUUID(), type: 'note', title: note.title, content: source, noteId: id,
+    refresh(next) {
+      if((next.revision||0)<=revision)return
+      if(source!==saved){status('saveConflict');return}
+      source=noteToMarkdown(next.content);saved=source;baseline=next.content||'';revision=next.revision||0
+      document.content=source;document.title=next.title;status('saved')
+      window.dispatchEvent(new CustomEvent('friday:note-document',{detail:{noteId:id,text:source}}))
+    },
     change(next) {
       source = next; journal(); clearTimeout(timer); status('unsaved')
       timer = setTimeout(() => { void document.flush().catch(() => {}) }, 600)
@@ -64,15 +72,16 @@ export function createNoteDocument(noteStore, note, status = () => {}, initialSo
         if (source === saved) return
         const next = source; status('saving')
         try {
-          const latest = await electronService.request('get_note', { noteId: id })
+          const latest = await readNote(id)
           if (!latest || latest.isDeleted) throw new Error('NOTE_NOT_FOUND')
-          const updated = await electronService.request('update_note', {noteId: id, title: latest.title, ...markdownToNote(next)})
+          if ((latest.revision || 0) !== revision) throw new Error('NOTE_REVISION_CONFLICT')
+          const updated = await saveNote({noteId: id, title: latest.title, baseRevision: revision, ...markdownToNote(next)})
           if (!updated?.id) throw new Error('NOTE_SAVE_FAILED')
           const index = noteStore.notes.findIndex(item => item.id === id)
           if (index >= 0) noteStore.notes[index] = updated
           else noteStore.notes.unshift(updated)
-          saved = next; baseline = updated.content || ''; journal(); status(source === saved ? 'saved' : 'unsaved')
-        } catch (error) { status('saveFailed'); throw error }
+          revision = updated.revision || 0; saved = next; baseline = updated.content || ''; journal(); status(source === saved ? 'saved' : 'unsaved')
+        } catch (error) { status(error.message?.includes('NOTE_REVISION_CONFLICT') ? 'saveConflict' : 'saveFailed'); throw error }
       })
       return queue
     },

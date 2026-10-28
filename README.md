@@ -1,5 +1,48 @@
 # Happy Friday Lite
 
+## 3.0.6.01-preview.19 AI Core runtime and conversation continuity
+
+- Completes the AI Core task runtime with live readiness checks, capability planning, approvals, cancellation, verification, idempotency and safe undo.
+- Routes Office AI inference through the shared sensitive capability while preserving request/thread context, streaming callbacks and cancellation.
+- Adds scoped conversation-history access across Friday AI chats and Docs, Sheets, Slides, PDF, Markdown and HTML AI panels; history reloads from project storage.
+- Automatically names AI-created Office files from their generated title or content across Docs, Sheets, Slides, PDF, Markdown and HTML.
+- Adds a verified note-to-Word task flow with source links, read-back verification and guarded undo.
+- Uses technical version `3.0.6-preview.19` and release label `3.0.6.01-preview.19`.
+
+## 3.0.6.01-preview.18 AI Core foundation
+
+- Adds the Friday AI Core v1 contracts for actor, space, session, thread, task, request, resource, and capability.
+- Adds structured plan/execute foundations with Runtime injection and task transitions that cannot skip verification.
+- Adds a repeatable DeepSeek connectivity check: `node scripts/check-deepseek-connection.mjs`.
+- Uses the release label `3.0.6.01-preview.18` without occupying the official `3.0.7` release line. npm/Electron uses the valid technical version `3.0.6-preview.18`; the Windows artifact keeps the requested release label.
+
+## Preview 17: terminal colors, settings access and note navigation
+
+Fixes xterm bright-color mapping and transparent-background contrast calculations, live terminal ink/fonts, visible settings entries, and shared Settings typography for the palette/plugins/shortcuts. Removes the duplicate sidebar command button and connects Office commands to real menu channels. Note references navigate from the main Notes page, standalone editor and Typewriter; the links panel includes usage help.
+
+See the [Preview 17 root-cause and validation report](docs/typewriter/07-preview17-root-cause-report.md) for evidence and limits.
+
+Windows x64 installer: [3.0.6.01-preview.19](release/Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe); SHA256: [preview.19 checksum](release/SHA256SUMS-preview.19.txt). The package uses technical version `3.0.6-preview.19` for Electron semver compatibility.
+
+## Preview 16: commands, plugins and Obsidian compatibility
+
+Four Windows x64 iterations are available as `3.0.6-preview.13` through `.16`. The latest package includes previous batches and preserves the existing Office work.
+
+- **Preview 13:** shared Nocturne ink, bundled fonts including Sarasa Mono SC, directed note references, WikiLink completion and revision-checked saves to the same note ID.
+- **Preview 14:** a persistent command button, categorized bilingual/pinyin search, recent commands, shortcut recording/conflicts/import/export, and native Office overlay/focus coordination. Command palette: `Ctrl+Shift+P`; Press: `Ctrl+Alt+P`.
+- **Preview 15:** plugin management/market, ZIP import, isolated sandbox hosts, settings, lifecycle cleanup, updates and rollback. Native examples use real note/Office APIs; agent tools retain approval requirements.
+- **Preview 16:** the official Obsidian community directory and release downloads, the unmodified official sample package, a controlled Vault/MetadataCache/Workspace/Editor subset, and an optional CodeMirror 6 Markdown window. Unsupported Node/private APIs report explicit errors.
+
+To use the compatibility editor, enable an Obsidian plugin, open a note in Notes or Typewriter, then search the command palette for “Markdown compatibility editor”. It saves to the same note ID. Tables, charts, media and styled nodes remain protected; removing protection tokens blocks the save and retains a recovery draft.
+
+Verified scope: official sample **1.0.0** lifecycle/commands/modal/settings and **Sort and Permute Lines 0.9.0** alphabetical sorting in CM6. Download availability does not imply complete plugin/API compatibility. Typewriter keeps its original input/feedback structure. macOS/Linux have not been run-tested.
+
+See the [four-batch delivery report](docs/typewriter/06-preview13-16-delivery.md) for validation and limits.
+
+## Preview 13: typewriter typography and note links
+
+Adds shared paper ink controls, bundled JetBrains Mono/Fira Code/Sarasa Mono SC, app-local font import/download, directed note links, WikiLink completion, and revision checks for note saves. Original Nocturne shell and feedback remain in use.
+
 [中文](README.zh-CN.md)
 
 <a id="english"></a>

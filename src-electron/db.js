@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
+import {extractNoteLinks, resolveTarget} from './notes/link-index.js'
 import { openSqliteStorage } from './sqlite-storage.js'
 import { applyPreviewMigrations } from './preview-migrations.js'
 
@@ -72,12 +73,14 @@ async function initDatabase() {
     throw Object.assign(new Error('DATABASE_FILE_EMPTY'), { code: 'DATABASE_FILE_EMPTY', recoverable: true })
   }
 
-  if (fs.existsSync(dbPath)) {
+  const existed=fs.existsSync(dbPath)
+  db = openSqliteStorage(dbPath)
+  if (existed) {
     // 启动迁移前保留最近五份数据库副本，便于预览版恢复旧数据。
     const backupDir = path.join(dataDir, 'backups')
     fs.mkdirSync(backupDir, { recursive: true })
     const stamp = new Date().toISOString().replace(/[:.]/g, '-')
-    await fs.promises.copyFile(dbPath, path.join(backupDir, `friday-${stamp}.db`))
+    await db.backupTo(path.join(backupDir, `friday-${stamp}.db`))
     const backups = fs.readdirSync(backupDir)
       .filter(name => /^friday-.*\.db$/.test(name))
       .sort()
@@ -85,13 +88,14 @@ async function initDatabase() {
       fs.rmSync(path.join(backupDir, stale), { force: true })
     }
   }
-  db = openSqliteStorage(dbPath)
 
   db.run(`
     CREATE TABLE IF NOT EXISTS sessions (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL DEFAULT '新对话',
       mode TEXT NOT NULL DEFAULT 'chat',
+      scope TEXT NOT NULL DEFAULT 'friday',
+      scopeKey TEXT,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     );
@@ -103,6 +107,52 @@ async function initDatabase() {
   } catch (_e) {
     // 列已存在，忽略
   }
+  // 迁移：为会话增加 AI Core 作用域。旧会话归入 Friday 全局聊天，
+  // 新的笔记、知识库、日程和 Office 会话通过 scope/scopeKey 隔离。
+  try { db.run("ALTER TABLE sessions ADD COLUMN scope TEXT NOT NULL DEFAULT 'friday'") } catch (_e) {}
+  try { db.run('ALTER TABLE sessions ADD COLUMN scopeKey TEXT') } catch (_e) {}
+  db.run('CREATE INDEX IF NOT EXISTS idx_sessions_scope ON sessions(scope, scopeKey, updatedAt)')
+
+  // AI Core 任务与事件是控制层事实源；正文能力仍由各业务表保存。
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ai_core_tasks (
+      id TEXT PRIMARY KEY,
+      actorId TEXT NOT NULL,
+      spaceId TEXT NOT NULL,
+      sessionId TEXT,
+      threadId TEXT,
+      requestId TEXT NOT NULL,
+      intent TEXT NOT NULL,
+      mode TEXT NOT NULL,
+      status TEXT NOT NULL,
+      idempotencyKey TEXT NOT NULL,
+      requestedCapabilitiesJson TEXT NOT NULL DEFAULT '[]',
+      requestFingerprint TEXT NOT NULL DEFAULT '',
+      planJson TEXT NOT NULL,
+      stepsJson TEXT NOT NULL DEFAULT '[]',
+      inputJson TEXT NOT NULL DEFAULT '{}',
+      contextJson TEXT NOT NULL DEFAULT '{}',
+      outputJson TEXT,
+      errorJson TEXT,
+      checkpointJson TEXT,
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL
+    );
+  `)
+  try { db.run("ALTER TABLE ai_core_tasks ADD COLUMN requestedCapabilitiesJson TEXT NOT NULL DEFAULT '[]'") } catch (_e) {}
+  try { db.run("ALTER TABLE ai_core_tasks ADD COLUMN requestFingerprint TEXT NOT NULL DEFAULT ''") } catch (_e) {}
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_ai_core_tasks_idempotency ON ai_core_tasks(actorId, idempotencyKey)')
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ai_core_task_events (
+      id TEXT PRIMARY KEY,
+      taskId TEXT NOT NULL,
+      type TEXT NOT NULL,
+      payloadJson TEXT NOT NULL DEFAULT '{}',
+      createdAt TEXT NOT NULL,
+      FOREIGN KEY (taskId) REFERENCES ai_core_tasks(id) ON DELETE CASCADE
+    );
+  `)
+  db.run('CREATE INDEX IF NOT EXISTS idx_ai_core_task_events_task ON ai_core_task_events(taskId, createdAt)')
 
   db.run(`
     CREATE TABLE IF NOT EXISTS messages (
@@ -311,6 +361,16 @@ async function initDatabase() {
     try { db.run(`ALTER TABLE resource_links ADD COLUMN ${column} TEXT`) } catch { /* 已迁移 */ }
   }
 
+  try { db.run('ALTER TABLE notes ADD COLUMN revision INTEGER NOT NULL DEFAULT 0') } catch {}
+  db.run(`CREATE TABLE IF NOT EXISTS note_link_occurrences (
+    id TEXT PRIMARY KEY, sourceNoteId TEXT NOT NULL, targetNoteId TEXT,
+    rawTarget TEXT NOT NULL, heading TEXT, alias TEXT, snippet TEXT,
+    occurrence INTEGER NOT NULL, sourceRevision INTEGER NOT NULL DEFAULT 0
+  )`)
+  db.run('CREATE INDEX IF NOT EXISTS idx_note_links_source ON note_link_occurrences(sourceNoteId)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_note_links_target ON note_link_occurrences(targetNoteId)')
+  db.run('CREATE TABLE IF NOT EXISTS note_link_state (noteId TEXT PRIMARY KEY, revision INTEGER NOT NULL)')
+
   // automation_tasks: 本地 DeepAgent 定时任务。cronExpression 使用本机时区的五字段 Cron。
   db.run(`
     CREATE TABLE IF NOT EXISTS automation_tasks (
@@ -515,37 +575,110 @@ function normalizeAutomationTask(row) {
   return row
 }
 
-export function createSession(title, mode = 'chat') {
+export function createSession(title, mode = 'chat', scope = 'friday', scopeKey = null) {
   const now = nowISO()
   const id = generateId()
   db.run(
-    'INSERT INTO sessions (id, title, mode, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)',
-    [id, title || '新对话', mode, now, now]
+    'INSERT INTO sessions (id, title, mode, scope, scopeKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [id, title || '新对话', mode, scope || 'friday', scopeKey || null, now, now]
   )
   saveDb()
-  return { id, title: title || '新对话', mode, createdAt: now, updatedAt: now }
+  return { id, title: title || '新对话', mode, scope: scope || 'friday', scopeKey: scopeKey || null, createdAt: now, updatedAt: now }
 }
 
-export function getSessions() {
-  return queryAll('SELECT * FROM sessions ORDER BY updatedAt DESC')
-}
-
-export function getSessionsWithStats(startDate, endDate) {
-  let sql, params
-  if (startDate && endDate) {
-    sql = 'SELECT * FROM sessions WHERE updatedAt >= ? AND updatedAt < ? ORDER BY updatedAt DESC'
-    params = [startDate, endDate]
-  } else if (startDate) {
-    sql = 'SELECT * FROM sessions WHERE updatedAt >= ? ORDER BY updatedAt DESC'
-    params = [startDate]
-  } else if (endDate) {
-    sql = 'SELECT * FROM sessions WHERE updatedAt < ? ORDER BY updatedAt DESC'
-    params = [endDate]
-  } else {
-    sql = 'SELECT * FROM sessions ORDER BY updatedAt DESC'
-    params = []
+export function getSessions(scope, scopeKey) {
+  const clauses = []
+  const params = []
+  if (scope !== undefined) { clauses.push('scope = ?'); params.push(scope) }
+  if (scope !== undefined || scopeKey !== undefined) {
+    if (scopeKey == null) clauses.push('scopeKey IS NULL')
+    else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
   }
+  const where = clauses.length ? ` WHERE ${clauses.join(' AND ')}` : ''
+  return queryAll(`SELECT * FROM sessions${where} ORDER BY updatedAt DESC`, params)
+}
 
+function parseJsonField(row, key, fallback) {
+  try { return row?.[key] == null ? fallback : JSON.parse(row[key]) } catch (_e) { return fallback }
+}
+
+export function saveAiCoreTask(task) {
+  const scrubUri = uri => crypto.createHash('sha256').update(String(uri)).digest('hex')
+  const safePlan = {
+    taskId: task.plan?.taskId,
+    mode: task.plan?.mode,
+    resourceUris: (task.plan?.resourceUris || []).map(scrubUri),
+    steps: (task.plan?.steps || []).map(step => ({
+      id: step.id, capabilityId: step.capabilityId, capabilityVersion: step.capabilityVersion,
+      risk: step.risk, type: step.type, approvalRequired: step.approvalRequired,
+      resources: (step.resources || []).map(scrubUri)
+    }))
+  }
+  const safeContext = task.requestContext ? {
+    actor: task.requestContext.actor,
+    spaceId: task.requestContext.spaceId,
+    sessionId: task.requestContext.sessionId,
+    threadId: task.requestContext.threadId,
+    requestId: task.requestContext.requestId,
+    scopes: task.requestContext.scopes
+  } : {}
+  const safeSteps = (task.steps || []).map(step => ({ stepId: step.stepId, capabilityId: step.capabilityId, completedAt: step.completedAt }))
+  db.run(`INSERT OR REPLACE INTO ai_core_tasks
+    (id, actorId, spaceId, sessionId, threadId, requestId, intent, mode, status, idempotencyKey,
+     requestedCapabilitiesJson, requestFingerprint, planJson, stepsJson, inputJson, contextJson, outputJson, errorJson, checkpointJson, createdAt, updatedAt)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+    task.id, task.actorId, task.spaceId, task.sessionId || null, task.threadId || null, task.requestId,
+    'AI Core 任务', task.mode || 'execute', task.status, task.idempotencyKey,
+    JSON.stringify(task.requestedCapabilities || []), task.requestFingerprint || '', JSON.stringify(safePlan), JSON.stringify(safeSteps), '{}',
+    JSON.stringify(safeContext), task.output == null ? null : JSON.stringify({ status: task.output.verification?.status || task.status }),
+    task.error == null ? null : JSON.stringify({ code: task.error.code || 'AI_CORE_EXECUTION_FAILED', stage: task.error.stage || 'execute' }),
+    task.checkpoint == null ? null : JSON.stringify({ capabilityId: task.checkpoint.capabilityId, status: task.checkpoint.status }),
+    task.createdAt, task.updatedAt
+  ])
+  saveDb()
+  return task
+}
+
+export function getAiCoreTask(id) {
+  const row = queryOne('SELECT * FROM ai_core_tasks WHERE id = ?', [id])
+  if (!row) return null
+  return {
+    id: row.id, actorId: row.actorId, spaceId: row.spaceId, sessionId: row.sessionId, threadId: row.threadId,
+    requestId: row.requestId, intent: row.intent, mode: row.mode, status: row.status, idempotencyKey: row.idempotencyKey,
+    requestedCapabilities: parseJsonField(row, 'requestedCapabilitiesJson', []), requestFingerprint: row.requestFingerprint || '',
+    plan: parseJsonField(row, 'planJson', {}), steps: parseJsonField(row, 'stepsJson', []), requestInput: parseJsonField(row, 'inputJson', {}),
+    requestContext: parseJsonField(row, 'contextJson', {}), output: parseJsonField(row, 'outputJson', null), error: parseJsonField(row, 'errorJson', null),
+    checkpoint: parseJsonField(row, 'checkpointJson', null), createdAt: row.createdAt, updatedAt: row.updatedAt
+  }
+}
+
+export function listAiCoreTasks(actorId) {
+  const rows = actorId ? queryAll('SELECT * FROM ai_core_tasks WHERE actorId = ? ORDER BY updatedAt DESC', [actorId]) : queryAll('SELECT * FROM ai_core_tasks ORDER BY updatedAt DESC')
+  return rows.map(row => getAiCoreTask(row.id))
+}
+
+export function saveAiCoreTaskEvent(event) {
+  db.run('INSERT OR REPLACE INTO ai_core_task_events (id, taskId, type, payloadJson, createdAt) VALUES (?, ?, ?, ?, ?)', [event.id, event.taskId, event.type, JSON.stringify(event.payload || {}), event.createdAt])
+  saveDb()
+  return event
+}
+
+export function listAiCoreTaskEvents(taskId) {
+  return queryAll('SELECT id, taskId, type, payloadJson, createdAt FROM ai_core_task_events WHERE taskId = ? ORDER BY createdAt ASC', [taskId]).map(row => ({ id: row.id, taskId: row.taskId, type: row.type, payload: parseJsonField(row, 'payloadJson', {}), createdAt: row.createdAt }))
+}
+
+export function getSessionsWithStats(startDate, endDate, scope, scopeKey) {
+  const clauses = []
+  const params = []
+  if (startDate) { clauses.push('updatedAt >= ?'); params.push(startDate) }
+  if (endDate) { clauses.push('updatedAt < ?'); params.push(endDate) }
+  if (scope !== undefined) { clauses.push('scope = ?'); params.push(scope) }
+  if (scope !== undefined || scopeKey !== undefined) {
+    if (scopeKey == null) clauses.push('scopeKey IS NULL')
+    else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
+  }
+  const where = clauses.length ? ' WHERE ' + clauses.join(' AND ') : ''
+  const sql = 'SELECT * FROM sessions' + where + ' ORDER BY updatedAt DESC'
   const sessions = queryAll(sql, params).map(s => {
     const stats = queryOne(
       'SELECT COUNT(*) as messageCount FROM messages WHERE sessionId = ?',
@@ -565,30 +698,39 @@ export function getSessionsWithStats(startDate, endDate) {
   // 是否还存在更早的会话（用于前端“查看更多”）
   let hasMore = false
   if (startDate) {
-    const older = queryOne(
-      'SELECT COUNT(*) as count FROM sessions WHERE updatedAt < ?',
-      [startDate]
-    )
+    const olderClauses = ['updatedAt < ?']
+    const olderParams = [startDate]
+    if (scope !== undefined) { olderClauses.push('scope = ?'); olderParams.push(scope) }
+    if (scope !== undefined || scopeKey !== undefined) {
+      if (scopeKey == null) olderClauses.push('scopeKey IS NULL')
+      else { olderClauses.push('scopeKey = ?'); olderParams.push(scopeKey) }
+    }
+    const olderSql = 'SELECT COUNT(*) as count FROM sessions WHERE ' + olderClauses.join(' AND ')
+    const older = queryOne(olderSql, olderParams)
     hasMore = !!(older && older.count > 0)
   }
 
   return { sessions, hasMore }
 }
 
-export function getSession(sessionId) {
-  return queryOne('SELECT * FROM sessions WHERE id = ?', [sessionId])
+export function getSession(sessionId, scope, scopeKey) {
+  const row = queryOne('SELECT * FROM sessions WHERE id = ?', [sessionId])
+  if (!row || (scope !== undefined && row.scope !== scope) || ((scope !== undefined || scopeKey !== undefined) && (row.scopeKey || null) !== (scopeKey || null))) return null
+  return row
 }
 
-export function deleteSession(sessionId) {
+export function deleteSession(sessionId, scope, scopeKey) {
+  if (!getSession(sessionId, scope, scopeKey)) return { automationRunsDeleted: 0, deleted: false }
   db.run('DELETE FROM automation_runs WHERE sessionId = ?', [sessionId])
   const automationRunsDeleted = db.getRowsModified()
   db.run('DELETE FROM messages WHERE sessionId = ?', [sessionId])
   db.run('DELETE FROM sessions WHERE id = ?', [sessionId])
   saveDb()
-  return { automationRunsDeleted }
+  return { automationRunsDeleted, deleted: true }
 }
 
-export function updateSessionTitle(sessionId, title) {
+export function updateSessionTitle(sessionId, title, scope, scopeKey) {
+  if (!getSession(sessionId, scope, scopeKey)) return false
   db.run(
     'UPDATE sessions SET title = ?, updatedAt = ? WHERE id = ?',
     [title, nowISO(), sessionId]
@@ -629,7 +771,8 @@ export function saveMessage(sessionId, role, content, metadata = null) {
   return { id, sessionId, role, content, createdAt: now, metadata }
 }
 
-export function getMessages(sessionId) {
+export function getMessages(sessionId, scope, scopeKey) {
+  if (!getSession(sessionId, scope, scopeKey)) return []
   const rows = queryAll('SELECT * FROM messages WHERE sessionId = ? ORDER BY id ASC', [sessionId])
   // 解析 metadata JSON
   return rows.map(row => {
@@ -747,9 +890,14 @@ export function getNote(noteId) {
   ))
 }
 
-export function updateNote(noteId, title, content, contentText, notebookId, marpContent) {
+export function updateNote(noteId, title, content, contentText, notebookId, marpContent, baseRevision) {
+  const before = getNote(noteId)
+  if (!before) return null
+  if (baseRevision !== undefined && Number(baseRevision) !== Number(before.revision || 0)) {
+    throw Object.assign(new Error('NOTE_REVISION_CONFLICT'), {code: 'NOTE_REVISION_CONFLICT'})
+  }
   const now = nowISO()
-  const sets = ['title = ?', 'content = ?', 'contentText = ?', 'updatedAt = ?']
+  const sets = ['title = ?', 'content = ?', 'contentText = ?', 'updatedAt = ?', 'revision = revision + 1']
   const params = [title, content, contentText, now]
   if (notebookId !== undefined) {
     sets.push('notebookId = ?')
@@ -761,12 +909,15 @@ export function updateNote(noteId, title, content, contentText, notebookId, marp
     params.push(marpContent)
   }
   params.push(noteId)
-  db.run(
-    `UPDATE notes SET ${sets.join(', ')} WHERE id = ?`,
-    params
-  )
-  const modified = db.getRowsModified()
-  saveDb()
+  db.run('BEGIN IMMEDIATE')
+  let modified
+  try {
+    db.run(`UPDATE notes SET ${sets.join(', ')} WHERE id = ?`, params)
+    modified = db.getRowsModified()
+    indexNoteLinks(noteId)
+    db.run('COMMIT')
+    saveDb()
+  } catch (error) { db.run('ROLLBACK'); throw error }
   if (modified > 0) {
     return normalizeNote(queryOne('SELECT * FROM notes WHERE id = ?', [noteId]))
   }
@@ -1434,4 +1585,56 @@ export function deleteParentDocsByKbType(kbType, kbRootPath) {
     [`${kbRootPath}%`]
   )
   saveDb()
+}
+
+// 链接是正文的派生索引；旧人工关联继续保存在 resource_links。
+export function indexNoteLinks(noteId) {
+  const note = getNote(noteId)
+  if (!note) return
+  const previous = queryAll('SELECT * FROM note_link_occurrences WHERE sourceNoteId = ?', [noteId])
+  const notes = queryAll('SELECT id, title FROM notes WHERE isDeleted = 0')
+  const links = extractNoteLinks(note.content || '')
+  db.run('DELETE FROM note_link_occurrences WHERE sourceNoteId = ?', [noteId])
+  for (const link of links) db.run('INSERT INTO note_link_occurrences VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [generateId(), noteId, resolveTarget(link, notes, previous), link.rawTarget, link.heading, link.alias,
+      link.snippet, link.occurrence, note.revision || 0])
+  db.run('INSERT OR REPLACE INTO note_link_state VALUES (?, ?)', [noteId, note.revision || 0])
+  saveDb()
+}
+
+export function rebuildNoteLinks() {
+  const pending = queryAll(`SELECT n.id FROM notes n LEFT JOIN note_link_state s ON s.noteId=n.id
+    WHERE n.isDeleted=0 AND (s.noteId IS NULL OR s.revision <> n.revision)`)
+  db.run('BEGIN IMMEDIATE')
+  try {
+    for (const row of pending) indexNoteLinks(row.id)
+    db.run('COMMIT'); saveDb()
+  } catch (error) { db.run('ROLLBACK'); throw error }
+  return pending.length
+}
+
+export function getNoteLinks(noteId, {offset = 0, limit = 100} = {}) {
+  rebuildNoteLinks()
+  const notes = queryAll('SELECT id, title FROM notes WHERE isDeleted = 0')
+  for (const link of queryAll('SELECT * FROM note_link_occurrences WHERE targetNoteId IS NULL')) {
+    const id = resolveTarget(link, notes)
+    if (id) db.run('UPDATE note_link_occurrences SET targetNoteId = ? WHERE id = ?', [id, link.id])
+  }
+  saveDb()
+  const take = Math.max(1, Math.min(200, Number(limit) || 100))
+  const skip = Math.max(0, Math.floor(Number(offset) || 0))
+  const outgoing = queryAll(`SELECT l.*, n.title AS title FROM note_link_occurrences l
+    JOIN notes n ON n.id=l.targetNoteId WHERE l.sourceNoteId=? AND n.isDeleted=0 ORDER BY l.occurrence LIMIT ? OFFSET ?`, [noteId, take, skip])
+  const incoming = queryAll(`SELECT l.*, n.title AS title FROM note_link_occurrences l JOIN notes n ON n.id=l.sourceNoteId
+    WHERE l.targetNoteId=? AND n.isDeleted=0 ORDER BY n.updatedAt DESC, l.occurrence LIMIT ? OFFSET ?`, [noteId, take, skip])
+  const unresolved=queryAll(`SELECT l.* FROM note_link_occurrences l LEFT JOIN notes n ON n.id=l.targetNoteId
+    WHERE l.sourceNoteId=? AND (n.id IS NULL OR n.isDeleted=1) ORDER BY l.occurrence LIMIT ? OFFSET ?`,[noteId,take,skip])
+  const uri=`friday://notes/${encodeURIComponent(noteId)}`,related=[]
+  const directed=new Set(queryAll('SELECT sourceNoteId,targetNoteId FROM note_link_occurrences WHERE sourceNoteId=? OR targetNoteId=?',[noteId,noteId]).flatMap(l=>[l.sourceNoteId,l.targetNoteId]))
+  const seen=new Set()
+  for(const link of queryAll("SELECT * FROM resource_links WHERE relation='note-bidirectional' AND (fromUri=? OR toUri=?) ORDER BY createdAt DESC",[uri,uri])){
+    const target=notes.find(n=>`friday://notes/${encodeURIComponent(n.id)}`===(link.fromUri===uri?link.toUri:link.fromUri))
+    if(target&&!directed.has(target.id)&&!seen.has(target.id)){seen.add(target.id);related.push({id:link.id,targetNoteId:target.id,title:target.title,snippet:link.evidence})}
+  }
+  return {outgoing,incoming,unresolved,related:related.slice(skip,skip+take),hasMore:{outgoing:outgoing.length===take,incoming:incoming.length===take,unresolved:unresolved.length===take,related:related.length>skip+take}}
 }

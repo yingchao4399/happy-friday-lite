@@ -2,6 +2,7 @@
   <div class="tab-bar-container">
     <div v-if="isMac" class="mac-traffic-lights-spacer"></div>
     <div class="tab-bar-left" :class="{ 'linux-left': !isMac }">
+      <button class="sidebar-toggle-btn" type="button" :title="t('workspace.commands.title')" :aria-label="t('workspace.commands.title')" @click="openCommands">⌘</button>
       <button class="sidebar-toggle-btn" @click="appStore.toggleSidebar()">
         <PanelLeftClose v-if="appStore.sidebarVisible" :size="16" :stroke-width="1.8" />
         <PanelLeftOpen v-else :size="16" :stroke-width="1.8" />
@@ -100,6 +101,7 @@
 </template>
 
 <script setup>
+function openCommands(){window.dispatchEvent(new Event('friday:open-commands'))}
 import { useTabStore, useAppStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';

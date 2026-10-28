@@ -437,6 +437,11 @@ const VIRTUAL_TOOLS = [
   { name: 'discover_capabilities', description: '列出当前客户端已获授权的 Friday 能力及参数格式。', inputSchema: { type: 'object', properties: {} } },
   { name: 'search_resources', description: '跨 Friday 内容搜索。', inputSchema: { type: 'object', properties: { query: { type: 'string' }, limit: { type: 'integer' } }, required: ['query'] } },
   { name: 'invoke_capability', description: '按名称通过 Friday AI Core 执行一项已授权能力。', inputSchema: { type: 'object', properties: { name: { type: 'string' }, args: { type: 'object' } }, required: ['name'] } },
+  { name: 'submit_core_task', description: '提交 Friday AI Core 任务；返回与桌面端相同的 taskId、计划和审批状态。', inputSchema: { type: 'object', properties: { intent: { type: 'string' }, requestedCapabilities: { type: 'array', items: { type: 'string' } }, input: { type: 'object' }, context: { type: 'object' }, idempotencyKey: { type: 'string' } }, required: ['intent', 'requestedCapabilities'] } },
+  { name: 'get_core_task_status', description: '查询 AI Core 任务状态、结果、事件和验证信息。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'approve_core_task', description: '批准一个等待用户授权的 AI Core 写任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'cancel_core_task', description: '取消一个 AI Core 任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'undo_core_task', description: '撤销已完成且仍满足安全条件的 AI Core 任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
   { name: 'submit_task', description: '提交异步任务，可提供自然语言 instruction 或已规划的 steps。', inputSchema: { type: 'object', properties: { instruction: { type: 'string' }, steps: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, args: { type: 'object' } }, required: ['name'] } } } } },
   { name: 'get_task_status', description: '查询本客户端任务状态、结果及执行记录。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
   { name: 'cancel_task', description: '取消本客户端仍在运行的任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
@@ -478,6 +483,26 @@ function buildLocalServer(client) {
       let result
       if (name === 'discover_capabilities') {
         result = availableToolSpecs(client).map(item => ({ name: item.name, description: item.description, inputSchema: item.inputSchema, scopes: getRequiredScopes(item.def) }))
+      } else if (name === 'submit_core_task') {
+        const { getAiCoreRuntime } = await import('../ai-core/ipc.js')
+        const actor = { id: ctx.actor, type: 'mcp', clientId: client.id }
+        const request = {
+          intent: args.intent,
+          requestedCapabilities: args.requestedCapabilities,
+          input: args.input || {},
+          idempotencyKey: args.idempotencyKey,
+          mode: 'execute',
+          context: { ...(args.context || {}), actor, scopes: client.scopes, requestId: ctx.requestId, spaceId: args.context?.spaceId || `mcp:${client.id}` }
+        }
+        result = await (await getAiCoreRuntime()).submit(request)
+      } else if (name === 'get_core_task_status' || name === 'approve_core_task' || name === 'cancel_core_task' || name === 'undo_core_task') {
+        const { getAiCoreRuntime } = await import('../ai-core/ipc.js')
+        const runtime = await getAiCoreRuntime()
+        const taskId = args.taskId
+        if (name === 'get_core_task_status') result = runtime.get(taskId, ctx.actor)
+        else if (name === 'approve_core_task') result = runtime.approve(taskId, ctx.actor)
+        else if (name === 'cancel_core_task') result = runtime.cancel(taskId, ctx.actor)
+        else result = await runtime.undo(taskId, ctx.actor)
       } else if (name === 'submit_task') {
         result = submitExternalTask(args, ctx.actor, client.scopes)
       } else if (name === 'get_task_status') {

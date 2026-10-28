@@ -1,0 +1,11 @@
+{
+  "batch": "shortcuts",
+  "checks": [
+    "真实快捷键设置录制 Ctrl+Shift+J，主进程保存并通过按键打开命令面板",
+    "清除后旧键失效，恢复默认后 Ctrl+Shift+P 生效",
+    "实际录制 Office 打印保留键被拒绝；与设置默认键冲突时显示提示并可取消",
+    "真实文件输入导入快捷键 JSON，导出按钮生成相同版本/绑定内容"
+  ],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-shortcuts-0tpvQ8",
+  "ok": true
+}

@@ -11,6 +11,7 @@ import {useNocturneSettings} from '../nocturne-core/lib/nocturne/store';
 import {typewriterService} from '@/services/typewriter';
 import {activateContent} from '../content-plugin';
 import {i18n} from '@/i18n';
+import {terminalTheme} from './terminal-theme';
 
 export function TerminalSurface() {
   const host = useRef<HTMLDivElement>(null);
@@ -24,7 +25,11 @@ export function TerminalSurface() {
     let session = '';
     setStatus('terminalStarting');
     const pending = new Map<string, string[]>();
-    const xterm = new Terminal({allowProposedApi: true, allowTransparency: true, scrollback: 5000});
+    const paper = activePaper(settings);
+    const xterm = new Terminal({allowProposedApi:true, allowTransparency:true, scrollback:5000,
+      fontFamily:fontStack(settings.typography),fontSize:settings.typography.fontSize,
+      minimumContrastRatio:settings.typography.contrastPolicy === 'exact' ? 1 : settings.typography.minimumContrast,
+      theme:terminalTheme(paper)});
     const fit = new FitAddon();
     xterm.loadAddon(fit);
     xterm.open(host.current);
@@ -61,6 +66,9 @@ export function TerminalSurface() {
     };
     const observer = new ResizeObserver(resize);
     observer.observe(host.current);
+    window.addEventListener('friday:typography-ready', resize);
+    const typographyResize = () => { void document.fonts.ready.then(resize); };
+    window.addEventListener('friday:typography-change', typographyResize);
     // 先注册事件，再启动 PTY，接收创建响应前的启动输出。
     void document.fonts.ready.then(async () => {
       if (closed) return;
@@ -74,6 +82,8 @@ export function TerminalSurface() {
       setStatus(''); resize(); xterm.focus();
     });
     return () => {
+      window.removeEventListener('friday:typography-ready', resize);
+      window.removeEventListener('friday:typography-change', typographyResize);
       closed = true; observer.disconnect(); data(); exit(); input.dispose();
       bridge.dispose(); deactivate(); setActiveTerminal(null);
       if (session) void typewriterService.killTerminal(session);
@@ -87,6 +97,7 @@ export function TerminalSurface() {
     if (!xterm) return;
     const paper = activePaper(settings);
     const type = settings.typography;
+    xterm.options.minimumContrastRatio = type.contrastPolicy === 'exact' ? 1 : type.minimumContrast;
     xterm.options.fontFamily = fontStack(type);
     xterm.options.fontSize = type.fontSize;
     xterm.options.fontWeight = type.fontWeight;
@@ -95,9 +106,10 @@ export function TerminalSurface() {
     xterm.options.letterSpacing = type.letterSpacing;
     xterm.options.cursorStyle = drawnCursorOn(settings) ? 'bar' : type.cursorStyle;
     xterm.options.cursorBlink = !drawnCursorOn(settings) && type.cursorBlink;
-    xterm.options.theme = {...paper.ansi, background: '#00000000', foreground: paper.ink,
+    xterm.options.theme = {...terminalTheme(paper),
       cursor: drawnCursorOn(settings) ? '#00000000' : paper.cursor,
       selectionBackground: inkSelectionOn(settings) ? '#00000000' : paper.selection};
+    window.dispatchEvent(new Event('friday:typography-change'));
   }, [settings, generation]);
   return <div className="tn-terminal-plugin" data-plugin="terminal">
     <div ref={host} className="tn-terminal-host" />

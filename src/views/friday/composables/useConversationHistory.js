@@ -5,7 +5,7 @@ import { useFridayStore } from '@/store';
 export async function refreshHistorySessions() {
   const fridayStore = useFridayStore();
   try {
-    const sessions = await electronService.invoke('get_sessions');
+    const sessions = await electronService.invoke('get_sessions', { scope: 'friday', scopeKey: null });
     fridayStore.setHistorySessions((sessions || []).slice(0, 50));
   } catch (err) {
     console.error('Failed to load conversation history:', err);

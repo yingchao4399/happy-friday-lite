@@ -1,0 +1,231 @@
+{
+  "ok": true,
+  "legacy": {
+    "legacy": true,
+    "paperId": "laid",
+    "theme": {
+      "black": "#2b231c",
+      "red": "#9c3a2a",
+      "green": "#4c6b2f",
+      "yellow": "#8a6a1c",
+      "blue": "#2f5277",
+      "magenta": "#7b3f6e",
+      "cyan": "#2e6b6a",
+      "white": "#7d7060",
+      "lightBlack": "#6e6153",
+      "lightRed": "#b0452a",
+      "lightGreen": "#557a33",
+      "lightYellow": "#94701a",
+      "lightBlue": "#3a6491",
+      "lightMagenta": "#8c4a7e",
+      "lightCyan": "#317876",
+      "lightWhite": "#5b4f43",
+      "background": "#00000000",
+      "foreground": "#2a2019"
+    },
+    "ansi": [
+      "#2b231c",
+      "#9c3a2a",
+      "#4c6b2f",
+      "#8a6a1c",
+      "#2f5277",
+      "#7b3f6e",
+      "#2e6b6a",
+      "#7d7060",
+      "#555753",
+      "#ef2929",
+      "#8ae234",
+      "#fce94f",
+      "#729fcf",
+      "#ad7fa8",
+      "#34e2e2",
+      "#eeeeec"
+    ],
+    "rows": [
+      {
+        "color": [
+          132,
+          125,
+          120
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          252,
+          233,
+          79
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          173,
+          127,
+          168
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          255,
+          255,
+          0
+        ],
+        "blank": 1496
+      }
+    ]
+  },
+  "fixed": {
+    "legacy": false,
+    "paperId": "laid",
+    "theme": {
+      "background": "rgba(241, 233, 214, 0)",
+      "foreground": "#2a2019",
+      "black": "#2b231c",
+      "brightBlack": "#6e6153",
+      "red": "#9c3a2a",
+      "brightRed": "#b0452a",
+      "green": "#4c6b2f",
+      "brightGreen": "#557a33",
+      "yellow": "#8a6a1c",
+      "brightYellow": "#94701a",
+      "blue": "#2f5277",
+      "brightBlue": "#3a6491",
+      "magenta": "#7b3f6e",
+      "brightMagenta": "#8c4a7e",
+      "cyan": "#2e6b6a",
+      "brightCyan": "#317876",
+      "white": "#7d7060",
+      "brightWhite": "#5b4f43"
+    },
+    "ansi": [
+      "#2b231c",
+      "#9c3a2a",
+      "#4c6b2f",
+      "#8a6a1c",
+      "#2f5277",
+      "#7b3f6e",
+      "#2e6b6a",
+      "#7d7060",
+      "#6e6153",
+      "#b0452a",
+      "#557a33",
+      "#94701a",
+      "#3a6491",
+      "#8c4a7e",
+      "#317876",
+      "#5b4f43"
+    ],
+    "rows": [
+      {
+        "color": [
+          42,
+          32,
+          25
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          133,
+          100,
+          23
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          140,
+          74,
+          126
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          108,
+          108,
+          0
+        ],
+        "blank": 1496
+      }
+    ]
+  },
+  "night": {
+    "legacy": false,
+    "paperId": "night",
+    "theme": {
+      "background": "rgba(29, 26, 32, 0)",
+      "foreground": "#e6e1ea",
+      "black": "#2a2b42",
+      "brightBlack": "#6f7192",
+      "red": "#d88a9a",
+      "brightRed": "#eba5b3",
+      "green": "#9cc3a4",
+      "brightGreen": "#b4d8bc",
+      "yellow": "#e2cf9a",
+      "brightYellow": "#efdfb2",
+      "blue": "#8ea8e0",
+      "brightBlue": "#aac0ef",
+      "magenta": "#b79ce0",
+      "brightMagenta": "#cbb5ef",
+      "cyan": "#8cc8d6",
+      "brightCyan": "#a8dbe6",
+      "white": "#c9cadf",
+      "brightWhite": "#f0f0fa"
+    },
+    "ansi": [
+      "#2a2b42",
+      "#d88a9a",
+      "#9cc3a4",
+      "#e2cf9a",
+      "#8ea8e0",
+      "#b79ce0",
+      "#8cc8d6",
+      "#c9cadf",
+      "#6f7192",
+      "#eba5b3",
+      "#b4d8bc",
+      "#efdfb2",
+      "#aac0ef",
+      "#cbb5ef",
+      "#a8dbe6",
+      "#f0f0fa"
+    ],
+    "rows": [
+      {
+        "color": [
+          230,
+          225,
+          234
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          239,
+          223,
+          178
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          203,
+          181,
+          239
+        ],
+        "blank": 1496
+      },
+      {
+        "color": [
+          255,
+          255,
+          0
+        ],
+        "blank": 1496
+      }
+    ]
+  }
+}

@@ -106,7 +106,7 @@ function runCli(args, { timeoutMs = 120000 } = {}) {
 
 /** 写类操作审批（与 execute_command 相同的 HITL 通道） */
 async function requireApproval(ctx, toolName, args, description) {
-  if (ctx.autoApprove || ctx.unattended) return null
+  if (ctx.autoApprove || ctx.unattended || ctx.capabilityPolicy?.approvalGranted) return null
   const riskAssessment = ctx.currentRiskAssessment
   if (!isValidRiskAssessment(riskAssessment)) {
     return '参数错误：该写操作需要用户审批，必须提供结合本次操作的 riskAssessment（level 与 evaluation）。'
@@ -189,7 +189,7 @@ registerTool({
     }
     return runCli(['info', args.filePath, '--json'])
   },
-  meta: { requireApproval: false },
+  meta: { requireApproval: false, exposedViaMcp: true, capabilityType: 'read', supportsReadback: true, readbackFor: ['office_create', 'note_to_word', 'office_edit_active', 'office_export'] },
 })
 
 // ---- office_create -----------------------------------------------------------

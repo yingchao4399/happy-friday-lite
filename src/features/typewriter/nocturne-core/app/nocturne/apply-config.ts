@@ -5,6 +5,7 @@
 // terminal stream; it only produces a config object.
 
 import {luminanceOfUnit, toUnit} from './color';
+import {resolveInk} from './ink';
 import {PAPERS} from './papers';
 import type {Paper} from './papers';
 import {fontStack} from './settings';
@@ -24,6 +25,10 @@ export function activeTheme(settings: NocturneSettings): NocturneTheme | null {
  * user's own; a custom colour takes the light or the night paper's inks, whichever reads on it.
  */
 export function activePaper(settings: NocturneSettings): Paper {
+  return resolveInk(basePaper(settings), settings.typography);
+}
+
+function basePaper(settings: NocturneSettings): Paper {
   const chosen = PAPERS[settings.paper.style];
   if (!settings.focusMode || settings.focus.background === 'paper') {
     return chosen;
@@ -79,7 +84,7 @@ export function drawnCursorOn(settings: NocturneSettings): boolean {
 export function extraTerminalOptions(settings: NocturneSettings) {
   return {
     cursorWidth: drawnCursorOn(settings) ? 1 : settings.typography.cursorWidth,
-    minimumContrastRatio: settings.typography.minimumContrast
+    minimumContrastRatio: settings.typography.contrastPolicy === 'exact' ? 1 : settings.typography.minimumContrast
   };
 }
 

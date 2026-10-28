@@ -20,6 +20,8 @@ export function themeVariables(theme: NocturneTheme, settings: NocturneSettings)
   const variables: Record<string, string> = {
     '--tn-room': palette.room,
     '--tn-sheet': activePaper(settings).paper,
+    '--tn-sheet-ink': activePaper(settings).ink,
+    '--tn-sheet-muted': activePaper(settings).inkMuted,
     '--tn-cursor': activePaper(settings).cursor,
     '--tn-room-edge': palette.roomEdge,
     '--tn-paper': palette.paper,

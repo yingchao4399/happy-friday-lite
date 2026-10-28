@@ -1,0 +1,190 @@
+{
+  "mode": "dev",
+  "checks": [
+    "设置三个正式入口可见；插件/市场/快捷键/命令面板同字体与标题规格；无侧栏重复按钮",
+    "Office 新建、撤销、重做和打印通过真实原生编辑器菜单运行，文档及焦点保留",
+    "真实 PowerShell 输入/输出；四款本地字体及字号/墨色热切换；PTY、xterm 实例保持；原作开关/预览样式",
+    "笔记首页引用卡片/内链/WikiLink 实际点击；出链/反链列表跳转；打字机 Ctrl 点击；内置使用说明"
+  ],
+  "ok": true,
+  "general": {
+    "font": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, \"Apple Color Emoji\", Arial, sans-serif, \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+    "title": "24px",
+    "entries": [
+      {
+        "text": "快捷键设置\n查看、录制和管理应用内快捷键",
+        "rect": {
+          "x": 261.6000061035156,
+          "y": 187.1999969482422,
+          "width": 720,
+          "height": 68.5999984741211,
+          "top": 187.1999969482422,
+          "right": 981.6000061035156,
+          "bottom": 255.79999542236328,
+          "left": 261.6000061035156
+        }
+      },
+      {
+        "text": "插件管理\n管理已安装插件、启停和插件设置",
+        "rect": {
+          "x": 261.6000061035156,
+          "y": 255.8000030517578,
+          "width": 720,
+          "height": 68.5999984741211,
+          "top": 255.8000030517578,
+          "right": 981.6000061035156,
+          "bottom": 324.4000015258789,
+          "left": 261.6000061035156
+        }
+      },
+      {
+        "text": "插件市场\n浏览、搜索并安装社区插件",
+        "rect": {
+          "x": 261.6000061035156,
+          "y": 324.3999938964844,
+          "width": 720,
+          "height": 67.80000305175781,
+          "top": 324.3999938964844,
+          "right": 981.6000061035156,
+          "bottom": 392.1999969482422,
+          "left": 261.6000061035156
+        }
+      }
+    ]
+  },
+  "officePrint": {
+    "text": "文件\n自动保存\n开始\n插入\n绘图\n设计\n布局\n引用\n审阅\n视图\nFriday\nAI 总结\nAI 润色\nAI 排版\n粘贴\nB\nI\nU\nab\n1\n2\n3\nA\nZ\nAa文\n正文\nAa文\n标题 1\nAa文\n标题 2\nAa文\n标题 3\nAa\n强调\nAa\n明显强调\nFriday\n让 AI 帮你写作和修改\n可以下达指令,也可以直接提问;\n选中文字后,改写类指令默认作用于选区。\n总结这篇文档的要点\n润色全文,使语气更专业\n接着现有内容往下写\n找出并填写文档里的占位符\n修订追踪\n \n \n\nOFFICE_COMMAND_17\n\n第 1 页,共 1 页\n3 个字\n— 已新建空白文档,可在左侧 AI 面板直接描述要生成的内容\n−\n+\n100%\n打印\n\nOFFICE_COMMAND_17\n\n‹\n1 / 1\n›\n打印设置\n份数\n颜色\n彩色\n黑白\n单双面\n单面打印\n双面 · 长边翻转\n双面 · 短边翻转\n逐份打印\n\n打印机、纸张和驱动参数可在下一步系统打印窗口调整；双面功能取决于打印机支持。\n\n打印范围\n所有页\n当前页\n自定义范围\n共 1 页\n取消\n打印",
+    "dialogs": 0
+  },
+  "office": [
+    {
+      "type": "docs",
+      "viewId": "docs-1",
+      "filePath": null,
+      "open": true
+    }
+  ],
+  "fonts": [
+    {
+      "font": "jetbrains-mono",
+      "family": "\"JetBrains Mono\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace",
+      "size": 15,
+      "cell": {
+        "width": 8.804123711340207,
+        "height": 28
+      }
+    },
+    {
+      "font": "fira-code",
+      "family": "\"Fira Code\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace",
+      "size": 15,
+      "cell": {
+        "width": 8.804123711340207,
+        "height": 28
+      }
+    },
+    {
+      "font": "sarasa-mono-sc",
+      "family": "\"Sarasa Mono SC\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace",
+      "size": 15,
+      "cell": {
+        "width": 7.201680672268908,
+        "height": 25.61111111111111
+      }
+    },
+    {
+      "font": "courier-prime",
+      "family": "\"Courier Prime\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace",
+      "size": 15,
+      "cell": {
+        "width": 8.804123711340207,
+        "height": 24
+      }
+    }
+  ],
+  "terminal": {
+    "theme": {
+      "background": "rgba(242, 241, 234, 0)",
+      "foreground": "#702738",
+      "black": "#2b231c",
+      "brightBlack": "#6e6153",
+      "red": "#9c3a2a",
+      "brightRed": "#b0452a",
+      "green": "#4c6b2f",
+      "brightGreen": "#557a33",
+      "yellow": "#8a6a1c",
+      "brightYellow": "#94701a",
+      "blue": "#2f5277",
+      "brightBlue": "#3a6491",
+      "magenta": "#7b3f6e",
+      "brightMagenta": "#8c4a7e",
+      "cyan": "#2e6b6a",
+      "brightCyan": "#317876",
+      "white": "#7d7060",
+      "brightWhite": "#5b4f43",
+      "cursor": "#00000000",
+      "selectionBackground": "#00000000"
+    },
+    "contrast": 4.5,
+    "dimensions": {
+      "width": 12,
+      "height": 32
+    },
+    "screen": "\nPS C:\\Users\\Administrator>\nPS C:\\Users\\Administrator> echo 'FRIDAY_TERMINAL\nPS C:\\Users\\Administrator> echo 'FRIDAY_TERMINAL\n_17 中文'\nFRIDAY_TERMINAL_17 中文\nPS C:\\Users\\Administrator>\n\n\nPS C:\\Users\\Administrator> echo 'FRIDAY_TERMINAL\n_17 中文'\nFRIDAY_TERMINAL_17 中文\nPS C:\\Users\\Administrator>\n\n\n\n\n\n\n\n\n\n",
+    "stage": {
+      "render": "high",
+      "machine": "drawn",
+      "motion": "moving"
+    }
+  },
+  "heading": {
+    "requests": [
+      {
+        "noteId": "5bba7133-5319-4466-a50a-2ff179579797",
+        "heading": "锚点",
+        "surface": "typewriter"
+      }
+    ],
+    "source": "<h1 data-note-title=\"true\">来源笔记 A</h1>\n\n[点击内链 B](friday://notes/5bba7133-5319-4466-a50a-2ff179579797#锚点)\n\n<div data-note-reference=\"true\" data-kind=\"note\" data-source-id=\"5bba7133-5319-4466-a50a-2ff179579797\" data-source-uri=\"friday://notes/5bba7133-5319-4466-a50a-2ff179579797\" data-title=\"引用卡片 B\">引用卡片 B</div>\n\n\\[\\[目标笔记 B#锚点|Wiki 别名\\]\\]",
+    "text": "<h1 data-note-title=\"true\">目标笔记 B</h1>\n\n## 锚点\n\nTARGET\\_BODY\\_17",
+    "position": 40
+  },
+  "links": {
+    "outgoing": [
+      {
+        "id": "d34819ad-c7e1-463b-9c6d-bc9f6c4b2427",
+        "sourceNoteId": "8642e085-f9a0-43de-b1f8-9b35620547e5",
+        "targetNoteId": "5bba7133-5319-4466-a50a-2ff179579797",
+        "rawTarget": "5bba7133-5319-4466-a50a-2ff179579797",
+        "heading": "锚点",
+        "alias": "点击内链 B",
+        "snippet": "点击内链 B",
+        "occurrence": 0,
+        "sourceRevision": 1,
+        "title": "目标笔记 B"
+      },
+      {
+        "id": "9ff49937-4874-467c-8b83-bc67751de182",
+        "sourceNoteId": "8642e085-f9a0-43de-b1f8-9b35620547e5",
+        "targetNoteId": "5bba7133-5319-4466-a50a-2ff179579797",
+        "rawTarget": "目标笔记 B",
+        "heading": "锚点",
+        "alias": "Wiki 别名",
+        "snippet": "来源笔记 A点击内链 B引用卡片 B[[目标笔记 B#锚点|Wiki 别名]]",
+        "occurrence": 1,
+        "sourceRevision": 1,
+        "title": "目标笔记 B"
+      }
+    ],
+    "incoming": [],
+    "unresolved": [],
+    "related": [],
+    "hasMore": {
+      "outgoing": false,
+      "incoming": false,
+      "unresolved": false,
+      "related": false
+    }
+  },
+  "errors": []
+}

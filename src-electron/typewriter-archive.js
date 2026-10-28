@@ -16,6 +16,40 @@ var ARCHIVE_CHANNELS = {
   reveal: "typewriter-archive-reveal"
 };
 
+// src/features/typewriter/nocturne-core/app/nocturne/color.ts
+var HEX = /^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+var RGB_FN = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(0|1|0?\.\d+|1\.0+)\s*)?\)$/i;
+function parseColor(input) {
+  if (typeof input !== "string") {
+    return null;
+  }
+  const value = input.trim();
+  const hex = HEX.exec(value);
+  if (hex) {
+    let digits = hex[1];
+    if (digits.length <= 4) {
+      digits = Array.from(digits, (d) => d + d).join("");
+    }
+    const channel = (index) => parseInt(digits.slice(index * 2, index * 2 + 2), 16);
+    return {
+      r: channel(0),
+      g: channel(1),
+      b: channel(2),
+      a: digits.length === 8 ? channel(3) / 255 : 1
+    };
+  }
+  const fn = RGB_FN.exec(value);
+  if (fn) {
+    const [r, g, b] = [fn[1], fn[2], fn[3]].map(Number);
+    if (r > 255 || g > 255 || b > 255) {
+      return null;
+    }
+    return { r, g, b, a: fn[4] === void 0 ? 1 : Number(fn[4]) };
+  }
+  return null;
+}
+var isColor = (input) => parseColor(input) !== null;
+
 // src/features/typewriter/nocturne-core/app/nocturne/papers.ts
 var LIGHT_ANSI = {
   black: "#2b231c",
@@ -292,13 +326,15 @@ var THEMES = {
 var THEME_IDS = Object.keys(THEMES);
 
 // src/features/typewriter/nocturne-core/app/nocturne/settings.ts
-var CJK_FALLBACK = '"PingFang SC", "Hiragino Sans", "Noto Sans Mono CJK SC", "Noto Sans CJK SC", "Microsoft YaHei", "Yu Gothic"';
+var CJK_FALLBACK = '"Sarasa Mono SC", "PingFang SC", "Hiragino Sans", "Noto Sans Mono CJK SC", "Noto Sans CJK SC", "Microsoft YaHei", "Yu Gothic"';
 var MONO_FALLBACK = `ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Mono", "DejaVu Sans Mono", ${CJK_FALLBACK}, monospace`;
 var FONTS = [
   { id: "ibm-plex-mono", label: "IBM Plex Mono", bundled: true, family: "IBM Plex Mono", ligatures: false },
   { id: "courier-prime", label: "Courier Prime", bundled: true, family: "Courier Prime", ligatures: false },
+  { id: "fira-code", label: "Fira Code", bundled: true, family: "Fira Code", ligatures: true },
+  { id: "sarasa-mono-sc", label: "Sarasa Mono SC", bundled: true, family: "Sarasa Mono SC", ligatures: false },
   { id: "system", label: "System monospace", bundled: false, family: "", ligatures: false },
-  { id: "jetbrains-mono", label: "JetBrains Mono", bundled: false, family: "JetBrains Mono", ligatures: true },
+  { id: "jetbrains-mono", label: "JetBrains Mono", bundled: true, family: "JetBrains Mono", ligatures: true },
   { id: "monaspace-neon", label: "Monaspace Neon", bundled: false, family: "Monaspace Neon", ligatures: true },
   { id: "commit-mono", label: "Commit Mono", bundled: false, family: "CommitMono", ligatures: false },
   { id: "recursive-mono", label: "Recursive Mono", bundled: false, family: "Recursive Mono Linear", ligatures: true },
@@ -360,6 +396,7 @@ var signature = (value, fallback) => typeof value === "string" ? value.replace(/
 function sanitizeFolioStyle(raw, base = defaultFolioStyle()) {
   const value = isDict(raw) ? raw : {};
   return {
+    ...typeof value.inkColor === "string" && isColor(value.inkColor) ? { inkColor: value.inkColor } : base.inkColor ? { inkColor: base.inkColor } : {},
     paper: oneOf(value.paper, FOLIO_PAPERS, base.paper),
     sealColor: oneOf(value.sealColor, SEAL_COLORS, base.sealColor),
     monogram: monogram(value.monogram, base.monogram),

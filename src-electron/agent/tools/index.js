@@ -15,12 +15,14 @@ import './builtin/knowledgeBase.js'
 
 // Friday Core 跨内容统一搜索（结构化资源 + 知识库）
 import './builtin/searchAll.js'
+import './builtin/aiChat.js'
 import './builtin/resources.js'
 import './builtin/uiControl.js'
 import './builtin/appActions.js'
 
 // 笔记操作工具（search/get/create/update）
 import './builtin/noteOps.js'
+import './builtin/noteToWord.js'
 
 // 绘图操作工具（list/get/create/update/layout）
 import './builtin/drawingOps.js'

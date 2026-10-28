@@ -1,6 +1,9 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 export const routes = [
+  {path:'/settings/plugins',name:'settings-plugins',component:()=>import('@/views/settings/SettingsPlugins.vue')},
+  {path:'/settings/plugin-market',name:'settings-plugin-market',component:()=>import('@/views/settings/SettingsPlugins.vue')},
+  {path:'/settings/shortcuts',name:'settings-shortcuts',component:()=>import('@/views/settings/SettingsShortcuts.vue')},
   {
     path: '/typewriter',
     name: 'typewriter',

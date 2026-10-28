@@ -26,6 +26,7 @@ import type {
 import {getSettings, setSettings, updateSettings} from '../store';
 
 import {percent, Section, Segmented, Slider, Switch} from './controls';
+import {InkPicker} from './ink-picker';
 import {FontPicker} from './font-picker';
 
 const THEME_IDS: ThemeId[] = ['paper-and-ink', 'midnight-study', 'moonlit-poetry'];
@@ -212,6 +213,7 @@ export function Studio({settings, drawing, onClose, onPress}: StudioProps) {
       </Section>
 
       <Section title={tr("Type")}>
+        <InkPicker settings={settings} />
         <FontPicker typography={typography} onChange={type} />
         <Slider
           label={tr("Type size")}

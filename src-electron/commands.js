@@ -49,7 +49,12 @@ import { registerRecitationCommands } from './recitation-ipc.js'
 import { deleteNoteToTrash, deleteResourceToTrash, listTrashEntries, restoreTrashEntry, exportTrashEntry, permanentlyDeleteTrashEntry } from './trash.js'
 import { saveKnowledgeNoteReference } from './knowledge-note-reference.js'
 import { listKnowledgeCategories, createKnowledgeCategory, renameKnowledgeCategory, moveKnowledgeCategory, deleteKnowledgeCategory, moveKnowledgeBase, validateKnowledgeName } from './knowledge-categories.js'
+import {registerPluginCommands} from './plugins/manager.js'
+import {registerWorkspaceCommands} from './workspace-commands.js'
+import {registerFontCommands} from './fonts.js'
 import { registerTypewriterTerminalCommands } from './typewriter-terminal.js'
+import { registerAiCoreCommands } from './ai-core/ipc.js'
+import { executeCapability } from './agent/tools/registry.js'
 
 const cancelTokens = new CancellationTokens()
 
@@ -164,6 +169,10 @@ function syncNoteRefOnDelete(noteId) {
 export function registerCommands(mainWindow) {
   console.log('[Commands] Starting to register all IPC handlers...')
   registerTypewriterTerminalCommands(mainWindow)
+  registerFontCommands(mainWindow)
+  registerWorkspaceCommands(mainWindow)
+  registerPluginCommands(mainWindow)
+  registerAiCoreCommands(mainWindow)
 
   ipcMain.handle('get-config', () => {
     return loadConfig()
@@ -305,41 +314,43 @@ export function registerCommands(mainWindow) {
     return properties.includes('multiSelections') ? result.filePaths : result.filePaths[0]
   })
 
-  ipcMain.handle('get_sessions', () => {
-    return db.getSessions()
+  ipcMain.handle('get_sessions', (_event, args = {}) => {
+    return db.getSessions(args?.scope, args?.scopeKey)
   })
 
-  ipcMain.handle('get_sessions_with_stats', (_event, args) => {
-    return db.getSessionsWithStats(args?.startDate, args?.endDate)
+  ipcMain.handle('get_sessions_with_stats', (_event, args = {}) => {
+    return db.getSessionsWithStats(args?.startDate, args?.endDate, args?.scope, args?.scopeKey)
   })
 
-  ipcMain.handle('get_session', (_event, args) => {
-    return db.getSession(args.sessionId)
+  ipcMain.handle('get_session', (_event, args = {}) => {
+    return db.getSession(args.sessionId, args.scope, args.scopeKey)
   })
 
   ipcMain.handle('create_session', (_event, args) => {
-    return db.createSession(args?.title)
+    return db.createSession(args?.title, args?.mode || 'chat', args?.scope || 'friday', args?.scopeKey || null)
   })
 
-  ipcMain.handle('update_session_title', (_event, args) => {
-    const result = db.updateSessionTitle(args.sessionId, args.title)
-    mainWindow.webContents.send(SESSION_TITLE_UPDATED, {
-      sessionId: args.sessionId,
-      title: args.title
-    })
+  ipcMain.handle('update_session_title', (_event, args = {}) => {
+    const result = db.updateSessionTitle(args.sessionId, args.title, args.scope, args.scopeKey)
+    if (result) {
+      mainWindow.webContents.send(SESSION_TITLE_UPDATED, {
+        sessionId: args.sessionId,
+        title: args.title
+      })
+    }
     return result
   })
 
-  ipcMain.handle('delete_session', (_event, args) => {
-    const result = db.deleteSession(args.sessionId)
+  ipcMain.handle('delete_session', (_event, args = {}) => {
+    const result = db.deleteSession(args.sessionId, args.scope, args.scopeKey)
     if (result.automationRunsDeleted > 0) {
       mainWindow.webContents.send('automation-updated')
     }
-    return true
+    return !!result.deleted
   })
 
-  ipcMain.handle('get_session_messages', (_event, args) => {
-    return db.getMessages(args.sessionId)
+  ipcMain.handle('get_session_messages', (_event, args = {}) => {
+    return db.getMessages(args.sessionId, args.scope, args.scopeKey)
   })
 
   // 生成内网分享链接：返回只读对话查看页面的 URL
@@ -379,7 +390,7 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('chat_with_memory', async (_event, args) => {
-    const { requestId, sessionId, model, message, enableThinking, systemPrompt, useKnowledgeBase, kbName, kbCategoryId, folderPath, topK, attachments } = args
+    const { requestId, sessionId, model, message, enableThinking, systemPrompt, useKnowledgeBase, kbName, kbCategoryId, folderPath, topK, attachments, scope = 'friday', scopeKey = null } = args
 
     let currentSessionId = sessionId
     let isNewSession = false
@@ -390,14 +401,15 @@ export function registerCommands(mainWindow) {
 
     try {
       if (!currentSessionId) {
-        const session = db.createSession(message.slice(0, 20) || '新对话')
+        const session = db.createSession(message.slice(0, 20) || '新对话', 'chat', scope, scopeKey)
         currentSessionId = session.id
         isNewSession = true
       } else {
-        const existing = db.getSession(currentSessionId)
+        const existing = db.getSession(currentSessionId, scope, scopeKey)
         if (!existing) {
           throw new Error('Session not found')
         }
+        if (existing.scope !== scope || (existing.scopeKey || null) !== (scopeKey || null)) throw new Error('Session scope mismatch')
       }
 
       // 保存用户消息到数据库（简洁引用格式）
@@ -417,7 +429,7 @@ export function registerCommands(mainWindow) {
         setImmediate(async () => {
           try {
             const title = await generateTitle(modelClone, userMsgClone)
-            db.updateSessionTitle(sessionIdClone, title)
+            db.updateSessionTitle(sessionIdClone, title, scope, scopeKey)
             mainWindow.webContents.send(SESSION_TITLE_UPDATED, {
               sessionId: sessionIdClone,
               title
@@ -427,7 +439,7 @@ export function registerCommands(mainWindow) {
         })
       }
 
-      const dbMessages = db.getMessages(currentSessionId)
+      const dbMessages = db.getMessages(currentSessionId, scope, scopeKey)
       let historyMessages = dbMessages.map(m => ({
         role: m.role,
         content: m.content
@@ -464,7 +476,11 @@ export function registerCommands(mainWindow) {
       try {
         const result = ragConfig
           ? await streamChatWithRagAgent(mainWindow, allMessages, effectiveModel, requestId, currentSessionId, enableThinking || false, cancelToken, ragConfig)
-          : await streamChat(mainWindow, allMessages, effectiveModel, requestId, currentSessionId, enableThinking || false, cancelToken)
+          : await executeCapability('ai_chat_inference', { messages: allMessages, stream: true }, {
+            actor: 'friday-ui', requestId, threadId: currentSessionId, signal: cancelToken.signal,
+            chat: () => streamChat(mainWindow, allMessages, effectiveModel, requestId, currentSessionId, enableThinking || false, cancelToken),
+            emit: () => {}
+          }, { actor: 'friday-ui', scopes: ['read'] })
         fullContent = result.fullContent
         fullReasoning = result.fullReasoning
         ragSources = Array.isArray(result.sources) ? result.sources : []
@@ -543,7 +559,11 @@ export function registerCommands(mainWindow) {
       try {
         const result = ragConfig
           ? await streamChatWithRagAgent(mainWindow, messages, effectiveModel, requestId, null, enableThinking || false, cancelToken, ragConfig)
-          : await streamChat(mainWindow, messages, effectiveModel, requestId, null, enableThinking || false, cancelToken)
+          : await executeCapability('ai_chat_inference', { messages, stream: true }, {
+            actor: 'friday-ui', requestId, threadId: requestId, signal: cancelToken.signal,
+            chat: () => streamChat(mainWindow, messages, effectiveModel, requestId, null, enableThinking || false, cancelToken),
+            emit: () => {}
+          }, { actor: 'friday-ui', scopes: ['read'] })
         fullContent = result.fullContent
         fullReasoning = result.fullReasoning
         ragSources = Array.isArray(result.sources) ? result.sources : []
@@ -590,6 +610,9 @@ export function registerCommands(mainWindow) {
     return db.getNote(args.noteId)
   })
 
+  ipcMain.handle('note-links-index', (_event, args) => db.getNoteLinks(String(args?.noteId || ''), args || {}))
+  ipcMain.handle('note-links-rebuild', () => db.rebuildNoteLinks())
+
   ipcMain.handle('note-link-upsert', (_event, args) => {
     const fromNoteId = String(args?.fromNoteId || '')
     const toNoteId = String(args?.toNoteId || '')
@@ -624,7 +647,8 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('update_note', (_event, args) => {
     const oldNote = db.getNote(args.noteId)
-    const updated = db.updateNote(args.noteId, args.title, args.content, args.contentText, args.notebookId, args.marpContent)
+    const updated = db.updateNote(args.noteId, args.title, args.content, args.contentText, args.notebookId, args.marpContent, args.baseRevision)
+    mainWindow.webContents.send('note-changed', {noteId: args.noteId, revision: updated?.revision})
     // 标题变更时同步重命名关联的 .note 文件
     if (updated && oldNote && oldNote.title !== updated.title) {
       syncNoteRefOnRename(args.noteId, updated.title)

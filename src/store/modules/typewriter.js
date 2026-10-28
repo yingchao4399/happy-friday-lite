@@ -14,12 +14,13 @@ function readJson(key, fallback) {
 }
 
 function writeJson(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
+  try { localStorage.setItem(key, JSON.stringify(key===STORAGE_KEY?{schemaVersion:1,settings:value}:value)) } catch {}
 }
+function readSettings(){const value=readJson(STORAGE_KEY,defaultSettings());return sanitizeSettings(value?.schemaVersion===1?value.settings:value)}
 
 export const useTypewriterStore = defineStore('typewriter', {
   state: () => ({
-    settings: sanitizeSettings(readJson(STORAGE_KEY, defaultSettings())),
+    settings: readSettings(),
     recents: readJson(RECENTS_KEY, []),
     activeSource: null,
     activeSessionId: '',

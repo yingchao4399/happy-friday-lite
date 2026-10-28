@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   invoke(channel, ...args) {
     const validChannels = [
       'get-config',
+      'plugins-context','plugins-markdown','plugins-sample','plugins-list','plugins-enable','plugins-disable','plugins-execute','plugins-settings','plugins-import','plugins-example','plugins-uninstall','plugins-rollback','plugins-catalog','plugins-download',
+      'workspace-keymap-sync', 'workspace-overlay', 'workspace-keymap-get', 'workspace-keymap-save',
+      'fonts-list', 'fonts-read', 'fonts-download', 'fonts-import',
       'open-file-get-pending',
       'save-config',
       'session-get',
@@ -33,6 +36,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'get_note',
       'note-link-upsert',
       'note-links-list',
+      'note-links-index',
+      'note-links-rebuild',
       'create_note',
       'import_note',
       'update_note',
@@ -162,6 +167,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'automation-run-task',
       'agent-invoke',
       'agent-stop',
+      'ai-core-health',
+      'ai-core-list-capabilities',
+      'ai-core-plan',
+      'ai-core-execute',
+      'ai-core-task-approve',
+      'ai-core-task-get',
+      'ai-core-task-list',
+      'ai-core-task-cancel',
+      'ai-core-task-undo',
       'agent-tool-approval-resume',
       'agent-list-tools',
       'agent-list-skills',
@@ -189,6 +203,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'office-close',
       'office-auto-save',
       'office-new',
+      'office-menu-command',
       'office-hide-all',
       'office-show',
       'office-get-state',
@@ -321,7 +336,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'open-file-request'
       , 'clipboard-item-added'
       , 'clipboard-item-used'
-      , 'clipboard-hotkey', 'clipboard-desktop-changed'
+      , 'plugins-changed','plugins-notice', 'workspace-shortcut', 'note-changed', 'clipboard-hotkey', 'clipboard-desktop-changed'
       , 'clipboard-settings-changed'
       , 'clipboard-ai-progress'
       , 'clipboard-append-changed'

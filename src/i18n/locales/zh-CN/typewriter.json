@@ -280,5 +280,35 @@
     "3f_2r_33_39_32_38_3h_w_2u_33_30_2x_33_37_w_3b_2t_36_2t_w_2s_2t_30_2t_38_2t_2s_1a": "已删除 {count} 份稿件。",
     "3f_2r_33_39_32_38_3h_w_2x_32_37_38_2p_30_30_2t_2s_w_2u_2p_31_2x_30_2x_2t_37_1a_w_2b_38_2p_36_38_w_38_3d_34_2x_32_2v_w_38_33_w_34_2x_2r_2z_w_33_32_2t_1a": "已找到 {count} 个字体家族，输入名称即可选择。"
   },
-  "restartTerminal": "重新启动终端"
+  "restartTerminal": "重新启动终端",
+  "ink": {
+    "title": "字体墨色",
+    "paper": "跟随纸张",
+    "preset": "预设墨色",
+    "custom": "自定义墨色",
+    "contrast": "自动保证文字清晰",
+    "effective": "实际墨色",
+    "lowContrast": "对比度偏低",
+    "reset": "恢复纸张墨色",
+    "carbon": "碳黑",
+    "brown": "深棕",
+    "blue": "蓝黑",
+    "navy": "藏蓝",
+    "wine": "酒红",
+    "green": "墨绿",
+    "minimumContrast": "最低文字对比度",
+    "terminalHint": "墨色用于普通文字；终端程序明确指定的 ANSI 语法颜色会保留，并按纸张校正对比度。"
+  },
+  "saveConflict": "此笔记已在其他位置更新。当前输入已保留，请重新打开最新笔记后合并。",
+  "fonts": {
+    "download": "下载字体",
+    "installed": "已下载",
+    "import": "导入字体",
+    "family": "字体名称",
+    "loading": "正在加载字体…",
+    "failed": "字体加载失败，请重试",
+    "retry": "重试",
+    "manage": "扩展字体",
+    "bundled": "内置，可离线使用"
+  }
 }

@@ -62,4 +62,8 @@ release/
 !docs/*-acceptance-2026-10-24.md
 !docs/DSH-runtime-root-cause-2026-10-24.md
 !docs/Delivery-readiness-audit-2026-10-24.md
+!docs/typewriter/05-workspace-and-plugin-ecosystem-plan.md
 .codegraph/
+
+!docs/typewriter/06-preview13-16-delivery.md
+!docs/typewriter/07-preview17-root-cause-report.md

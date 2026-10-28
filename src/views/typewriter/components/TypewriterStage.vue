@@ -2,6 +2,7 @@
 <script setup>
 import { onMounted, onActivated, onDeactivated, onBeforeUnmount, ref, watch } from 'vue'
 import React from 'react'
+import {restorePrivateFonts} from '@/features/fonts/loader'
 import { createRoot } from 'react-dom/client'
 import { useI18n } from 'vue-i18n'
 import { NocturneShell } from '@/features/typewriter/nocturne-core/lib/nocturne/components/shell.tsx'
@@ -35,23 +36,14 @@ function command(name) { window.dispatchEvent(new CustomEvent('nocturne:command'
 defineExpose({ command })
 watch(() => props.settings, next => setSettings(next), {deep: true})
 watch([() => props.source, locale], render)
-function shortcuts(event) {
-  const modifier = event.ctrlKey || event.metaKey
-  if (!modifier) return
-  const key = event.key.toLowerCase()
-  const name = event.shiftKey ? ({enter:'focus-mode',l:'lighting',p:'print',o:'archive',',':'studio'}[key]) : event.altKey && key === 'm' ? 'sound' : null
-  if (name) { event.preventDefault(); command(name) }
-}
 function mount() {
   if (root) return
-  window.addEventListener('keydown', shortcuts)
   disconnect = connectSettings(props.settings, settings => emit('settings', settings))
   window.focusActiveTerm = focusContent
   root = createRoot(host.value)
-  render()
+  void restorePrivateFonts().then(render).catch(render)
 }
 function unmount() {
-  window.removeEventListener('keydown', shortcuts)
   root?.unmount(); root = null; disconnect?.(); delete window.focusActiveTerm
 }
 onMounted(mount)

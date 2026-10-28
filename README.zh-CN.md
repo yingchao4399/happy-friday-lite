@@ -1,5 +1,48 @@
 # Happy Friday Lite
 
+## 3.0.6.01-preview.19 AI Core 运行时与对话连续性
+
+- 补齐 AI Core 任务运行时：真实就绪检查、能力计划、审批、取消、回读验证、幂等和安全撤销。
+- Office AI 推理统一经过敏感能力入口，并保留请求/线程上下文、流式回调和取消信号。
+- Friday 各 AI 对话及 Docs、Sheets、Slides、PDF、Markdown、HTML 面板新增各自的历史入口；历史记录从项目存储读取并可恢复。
+- AI 创建的 Office 文件按生成标题或正文内容自动命名，覆盖 Docs、Sheets、Slides、PDF、Markdown、HTML。
+- 增加笔记到 Word 的可验证任务流程，包含来源关联、回读验证与带条件撤销。
+- 技术版本为 `3.0.6-preview.19`，发布标签为 `3.0.6.01-preview.19`。
+
+## 3.0.6.01-preview.18 AI Core 首版基础
+
+- 新增 Friday AI Core v1 合同：actor、space、session、thread、task、request、resource 和 capability。
+- 新增结构化 plan/execute 入口基础，计划与 Runtime 解耦，任务状态禁止跳过验证直接完成。
+- 新增可重复的 DeepSeek 连通性检查脚本：`node scripts/check-deepseek-connection.mjs`。
+- 发布标签使用 `3.0.6.01-preview.18`，不占用官方 `3.0.7` 版本线。npm/Electron 内部使用合法技术版本 `3.0.6-preview.18`，Windows 安装包保留要求的发布标签。
+
+## Preview 17：终端颜色、设置入口与引用导航修复
+
+修正 xterm 亮色映射与透明背景的对比度计算，恢复终端墨色和字体设置；统一命令面板、插件和快捷键页面的 Settings 字体与布局，新增三个正式设置入口，移除侧栏重复按钮。Office 命令接入真实菜单通道；笔记首页、独立编辑页和打字机支持引用导航，双链面板提供使用说明。
+
+根因、实际验证及限制见 [Preview 17 修复报告](docs/typewriter/07-preview17-root-cause-report.md)。
+
+Windows x64 安装包：[3.0.6.01-preview.19](release/Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe)；SHA256：[Preview.19 校验文件](release/SHA256SUMS-preview.19.txt)。Electron 内部使用合法技术版本 `3.0.6-preview.19`。
+
+## Preview 16：命令、插件与 Obsidian 兼容工作区
+
+本轮按四批迭代，Windows x64 安装包依次为 `3.0.6-preview.13`、`.14`、`.15`、`.16`。最新包包含前面各批变更，原有 Office 改动保留。
+
+- **Preview 13**：Nocturne 统一墨色、本地字体（包括更纱等宽中文）、有向出链/反向链接、WikiLink、同 noteId 的 revision 保存检查。
+- **Preview 14**：常驻命令按钮、分类搜索浮窗、中英文和拼音搜索、最近命令；快捷键录制、冲突处理、导入导出。命令面板 `Ctrl+Shift+P`，Press `Ctrl+Alt+P`。Office 原生视图支持浮层与焦点恢复。
+- **Preview 15**：插件管理、分类市场、本地 ZIP、独立 sandbox 宿主、启停/配置/卸载和更新回滚。真实写作示例接入笔记；智能体工具保留审批，Office 插件使用实际宿主接口。
+- **Preview 16**：官方 Obsidian 社区目录及发行包下载、官方示例原包运行、受控 Vault/MetadataCache/Workspace/Editor 子集，以及可选 CodeMirror 6 Markdown 编辑窗口。未支持的 Node/私有接口明确报错，兼容状态按版本记录。
+
+使用兼容编辑器：安装并启用 Obsidian 插件 → 打开笔记或打字机中的笔记 → 命令面板搜索“Markdown 兼容编辑器”。它与笔记使用同一 ID；表格、图表、媒体和格式节点以保护标记保留。删除保护标记会拒绝保存，并保留恢复草稿。
+
+当前验证了官方示例 `1.0.0` 的生命周期、命令、弹窗和设置，以及社区 **Sort and Permute Lines 0.9.0** 在 CM6 模式下的字母排序。社区目录可下载不等于全部插件/API 已兼容；原版打字机仍使用自己的输入与拟真层。macOS/Linux 尚未运行验收。
+
+详细范围和测试结果见 [四批迭代交付报告](docs/typewriter/06-preview13-16-delivery.md)。
+
+## Preview 13：打字机字体、墨色与笔记双链
+
+新增统一纸面墨色、本地 JetBrains Mono/Fira Code/更纱等宽中文字体、应用内字体导入和下载、有向出链/反向链接、WikiLink 补全，以及笔记保存版本检查。继续复用 Nocturne 原版外壳与拟真反馈。
+
 [English](README.md)
 
 一个基于 Electron + Vue 3 的桌面端个人知识智能助手。集成 AI Agent、RAG 知识检索、富文本笔记、日程日历于一体，所有数据本地存储，隐私优先。

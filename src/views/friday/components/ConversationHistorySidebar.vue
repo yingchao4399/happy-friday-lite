@@ -209,7 +209,7 @@ async function confirmHistoryDelete() {
   const sessionId = historyDeleteSessionId.value;
   if (!sessionId) return;
   try {
-    await electronService.invoke('delete_session', { sessionId });
+    await electronService.invoke('delete_session', { sessionId, scope: 'friday', scopeKey: null });
     fridayStore.removeHistorySession(sessionId);
     emit('deleted', sessionId);
   } catch (err) {
@@ -235,7 +235,7 @@ async function saveHistorySessionAsNote() {
   if (!sessionId) return;
 
   try {
-    const messages = await electronService.invoke('get_session_messages', { sessionId });
+    const messages = await electronService.invoke('get_session_messages', { sessionId, scope: 'friday', scopeKey: null });
     sessionMessages.value = (messages || []).map(mapHistoryMessage);
     handleAddToKnowledge(false);
   } catch (err) {
@@ -267,7 +267,7 @@ async function confirmHistoryRename() {
     return;
   }
   try {
-    await electronService.invoke('update_session_title', { sessionId, title });
+    await electronService.invoke('update_session_title', { sessionId, title, scope: 'friday', scopeKey: null });
     fridayStore.patchHistorySession(sessionId, { title });
     emit('renamed', { sessionId, title });
   } catch (err) {

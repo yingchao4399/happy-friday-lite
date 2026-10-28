@@ -1,0 +1,142 @@
+{
+  "createdAt": "2026-10-27T17:45:00+08:00",
+  "platform": "win32-x64",
+  "electron": "42.2.0",
+  "latest": "3.0.6-preview.17",
+  "installers": [
+    {
+      "version": "3.0.6-preview.13",
+      "filename": "Happy Friday Lite-3.0.6-preview.13-win-x64-setup.exe",
+      "bytes": 268314242,
+      "sha256": "77b991c8ef5b12245dccd3c3c2f1f85b7e7d235fff24536f116dbe30f0d0d1d8"
+    },
+    {
+      "version": "3.0.6-preview.14",
+      "filename": "Happy Friday Lite-3.0.6-preview.14-win-x64-setup.exe",
+      "bytes": 268434152,
+      "sha256": "37c85d47bc4ce0fefc706dd9cf24d449f42ae739abb63b3e6f4f0b03b191b23b"
+    },
+    {
+      "version": "3.0.6-preview.15",
+      "filename": "Happy Friday Lite-3.0.6-preview.15-win-x64-setup.exe",
+      "bytes": 268452025,
+      "sha256": "6ef6470665a14182f7591ecbbe7a0dbe91fd576f96f78c8ffde05424e11b3881"
+    },
+    {
+      "version": "3.0.6-preview.16",
+      "filename": "Happy Friday Lite-3.0.6-preview.16-win-x64-setup.exe",
+      "bytes": 268674411,
+      "sha256": "9a6cb15b3fcc2d87bf4dd0c39b74d4479f061e56fe15d27b27042dfcc02d0165"
+    },
+    {
+      "version": "3.0.6-preview.17",
+      "filename": "Happy Friday Lite-3.0.6-preview.17-win-x64-setup.exe",
+      "bytes": 276891887,
+      "sha256": "a0a8ccf5629fd37a88b524005091401ba211d5eac8c10d90bb9832e5a1f283df"
+    }
+  ],
+  "tests": {
+    "nodeTestMjs": {
+      "pass": 239,
+      "fail": 0
+    },
+    "nodeTestCjs": {
+      "pass": 20,
+      "fail": 0
+    },
+    "terminalCanvas": {
+      "pass": true,
+      "report": "terminal-colors-report.json"
+    },
+    "packagedRegression": {
+      "pass": true,
+      "report": "preview17-packaged-report.json"
+    },
+    "packagedShortcuts": {
+      "pass": true,
+      "report": "preview17-shortcuts-report.json"
+    },
+    "nativeAudit": {
+      "pass": true,
+      "report": "preview17-native.log"
+    }
+  },
+  "functionalReports": {
+    "packaged-1": {
+      "ok": true,
+      "checks": 3,
+      "report": "packaged-1-report.json"
+    },
+    "packaged-2": {
+      "ok": true,
+      "checks": 6,
+      "report": "packaged-2-report.json"
+    },
+    "packaged-3": {
+      "ok": true,
+      "checks": 8,
+      "report": "packaged-3-report.json"
+    },
+    "packaged-4": {
+      "ok": true,
+      "checks": 13,
+      "report": "packaged-4-report.json"
+    },
+    "packaged-shortcuts": {
+      "ok": true,
+      "checks": 4,
+      "report": "packaged-shortcuts-report.json"
+    },
+    "plugins-runtime": {
+      "ok": true,
+      "checks": 7,
+      "report": "plugins-runtime-report.json"
+    },
+    "obsidian-runtime": {
+      "ok": true,
+      "checks": 4,
+      "report": "obsidian-runtime-report.json"
+    },
+    "plugin-market": {
+      "ok": true,
+      "checks": 2,
+      "report": "plugin-market-report.json"
+    },
+    "workspace": {
+      "ok": true,
+      "checks": 14,
+      "report": "workspace-report.json"
+    },
+    "packagedRegression": {
+      "ok": true,
+      "checks": 4,
+      "report": "preview17-packaged-report.json"
+    },
+    "packagedShortcuts": {
+      "ok": true,
+      "checks": 4,
+      "report": "preview17-shortcuts-report.json"
+    },
+    "nativeAudit": {
+      "ok": true,
+      "checks": 3,
+      "report": "preview17-native.log"
+    },
+    "terminalColors": {
+      "ok": true,
+      "report": "terminal-colors-report.json"
+    }
+  },
+  "compatibility": {
+    "obsidian": "partial, version-specific verified scope",
+    "samplePlugin": "1.0.0",
+    "communityPlugin": "obsidian-sort-and-permute-lines@0.9.0 sort-alphabetically in CM6"
+  },
+  "packagedApplication": "release/win-unpacked/Happy Friday Lite.exe",
+  "reports": {
+    "rootCause": "../../docs/typewriter/07-preview17-root-cause-report.md",
+    "build": "preview17-package.log",
+    "buildInfo": "../../release/preview.17-build-info.txt",
+    "sha256": "../../release/SHA256SUMS-preview.17.txt"
+  }
+}

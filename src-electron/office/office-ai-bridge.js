@@ -4,6 +4,8 @@ import fs from 'fs'
 import path from 'path'
 import { app, ipcMain, webContents } from 'electron'
 import { buildChatCompletionsUrl } from '../openaiUrl.js'
+import { executeCapability } from '../agent/tools/registry.js'
+import { createAiChatCapabilityInvoker } from './ai-inference-adapter.js'
 
 /**
  * Office 编辑器 AI 桥接：用 Friday 的模型层覆写编辑器注册的 ai:* IPC。
@@ -197,6 +199,8 @@ function fridayStreamRequest(chatMessages, tools, { signal, onDelta, onReasoning
   })
 }
 
+const invokeAiChat = createAiChatCapabilityInvoker(executeCapability, fridayStreamRequest)
+
 async function runFridayStream(request, send) {
   const { requestId, system, messages, tools } = request
   const sendSafe = (chunk) => {
@@ -218,10 +222,14 @@ async function runFridayStream(request, send) {
   const t0 = Date.now()
   const ping = setInterval(() => sendSafe({ requestId, type: 'ping' }), 5000)
   try {
-    const { content, toolCalls, stopReason } = await fridayStreamRequest(
+    const { content, toolCalls, stopReason } = await invokeAiChat(
       toOpenAiMessages(system, messages),
       toOpenAiTools(tools),
       {
+        actor: 'office-ai',
+        requestId,
+        threadId: requestId,
+        stream: true,
         signal: controller.signal,
         onDelta: (text) => sendSafe({ requestId, type: 'delta', text }),
         onReasoning: (text) => sendSafe({ requestId, type: 'reasoning', text }),
@@ -274,10 +282,11 @@ export function registerOfficeAiBridge() {
     const { system, user } = request ?? {}
     if (!state.model) return { ok: false, error: 'Friday 模型未配置，请在本项目设置中添加模型' }
     try {
-      const { content } = await fridayStreamRequest(
+      const requestId = `office-chat:${Date.now()}`
+      const { content } = await invokeAiChat(
         toOpenAiMessages(system, [{ role: 'user', text: String(user ?? '') }]),
         [],
-        {},
+        { actor: 'office-ai', requestId, threadId: requestId, stream: true },
       )
       return { ok: true, content }
     } catch (err) {

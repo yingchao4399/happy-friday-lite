@@ -63,6 +63,8 @@ export function installIpcCapabilityGateway(ipcMain, getMainWindow) {
   ipcMain.__fridayGateway = true
   const handle = ipcMain.handle.bind(ipcMain)
   ipcMain.handle = (channel, handler) => {
+    // 工作区/插件宿主的私有协议不是 Agent 工具；插件工具另行声明并经过审批。
+    if (/^(?:plugins-|plugin-runtime-call$|workspace-|fonts-)/.test(channel)) return handle(channel, handler)
     const name = `app_${channel.replace(/[^a-zA-Z0-9_]/g, '_')}`
     const read = readable.test(channel) || ['trash-list', 'clipboard-list', 'clipboard-image', 'clipboard-settings-get', 'clipboard-organization-get', 'clipboard-ai-options', 'kb-read-sqlite'].includes(channel) || /^office-(?:get-state|get-recents|is-dirty|open-file)$/.test(channel)
     const exposed = externalBusiness.test(channel)

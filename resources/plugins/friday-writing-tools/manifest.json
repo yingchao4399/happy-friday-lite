@@ -1,0 +1,1 @@
+{"id":"friday-writing-tools","name":"Friday Writing Tools / 写作工具","version":"1.0.0","format":"friday","apiVersion":1,"category":"notes","author":"Happy Friday Lite","description":"Word count, insert a timestamp, and a persistent writing goal.","permissions":["notes.read","notes.write"]}

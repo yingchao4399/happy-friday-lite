@@ -280,5 +280,35 @@
     "3f_2r_33_39_32_38_3h_w_2u_33_30_2x_33_37_w_3b_2t_36_2t_w_2s_2t_30_2t_38_2t_2s_1a": "{count} folios were deleted.",
     "3f_2r_33_39_32_38_3h_w_2x_32_37_38_2p_30_30_2t_2s_w_2u_2p_31_2x_30_2x_2t_37_1a_w_2b_38_2p_36_38_w_38_3d_34_2x_32_2v_w_38_33_w_34_2x_2r_2z_w_33_32_2t_1a": "{count} installed families. Start typing to pick one."
   },
-  "restartTerminal": "Restart terminal"
+  "restartTerminal": "Restart terminal",
+  "ink": {
+    "title": "Ink color",
+    "paper": "Follow paper",
+    "preset": "Ink presets",
+    "custom": "Custom ink",
+    "contrast": "Automatically improve contrast",
+    "effective": "Effective ink",
+    "lowContrast": "Low contrast",
+    "reset": "Restore paper ink",
+    "carbon": "Carbon",
+    "brown": "Brown",
+    "blue": "Blue black",
+    "navy": "Navy",
+    "wine": "Wine",
+    "green": "Forest",
+    "minimumContrast": "Minimum text contrast",
+    "terminalHint": "Ink applies to ordinary text. Explicit ANSI syntax colours from terminal programs are preserved and adjusted for the paper."
+  },
+  "saveConflict": "This note changed elsewhere. Your draft is preserved; reopen the latest note and merge your changes.",
+  "fonts": {
+    "download": "Download font",
+    "installed": "Downloaded",
+    "import": "Import font",
+    "family": "Font family",
+    "loading": "Loading font…",
+    "failed": "Could not load font; try again",
+    "retry": "Retry",
+    "manage": "Additional fonts",
+    "bundled": "Bundled, available offline"
+  }
 }

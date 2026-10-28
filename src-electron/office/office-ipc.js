@@ -19,6 +19,8 @@ import {
   queryOfficeDirty,
   isOfficeAvailable,
   locateOfficeSpan,
+  executeOfficeMenuCommand,
+  isOfficeMainSender,
 } from './office-host.js'
 import { resolveEditorType } from './office-files.js'
 
@@ -31,6 +33,11 @@ export function registerOfficeIpc() {
     console.warn('[Office] skip office IPC registration (bundles not built)')
     return
   }
+
+  ipcMain.handle('office-menu-command',(event,{viewId,command}={})=>{
+    if(!isOfficeMainSender(event.sender))throw new Error('OFFICE_COMMAND_OWNER_REQUIRED')
+    return executeOfficeMenuCommand(viewId,command)
+  })
 
   ipcMain.handle('office-open-file', (_e, { filePath, viewId, background } = {}) => {
     if (typeof filePath !== 'string' || !resolveEditorType(filePath)) {

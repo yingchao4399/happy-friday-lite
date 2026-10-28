@@ -271,7 +271,7 @@ export function drawFolio(canvas: HTMLCanvasElement, art: FolioArt): number {
     return MIN_HEIGHT;
   }
   const {style} = art.draft;
-  const sheet = FOLIO_PAPERS[style.paper];
+  const sheet = {...FOLIO_PAPERS[style.paper], ...(style.inkColor ? {ink:style.inkColor} : {})};
   const textFont = `${art.fonts.textSize}px ${art.fonts.text}`;
   const line = Math.round(art.fonts.textSize * 1.55);
   measure.font = textFont;

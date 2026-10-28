@@ -140,6 +140,13 @@
     "exporting": "Exporting...",
     "exportPdf": "Export PDF",
     "exportMarkdown": "Export Markdown",
+    "exportWord": "AI export to Word",
+    "exportingWord": "Writing Word…",
+    "exportWordApproval": "Friday will write “{title}” to a new Word file:\n{out}\n\nAllow this operation?",
+    "exportWordFailed": "Word export failed: {error}",
+    "undoWord": "Undo latest Word write",
+    "undoingWord": "Undoing Word write…",
+    "undoWordFailed": "Undo failed: {error}",
     "presentation": "Switch to presentation",
     "backToEdit": "Switch to edit mode",
     "fridayAssistant": "Friday Assistant"

@@ -14,5 +14,5 @@
 .tn-terminal-host{width:100%;height:100%}
 .tn-terminal-host .xterm{height:100%;padding:0;background:transparent}
 .tn-terminal-host .xterm-viewport{background:transparent!important}
-.tn-plugin-status{position:absolute;bottom:8px;right:8px;font:12px var(--tn-font-ui);color:var(--tn-ink-muted)}
+.tn-plugin-status{position:absolute;bottom:8px;right:8px;font:12px var(--tn-font-ui);color:var(--tn-sheet-muted)}
 .tn-plugin-status button{margin-left:10px}

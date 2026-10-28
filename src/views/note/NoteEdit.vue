@@ -22,6 +22,7 @@
         <button v-if="!isShareMode" class="header-btn" :title="t('note.export')" @click="handleExport">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         </button>
+<button v-if="!isShareMode" class="header-btn" :title="t('workspace.links.title')" @click="showLinks=!showLinks">↗</button>
         <button v-if="!isShareMode" class="header-btn" :title="t('note.more')" @click="toggleMoreMenu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
         </button>
@@ -43,14 +44,16 @@
     </div>
 
     <div class="note-edit-body">
-      <NoteEditor
+      <div class="note-editor-column"><div v-if="!noteReady" :role="noteLoadError ? 'alert' : 'status'">{{ noteLoadError || t('workspace.links.loading') }}</div><NoteEditor
+        v-if="noteReady"
         v-model="noteContent"
         :placeholder="t('note.editorPlaceholder')"
         :note-id="noteId"
         :share-mode="isShareMode"
         @change="onEditorChange"
         @open-note="openLinkedNote"
-      />
+      /></div>
+      <NoteLinksPanel v-if="!isShareMode && showLinks" :note-id="noteId" :initial-mode="linksMode" @close="showLinks=false" @open="openLinkLocation" />
     </div>
 
     <div v-if="!isShareMode" class="note-edit-footer">
@@ -74,6 +77,13 @@ import { useAppStore } from '@/store';
 import { useNoteStore } from '@/store/modules/note';
 import { isElectronEnvironment } from '@/config/menu';
 import NoteEditor from './NoteEditor.vue';
+import NoteLinksPanel from '@/components/notes/NoteLinksPanel.vue';
+import {requestNoteLocation} from '@/features/notes/location';
+const linksMode=ref('outgoing'); const showLinks=ref(false);
+function showNoteLinks(event){linksMode.value=event.detail||'outgoing';if(route.path.startsWith('/note'))showLinks.value=true;}
+window.addEventListener('friday:show-links',showNoteLinks);
+function openLinkLocation(link){requestNoteLocation(link);openLinkedNote(link.noteId);}
+import {readNote,subscribeNotes} from '@/features/notes/documents';
 import { extractPlainText } from '@/utils/text';
 
 const route = useRoute();
@@ -88,26 +98,41 @@ const isShareMode = computed(() => route.meta?.share === true || !isElectronEnvi
 const isDark = computed(() => appStore.theme === 'dark');
 const noteTitle = ref('');
 const noteContent = ref('');
+const noteReady = ref(false);
+const noteLoadError = ref('');
 const isSaved = ref(true);
 const wordCount = ref(0);
 const charCount = ref(0);
 const lastSavedTime = ref('');
 const moreMenuVisible = ref(false);
 const moreMenuStyle = reactive({ left: '0px', top: '0px' });
+const unlistenDocument=subscribeNotes(async event=>{
+ try{
+  if(event.noteId!==noteId.value||noteStore.saving||noteStore._pendingSave||!isSaved.value)return;
+  const before=noteContent.value,id=noteId.value;const note=await noteStore.fetchNote(id);
+  if(note&&noteId.value===id&&noteContent.value===before&&!noteStore.saving&&!noteStore._pendingSave){noteContent.value=note.content||'';noteTitle.value=note.title;updateStats(extractPlainText(noteContent.value));}
+ }catch{window.dispatchEvent(new CustomEvent('friday:note-save-error'));}
+});
 
 const loadNote = async (id) => {
   if (!id || isShareMode.value) return;
-  await noteStore.flushPendingSave();
-  const note = await noteStore.fetchNote(id);
-  if (!note || noteId.value !== id) return;
-  noteTitle.value = note.title || t('note.untitledNote');
-  noteContent.value = note.content || '';
-  updateStats(extractPlainText(noteContent.value).replace(/\s+/g, ' ').trim());
-  isSaved.value = true;
-  lastSavedTime.value = '';
+  noteReady.value = false; noteLoadError.value = '';
+  try {
+    await noteStore.flushPendingSave();
+    const note = await noteStore.fetchNote(id);
+    if (noteId.value !== id) return;
+    if (!note || note.isDeleted) throw new Error('NOTE_LINK_UNRESOLVED');
+    noteTitle.value = note.title || t('note.untitledNote');
+    noteContent.value = note.content || '';
+    updateStats(extractPlainText(noteContent.value).replace(/\s+/g, ' ').trim());
+    isSaved.value = true; lastSavedTime.value = ''; noteReady.value = true;
+  } catch {
+    if(noteId.value===id)noteLoadError.value=t('workspace.links.resolveError');
+  }
 };
 
 const onEditorChange = (content) => {
+  if (!noteReady.value) return;
   noteContent.value = content;
   const plainText = extractPlainText(content);
   const normalizedText = plainText.replace(/\s+/g, ' ').trim();
@@ -168,6 +193,7 @@ const handleCopyContent = () => {
 };
 
 const openLinkedNote = (id) => {
+  if (typeof id === 'object' && id) { openLinkLocation(id); return; }
   if (id) router.push({ name: 'note-edit', params: { id } });
 };
 
@@ -188,7 +214,7 @@ const handleClickOutside = () => {
 
 watch(() => noteStore.saving, (saving) => {
   if (!saving) {
-    isSaved.value = true;
+    isSaved.value = !noteStore._pendingSave;
     lastSavedTime.value = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
   }
 });
@@ -212,6 +238,7 @@ onMounted(async () => {
       if (data && data.success && data.note) {
         noteTitle.value = data.note.title || t('note.untitledNote');
         noteContent.value = data.note.content || '';
+        noteReady.value = true;
       }
     } catch (err) {
       console.error('Failed to load share note:', err);
@@ -223,6 +250,8 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(async () => {
+  unlistenDocument();
+  window.removeEventListener('friday:show-links',showNoteLinks);
   document.removeEventListener('click', handleClickOutside);
   if (!isShareMode.value) {
     await noteStore.flushPendingSave();
@@ -409,3 +438,5 @@ onDeactivated(() => {
   margin: 4px 12px;
 }
 </style>
+
+<style scoped>.note-editor-column{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}.note-edit-body{display:flex;flex-direction:row}</style>

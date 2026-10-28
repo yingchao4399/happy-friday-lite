@@ -22,6 +22,7 @@
                 </div>
               </div>
               <div class="header-right">
+                <ScopedHistoryButton scope="knowledge-agent" :scope-key="historyScopeKey" @select="selectHistory" />
                 <button class="header-btn" @click="handleStop" v-if="isStreaming" title="停止生成">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="6" y="6" width="12" height="12" rx="2"></rect>
@@ -193,6 +194,7 @@ import AIMessage from '@/components/chat/AIMessage.vue';
 import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessage.vue';
 import ToolCallSection from '@/components/chat/ToolCallSection.vue';
 import ToolApprovalDialog from '@/components/chat/ToolApprovalDialog.vue';
+import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
 import AgentFileSelectDialog from './AgentFileSelectDialog.vue';
 
 const props = defineProps({
@@ -208,6 +210,15 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+
+const historyScopeKey = computed(() => `folder:${props.folderPath || props.contextLabel || 'default'}`)
+
+function selectHistory({ session, messages: history }) {
+  if (isStreaming.value) handleStop()
+  currentSessionId = session.id
+  messages.value = history.map(item => ({ ...item, content: item.content || '' }))
+  nextTick(() => scrollToBottomForce())
+}
 
 marked.setOptions({ breaks: true, gfm: true });
 function renderMarkdown(content) {
@@ -693,7 +704,9 @@ async function sendChatMessage(text) {
       message: userMessage,
       enableThinking,
       attachments: [],
-      folderPath: virtualFolderPath
+      folderPath: virtualFolderPath,
+      scope: 'knowledge-agent',
+      scopeKey: historyScopeKey.value
     });
   } catch (err) {
     console.error('[KbAgentChat] Agent invoke error:', err);

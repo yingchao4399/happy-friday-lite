@@ -106,6 +106,12 @@ export function listRegisteredTools() {
   return Array.from(registry.values())
 }
 
+/** 插件卸载仅释放自己注册的工具，避免移除宿主或其他插件能力。 */
+export function unregisterOwnedTool(name, owner) {
+  if (!owner || registry.get(name)?.meta?.owner !== owner) return false
+  return registry.delete(name)
+}
+
 /**
  * 获取所有已注册的工具名
  * @returns {string[]}
@@ -150,7 +156,7 @@ export async function executeCapability(name, args = {}, ctx = {}, options = {})
   // 未通过校验的输入可能包含敏感数据，不记录原始值。
   let businessArgs = '[not validated]'
   const hidden = !def || def.meta?.sensitive
-  const auditOptions = { metadataOnly: actor === 'friday-ui' }
+  const auditOptions = { metadataOnly: actor === 'friday-ui' || actor === 'user:local' }
   let status = 'success'
   let output
   const previousPolicy = ctx.capabilityPolicy

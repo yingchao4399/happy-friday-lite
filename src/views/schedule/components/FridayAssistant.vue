@@ -40,12 +40,25 @@
               </svg>
               <span>Friday 日程助理</span>
             </div>
+            <ScopedHistoryButton
+              scope="schedule-agent"
+              label="历史"
+              title="日程对话历史"
+              @select="selectHistory"
+            />
             <button class="close-btn" @click="close">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
+          </div>
+
+          <div v-if="historyMessages.length" class="schedule-history-transcript" aria-label="日程对话历史">
+            <div v-for="(message, index) in historyMessages" :key="message.id || `${index}-${message.role}`" class="schedule-history-message" :class="message.role">
+              <strong>{{ message.role === 'user' ? '我' : 'Friday' }}</strong>
+              <p>{{ message.content }}</p>
+            </div>
           </div>
 
           <!-- 单行输入框 -->
@@ -96,6 +109,7 @@ import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { marked } from 'marked';
 import { electronService } from '@/services/electron';
 import { useScheduleStore } from '@/store/modules/schedule';
+import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
 
 marked.setOptions({ breaks: true, gfm: true });
 
@@ -112,6 +126,7 @@ const inputText = ref('');
 const isStreaming = ref(false);
 const bubbleVisible = ref(false);
 const bubbleContent = ref('');
+const historyMessages = ref([]);
 
 let activeRequestId = null;
 // 注意：不再复用旧 sessionId —— 旧会话历史中可能包含 AI 幻觉数据，会污染后续对话
@@ -130,6 +145,15 @@ const suggestions = [
   '本周未完成的日程',
   '帮我创建明天下午三点的会议',
 ];
+
+function selectHistory({ session, messages }) {
+  sessionId = session?.id || '';
+  historyMessages.value = messages || [];
+  bubbleContent.value = '';
+  bubbleVisible.value = false;
+  isStreaming.value = false;
+  nextTick(syncSendState);
+}
 
 function renderContent(text) {
   if (!text) return '';
@@ -222,6 +246,7 @@ async function handleSend() {
 4. 仅在信息严重缺失导致无法执行时才询问用户，且一次问清所有需要的信息。]\n\n${text}`;
 
   setInputText('');
+  historyMessages.value.push({ role: 'user', content: text });
 
   isStreaming.value = true;
   bubbleVisible.value = true;
@@ -234,9 +259,12 @@ async function handleSend() {
       requestId: activeRequestId,
       sessionId: sessionId,
       model: model,
-      message: scheduleMessage,
+      message: text,
+      runtimeInstructions: scheduleMessage.slice(0, -text.length),
       attachments: [],
       enableThinking: false,
+      scope: 'schedule-agent',
+      scopeKey: null
     });
   } catch (err) {
     console.error('[ScheduleAssistant] Agent invoke error:', err);
@@ -280,6 +308,7 @@ onMounted(() => {
     isStreaming.value = false;
     if (data.fullContent) {
       bubbleContent.value = data.fullContent;
+      historyMessages.value.push({ role: 'assistant', content: data.fullContent });
     }
     if (data.sessionId) {
       sessionId = data.sessionId;
@@ -578,6 +607,13 @@ watch(() => props.visible, (val) => {
   flex-direction: column;
   overflow: hidden;
 }
+
+.schedule-history-transcript { max-height: 240px; overflow: auto; padding: 10px 14px; border-bottom: 1px solid var(--border-color, #e8e8e8); }
+.schedule-history-message { padding: 7px 9px; margin: 4px 0; border-radius: 9px; background: var(--bg-secondary, #f5f5f5); color: var(--text-primary, #333); font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.schedule-history-message.user { margin-left: 24px; background: rgba(102, 126, 234, .1); }
+.schedule-history-message.assistant { margin-right: 24px; }
+.schedule-history-message strong { display: block; margin-bottom: 3px; color: var(--text-tertiary, #888); font-size: 10px; }
+.schedule-history-message p { margin: 0; }
 
 [data-theme='dark'] .assistant-panel {
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);

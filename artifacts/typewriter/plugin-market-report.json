@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "checks": [
+    "官方社区目录联网读取、作者/仓库/ID 保留、离线缓存复用",
+    "真实社区插件发行版 main.js/manifest/styles 下载并安装，原始代码保持一致"
+  ],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-plugin-market-OjVj8N",
+  "entries": 9509,
+  "plugin": {
+    "id": "obsidian-sort-and-permute-lines",
+    "repo": "vinzent03/obsidian-sort-and-permute-lines",
+    "version": "0.9.0"
+  }
+}

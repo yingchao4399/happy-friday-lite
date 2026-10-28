@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "checks": [
+    "官方 1.0.0 原始 main.js / manifest / styles 未修改，ES5 插件启动、命令、Modal、Setting、状态栏通过",
+    "真实 CM6 Markdown 编辑连续保存同 noteId，保留富文本表格；删除保护标记时拒绝落盘并保留恢复草稿",
+    "现代 Obsidian 类生命周期、配置持久化、Editor 回调、Vault 受控投影、MetadataCache 标题、同一 CM6 模块扩展实际运行",
+    "真实社区插件 Sort and Permute Lines 0.9.0 原包在 CM6 中排序并保存同一笔记；其余命令未宣称通过"
+  ],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-obsidian-9KRrGd",
+  "community": {
+    "id": "obsidian-sort-and-permute-lines",
+    "repo": "vinzent03/obsidian-sort-and-permute-lines",
+    "version": "0.9.0",
+    "compatibility": "partial",
+    "verifiedCommands": [
+      "sort-alphabetically"
+    ],
+    "mode": "CM6 Markdown"
+  }
+}

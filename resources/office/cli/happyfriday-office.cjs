@@ -35759,7 +35759,7 @@ var init_parse_props = __esm({
       thaiDistribute: "justify",
       distribute: "distribute"
     };
-    SIMPLE_INLINE_FIELD_RE = /^\s*(DATE|TIME|CREATEDATE|SAVEDATE|NUMPAGES|FILENAME|AUTHOR|PAGE)\b/;
+    SIMPLE_INLINE_FIELD_RE = /^\s*(DATE|TIME|CREATEDATE|SAVEDATE|NUMPAGES|FILENAME|AUTHOR|PAGE|TITLE|SUBJECT|KEYWORDS|COMMENTS|DOCPROPERTY)\b/i;
     ZOTERO_INLINE_FIELD_RE = /^\s*(?:ADDIN\s+)?(?:ZOTERO_|CSL_)(?:ITEM|BIBL|TEMP)\b/i;
     SPACE_ONLY_RE = /^[ \u00a0\u3000]+$/;
     IMAGE_RUN_CHILDREN = /* @__PURE__ */ new Set([
@@ -40447,12 +40447,7 @@ function hfContentFromXml(xml, kind, theme, styles2, tableMedia, compatibilityMo
         hasPageNumber = true;
         return emit3(`<w:r>${rPr}<w:t>${PAGE_MARK}</w:t></w:r>`);
       }
-      const cached3 = /<w:fldChar[^>]*w:fldCharType="separate"[^>]*?(?:\/>|>\s*<\/w:fldChar>)([\s\S]*)$/.exec(
-        span
-      )?.[1];
-      return emit3(
-        (cached3?.match(/<w:r(?:\s[^>]*)?>[\s\S]*?<\/w:r>/g) ?? []).filter((run4) => run4.includes("<w:t")).join("")
-      );
+      return span;
     }
   );
   cleaned = cleaned.replace(
@@ -40464,7 +40459,7 @@ function hfContentFromXml(xml, kind, theme, styles2, tableMedia, compatibilityMo
         hasPageNumber = true;
         return `<w:r>${rPr}<w:t>${PAGE_MARK}</w:t></w:r>`;
       }
-      return inner2 ?? whole2;
+      return whole2;
     }
   );
   cleaned = cleaned.replace(/<w:pgNum\s*\/>/g, () => {
@@ -40476,9 +40471,9 @@ function hfContentFromXml(xml, kind, theme, styles2, tableMedia, compatibilityMo
     hasPageNumber,
     watermark: kind === "header" ? readWatermarkText(xml) : null,
     watermarkPicture: kind === "header" ? readPictureWatermark(xml) : null,
-    // strip leftover field chars so the page marker parses as plain text
+    // 页码已转为显示标记；其他字段保留完整指令供编辑保存。
     paras: hfParagraphs(
-      cleaned.replace(/<w:fldChar[^>]*?(?:\/>|>\s*<\/w:fldChar>)/g, ""),
+      cleaned,
       theme,
       styles2,
       tableMedia,
@@ -43256,10 +43251,10 @@ function headerFooterPartXml(kind, hf, watermarkXml = void 0, originalXml = null
       for (const run4 of para.runs) {
         if (run4.text.includes(TOTAL_PAGES_MARK) || run4.text.includes(PAGE_MARK) || !pageEmitted && run4.text.includes("#")) {
           run4.text.split(TOTAL_PAGES_MARK).forEach((seg, k2) => {
-            if (k2 > 0) runs += numPagesField;
+            if (k2 > 0) runs += inlineRunsXml([{ ...run4, text: "1", instrField: "NUMPAGES" }]);
             if (seg.includes(PAGE_MARK)) {
               seg.split(PAGE_MARK).forEach((piece, j2) => {
-                if (j2 > 0) runs += pageField;
+                if (j2 > 0) runs += inlineRunsXml([{ ...run4, text: "1", instrField: "PAGE" }]);
                 if (piece) runs += inlineRunsXml([{ ...run4, text: piece }]);
               });
             } else if (!pageEmitted && seg.includes("#")) {
@@ -43292,7 +43287,7 @@ function headerFooterPartXml(kind, hf, watermarkXml = void 0, originalXml = null
     content = `<w:p><w:pPr><w:jc w:val="center"/></w:pPr>${runs.join("")}</w:p>`;
   }
   const body = `${watermarkXml ?? ""}${content}`;
-  if (originalXml) {
+  if (originalXml && !hf.replaceContent) {
     const open2 = new RegExp(`<${root}[^>]*>`).exec(originalXml)?.[0];
     const closeIdx = originalXml.lastIndexOf(`</${root}>`);
     if (open2 && closeIdx >= 0) {
@@ -156215,12 +156210,12 @@ var require_use_sync_external_store_shim_production = __commonJS({
       return x2 === y2 && (0 !== x2 || 1 / x2 === 1 / y2) || x2 !== x2 && y2 !== y2;
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
-    var useState13 = React6.useState;
+    var useState14 = React6.useState;
     var useEffect14 = React6.useEffect;
     var useLayoutEffect2 = React6.useLayoutEffect;
     var useDebugValue2 = React6.useDebugValue;
     function useSyncExternalStore$2(subscribe, getSnapshot) {
-      var value = getSnapshot(), _useState = useState13({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+      var value = getSnapshot(), _useState = useState14({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
       useLayoutEffect2(
         function() {
           inst.value = value;
@@ -156278,7 +156273,7 @@ var require_use_sync_external_store_shim_development = __commonJS({
             "The result of getSnapshot should be cached to avoid an infinite loop"
           ), didWarnUncachedGetSnapshot = true);
         }
-        cachedValue = useState13({
+        cachedValue = useState14({
           inst: { value, getSnapshot }
         });
         var inst = cachedValue[0].inst, forceUpdate = cachedValue[1];
@@ -156316,7 +156311,7 @@ var require_use_sync_external_store_shim_development = __commonJS({
         return getSnapshot();
       }
       "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-      var React6 = require_react(), objectIs = "function" === typeof Object.is ? Object.is : is, useState13 = React6.useState, useEffect14 = React6.useEffect, useLayoutEffect2 = React6.useLayoutEffect, useDebugValue2 = React6.useDebugValue, didWarnOld18Alpha = false, didWarnUncachedGetSnapshot = false, shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
+      var React6 = require_react(), objectIs = "function" === typeof Object.is ? Object.is : is, useState14 = React6.useState, useEffect14 = React6.useEffect, useLayoutEffect2 = React6.useLayoutEffect, useDebugValue2 = React6.useDebugValue, didWarnOld18Alpha = false, didWarnUncachedGetSnapshot = false, shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
       exports2.useSyncExternalStore = void 0 !== React6.useSyncExternalStore ? React6.useSyncExternalStore : shim;
       "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(Error());
     })();
@@ -157480,42 +157475,52 @@ var init_AiPanelSideButton = __esm({
   }
 });
 
-// ../ui/src/icons.tsx
-var import_jsx_runtime5;
-var init_icons = __esm({
-  "../ui/src/icons.tsx"() {
+// ../ui/src/AiHistoryButton.tsx
+var import_react4, import_jsx_runtime5;
+var init_AiHistoryButton = __esm({
+  "../ui/src/AiHistoryButton.tsx"() {
     "use strict";
+    import_react4 = __toESM(require_react(), 1);
     import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
-// ../ui/src/AiComposer.tsx
-var import_react4, import_jsx_runtime6;
-var init_AiComposer = __esm({
-  "../ui/src/AiComposer.tsx"() {
+// ../ui/src/icons.tsx
+var import_jsx_runtime6;
+var init_icons = __esm({
+  "../ui/src/icons.tsx"() {
     "use strict";
-    import_react4 = __toESM(require_react(), 1);
-    init_icons();
-    init_ai_panel_prefs_store();
     import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
-// ../ui/src/AiScopeQuote.tsx
-var import_jsx_runtime7;
-var init_AiScopeQuote = __esm({
-  "../ui/src/AiScopeQuote.tsx"() {
+// ../ui/src/AiComposer.tsx
+var import_react5, import_jsx_runtime7;
+var init_AiComposer = __esm({
+  "../ui/src/AiComposer.tsx"() {
     "use strict";
+    import_react5 = __toESM(require_react(), 1);
+    init_icons();
+    init_ai_panel_prefs_store();
     import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
-// ../ui/src/color-picker.tsx
+// ../ui/src/AiScopeQuote.tsx
 var import_jsx_runtime8;
+var init_AiScopeQuote = __esm({
+  "../ui/src/AiScopeQuote.tsx"() {
+    "use strict";
+    import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+  }
+});
+
+// ../ui/src/color-picker.tsx
+var import_jsx_runtime9;
 var init_color_picker = __esm({
   "../ui/src/color-picker.tsx"() {
     "use strict";
-    import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
@@ -157572,12 +157577,12 @@ function installPopoverDismiss(close3, options) {
   };
 }
 function useDismissablePopover(open2, close3, options) {
-  const closeRef = (0, import_react5.useRef)(close3);
+  const closeRef = (0, import_react6.useRef)(close3);
   closeRef.current = close3;
-  const insideRef = (0, import_react5.useRef)(options?.inside);
+  const insideRef = (0, import_react6.useRef)(options?.inside);
   insideRef.current = options?.inside;
   const guarded = options?.inside != null;
-  (0, import_react5.useEffect)(() => {
+  (0, import_react6.useEffect)(() => {
     if (!open2) return;
     return installPopoverDismiss(
       () => closeRef.current(),
@@ -157585,11 +157590,11 @@ function useDismissablePopover(open2, close3, options) {
     );
   }, [open2, guarded]);
 }
-var import_react5, openPopovers;
+var import_react6, openPopovers;
 var init_popover_dismiss = __esm({
   "../ui/src/popover-dismiss.ts"() {
     "use strict";
-    import_react5 = __toESM(require_react(), 1);
+    import_react6 = __toESM(require_react(), 1);
     openPopovers = 0;
   }
 });
@@ -157606,12 +157611,12 @@ function Dropdown({
   ariaRequired,
   ariaInvalid
 }) {
-  const [open2, setOpen] = (0, import_react6.useState)(false);
-  const [active3, setActive] = (0, import_react6.useState)(0);
-  const popRef = (0, import_react6.useRef)(null);
-  const wrapRef = (0, import_react6.useRef)(null);
+  const [open2, setOpen] = (0, import_react7.useState)(false);
+  const [active3, setActive] = (0, import_react7.useState)(0);
+  const popRef = (0, import_react7.useRef)(null);
+  const wrapRef = (0, import_react7.useRef)(null);
   useDismissablePopover(open2, () => setOpen(false), { inside: () => [wrapRef.current] });
-  (0, import_react6.useEffect)(() => {
+  (0, import_react7.useEffect)(() => {
     if (!open2) return;
     popRef.current?.querySelectorAll(".gs-dd-item")[active3]?.scrollIntoView?.({ block: "nearest" });
   }, [open2, active3]);
@@ -157646,8 +157651,8 @@ function Dropdown({
     e.preventDefault();
     e.stopPropagation();
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { ref: wrapRef, className: `gs-dd${className ? ` ${className}` : ""}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("span", { ref: wrapRef, className: `gs-dd${className ? ` ${className}` : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(
       "button",
       {
         type: "button",
@@ -157666,8 +157671,8 @@ function Dropdown({
           if (!wrapRef.current?.contains(e.relatedTarget)) setOpen(false);
         },
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "gs-dd-value", children: current ? current.render ?? current.label : value }),
-          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "gs-dd-caret", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("svg", { width: "11", height: "11", viewBox: "0 0 24 24", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "gs-dd-value", children: current ? current.render ?? current.label : value }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: "gs-dd-caret", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("svg", { width: "11", height: "11", viewBox: "0 0 24 24", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
             "path",
             {
               d: "M5.5 9.25 12 15.75l6.5-6.5",
@@ -157680,7 +157685,7 @@ function Dropdown({
         ]
       }
     ),
-    open2 && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { ref: popRef, className: "gs-dd-pop", role: "listbox", children: options.map((o, i) => /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    open2 && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { ref: popRef, className: "gs-dd-pop", role: "listbox", children: options.map((o, i) => /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       "button",
       {
         type: "button",
@@ -157701,23 +157706,23 @@ function Dropdown({
     )) })
   ] });
 }
-var import_react6, import_jsx_runtime9;
+var import_react7, import_jsx_runtime10;
 var init_dropdown = __esm({
   "../ui/src/dropdown.tsx"() {
     "use strict";
-    import_react6 = __toESM(require_react(), 1);
+    import_react7 = __toESM(require_react(), 1);
     init_popover_dismiss();
-    import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
 // ../ui/src/find-panel.tsx
-var import_react7, import_jsx_runtime10;
+var import_react8, import_jsx_runtime11;
 var init_find_panel = __esm({
   "../ui/src/find-panel.tsx"() {
     "use strict";
-    import_react7 = __toESM(require_react(), 1);
-    import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+    import_react8 = __toESM(require_react(), 1);
+    import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
@@ -157729,34 +157734,34 @@ var init_find_text = __esm({
 });
 
 // ../ui/src/ribbon-collapse.tsx
-var import_react8, import_jsx_runtime11, IS_MAC;
+var import_react9, import_jsx_runtime12, IS_MAC;
 var init_ribbon_collapse = __esm({
   "../ui/src/ribbon-collapse.tsx"() {
     "use strict";
-    import_react8 = __toESM(require_react(), 1);
+    import_react9 = __toESM(require_react(), 1);
     init_popover_dismiss();
-    import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
     IS_MAC = typeof navigator !== "undefined" && navigator.platform.toLowerCase().includes("mac");
   }
 });
 
 // ../ui/src/AiTypingIndicator.tsx
-var import_react9, import_jsx_runtime12;
+var import_react10, import_jsx_runtime13;
 var init_AiTypingIndicator = __esm({
   "../ui/src/AiTypingIndicator.tsx"() {
     "use strict";
-    import_react9 = __toESM(require_react(), 1);
-    import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+    import_react10 = __toESM(require_react(), 1);
+    import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
 // ../ui/src/Markdown.tsx
-var import_react10, import_jsx_runtime13, HREF, INLINE_RE, LINK_RE;
+var import_react11, import_jsx_runtime14, HREF, INLINE_RE, LINK_RE;
 var init_Markdown = __esm({
   "../ui/src/Markdown.tsx"() {
     "use strict";
-    import_react10 = __toESM(require_react(), 1);
-    import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+    import_react11 = __toESM(require_react(), 1);
+    import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
     HREF = /(?:[^\s()]|\([^\s()]*\))+/.source;
     INLINE_RE = new RegExp(
       `(\`[^\`\\n]+\`|\\*\\*[^*\\n]+?\\*\\*|\\*[^*\\n]+?\\*|\\[[^\\]\\n]+\\]\\(${HREF}\\))`,
@@ -159276,12 +159281,12 @@ var init_preset_geometry = __esm({
 });
 
 // ../ui/src/shape-gallery.tsx
-var import_jsx_runtime14, s, SHAPE_GALLERY_GROUPS;
+var import_jsx_runtime15, s, SHAPE_GALLERY_GROUPS;
 var init_shape_gallery = __esm({
   "../ui/src/shape-gallery.tsx"() {
     "use strict";
     init_preset_geometry();
-    import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
     s = (prst, labelKey) => ({ prst, labelKey });
     SHAPE_GALLERY_GROUPS = [
       {
@@ -159440,32 +159445,32 @@ var init_cutout = __esm({
 });
 
 // ../ui/src/image-dialogs.tsx
-var import_react11, import_jsx_runtime15;
+var import_react12, import_jsx_runtime16;
 var init_image_dialogs = __esm({
   "../ui/src/image-dialogs.tsx"() {
     "use strict";
-    import_react11 = __toESM(require_react(), 1);
-    init_cutout();
-    import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
-  }
-});
-
-// ../ui/src/image-viewer.tsx
-var import_react12, import_jsx_runtime16;
-var init_image_viewer = __esm({
-  "../ui/src/image-viewer.tsx"() {
-    "use strict";
     import_react12 = __toESM(require_react(), 1);
+    init_cutout();
     import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
+// ../ui/src/image-viewer.tsx
+var import_react13, import_jsx_runtime17;
+var init_image_viewer = __esm({
+  "../ui/src/image-viewer.tsx"() {
+    "use strict";
+    import_react13 = __toESM(require_react(), 1);
+    import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+  }
+});
+
 // ../ui/src/auto-save-pref.ts
-var import_react13;
+var import_react14;
 var init_auto_save_pref = __esm({
   "../ui/src/auto-save-pref.ts"() {
     "use strict";
-    import_react13 = __toESM(require_react(), 1);
+    import_react14 = __toESM(require_react(), 1);
   }
 });
 
@@ -159474,6 +159479,7 @@ var init_src11 = __esm({
   "../ui/src/index.ts"() {
     "use strict";
     init_AiPanelSideButton();
+    init_AiHistoryButton();
     init_AiComposer();
     init_AiScopeQuote();
     init_ai_panel_prefs();
@@ -159741,6 +159747,10 @@ var init_strings = __esm({
         aiTidyBtn: "AI \u6392\u7248",
         aiTidyPrompt: "\u6574\u7406\u5168\u6587\u6392\u7248\uFF1A\u4FEE\u6B63\u6807\u9898\u5C42\u7EA7\u3001\u7EDF\u4E00\u5217\u8868\u683C\u5F0F\u3001\u53BB\u9664\u591A\u4F59\u7684\u52A0\u7C97\u548C\u659C\u4F53\u3001\u6E05\u7406\u591A\u4F59\u7A7A\u884C\uFF1B\u53EA\u8C03\u6574\u683C\u5F0F\uFF0C\u4E0D\u8981\u6539\u52A8\u4EFB\u4F55\u6587\u5B57\u5185\u5BB9",
         aiNewChat: "\u65B0\u5BF9\u8BDD",
+        aiHistory: "\u5386\u53F2",
+        aiHistoryEmpty: "\u6682\u65E0\u5BF9\u8BDD\u5386\u53F2",
+        aiHistoryYou: "\u4F60",
+        aiHistoryAssistant: "\u52A9\u624B",
         aiCollapsePanel: "\u6536\u8D77\u9762\u677F",
         aiEmptyTitle: "\u95EE\u95EE\u8FD9\u7BC7\u6587\u6863",
         aiEmptyBody: "\u64B0\u5199\u3001\u6539\u5199\u3001\u603B\u7ED3\u3001\u7FFB\u8BD1\uFF0C\u6216\u4ECE\u96F6\u751F\u6210\u4E00\u7BC7\u6587\u6863",
@@ -159938,6 +159948,10 @@ var init_strings = __esm({
         aiTidyBtn: "AI Format",
         aiTidyPrompt: "Tidy up the document formatting \u2014 fix heading levels, unify list formatting, remove unnecessary bold and italics, and clean up extra blank lines. Adjust formatting only \u2014 do not change any text content",
         aiNewChat: "New chat",
+        aiHistory: "History",
+        aiHistoryEmpty: "No conversation history",
+        aiHistoryYou: "You",
+        aiHistoryAssistant: "Assistant",
         aiCollapsePanel: "Collapse panel",
         aiEmptyTitle: "Ask about this document",
         aiEmptyBody: "Draft, rewrite, summarize, translate, or generate a document from scratch",
@@ -160135,6 +160149,10 @@ var init_strings = __esm({
         aiTidyBtn: "AI \u66F8\u5F0F\u6574\u7406",
         aiTidyPrompt: "\u6587\u66F8\u5168\u4F53\u306E\u66F8\u5F0F\u3092\u6574\u7406\u3057\u3066\u304F\u3060\u3055\u3044\u3002\u898B\u51FA\u3057\u30EC\u30D9\u30EB\u306E\u4FEE\u6B63\u3001\u30EA\u30B9\u30C8\u5F62\u5F0F\u306E\u7D71\u4E00\u3001\u4E0D\u8981\u306A\u592A\u5B57\u30FB\u659C\u4F53\u306E\u524A\u9664\u3001\u4F59\u5206\u306A\u7A7A\u884C\u306E\u6574\u7406\u306A\u3069\u3002\u66F8\u5F0F\u306E\u307F\u3092\u8ABF\u6574\u3057\u3001\u672C\u6587\u306E\u5185\u5BB9\u306F\u4E00\u5207\u5909\u66F4\u3057\u306A\u3044\u3067\u304F\u3060\u3055\u3044",
         aiNewChat: "\u65B0\u3057\u3044\u30C1\u30E3\u30C3\u30C8",
+        aiHistory: "\u5C65\u6B74",
+        aiHistoryEmpty: "\u4F1A\u8A71\u5C65\u6B74\u306F\u3042\u308A\u307E\u305B\u3093",
+        aiHistoryYou: "\u3042\u306A\u305F",
+        aiHistoryAssistant: "\u30A2\u30B7\u30B9\u30BF\u30F3\u30C8",
         aiCollapsePanel: "\u30D1\u30CD\u30EB\u3092\u6298\u308A\u305F\u305F\u3080",
         aiEmptyTitle: "\u3053\u306E\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\u306B\u3064\u3044\u3066\u8CEA\u554F",
         aiEmptyBody: "\u57F7\u7B46\u3001\u66F8\u304D\u63DB\u3048\u3001\u8981\u7D04\u3001\u7FFB\u8A33\u3001\u307E\u305F\u306F\u30BC\u30ED\u304B\u3089\u6587\u66F8\u3092\u751F\u6210",
@@ -160332,6 +160350,10 @@ var init_strings = __esm({
         aiTidyBtn: "AI \uC11C\uC2DD \uC815\uB9AC",
         aiTidyPrompt: "\uBB38\uC11C \uC804\uCCB4 \uC11C\uC2DD\uC744 \uC815\uB9AC\uD574 \uC8FC\uC138\uC694. \uC81C\uBAA9 \uC218\uC900 \uC218\uC815, \uBAA9\uB85D \uD615\uC2DD \uD1B5\uC77C, \uBD88\uD544\uC694\uD55C \uAD75\uAC8C/\uAE30\uC6B8\uC784 \uC81C\uAC70, \uBD88\uD544\uC694\uD55C \uBE48 \uC904 \uC815\uB9AC \uB4F1. \uC11C\uC2DD\uB9CC \uC870\uC815\uD558\uACE0 \uBCF8\uBB38 \uB0B4\uC6A9\uC740 \uC808\uB300 \uBCC0\uACBD\uD558\uC9C0 \uB9C8\uC138\uC694",
         aiNewChat: "\uC0C8 \uB300\uD654",
+        aiHistory: "\uAE30\uB85D",
+        aiHistoryEmpty: "\uB300\uD654 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4",
+        aiHistoryYou: "\uB098",
+        aiHistoryAssistant: "\uC5B4\uC2DC\uC2A4\uD134\uD2B8",
         aiCollapsePanel: "\uD328\uB110 \uC811\uAE30",
         aiEmptyTitle: "\uC774 \uBB38\uC11C\uC5D0 \uB300\uD574 \uC9C8\uBB38\uD558\uC138\uC694",
         aiEmptyBody: "\uC791\uC131, \uB2E4\uC2DC \uC4F0\uAE30, \uC694\uC57D, \uBC88\uC5ED \uB610\uB294 \uCC98\uC74C\uBD80\uD130 \uBB38\uC11C \uC0DD\uC131",
@@ -160529,6 +160551,10 @@ var init_strings = __esm({
         aiTidyBtn: "Mise en forme IA",
         aiTidyPrompt: "R\xE9organisez la mise en forme du document : corrigez les niveaux de titres, unifiez le format des listes, supprimez le gras et l'italique superflus et nettoyez les lignes vides en trop. Ne modifiez que la mise en forme, sans changer le texte",
         aiNewChat: "Nouvelle conversation",
+        aiHistory: "Historique",
+        aiHistoryEmpty: "Aucun historique de conversation",
+        aiHistoryYou: "Vous",
+        aiHistoryAssistant: "Assistant",
         aiCollapsePanel: "R\xE9duire le panneau",
         aiEmptyTitle: "Interrogez ce document",
         aiEmptyBody: "R\xE9diger, r\xE9\xE9crire, r\xE9sumer, traduire ou g\xE9n\xE9rer un document",
@@ -160726,6 +160752,10 @@ var init_strings = __esm({
         aiTidyBtn: "KI-Formatierung",
         aiTidyPrompt: "Bereinige die Formatierung des Dokuments: korrigiere \xDCberschriftenebenen, vereinheitliche Listenformate, entferne \xFCberfl\xFCssiges Fett und Kursiv und r\xE4ume \xFCberz\xE4hlige Leerzeilen auf. \xC4ndere nur die Formatierung, nicht den Textinhalt",
         aiNewChat: "Neuer Chat",
+        aiHistory: "Verlauf",
+        aiHistoryEmpty: "Kein Gespr\xE4chsverlauf",
+        aiHistoryYou: "Du",
+        aiHistoryAssistant: "Assistent",
         aiCollapsePanel: "Panel einklappen",
         aiEmptyTitle: "Fragen Sie zu diesem Dokument",
         aiEmptyBody: "Verfassen, umschreiben, zusammenfassen, \xFCbersetzen oder neu generieren",
@@ -160923,6 +160953,10 @@ var init_strings = __esm({
         aiTidyBtn: "Formato IA",
         aiTidyPrompt: "Ordena el formato del documento: corrige los niveles de los t\xEDtulos, unifica el formato de las listas, elimina negritas y cursivas innecesarias y limpia las l\xEDneas en blanco sobrantes. Ajusta solo el formato, sin cambiar el texto",
         aiNewChat: "Nueva conversaci\xF3n",
+        aiHistory: "Historial",
+        aiHistoryEmpty: "No hay historial de conversaci\xF3n",
+        aiHistoryYou: "T\xFA",
+        aiHistoryAssistant: "Asistente",
         aiCollapsePanel: "Contraer panel",
         aiEmptyTitle: "Pregunta sobre este documento",
         aiEmptyBody: "Redacta, reescribe, resume, traduce o genera un documento",
@@ -161120,6 +161154,10 @@ var init_strings = __esm({
         aiTidyBtn: "\u0E08\u0E31\u0E14\u0E23\u0E39\u0E1B\u0E41\u0E1A\u0E1A\u0E14\u0E49\u0E27\u0E22 AI",
         aiTidyPrompt: "\u0E08\u0E31\u0E14\u0E23\u0E30\u0E40\u0E1A\u0E35\u0E22\u0E1A\u0E23\u0E39\u0E1B\u0E41\u0E1A\u0E1A\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E17\u0E31\u0E49\u0E07\u0E09\u0E1A\u0E31\u0E1A \u0E40\u0E0A\u0E48\u0E19 \u0E41\u0E01\u0E49\u0E44\u0E02\u0E23\u0E30\u0E14\u0E31\u0E1A\u0E2B\u0E31\u0E27\u0E02\u0E49\u0E2D \u0E1B\u0E23\u0E31\u0E1A\u0E23\u0E39\u0E1B\u0E41\u0E1A\u0E1A\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23\u0E43\u0E2B\u0E49\u0E2A\u0E2D\u0E14\u0E04\u0E25\u0E49\u0E2D\u0E07\u0E01\u0E31\u0E19 \u0E25\u0E1A\u0E15\u0E31\u0E27\u0E2B\u0E19\u0E32\u0E41\u0E25\u0E30\u0E15\u0E31\u0E27\u0E40\u0E2D\u0E35\u0E22\u0E07\u0E17\u0E35\u0E48\u0E44\u0E21\u0E48\u0E08\u0E33\u0E40\u0E1B\u0E47\u0E19 \u0E41\u0E25\u0E30\u0E25\u0E1A\u0E1A\u0E23\u0E23\u0E17\u0E31\u0E14\u0E27\u0E48\u0E32\u0E07\u0E2A\u0E48\u0E27\u0E19\u0E40\u0E01\u0E34\u0E19 \u0E1B\u0E23\u0E31\u0E1A\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E23\u0E39\u0E1B\u0E41\u0E1A\u0E1A\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19 \u0E2B\u0E49\u0E32\u0E21\u0E41\u0E01\u0E49\u0E44\u0E02\u0E40\u0E19\u0E37\u0E49\u0E2D\u0E2B\u0E32\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21",
         aiNewChat: "\u0E41\u0E0A\u0E17\u0E43\u0E2B\u0E21\u0E48",
+        aiHistory: "\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34",
+        aiHistoryEmpty: "\u0E44\u0E21\u0E48\u0E21\u0E35\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E01\u0E32\u0E23\u0E2A\u0E19\u0E17\u0E19\u0E32",
+        aiHistoryYou: "\u0E04\u0E38\u0E13",
+        aiHistoryAssistant: "\u0E1C\u0E39\u0E49\u0E0A\u0E48\u0E27\u0E22",
         aiCollapsePanel: "\u0E22\u0E38\u0E1A\u0E41\u0E1C\u0E07",
         aiEmptyTitle: "\u0E16\u0E32\u0E21\u0E40\u0E01\u0E35\u0E48\u0E22\u0E27\u0E01\u0E31\u0E1A\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E19\u0E35\u0E49",
         aiEmptyBody: "\u0E40\u0E02\u0E35\u0E22\u0E19 \u0E41\u0E01\u0E49\u0E44\u0E02 \u0E2A\u0E23\u0E38\u0E1B \u0E41\u0E1B\u0E25 \u0E2B\u0E23\u0E37\u0E2D\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E41\u0E15\u0E48\u0E15\u0E49\u0E19",
@@ -161317,6 +161355,10 @@ var init_strings = __esm({
         aiTidyBtn: "Format AI",
         aiTidyPrompt: "Rapikan format dokumen: perbaiki tingkat judul, seragamkan format daftar, hapus cetak tebal dan miring yang tidak perlu, dan bersihkan baris kosong berlebih. Sesuaikan format saja \u2014 jangan ubah isi teks apa pun",
         aiNewChat: "Obrolan baru",
+        aiHistory: "Riwayat",
+        aiHistoryEmpty: "Belum ada riwayat percakapan",
+        aiHistoryYou: "Anda",
+        aiHistoryAssistant: "Asisten",
         aiCollapsePanel: "Ciutkan panel",
         aiEmptyTitle: "Tanyakan tentang dokumen ini",
         aiEmptyBody: "Tulis, tulis ulang, ringkas, terjemahkan, atau buat dokumen baru",
@@ -161514,6 +161556,10 @@ var init_strings = __esm({
         aiTidyBtn: "\u0418\u0418-\u0444\u043E\u0440\u043C\u0430\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435",
         aiTidyPrompt: "\u041F\u0440\u0438\u0432\u0435\u0434\u0438\u0442\u0435 \u0432 \u043F\u043E\u0440\u044F\u0434\u043E\u043A \u0444\u043E\u0440\u043C\u0430\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435 \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0430: \u0438\u0441\u043F\u0440\u0430\u0432\u044C\u0442\u0435 \u0443\u0440\u043E\u0432\u043D\u0438 \u0437\u0430\u0433\u043E\u043B\u043E\u0432\u043A\u043E\u0432, \u0443\u043D\u0438\u0444\u0438\u0446\u0438\u0440\u0443\u0439\u0442\u0435 \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0441\u043F\u0438\u0441\u043A\u043E\u0432, \u0443\u0431\u0435\u0440\u0438\u0442\u0435 \u043B\u0438\u0448\u043D\u0438\u0435 \u0436\u0438\u0440\u043D\u044B\u0439 \u0448\u0440\u0438\u0444\u0442 \u0438 \u043A\u0443\u0440\u0441\u0438\u0432, \u0443\u0434\u0430\u043B\u0438\u0442\u0435 \u043B\u0438\u0448\u043D\u0438\u0435 \u043F\u0443\u0441\u0442\u044B\u0435 \u0441\u0442\u0440\u043E\u043A\u0438. \u041C\u0435\u043D\u044F\u0439\u0442\u0435 \u0442\u043E\u043B\u044C\u043A\u043E \u0444\u043E\u0440\u043C\u0430\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435, \u043D\u0435 \u0438\u0437\u043C\u0435\u043D\u044F\u044F \u0442\u0435\u043A\u0441\u0442",
         aiNewChat: "\u041D\u043E\u0432\u044B\u0439 \u0447\u0430\u0442",
+        aiHistory: "\u0418\u0441\u0442\u043E\u0440\u0438\u044F",
+        aiHistoryEmpty: "\u0418\u0441\u0442\u043E\u0440\u0438\u044F \u0434\u0438\u0430\u043B\u043E\u0433\u0430 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442",
+        aiHistoryYou: "\u0412\u044B",
+        aiHistoryAssistant: "\u0410\u0441\u0441\u0438\u0441\u0442\u0435\u043D\u0442",
         aiCollapsePanel: "\u0421\u0432\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0430\u043D\u0435\u043B\u044C",
         aiEmptyTitle: "\u0421\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u043E\u0431 \u044D\u0442\u043E\u043C \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0435",
         aiEmptyBody: "\u041D\u0430\u043F\u0438\u0441\u0430\u0442\u044C, \u043F\u0435\u0440\u0435\u043F\u0438\u0441\u0430\u0442\u044C, \u0441\u0443\u043C\u043C\u0438\u0440\u043E\u0432\u0430\u0442\u044C, \u043F\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0438\u043B\u0438 \u0441\u043E\u0437\u0434\u0430\u0442\u044C \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442",
@@ -161711,6 +161757,10 @@ var init_strings = __esm({
         aiTidyBtn: "\u062A\u0646\u0633\u064A\u0642 AI",
         aiTidyPrompt: "\u0631\u062A\u0651\u0628 \u062A\u0646\u0633\u064A\u0642 \u0627\u0644\u0645\u0633\u062A\u0646\u062F: \u0635\u062D\u0651\u062D \u0645\u0633\u062A\u0648\u064A\u0627\u062A \u0627\u0644\u0639\u0646\u0627\u0648\u064A\u0646\u060C \u0648\u0648\u062D\u0651\u062F \u062A\u0646\u0633\u064A\u0642 \u0627\u0644\u0642\u0648\u0627\u0626\u0645\u060C \u0648\u0623\u0632\u0644 \u0627\u0644\u062E\u0637 \u0627\u0644\u063A\u0627\u0645\u0642 \u0648\u0627\u0644\u0645\u0627\u0626\u0644 \u063A\u064A\u0631 \u0627\u0644\u0636\u0631\u0648\u0631\u064A\u064A\u0646\u060C \u0648\u0646\u0638\u0651\u0641 \u0627\u0644\u0623\u0633\u0637\u0631 \u0627\u0644\u0641\u0627\u0631\u063A\u0629 \u0627\u0644\u0632\u0627\u0626\u062F\u0629. \u0639\u062F\u0651\u0644 \u0627\u0644\u062A\u0646\u0633\u064A\u0642 \u0641\u0642\u0637 \u062F\u0648\u0646 \u062A\u063A\u064A\u064A\u0631 \u0623\u064A \u0645\u062D\u062A\u0648\u0649 \u0646\u0635\u064A",
         aiNewChat: "\u0645\u062D\u0627\u062F\u062B\u0629 \u062C\u062F\u064A\u062F\u0629",
+        aiHistory: "\u0627\u0644\u0633\u062C\u0644",
+        aiHistoryEmpty: "\u0644\u0627 \u064A\u0648\u062C\u062F \u0633\u062C\u0644 \u0644\u0644\u0645\u062D\u0627\u062F\u062B\u0629",
+        aiHistoryYou: "\u0623\u0646\u062A",
+        aiHistoryAssistant: "\u0627\u0644\u0645\u0633\u0627\u0639\u062F",
         aiCollapsePanel: "\u0637\u064A \u0627\u0644\u0644\u0648\u062D\u0629",
         aiEmptyTitle: "\u0627\u0633\u0623\u0644 \u0639\u0646 \u0647\u0630\u0627 \u0627\u0644\u0645\u0633\u062A\u0646\u062F",
         aiEmptyBody: "\u0627\u0643\u062A\u0628 \u0623\u0648 \u0623\u0639\u062F \u0627\u0644\u0635\u064A\u0627\u063A\u0629 \u0623\u0648 \u0644\u062E\u0651\u0635 \u0623\u0648 \u062A\u0631\u062C\u0645 \u0623\u0648 \u0623\u0646\u0634\u0626 \u0645\u0633\u062A\u0646\u062F\u0627\u064B \u0645\u0646 \u0627\u0644\u0635\u0641\u0631",
@@ -161908,6 +161958,10 @@ var init_strings = __esm({
         aiTidyBtn: "Formata\xE7\xE3o IA",
         aiTidyPrompt: "Organize a formata\xE7\xE3o do documento: corrija os n\xEDveis dos t\xEDtulos, unifique o formato das listas, remova negrito e it\xE1lico desnecess\xE1rios e limpe linhas em branco excedentes. Ajuste apenas a formata\xE7\xE3o, sem alterar o texto",
         aiNewChat: "Nova conversa",
+        aiHistory: "Hist\xF3rico",
+        aiHistoryEmpty: "Sem hist\xF3rico de conversa",
+        aiHistoryYou: "Voc\xEA",
+        aiHistoryAssistant: "Assistente",
         aiCollapsePanel: "Recolher painel",
         aiEmptyTitle: "Pergunte sobre este documento",
         aiEmptyBody: "Redija, reescreva, resuma, traduza ou gere um documento",
@@ -162105,6 +162159,10 @@ var init_strings = __esm({
         aiTidyBtn: "Formattazione IA",
         aiTidyPrompt: "Riordina la formattazione del documento: correggi i livelli dei titoli, uniforma il formato degli elenchi, rimuovi grassetto e corsivo superflui ed elimina le righe vuote in eccesso. Modifica solo la formattazione, senza cambiare il testo",
         aiNewChat: "Nuova chat",
+        aiHistory: "Cronologia",
+        aiHistoryEmpty: "Nessuna cronologia della conversazione",
+        aiHistoryYou: "Tu",
+        aiHistoryAssistant: "Assistente",
         aiCollapsePanel: "Comprimi pannello",
         aiEmptyTitle: "Chiedi di questo documento",
         aiEmptyBody: "Scrivi, riscrivi, riassumi, traduci o genera un documento",
@@ -162302,6 +162360,10 @@ var init_strings = __esm({
         aiTidyBtn: "Formatowanie AI",
         aiTidyPrompt: "Uporz\u0105dkuj formatowanie dokumentu: popraw poziomy nag\u0142\xF3wk\xF3w, ujednoli\u0107 formatowanie list, usu\u0144 zb\u0119dne pogrubienia i kursyw\u0119 oraz nadmiarowe puste wiersze. Zmieniaj tylko formatowanie, nie zmieniaj tre\u015Bci tekstu",
         aiNewChat: "Nowy czat",
+        aiHistory: "Historia",
+        aiHistoryEmpty: "Brak historii rozm\xF3w",
+        aiHistoryYou: "Ty",
+        aiHistoryAssistant: "Asystent",
         aiCollapsePanel: "Zwi\u0144 panel",
         aiEmptyTitle: "Zapytaj o ten dokument",
         aiEmptyBody: "Pisz, przepisuj, streszczaj, t\u0142umacz lub generuj dokument",
@@ -162485,6 +162547,10 @@ var init_strings = __esm({
         aiTidyBtn: "Form\xE1tovat pomoc\xED AI",
         aiTidyPrompt: "Uprav form\xE1tov\xE1n\xED dokumentu \u2013 oprav \xFArovn\u011B nadpis\u016F, sjedno\u0165 form\xE1tov\xE1n\xED seznam\u016F, odstra\u0148 nadbyte\u010Dn\xE9 tu\u010Dn\xE9 p\xEDsmo a kurz\xEDvu a vy\u010Disti p\u0159ebyte\u010Dn\xE9 pr\xE1zdn\xE9 \u0159\xE1dky. Uprav pouze form\xE1tov\xE1n\xED \u2013 nem\u011B\u0148 \u017E\xE1dn\xFD textov\xFD obsah",
         aiNewChat: "Nov\xFD chat",
+        aiHistory: "Historie",
+        aiHistoryEmpty: "Historie konverzace nen\xED k dispozici",
+        aiHistoryYou: "Vy",
+        aiHistoryAssistant: "Asistent",
         aiCollapsePanel: "Sbalit panel",
         aiEmptyTitle: "Zeptejte se na tento dokument",
         aiEmptyBody: "Napi\u0161te, p\u0159epi\u0161te, shr\u0148te, p\u0159elo\u017Ete nebo vygenerujte dokument od za\u010D\xE1tku",
@@ -162696,6 +162762,10 @@ var init_strings = __esm({
         aiTidyBtn: "AI-opmaak",
         aiTidyPrompt: "Ruim de opmaak van het document op: corrigeer kopniveaus, maak lijstopmaak uniform, verwijder onnodige vetgedrukte en cursieve tekst en verwijder overtollige lege regels. Pas alleen de opmaak aan, verander de tekst niet",
         aiNewChat: "Nieuwe chat",
+        aiHistory: "Geschiedenis",
+        aiHistoryEmpty: "Geen gespreksgeschiedenis",
+        aiHistoryYou: "Jij",
+        aiHistoryAssistant: "Assistent",
         aiCollapsePanel: "Paneel inklappen",
         aiEmptyTitle: "Vraag over dit document",
         aiEmptyBody: "Schrijf, herschrijf, vat samen, vertaal of genereer een document",
@@ -162893,6 +162963,10 @@ var init_strings = __esm({
         aiTidyBtn: "Format AI",
         aiTidyPrompt: "Kemaskan format dokumen: betulkan aras tajuk, seragamkan format senarai, buang huruf tebal dan condong yang tidak perlu, dan bersihkan baris kosong berlebihan. Laraskan format sahaja \u2014 jangan ubah sebarang kandungan teks",
         aiNewChat: "Sembang baharu",
+        aiHistory: "Sejarah",
+        aiHistoryEmpty: "Tiada sejarah perbualan",
+        aiHistoryYou: "Anda",
+        aiHistoryAssistant: "Pembantu",
         aiCollapsePanel: "Runtuhkan panel",
         aiEmptyTitle: "Tanya tentang dokumen ini",
         aiEmptyBody: "Tulis, tulis semula, ringkas, terjemah atau jana dokumen",
@@ -163090,6 +163164,10 @@ var init_strings = __esm({
         aiTidyBtn: "\u05E2\u05D9\u05E6\u05D5\u05D1 AI",
         aiTidyPrompt: "\u05E1\u05D3\u05E8 \u05D0\u05EA \u05E2\u05D9\u05E6\u05D5\u05D1 \u05D4\u05DE\u05E1\u05DE\u05DA: \u05EA\u05E7\u05DF \u05E8\u05DE\u05D5\u05EA \u05DB\u05D5\u05EA\u05E8\u05D5\u05EA, \u05D0\u05D7\u05D3 \u05D0\u05EA \u05E2\u05D9\u05E6\u05D5\u05D1 \u05D4\u05E8\u05E9\u05D9\u05DE\u05D5\u05EA, \u05D4\u05E1\u05E8 \u05D4\u05D3\u05D2\u05E9\u05D5\u05EA \u05D5\u05D4\u05D8\u05D9\u05D5\u05EA \u05DE\u05D9\u05D5\u05EA\u05E8\u05D5\u05EA \u05D5\u05E0\u05E7\u05D4 \u05E9\u05D5\u05E8\u05D5\u05EA \u05E8\u05D9\u05E7\u05D5\u05EA \u05E2\u05D5\u05D3\u05E4\u05D5\u05EA. \u05E9\u05E0\u05D4 \u05E2\u05D9\u05E6\u05D5\u05D1 \u05D1\u05DC\u05D1\u05D3 \u2014 \u05D0\u05DC \u05EA\u05E9\u05E0\u05D4 \u05E9\u05D5\u05DD \u05EA\u05D5\u05DB\u05DF \u05D8\u05E7\u05E1\u05D8",
         aiNewChat: "\u05E9\u05D9\u05D7\u05D4 \u05D7\u05D3\u05E9\u05D4",
+        aiHistory: "\u05D4\u05D9\u05E1\u05D8\u05D5\u05E8\u05D9\u05D4",
+        aiHistoryEmpty: "\u05D0\u05D9\u05DF \u05D4\u05D9\u05E1\u05D8\u05D5\u05E8\u05D9\u05D9\u05EA \u05E9\u05D9\u05D7\u05D4",
+        aiHistoryYou: "\u05D0\u05EA\u05D4",
+        aiHistoryAssistant: "\u05E2\u05D5\u05D6\u05E8",
         aiCollapsePanel: "\u05DB\u05D5\u05D5\u05E6\u05D5 \u05D0\u05EA \u05D4\u05D7\u05DC\u05D5\u05E0\u05D9\u05EA",
         aiEmptyTitle: "\u05E9\u05D0\u05DC\u05D5 \u05E2\u05DC \u05D4\u05DE\u05E1\u05DE\u05DA \u05D4\u05D6\u05D4",
         aiEmptyBody: "\u05E0\u05E1\u05D7\u05D5, \u05E9\u05DB\u05EA\u05D1\u05D5, \u05E1\u05DB\u05DE\u05D5, \u05EA\u05E8\u05D2\u05DE\u05D5 \u05D0\u05D5 \u05E6\u05E8\u05D5 \u05DE\u05E1\u05DE\u05DA \u05DE\u05D0\u05E4\u05E1",
@@ -163287,6 +163365,10 @@ var init_strings = __esm({
         aiTidyBtn: "AI \u0938\u094D\u0935\u0930\u0942\u092A\u0923",
         aiTidyPrompt: "\u0926\u0938\u094D\u0924\u093E\u0935\u0947\u091C\u093C \u0915\u093E \u0938\u094D\u0935\u0930\u0942\u092A\u0923 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093F\u0924 \u0915\u0930\u0947\u0902: \u0936\u0940\u0930\u094D\u0937\u0915 \u0938\u094D\u0924\u0930 \u0920\u0940\u0915 \u0915\u0930\u0947\u0902, \u0938\u0942\u091A\u0940 \u0938\u094D\u0935\u0930\u0942\u092A\u0923 \u090F\u0915\u0930\u0942\u092A \u0915\u0930\u0947\u0902, \u0905\u0928\u093E\u0935\u0936\u094D\u092F\u0915 \u092C\u094B\u0932\u094D\u0921 \u0914\u0930 \u0907\u091F\u0948\u0932\u093F\u0915 \u0939\u091F\u093E\u090F\u0901 \u0914\u0930 \u0905\u0924\u093F\u0930\u093F\u0915\u094D\u0924 \u0916\u093E\u0932\u0940 \u092A\u0902\u0915\u094D\u0924\u093F\u092F\u093E\u0901 \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902\u0964 \u0915\u0947\u0935\u0932 \u0938\u094D\u0935\u0930\u0942\u092A\u0923 \u092C\u0926\u0932\u0947\u0902 \u2014 \u0915\u093F\u0938\u0940 \u092D\u0940 \u092A\u093E\u0920 \u0938\u093E\u092E\u0917\u094D\u0930\u0940 \u0915\u094B \u0928 \u092C\u0926\u0932\u0947\u0902",
         aiNewChat: "\u0928\u0908 \u091A\u0948\u091F",
+        aiHistory: "\u0907\u0924\u093F\u0939\u093E\u0938",
+        aiHistoryEmpty: "\u0915\u094B\u0908 \u092C\u093E\u0924\u091A\u0940\u0924 \u0907\u0924\u093F\u0939\u093E\u0938 \u0928\u0939\u0940\u0902",
+        aiHistoryYou: "\u0906\u092A",
+        aiHistoryAssistant: "\u0938\u0939\u093E\u092F\u0915",
         aiCollapsePanel: "\u092A\u0948\u0928\u0932 \u0938\u0902\u0915\u094D\u0937\u093F\u092A\u094D\u0924 \u0915\u0930\u0947\u0902",
         aiEmptyTitle: "\u0907\u0938 \u0926\u0938\u094D\u0924\u093E\u0935\u0947\u091C\u093C \u0915\u0947 \u092C\u093E\u0930\u0947 \u092E\u0947\u0902 \u092A\u0942\u091B\u0947\u0902",
         aiEmptyBody: "\u0932\u093F\u0916\u0947\u0902, \u092B\u093F\u0930 \u0938\u0947 \u0932\u093F\u0916\u0947\u0902, \u0938\u093E\u0930\u093E\u0902\u0936 \u0926\u0947\u0902, \u0905\u0928\u0941\u0935\u093E\u0926 \u0915\u0930\u0947\u0902 \u092F\u093E \u0928\u092F\u093E \u0926\u0938\u094D\u0924\u093E\u0935\u0947\u091C\u093C \u092C\u0928\u093E\u090F\u0901",
@@ -163484,6 +163566,10 @@ var init_strings = __esm({
         aiTidyBtn: "AI \u6392\u7248",
         aiTidyPrompt: "\u6574\u7406\u5168\u6587\u6392\u7248\uFF1A\u4FEE\u6B63\u6A19\u984C\u5C64\u7D1A\u3001\u7D71\u4E00\u6E05\u55AE\u683C\u5F0F\u3001\u53BB\u9664\u591A\u9918\u7684\u7C97\u9AD4\u548C\u659C\u9AD4\u3001\u6E05\u7406\u591A\u9918\u7A7A\u884C\uFF1B\u53EA\u8ABF\u6574\u683C\u5F0F\uFF0C\u4E0D\u8981\u6539\u52D5\u4EFB\u4F55\u6587\u5B57\u5167\u5BB9",
         aiNewChat: "\u65B0\u5C0D\u8A71",
+        aiHistory: "\u6B77\u53F2",
+        aiHistoryEmpty: "\u6C92\u6709\u5C0D\u8A71\u6B77\u53F2",
+        aiHistoryYou: "\u4F60",
+        aiHistoryAssistant: "\u52A9\u7406",
         aiCollapsePanel: "\u6536\u5408\u9762\u677F",
         aiEmptyTitle: "\u8A62\u554F\u9019\u4EFD\u6587\u4EF6",
         aiEmptyBody: "\u64B0\u5BEB\u3001\u6539\u5BEB\u3001\u6458\u8981\u3001\u7FFB\u8B6F\uFF0C\u6216\u5F9E\u96F6\u751F\u6210\u6587\u4EF6",
@@ -163529,16 +163615,16 @@ var init_strings = __esm({
 function t(key8, params) {
   return translate(moduleLang, key8, params);
 }
-var import_react14, import_jsx_runtime17, translate, LocaleContext, moduleLang;
+var import_react15, import_jsx_runtime18, translate, LocaleContext, moduleLang;
 var init_locale2 = __esm({
   "../../apps/markdown/src/renderer/i18n/locale.tsx"() {
     "use strict";
-    import_react14 = __toESM(require_react());
+    import_react15 = __toESM(require_react());
     init_src12();
     init_strings();
-    import_jsx_runtime17 = __toESM(require_jsx_runtime());
+    import_jsx_runtime18 = __toESM(require_jsx_runtime());
     translate = createI18n(strings);
-    LocaleContext = (0, import_react14.createContext)("zh");
+    LocaleContext = (0, import_react15.createContext)("zh");
     moduleLang = "zh";
   }
 });
@@ -168963,25 +169049,25 @@ var init_diagrams = __esm({
 
 // ../../apps/markdown/src/renderer/editor/CodeBlockView.tsx
 function CodeBlockView({ node, updateAttributes: updateAttributes2, editor, getPos }) {
-  const [copied, setCopied] = (0, import_react15.useState)(false);
-  const copyTimerRef = (0, import_react15.useRef)(null);
-  const mountedRef = (0, import_react15.useRef)(true);
+  const [copied, setCopied] = (0, import_react16.useState)(false);
+  const copyTimerRef = (0, import_react16.useRef)(null);
+  const mountedRef = (0, import_react16.useRef)(true);
   const language = String(node.attrs.language ?? "") || "plaintext";
   const diagramLang = diagramLanguage(language);
   const source2 = node.textContent;
-  const [rendered, setRendered] = (0, import_react15.useState)(null);
+  const [rendered, setRendered] = (0, import_react16.useState)(null);
   const diagram = rendered && rendered.language === diagramLang ? rendered.result : null;
-  const hasDiagramRef = (0, import_react15.useRef)(false);
+  const hasDiagramRef = (0, import_react16.useRef)(false);
   hasDiagramRef.current = diagram !== null;
-  const [caretInside, setCaretInside] = (0, import_react15.useState)(false);
-  (0, import_react15.useEffect)(() => {
+  const [caretInside, setCaretInside] = (0, import_react16.useState)(false);
+  (0, import_react16.useEffect)(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
       if (copyTimerRef.current !== null) window.clearTimeout(copyTimerRef.current);
     };
   }, []);
-  (0, import_react15.useEffect)(() => {
+  (0, import_react16.useEffect)(() => {
     if (!diagramLang) return;
     const update = () => {
       const pos = getPos();
@@ -168997,7 +169083,7 @@ function CodeBlockView({ node, updateAttributes: updateAttributes2, editor, getP
       editor.off("selectionUpdate", update);
     };
   }, [editor, getPos, diagramLang]);
-  (0, import_react15.useEffect)(() => {
+  (0, import_react16.useEffect)(() => {
     if (!diagramLang || !source2.trim()) {
       setRendered(null);
       return;
@@ -169039,9 +169125,9 @@ function CodeBlockView({ node, updateAttributes: updateAttributes2, editor, getP
     diagramLang && "md-diagram",
     !showSource && "md-diagram-collapsed"
   ].filter(Boolean).join(" ");
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(NodeViewWrapper, { className, "data-diagram": hasPicture ? "rendered" : void 0, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "md-codeblock-bar", contentEditable: false, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(NodeViewWrapper, { className, "data-diagram": hasPicture ? "rendered" : void 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "md-codeblock-bar", contentEditable: false, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
         Dropdown,
         {
           className: "md-codeblock-lang",
@@ -169051,15 +169137,15 @@ function CodeBlockView({ node, updateAttributes: updateAttributes2, editor, getP
           onPick: (lang) => updateAttributes2({ language: lang === "plaintext" ? null : lang })
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "button", className: "md-codeblock-copy", onClick: copy2, children: copied ? t("codeCopied") : t("codeCopy") })
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", className: "md-codeblock-copy", onClick: copy2, children: copied ? t("codeCopied") : t("codeCopy") })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(NodeViewContent, { as: "code" }) }),
-    error51 && /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "md-diagram-error", contentEditable: false, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(NodeViewContent, { as: "code" }) }),
+    error51 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "md-diagram-error", contentEditable: false, children: [
       t("mermaidError"),
       ": ",
       error51
     ] }),
-    diagram?.ok && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    diagram?.ok && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       "div",
       {
         className: "md-diagram-preview",
@@ -169070,16 +169156,16 @@ function CodeBlockView({ node, updateAttributes: updateAttributes2, editor, getP
     )
   ] });
 }
-var import_react15, import_jsx_runtime18, LANGUAGES, RERENDER_DEBOUNCE_MS;
+var import_react16, import_jsx_runtime19, LANGUAGES, RERENDER_DEBOUNCE_MS;
 var init_CodeBlockView = __esm({
   "../../apps/markdown/src/renderer/editor/CodeBlockView.tsx"() {
     "use strict";
-    import_react15 = __toESM(require_react());
+    import_react16 = __toESM(require_react());
     init_dist34();
     init_src11();
     init_locale2();
     init_diagrams();
-    import_jsx_runtime18 = __toESM(require_jsx_runtime());
+    import_jsx_runtime19 = __toESM(require_jsx_runtime());
     LANGUAGES = [
       "plaintext",
       "bash",
@@ -193375,12 +193461,112 @@ var init_en3 = __esm({
   }
 });
 
+// ../../apps/docs/src/renderer/editor/hf-menu-strings.ts
+var hfMenuZh, hfMenuEn;
+var init_hf_menu_strings = __esm({
+  "../../apps/docs/src/renderer/editor/hf-menu-strings.ts"() {
+    "use strict";
+    hfMenuZh = {
+      ribbonHfBuiltIn: "\u5185\u7F6E\u6A21\u677F",
+      ribbonHfTemplateText: "[\u5728\u6B64\u5904\u8F93\u5165]",
+      ribbonHfTplBlank: "\u7A7A\u767D",
+      ribbonHfTplColumns: "\u7A7A\u767D\uFF08\u4E09\u680F\uFF09",
+      ribbonHfTplTitle: "\u6587\u6863\u6807\u9898",
+      ribbonHfTplRule: "\u6A2A\u7EBF\u578B",
+      ribbonHfTplBand: "\u8272\u5E26\u578B",
+      ribbonHfTplTitleDate: "\u6807\u9898\u548C\u65E5\u671F",
+      ribbonHfTplPage: "\u666E\u901A\u9875\u7801",
+      ribbonHfTplPageTotal: "\u7B2C X \u9875\uFF0C\u5171 Y \u9875",
+      ribbonHfEditHeader: "\u7F16\u8F91\u9875\u7709\u2026",
+      ribbonHfEditFooter: "\u7F16\u8F91\u9875\u811A\u2026",
+      ribbonHfRemoveHeader: "\u5220\u9664\u9875\u7709",
+      ribbonHfRemoveFooter: "\u5220\u9664\u9875\u811A",
+      ribbonHfPnTop: "\u9875\u9762\u9876\u7AEF",
+      ribbonHfPnBottom: "\u9875\u9762\u5E95\u7AEF",
+      ribbonHfPnCurrent: "\u5F53\u524D\u4F4D\u7F6E",
+      ribbonHfPnPlain: "\u666E\u901A\u6570\u5B57",
+      ribbonHfPnDash: "\u77ED\u6A2A\u7EBF",
+      ribbonHfPnAccent: "\u5F3A\u8C03\u6570\u5B57",
+      ribbonHfPagePrefix: "\u7B2C ",
+      ribbonHfPageOf: " \u9875\uFF0C\u5171 ",
+      ribbonHfPageSuffix: " \u9875",
+      ribbonHfDateTime: "\u65E5\u671F\u548C\u65F6\u95F4",
+      ribbonHfLanguage: "\u8BED\u8A00\uFF08\u56FD\u5BB6/\u5730\u533A\uFF09",
+      ribbonHfAvailableFormats: "\u53EF\u7528\u683C\u5F0F",
+      ribbonHfInsertAsField: "\u63D2\u5165\u4E3A\u57DF\uFF08Word \u66F4\u65B0\u65F6\u81EA\u52A8\u66F4\u65B0\uFF09",
+      ribbonHfDocumentInfo: "\u6587\u6863\u4FE1\u606F",
+      ribbonHfAuthor: "\u4F5C\u8005",
+      ribbonHfFilePath: "\u6587\u4EF6\u8DEF\u5F84",
+      ribbonHfDocTitle: "\u6587\u6863\u6807\u9898",
+      ribbonHfSubject: "\u4E3B\u9898",
+      ribbonHfKeywords: "\u5173\u952E\u8BCD",
+      ribbonHfDescription: "\u5907\u6CE8",
+      ribbonHfFieldValue: "\u57DF\u663E\u793A\u5185\u5BB9",
+      ribbonHfMissingProperty: "\u6587\u6863\u672A\u8BBE\u7F6E\u6B64\u5C5E\u6027\uFF0C\u8BF7\u586B\u5199\u663E\u793A\u5185\u5BB9",
+      ribbonHfDocumentParts: "\u6587\u6863\u90E8\u4EF6",
+      ribbonHfSavedTemplates: "\u6211\u7684\u9875\u7709\u9875\u811A\u6A21\u677F",
+      ribbonHfTemplateName: "\u6A21\u677F\u540D\u79F0",
+      ribbonHfSaveTemplate: "\u4FDD\u5B58\u5F53\u524D\u5185\u5BB9\u5230\u6A21\u677F\u5E93",
+      ribbonHfDeleteTemplate: "\u5220\u9664\u6B64\u6A21\u677F",
+      ribbonHfTemplateSaveFailed: "\u6A21\u677F\u672A\u80FD\u4FDD\u5B58\uFF0C\u672C\u5730\u5B58\u50A8\u53EF\u80FD\u5DF2\u6EE1\u6216\u4E0D\u53EF\u7528\u3002\u8BF7\u6E05\u7406\u7A7A\u95F4\u540E\u91CD\u8BD5\uFF1B\u6587\u6863\u5185\u5BB9\u4ECD\u53EF\u6B63\u5E38\u4FDD\u5B58\u3002",
+      ribbonHfNoTemplates: "\u6682\u65E0\u6A21\u677F\uFF0C\u53EF\u4EE5\u4FDD\u5B58\u5F53\u524D\u9875\u7709\u6216\u9875\u811A\u4EE5\u4FBF\u590D\u7528\u3002"
+    };
+    hfMenuEn = {
+      ribbonHfBuiltIn: "Built-in templates",
+      ribbonHfTemplateText: "[Type here]",
+      ribbonHfTplBlank: "Blank",
+      ribbonHfTplColumns: "Blank (three columns)",
+      ribbonHfTplTitle: "Document title",
+      ribbonHfTplRule: "Ruled",
+      ribbonHfTplBand: "Color band",
+      ribbonHfTplTitleDate: "Title and date",
+      ribbonHfTplPage: "Page number",
+      ribbonHfTplPageTotal: "Page X of Y",
+      ribbonHfEditHeader: "Edit header\u2026",
+      ribbonHfEditFooter: "Edit footer\u2026",
+      ribbonHfRemoveHeader: "Remove header",
+      ribbonHfRemoveFooter: "Remove footer",
+      ribbonHfPnTop: "Top of page",
+      ribbonHfPnBottom: "Bottom of page",
+      ribbonHfPnCurrent: "Current position",
+      ribbonHfPnPlain: "Plain number",
+      ribbonHfPnDash: "Dashes",
+      ribbonHfPnAccent: "Accent number",
+      ribbonHfPagePrefix: "Page ",
+      ribbonHfPageOf: " of ",
+      ribbonHfPageSuffix: "",
+      ribbonHfDateTime: "Date and time",
+      ribbonHfLanguage: "Language / region",
+      ribbonHfAvailableFormats: "Available formats",
+      ribbonHfInsertAsField: "Insert as field (updates in Word)",
+      ribbonHfDocumentInfo: "Document info",
+      ribbonHfAuthor: "Author",
+      ribbonHfFilePath: "File path",
+      ribbonHfDocTitle: "Document title",
+      ribbonHfSubject: "Subject",
+      ribbonHfKeywords: "Keywords",
+      ribbonHfDescription: "Comments",
+      ribbonHfFieldValue: "Field value",
+      ribbonHfMissingProperty: "Property is empty; enter a display value",
+      ribbonHfDocumentParts: "Quick parts",
+      ribbonHfSavedTemplates: "My header/footer templates",
+      ribbonHfTemplateName: "Template name",
+      ribbonHfSaveTemplate: "Save current content as template",
+      ribbonHfDeleteTemplate: "Delete template",
+      ribbonHfTemplateSaveFailed: "Could not save the template. Local storage may be full or unavailable. Free some space and retry; the document can still be saved.",
+      ribbonHfNoTemplates: "No templates yet. Save the current header or footer for reuse."
+    };
+  }
+});
+
 // ../../apps/docs/src/renderer/i18n/ribbon/zh.ts
 var zh3;
 var init_zh3 = __esm({
   "../../apps/docs/src/renderer/i18n/ribbon/zh.ts"() {
     "use strict";
+    init_hf_menu_strings();
     zh3 = {
+      ...hfMenuZh,
       ribbonHfRemove: "\u79FB\u9664\u5F53\u524D\u9875\u7709/\u9875\u811A",
       ribbonHfLine: "\u9875\u7709\u6A2A\u7EBF",
       ribbonHfLineSpacing: "\u4E0E\u6587\u5B57\u95F4\u8DDD",
@@ -194112,7 +194298,9 @@ var en3;
 var init_en4 = __esm({
   "../../apps/docs/src/renderer/i18n/ribbon/en.ts"() {
     "use strict";
+    init_hf_menu_strings();
     en3 = {
+      ...hfMenuEn,
       ribbonHfRemove: "Remove header/footer",
       ribbonHfLine: "Header rule",
       ribbonHfLineSpacing: "Text spacing",
@@ -196422,8 +196610,8 @@ function aiLangDirective() {
   return AI_LANG_DIRECTIVES[moduleLang2];
 }
 function LocaleProvider({ initial, children }) {
-  const [lang, setLang] = (0, import_react18.useState)(initial);
-  (0, import_react18.useEffect)(() => {
+  const [lang, setLang] = (0, import_react19.useState)(initial);
+  (0, import_react19.useEffect)(() => {
     let generation = 0;
     let active3 = true;
     const unsubscribe = window.desktop.onLanguageChanged((next) => {
@@ -196442,25 +196630,25 @@ function LocaleProvider({ initial, children }) {
       unsubscribe();
     };
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(LocaleContext2.Provider, { value: lang, children });
+  return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(LocaleContext2.Provider, { value: lang, children });
 }
 function useI18n() {
-  const lang = (0, import_react18.useContext)(LocaleContext2);
+  const lang = (0, import_react19.useContext)(LocaleContext2);
   return {
     lang,
     t: (key8, params) => translate2(lang, key8, params),
     dateLocale: DATE_LOCALES[lang]
   };
 }
-var import_react18, import_jsx_runtime19, moduleLang2, getLang, setModuleLang, t2, AI_LANG_DIRECTIVES, DATE_LOCALES, LocaleContext2;
+var import_react19, import_jsx_runtime20, moduleLang2, getLang, setModuleLang, t2, AI_LANG_DIRECTIVES, DATE_LOCALES, LocaleContext2;
 var init_locale3 = __esm({
   "../../apps/docs/src/renderer/i18n/locale.tsx"() {
     "use strict";
-    import_react18 = __toESM(require_react());
+    import_react19 = __toESM(require_react());
     init_src12();
     init_language_packs();
     init_language_packs();
-    import_jsx_runtime19 = __toESM(require_jsx_runtime());
+    import_jsx_runtime20 = __toESM(require_jsx_runtime());
     moduleLang2 = "zh";
     getLang = () => moduleLang2;
     setModuleLang = (lang) => {
@@ -196511,7 +196699,7 @@ var init_locale3 = __esm({
       hi: "hi-IN",
       "zh-TW": "zh-TW"
     };
-    LocaleContext2 = (0, import_react18.createContext)("zh");
+    LocaleContext2 = (0, import_react19.createContext)("zh");
   }
 });
 
@@ -218210,7 +218398,8 @@ __export(hf_text_exports, {
   TOTAL_TOKEN: () => TOTAL_TOKEN,
   applyHfText: () => applyHfText,
   hfEditText: () => hfEditText,
-  hfParasOf: () => hfParasOf
+  hfParasOf: () => hfParasOf,
+  insertHfRuns: () => insertHfRuns
 });
 function hfParasOf(value) {
   if (value.paras?.length) return value.paras;
@@ -218232,7 +218421,23 @@ function applyHfText(value, text2) {
   const edited = lines.map((line2, i) => {
     const template = templates[Math.min(i, templates.length - 1)];
     const style2 = template.runs[0] ?? {};
-    return { ...template, runs: line2 === "" ? [] : [{ ...style2, text: line2 }] };
+    const before = template.runs.map((r) => r.text).join("");
+    if (line2 === before) return template;
+    if (!template.runs.some((r) => r.instrField)) return { ...template, runs: line2 === "" ? [] : [{ ...style2, text: line2 }] };
+    let prefix = 0, suffix = 0;
+    while (prefix < before.length && prefix < line2.length && before[prefix] === line2[prefix]) prefix++;
+    while (suffix < before.length - prefix && suffix < line2.length - prefix && before[before.length - 1 - suffix] === line2[line2.length - 1 - suffix]) suffix++;
+    const slice2 = (from2, to) => {
+      let offset3 = 0;
+      return template.runs.flatMap((run4) => {
+        const start = Math.max(0, from2 - offset3), end = Math.min(run4.text.length, to - offset3);
+        offset3 += run4.text.length;
+        if (end <= start) return [];
+        return [{ ...run4, text: run4.text.slice(start, end), ...start !== 0 || end !== run4.text.length ? { instrField: void 0, fldBeginXml: void 0 } : {} }];
+      });
+    };
+    const inserted = line2.slice(prefix, line2.length - suffix);
+    return { ...template, runs: [...slice2(0, prefix), ...inserted ? [{ ...style2, instrField: void 0, fldBeginXml: void 0, text: inserted }] : [], ...slice2(before.length - suffix, before.length)] };
   });
   const nextParas = [];
   let ei = 0;
@@ -218242,7 +218447,44 @@ function applyHfText(value, text2) {
   }
   nextParas.push(...edited.slice(ei));
   const nextText = edited.map((p) => p.runs.map((r) => r.text).join("")).join("");
-  return { ...base2, text: nextText, paras: nextParas };
+  const pageNumber = nextParas.some((p) => [...p.runs, ...p.cells?.flatMap((c) => c.paras.flat()) ?? []].some((run4) => run4.text.includes(PAGE_MARK) || base2.pageNumber && run4.text.includes("#")));
+  return { ...base2, text: nextText, paras: nextParas, pageNumber };
+}
+function insertHfRuns(value, inserted, start, end = start) {
+  const paras = hfParasOf(value).map((p) => ({ ...p, runs: [...p.runs] }));
+  const raw = (s2) => s2.replaceAll(PAGE_TOKEN, PAGE_MARK).replaceAll(TOTAL_TOKEN, TOTAL_PAGES_MARK);
+  const visible = hfEditText(value);
+  const from2 = raw(visible.slice(0, start ?? visible.length)).length;
+  const to = raw(visible.slice(0, end ?? start ?? visible.length)).length;
+  let offset3 = 0, done = false;
+  for (const para of paras) {
+    if (para.cells) continue;
+    const text2 = para.runs.map((r) => r.text).join("");
+    const paraEnd = offset3 + text2.length;
+    if (!done && from2 <= paraEnd) {
+      const slice2 = (a, b2) => {
+        let pos = 0;
+        return para.runs.flatMap((run4) => {
+          const left = Math.max(0, a - pos), right = Math.min(run4.text.length, b2 - pos);
+          pos += run4.text.length;
+          return right > left ? [{ ...run4, text: run4.text.slice(left, right), ...left || right !== run4.text.length ? { instrField: void 0, fldBeginXml: void 0 } : {} }] : [];
+        });
+      };
+      para.runs = [...slice2(0, Math.max(0, from2 - offset3)), ...inserted, ...slice2(Math.max(0, to - offset3), text2.length)];
+      done = true;
+    } else if (done && offset3 < to) {
+      const left = Math.min(text2.length, to - offset3);
+      let pos = 0;
+      para.runs = para.runs.flatMap((run4) => {
+        const begin = Math.max(0, left - pos);
+        pos += run4.text.length;
+        return begin < run4.text.length ? [{ ...run4, text: run4.text.slice(begin), ...begin ? { instrField: void 0, fldBeginXml: void 0 } : {} }] : [];
+      });
+    }
+    offset3 = paraEnd + 1;
+  }
+  if (!done) paras.push({ align: "center", runs: inserted });
+  return { ...value, paras, text: paras.filter((p) => !p.cells).map((p) => p.runs.map((r) => r.text).join("")).join("\n"), pageNumber: paras.some((p) => p.runs.some((r) => r.text.includes(PAGE_MARK))) };
 }
 var PAGE_TOKEN, TOTAL_TOKEN;
 var init_hf_text = __esm({

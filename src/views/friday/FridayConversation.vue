@@ -239,7 +239,7 @@ function scrollToBottomForce() {
 
 async function loadSessionHistory(sessionId) {
   try {
-    const history = await electronService.invoke('get_session_messages', { sessionId });
+    const history = await electronService.invoke('get_session_messages', { sessionId, scope: 'friday', scopeKey: null });
     return (history || []).map(mapHistoryMessage);
   } catch (err) {
     console.error('Failed to load session history:', err);
@@ -341,7 +341,7 @@ async function initConversation() {
     if (seq !== initSeq) return;
     messages.value = loadedMessages;
     try {
-      const sessionInfo = await electronService.invoke('get_session', { sessionId: sessionParam });
+      const sessionInfo = await electronService.invoke('get_session', { sessionId: sessionParam, scope: 'friday', scopeKey: null });
       if (seq !== initSeq) return;
       if (sessionInfo) {
         if (sessionInfo.title) sessionTitle.value = sessionInfo.title;

@@ -3,6 +3,15 @@
     <h1 class="settings-title">{{ t('settings.title') }}</h1>
 
     <div class="settings-content">
+      <div class="settings-group" data-settings-workspace>
+        <div class="group-title">{{ t('workspace.settingsGroup') }}</div>
+        <div class="group-content">
+          <router-link v-for="section in ['shortcuts', 'plugins', 'plugin-market']" :key="section" :to="'/settings/'+section" class="setting-item clickable">
+            <div class="item-label-group"><span class="item-label">{{ t('workspace.'+(section==='plugin-market'?'market':section)+'.title') }}</span><span class="item-hint">{{ t('workspace.settingsDescriptions.'+section) }}</span></div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="arrow-icon"><polyline points="9 18 15 12 9 6" /></svg>
+          </router-link>
+        </div>
+      </div>
       <!-- 通用设置 -->
       <div class="settings-group">
         <div class="group-title">{{ t('settings.general') }}</div>

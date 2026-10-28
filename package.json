@@ -1,6 +1,6 @@
 {
   "name": "happy-friday-lite",
-  "version": "3.0.6-preview.12",
+  "version": "3.0.6-preview.19",
   "description": "Happy Friday Lite - Electron + Vue3",
   "author": "Chen Jie <chenjie.plus@qq.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -13,17 +13,24 @@
     "preview": "vite preview",
     "electron:dev": "node scripts/fix-dsh-directory-picker-electron.mjs && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "node scripts/prebuild-install.mjs x64 && node scripts/prebuild-clean.mjs x64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --linux --x64 --config.npmRebuild=false && node scripts/verify-packaged-native-modules.mjs x64 && node scripts/prebuild-install.mjs",
-    "electron:build:win": "npm run verify:dsh && node scripts/build-typewriter-host.mjs && vite build && electron-builder --win --x64 --config.npmRebuild=false --publish=never",
+    "electron:build:win": "npm run verify:dsh && node scripts/build-typewriter-host.mjs && node scripts/build-plugin-host.mjs && vite build && electron-builder --win --x64 --config.npmRebuild=false --publish=never",
     "electron:build:arm64": "node scripts/prebuild-install.mjs arm64 && node scripts/prebuild-clean.mjs arm64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --linux --arm64 --config.npmRebuild=false && node scripts/verify-packaged-native-modules.mjs arm64 && node scripts/prebuild-install.mjs",
     "electron:build:all": "npm run electron:build && npm run electron:build:arm64",
     "electron:build:mac": "node scripts/prebuild-install.mjs darwin arm64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --mac --arm64 --config.npmRebuild=false --publish=never",
     "start": "node scripts/fix-dsh-directory-picker-electron.mjs && electron .",
     "office:build": "node scripts/build-office.mjs",
     "postinstall": "node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && node scripts/dedupe-nested-deps.mjs",
-    "prebuild": "node scripts/build-typewriter-host.mjs"
+    "prebuild": "node scripts/build-typewriter-host.mjs && node scripts/build-plugin-host.mjs"
   },
   "dependencies": {
     "@cfworker/json-schema": "4.1.1",
+    "@codemirror/autocomplete": "6.20.4",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-markdown": "6.5.2",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/search": "6.7.2",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.15",
     "@deepseek-ai/cordis": "4.0.2",
     "@deepseek-ai/cordis-plugin-group": "1.0.2",
     "@deepseek-ai/cordis-plugin-hmr": "1.0.17",
@@ -60,7 +67,9 @@
     "@fontsource/cormorant-garamond": "^5.3.0",
     "@fontsource/courier-prime": "^5.3.0",
     "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/fira-code": "5.2.7",
     "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/jetbrains-mono": "5.2.8",
     "@hono/node-server": "2.0.12",
     "@langchain/community": "^1.1.28",
     "@langchain/core": "^1.1.0",
@@ -86,6 +95,7 @@
     "node-pty": "^1.2.0-beta.15",
     "officeparser": "^6.1.1",
     "pdf-parse": "^1.1.1",
+    "pinyin-pro": "3.29.5",
     "pptxgenjs": "^4.0.1",
     "qrcode": "^1.5.4",
     "sharp": "^0.35.3",
@@ -192,6 +202,10 @@
       {
         "from": "resources/typewriter-licenses",
         "to": "typewriter-licenses"
+      },
+      {
+        "from": "resources/plugins",
+        "to": "plugins"
       }
     ],
     "asar": false,
@@ -213,6 +227,7 @@
       "src/i18n/locales/*/startup.json",
       "main.js",
       "preload.cjs",
+      "src/features/shortcuts/keymap.js",
       "src-electron/**/*",
       "src/config/prompts.js",
       "node_modules/@deepseek-ai/**/*",
@@ -408,12 +423,12 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "${productName}-${version}-win-${arch}.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.6.01-preview.19-win-${arch}-setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "${productName}-${version}-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.6.01-preview.19-win-${arch}-setup.${ext}"
     },
     "linux": {
       "icon": "build/icons/icon.png",
@@ -424,5 +439,6 @@
       "category": "Utility",
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     }
-  }
+  },
+  "releaseVersion": "3.0.6.01-preview.19"
 }

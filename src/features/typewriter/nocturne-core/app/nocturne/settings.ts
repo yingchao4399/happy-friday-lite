@@ -40,7 +40,7 @@ import type {
 // Fonts
 
 const CJK_FALLBACK =
-  '"PingFang SC", "Hiragino Sans", "Noto Sans Mono CJK SC", "Noto Sans CJK SC", "Microsoft YaHei", "Yu Gothic"';
+  '"Sarasa Mono SC", "PingFang SC", "Hiragino Sans", "Noto Sans Mono CJK SC", "Noto Sans CJK SC", "Microsoft YaHei", "Yu Gothic"';
 const MONO_FALLBACK = `ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Mono", "DejaVu Sans Mono", ${CJK_FALLBACK}, monospace`;
 
 export type FontEntry = {
@@ -55,8 +55,10 @@ export type FontEntry = {
 export const FONTS: FontEntry[] = [
   {id: 'ibm-plex-mono', label: 'IBM Plex Mono', bundled: true, family: 'IBM Plex Mono', ligatures: false},
   {id: 'courier-prime', label: 'Courier Prime', bundled: true, family: 'Courier Prime', ligatures: false},
+  {id: 'fira-code', label: 'Fira Code', bundled: true, family: 'Fira Code', ligatures: true},
+  {id: 'sarasa-mono-sc', label: 'Sarasa Mono SC', bundled: true, family: 'Sarasa Mono SC', ligatures: false},
   {id: 'system', label: 'System monospace', bundled: false, family: '', ligatures: false},
-  {id: 'jetbrains-mono', label: 'JetBrains Mono', bundled: false, family: 'JetBrains Mono', ligatures: true},
+  {id: 'jetbrains-mono', label: 'JetBrains Mono', bundled: true, family: 'JetBrains Mono', ligatures: true},
   {id: 'monaspace-neon', label: 'Monaspace Neon', bundled: false, family: 'Monaspace Neon', ligatures: true},
   {id: 'commit-mono', label: 'Commit Mono', bundled: false, family: 'CommitMono', ligatures: false},
   {id: 'recursive-mono', label: 'Recursive Mono', bundled: false, family: 'Recursive Mono Linear', ligatures: true},
@@ -247,6 +249,7 @@ export function defaultSettings(): NocturneSettings {
       quality: 'auto'
     },
     typography: {
+      inkMode: 'paper', inkPreset: 'carbon', inkColor: '#2a2019', contrastPolicy: 'auto',
       preset: 'manuscript',
       font: 'courier-prime',
       customFamily: '',
@@ -356,6 +359,7 @@ const signature = (value: unknown, fallback: string) =>
 export function sanitizeFolioStyle(raw: unknown, base: FolioStyle = defaultFolioStyle()): FolioStyle {
   const value = isDict(raw) ? raw : {};
   return {
+    ...(typeof value.inkColor === 'string' && isColor(value.inkColor) ? {inkColor:value.inkColor} : base.inkColor ? {inkColor:base.inkColor} : {}),
     paper: oneOf(value.paper, FOLIO_PAPERS, base.paper),
     sealColor: oneOf(value.sealColor, SEAL_COLORS, base.sealColor),
     monogram: monogram(value.monogram, base.monogram),
@@ -466,6 +470,10 @@ function sanitizeTypography(raw: unknown, base: TypographySettings): TypographyS
   const fontWeight = num(value.fontWeight, base.fontWeight, 100, 900, 100);
   const customFamily = value.customFamily;
   return {
+    inkMode: oneOf(value.inkMode, ['paper', 'preset', 'custom'], base.inkMode),
+    inkPreset: oneOf(value.inkPreset, ['carbon', 'brown', 'blue', 'navy', 'wine', 'green'], base.inkPreset),
+    inkColor: typeof value.inkColor === 'string' && /^#[0-9a-f]{6}$/i.test(value.inkColor) ? value.inkColor : base.inkColor,
+    contrastPolicy: oneOf(value.contrastPolicy, ['auto', 'exact'], base.contrastPolicy),
     preset: oneOf(value.preset, ['study', 'manuscript', 'compact', 'recital', 'custom'], base.preset),
     font: oneOf(value.font, FONT_IDS, base.font),
     customFamily: isSafeFontFamily(customFamily) ? customFamily : '',

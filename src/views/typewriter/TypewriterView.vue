@@ -21,13 +21,14 @@
           <button class="toolbar-button" data-action="new-note" @click="newNote">{{ t('typewriter.newNote') }}</button>
           <button class="toolbar-button" data-action="terminal" @click="startTerminal">{{ t('typewriter.terminal') }}</button>
           <button v-if="source" class="toolbar-button" data-action="open-note-page" @click="openNotePage">{{ t('typewriter.openInNotes') }}</button>
+          <button v-if="source" class="toolbar-button" @click="showLinks=!showLinks">{{ t('workspace.links.title') }}</button>
           <button v-if="source" class="toolbar-button" @click="exportText">{{ t('typewriter.exportMarkdown') }}</button>
           <select class="language-select" :aria-label="t('typewriter.language')" :value="appStore.language" @change="changeLanguage($event.target.value)"><option value="zh-CN">中文</option><option value="en-US">English</option></select>
           <button class="toolbar-button icon-only" :title="t('typewriter.close')" @click="closeWorkspace">×</button>
         </div>
       </header>
       <p v-if="error" class="workspace-error" role="alert">{{ error }}</p>
-      <div class="workspace-body"><TypewriterStage ref="stage" :settings="store.settings" :source="source" @settings="store.patchSettings" @change="source?.change($event)" /></div>
+      <div class="workspace-body"><TypewriterStage ref="stage" :settings="store.settings" :source="source" @settings="store.patchSettings" @change="source?.change($event)" /><NoteLinksPanel v-if="source && showLinks" :note-id="source.noteId" :initial-mode="linksMode" @close="showLinks=false" @open="openLinkLocation" /></div>
     </section>
     <div v-if="picking" class="dialog-backdrop" @click.self="picking = false">
       <section class="typewriter-dialog note-picker" role="dialog" :aria-label="t('typewriter.openNote')">
@@ -47,17 +48,29 @@ import { useI18n } from 'vue-i18n'
 import { useTypewriterStore, useNoteStore, useAppStore } from '@/store'
 import { typewriterService } from '@/services/typewriter'
 import { electronService } from '@/services/electron'
+import {readNote,subscribeNotes} from '@/features/notes/documents'
 import { setI18nLanguage } from '@/i18n'
 import { createNoteDocument, markdownToNote } from '@/features/typewriter/adapters/note-adapter'
 import { activeTheme } from '@/features/typewriter/nocturne-core/app/nocturne/apply-config.ts'
 import { THEMES } from '@/features/typewriter/nocturne-core/app/nocturne/themes.ts'
 import { themeVariables } from '@/features/typewriter/nocturne-core/lib/nocturne/theme-css.ts'
+import NoteLinksPanel from '@/components/notes/NoteLinksPanel.vue'
+import {resolveNoteTarget} from '@/features/notes/link-target'
+import {requestNoteLocation} from '@/features/notes/location'
 import TypewriterStage from './components/TypewriterStage.vue'
 const { t } = useI18n()
 const router = useRouter(), store = useTypewriterStore(), notes = useNoteStore(), appStore = useAppStore()
 const iconUrl = new URL('../../features/typewriter/nocturne-core/icon.svg', import.meta.url).href
 const started = ref(false), picking = ref(false), query = ref(''), error = ref(''), saveStatus = ref('saved')
+const linksMode=ref('outgoing'); const showLinks=ref(false)
+function handleLinks(event){linksMode.value=event.detail||'outgoing';if(router.currentRoute.value.path.startsWith('/typewriter'))showLinks.value=true}
+function handleAction(event){if(router.currentRoute.value.path.startsWith('/typewriter')&&event.detail==='terminal')void startTerminal()}
+window.addEventListener('friday:show-links',handleLinks)
+window.addEventListener('friday:typewriter-action',handleAction)
+onBeforeUnmount(()=>{window.removeEventListener('friday:show-links',handleLinks);window.removeEventListener('friday:typewriter-action',handleAction)})
 const source = shallowRef(null), stage = ref(null)
+const unlistenNotes=subscribeNotes(async event=>{if(event.noteId!==source.value?.noteId)return;const document=source.value;try{const note=await readNote(event.noteId);if(source.value===document&&note)document.refresh(note)}catch{error.value=t('typewriter.operationFailed')}})
+onBeforeUnmount(()=>unlistenNotes())
 const chromeStyle = computed(() => themeVariables(activeTheme(store.settings) || THEMES['paper-and-ink'], store.settings))
 const visibleNotes = computed(() => notes.notes.filter(note => !note.isDeleted && (note.title + ' ' + (note.contentText || '')).toLowerCase().includes(query.value.toLowerCase())))
 async function guarded(action) {
@@ -72,6 +85,14 @@ function loadNote(note, initialSource) {
 async function newNote() { await guarded(async () => { const note = await notes.createNote(null, t('typewriter.untitled')); if (!note?.id) throw new Error('CREATE_FAILED'); loadNote(note, '') }) }
 async function chooseNote() { await guarded(async () => { await notes.fetchNotes(); picking.value = true }) }
 async function selectNote(id) { await guarded(async () => { const note = await notes.fetchNote(id); if (!note) throw new Error('NOTE_NOT_FOUND'); loadNote(note) }) }
+async function openLinkLocation(location) { requestNoteLocation(location,'typewriter'); await selectNote(location.noteId) }
+const openTextLink=async event=>{
+  if(!router.currentRoute.value.path.startsWith('/typewriter'))return
+  try { await openLinkLocation(await resolveNoteTarget(event.detail)) }
+  catch { showLinks.value=true;linksMode.value='unresolved';error.value=t('workspace.links.resolveError') }
+}
+window.addEventListener('friday:open-note-link',openTextLink)
+onBeforeUnmount(()=>window.removeEventListener('friday:open-note-link',openTextLink))
 async function startTerminal() { await guarded(async () => { source.value = null; started.value = true; picking.value = false }) }
 async function closeWorkspace() { await guarded(async () => { source.value = null; started.value = false }) }
 async function openNotePage() { await guarded(async () => { notes.selectNote(source.value.noteId); await router.push({name:'note'}) }) }
@@ -141,3 +162,5 @@ onBeforeUnmount(() => { void source.value?.flush().catch(() => {}) })
 .note-choices strong{font-weight:400;font-size:17px}.note-choices small{font-size:13px}
 @media(max-width:720px){.workspace-toolbar{padding:4px 10px}.toolbar-actions{gap:2px}.toolbar-title{max-width:36%}.toolbar-button{padding:4px 5px}}
 </style>
+
+<style scoped>.workspace-body{display:flex}.workspace-body :deep(.typewriter-original-host){flex:1;min-width:0}</style>

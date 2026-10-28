@@ -1,6 +1,8 @@
 <template>
   <div class="app-container" :class="{ 'is-share-view': isShareView }">
     <TabBar v-if="!isShareView" />
+    <CommandPalette v-if="!isShareView" /><div v-if="pluginState.notice" class="workspace-command-notice" role="status">{{ pluginState.notice }}</div>
+    <div v-if="commandState.error" class="workspace-command-notice" role="alert">{{ commandState.error === 'NOTE_SAVE_FAILED' ? $t('workspace.saveError') : commandState.error }} <button @click="commandState.error=''" :aria-label="$t('workspace.close')">×</button></div>
     <div class="main-body">
       <Sidebar v-if="!isShareView" />
       <main class="main-content">
@@ -20,6 +22,12 @@
 </template>
 
 <script setup>
+import CommandPalette from '@/components/commands/CommandPalette.vue';
+import {setupPlugins,pluginState} from '@/features/plugins/client';
+import {setupCommands} from '@/features/commands/setup';
+import {commandState} from '@/features/commands/registry';
+import {useNoteStore} from '@/store/modules/note';
+import {useTypewriterStore} from '@/store/modules/typewriter';
 import Sidebar from '@/components/layout/Sidebar.vue';
 import TabBar from '@/components/layout/TabBar.vue';
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue';
@@ -56,6 +64,7 @@ const routerViewKey = computed(() => {
   return route.fullPath;
 });
 
+let disposeCommands,disposePlugins;
 let unlistenConfig = null;
 let unlistenOfficeOpened = null;
 let unlistenOpenFileRequest = null;
@@ -187,6 +196,8 @@ watch(
 );
 
 onMounted(async () => {
+  if(!isShareView.value) disposeCommands=setupCommands({router,notes:useNoteStore(),typewriter:useTypewriterStore()});
+  if(!isShareView.value) disposePlugins=setupPlugins();
   initTheme();
   // 统一处理应用内所有横向溢出区域（笔记表格、代码、Markdown 预览等）。
   // TabBar 自己管理选项卡滚轮，工具函数会跳过该区域。
@@ -327,6 +338,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  disposePlugins?.();disposeCommands?.();
   document.removeEventListener('wheel', onHorizontalWheel, true);
   unlistenClipboardHotkey?.();
   if (unlistenConfig) {
@@ -402,3 +414,7 @@ onUnmounted(() => {
 }
 
 </style>
+
+<style>.friday-wiki-suggest{width:280px;max-height:260px;overflow:auto;background:var(--bg-primary,#fff);color:var(--text-primary,#222);border:1px solid var(--border-color,#ddd);box-shadow:0 8px 30px #0003;border-radius:8px;padding:5px}.friday-wiki-suggest button{display:block;width:100%;padding:8px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}.friday-wiki-suggest .selected{background:var(--bg-hover,#e8eef9)}</style>
+
+<style>.workspace-command-notice{position:fixed;right:20px;bottom:20px;max-width:480px;padding:16px;border:1px solid var(--border-color,#ccc);background:var(--bg-primary,#fff);color:var(--text-primary,#222);box-shadow:0 8px 30px #0003;z-index:24000;border-radius:9px}.workspace-command-notice button{margin-left:12px;background:transparent;color:inherit;border:0;cursor:pointer}</style>

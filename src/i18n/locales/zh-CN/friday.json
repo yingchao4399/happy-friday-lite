@@ -35,6 +35,11 @@
   "historyFooter": "为你保留最近的对话记录",
   "historyCollapse": "收起会话历史",
   "historyExpand": "展开会话历史",
+  "scopedHistory": {
+    "loading": "正在加载…",
+    "empty": "此处暂无对话历史",
+    "untitled": "新对话"
+  },
   "moreActions": "更多操作",
   "assistantName": "周五",
   "defaultTitle": "与 Friday 的对话",

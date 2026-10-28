@@ -61,7 +61,7 @@ export function getCheckpointer() {
  * @returns {Promise<Object>} DeepAgent 实例
  */
 export async function createAgent(modelConfig, options = {}) {
-  const { folderPath = '', unattended = false } = options
+  const { folderPath = '', unattended = false, runtimeInstructions = '' } = options
   log.info('====== 开始创建 DeepAgent ======')
   if (folderPath) {
     log.info(`用户当前工作目录（虚拟路径）: ${folderPath}`)
@@ -196,7 +196,8 @@ export async function createAgent(modelConfig, options = {}) {
       '**更新规则**：当你在对话中学到新的用户偏好、重要事实或经验时，应立即用 `edit_file` 更新对应记忆文件' +
       '（以当前内容片段作为 `old_string`，新内容作为 `new_string`）。更新会立即落盘并在下次对话生效。' +
       '更新应精炼、去重，避免冗长。\n' +
-      '注意：`write_file` 无法覆盖已存在的文件，修改记忆文件请务必使用 `edit_file`。\n'
+      '注意：`write_file` 无法覆盖已存在的文件，修改记忆文件请务必使用 `edit_file`。\n' +
+      (runtimeInstructions ? `\n## 当前场景约束\n${runtimeInstructions}\n` : '')
   })
 
   log.info('====== DeepAgent 创建完成 ======')
@@ -214,7 +215,8 @@ export async function createAgent(modelConfig, options = {}) {
 export async function createAgentWithContext(modelConfig, runtimeCtx) {
   const { agent, toolCtx, rootDir } = await createAgent(modelConfig, {
     folderPath: runtimeCtx?.folderPath || '',
-    unattended: !!runtimeCtx?.unattended
+    unattended: !!runtimeCtx?.unattended,
+    runtimeInstructions: runtimeCtx?.runtimeInstructions || ''
   })
 
   // 动态注入运行时上下文

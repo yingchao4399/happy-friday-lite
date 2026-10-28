@@ -35,6 +35,11 @@
   "historyFooter": "Recent conversations are kept here",
   "historyCollapse": "Collapse history",
   "historyExpand": "Expand history",
+  "scopedHistory": {
+    "loading": "Loading…",
+    "empty": "No conversation history here yet",
+    "untitled": "New conversation"
+  },
   "moreActions": "More actions",
   "assistantName": "Friday",
   "defaultTitle": "Conversation with Friday",

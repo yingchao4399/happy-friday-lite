@@ -322,6 +322,8 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
       message: userMessage,
       attachments: attachments || [],
       enableThinking,
+      scope: 'friday',
+      scopeKey: null,
       kbName: kbName || '',
       kbCategoryId: kbCategoryId || ''
     });

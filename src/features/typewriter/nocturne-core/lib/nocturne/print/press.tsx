@@ -7,6 +7,7 @@ import React, {useEffect, useRef, useState} from 'react';
 
 import {sanitizeDraft, toRoman, verseLines} from '../../../app/nocturne/folio';
 import type {Folio, FolioDraft, FolioSource} from '../../../app/nocturne/folio';
+import {activePaper} from '../../../app/nocturne/apply-config';
 import {DISPLAY_SERIF, folioFontStack, sanitizeFolioStyle, UI_SERIF} from '../../../app/nocturne/settings';
 import type {
   FolioFont,
@@ -279,7 +280,7 @@ export function Press({settings, initialTab, onClose}: PressProps) {
   const renameTarget = useRef<string | null>(null);
 
   // The options as they stand, typed fields included; invalid entries fall back to the saved ones.
-  const style = sanitizeFolioStyle({...saved, monogram, signature, customFont}, saved);
+  const style = sanitizeFolioStyle({...saved, monogram, signature, customFont, inkColor:saved.inkColor || activePaper(settings).ink}, saved);
 
   const changeStyle = (patch: Partial<FolioStyle>) => {
     updateSettings({print: {style: {...style, ...patch}}});

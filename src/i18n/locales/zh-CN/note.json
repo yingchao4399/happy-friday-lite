@@ -140,6 +140,13 @@
     "exporting": "导出中...",
     "exportPdf": "导出 PDF",
     "exportMarkdown": "导出 Markdown",
+    "exportWord": "AI 写入 Word",
+    "exportingWord": "正在写入 Word…",
+    "exportWordApproval": "Friday 将把“{title}”写入新建 Word 文件：\n{out}\n\n是否允许执行？",
+    "exportWordFailed": "写入 Word 失败：{error}",
+    "undoWord": "撤销最近一次 Word 写入",
+    "undoingWord": "正在撤销 Word 写入…",
+    "undoWordFailed": "撤销 Word 写入失败：{error}",
     "presentation": "切换演示模式",
     "backToEdit": "切换编辑模式",
     "fridayAssistant": "Friday 助理"

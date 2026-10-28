@@ -81,6 +81,20 @@ export function isOfficeAvailable() {
   return fs.existsSync(path.join(officeRoot(), 'main', 'docs-main.cjs'))
 }
 
+// 应用命令面板只向当前可见、已注册的原生文档发送白名单菜单命令。
+// 编辑器沿用上游自己的保存、撤销和打印实现，不在 Vue 中模拟文档操作。
+export function executeOfficeMenuCommand(viewId, command) {
+  const entry=state.views.get(viewId)
+  if(!entry || state.visibleId!==viewId || entry.view.webContents.isDestroyed())throw new Error('OFFICE_DOCUMENT_INACTIVE')
+  const allowed={docs:['save','save-as','undo','redo','find','print'],sheets:['save','save-as','undo','redo','print','export-pdf','export-csv'],slides:['save','save-as','undo','redo','print','export-pdf','export-images']}
+  if(!allowed[entry.type]?.includes(command))throw new Error('OFFICE_COMMAND_UNSUPPORTED')
+  const channel={docs:'menu:command',sheets:'menu:action',slides:'slides:menu'}[entry.type]
+  entry.view.webContents.send(channel,command)
+  return {success:true}
+}
+
+export function isOfficeMainSender(sender) { return sender===state.mainWindow?.webContents }
+
 function editorPaths(editor) {
   const root = officeRoot()
   return {
@@ -694,7 +708,8 @@ async function createBlankOfficeFile(type, displayName) {
   const dir = officeDefaultSaveDir()
   fs.mkdirSync(dir, { recursive: true })
   const ext = { docs: '.docx', sheets: '.xlsx', slides: '.pptx', pdf: '.pdf' }[type]
-  const filePath = uniqueOfficePath(dir, `${displayName}${ext}`)
+  const fallbackName = `${({ docs: 'Word 文档', sheets: 'Excel 工作簿', slides: 'PowerPoint 演示', pdf: 'PDF 文档' }[type] || 'Office 文档')} ${new Date().toISOString().slice(0, 10)}`
+  const filePath = uniqueOfficePath(dir, `${String(displayName || fallbackName).trim() || fallbackName}${ext}`)
   if (type === 'sheets') {
     const XLSX = _require('xlsx')
     const workbook = XLSX.utils.book_new()
@@ -837,7 +852,8 @@ export async function closeOfficeFile(viewId) {
 export async function newOfficeDocument(type, requestedViewId, name) {
   if (!await ensureEditor(type)) return { success: false, error: 'editor unavailable' }
   // 与 renameOfficeFile 一致的非法字符清理
-  const base = String(name || '')
+  const fallbackName = `${({ docs: 'Word 文档', sheets: 'Excel 工作簿', slides: 'PowerPoint 演示', pdf: 'PDF 文档' }[type] || 'Office 文档')} ${new Date().toISOString().slice(0, 10)}`
+  const base = String(name || fallbackName)
     .replace(/[\r\n\t]+/g, ' ')
     .replace(/[\\/:*?"<>|]/g, '')
     .replace(/\.+$/, '')
@@ -1217,3 +1233,14 @@ function notifyVue(channel, payload) {
 }
 
 export { contentBounds }
+
+let overlayViewId=null
+export function suspendOfficeForOverlay(){
+  overlayViewId=state.visibleId
+  if(overlayViewId){const entry=state.views.get(overlayViewId);if(entry&&!entry.view.webContents.isDestroyed())entry.view.setVisible(false)}
+  state.mainWindow?.webContents.focus()
+}
+export function resumeOfficeAfterOverlay(){
+  const id=overlayViewId;overlayViewId=null
+  if(id&&state.visibleId===id){const entry=state.views.get(id);if(entry&&!entry.view.webContents.isDestroyed()){entry.view.setVisible(true);entry.view.webContents.focus()}}
+}

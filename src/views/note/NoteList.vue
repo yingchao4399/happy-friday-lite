@@ -10,6 +10,7 @@
         <div class="sidebar-topbar" v-if="!searchMode">
           <span class="topbar-spacer" aria-hidden="true"></span>
           <div class="topbar-actions">
+            <button class="topbar-btn" type="button" :title="t('workspace.links.title')" :aria-label="t('workspace.links.title')" @click="showLinks=!showLinks"><Link2 :size="18" /></button>
             <div class="new-note-btn-group" ref="newNoteBtnRef">
               <button class="new-note-main-btn" @click="createNewNote" :title="t('note.newNote')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
@@ -265,6 +266,7 @@
           @toggle-toc="handleToggleToc"
           @close-sidebar="handleCloseSidebar"
           @close-toc="handleCloseToc"
+          @open-note="openLinkedNote"
         />
       </div>
       <div v-else class="editor-empty">
@@ -273,6 +275,7 @@
           <p>{{ t('note.selectToEdit') }}</p>
         </div>
       </div>
+      <NoteLinksPanel v-if="selectedNote && showLinks" :note-id="selectedNoteId" :initial-mode="linksMode" @close="showLinks=false" @open="openLinkedNote" />
     </div>
 
     <Teleport to="body">
@@ -401,6 +404,9 @@
 </template>
 
 <script setup>
+import {Link2} from 'lucide-vue-next';
+import NoteLinksPanel from '@/components/notes/NoteLinksPanel.vue';
+import {requestNoteLocation} from '@/features/notes/location';
 import { reactive, ref, computed, onMounted, onBeforeUnmount, nextTick, onDeactivated, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CheckCheck, FolderPlus, ListChecks, PanelLeftClose, PanelLeftOpen, Pin, Trash2 } from 'lucide-vue-next';
@@ -651,6 +657,23 @@ const getNotebookName = (notebookId) => {
 const selectNote = (id) => {
   noteStore.selectNote(id);
 };
+const showLinks=ref(false),linksMode=ref('outgoing');
+async function openLinkedNote(target) {
+  const link=typeof target==='string'?{noteId:target}:target;
+  if(!link?.noteId)return;
+  await noteStore.flushPendingSave();
+  requestNoteLocation(link);
+  const targetNote=await noteStore.fetchNote(link.noteId);
+  if(!targetNote || targetNote.isDeleted){linksMode.value='unresolved';showLinks.value=true;return;}
+  selectNote(link.noteId);
+  await nextTick();
+}
+const showNoteLinks=event=>{
+  if(!document.querySelector('.note-page')?.getBoundingClientRect().width)return;
+  linksMode.value=event.detail||'outgoing';showLinks.value=true;
+};
+onMounted(()=>window.addEventListener('friday:show-links',showNoteLinks));
+onBeforeUnmount(()=>window.removeEventListener('friday:show-links',showNoteLinks));
 
 const toggleSelectedNote = (id) => {
   const next = new Set(selectedNoteIds.value);
@@ -1690,13 +1713,14 @@ onDeactivated(() => {
 .note-editor-area {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
   background-color: var(--bg-primary);
 }
 
 .editor-container {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -22,6 +22,7 @@
                 </div>
               </div>
               <div class="header-right">
+                <ScopedHistoryButton scope="knowledge" :scope-key="historyScopeKey" @select="selectHistory" />
                 <button class="header-btn" @click="handleStop" v-if="isStreaming" title="停止生成">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="6" y="6" width="12" height="12" rx="2"></rect>
@@ -116,6 +117,7 @@ import { electronService } from '@/services/electron';
 import UserMessage from '@/components/chat/UserMessage.vue';
 import AIMessage from '@/components/chat/AIMessage.vue';
 import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessage.vue';
+import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -132,6 +134,15 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+
+const historyScopeKey = computed(() => props.isFolder ? `folder:${props.folderPath}` : `kb:${props.kbName || props.kbCategoryId || 'default'}`)
+
+function selectHistory({ session, messages: history }) {
+  if (isStreaming.value) handleStop()
+  currentSessionId = session.id
+  messages.value = history.map(item => ({ ...item, content: item.content || '' }))
+  nextTick(() => scrollToBottomForce())
+}
 
 // 顶部副标题：工作区不参与 RAG 检索，提示可执行 Agent 工作流
 const subtitleText = computed(() => {
@@ -438,7 +449,9 @@ async function sendChatMessage(text) {
     if (mode === 'chat') {
       result = await electronService.invoke('chat_with_memory', {
         ...baseArgs,
-        sessionId: currentSessionId || ''
+        sessionId: currentSessionId || '',
+        scope: 'knowledge',
+        scopeKey: historyScopeKey.value
       });
     } else {
       result = await electronService.invoke('chat_without_memory', baseArgs);

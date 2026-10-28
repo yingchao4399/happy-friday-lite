@@ -1340,3 +1340,9 @@
     transition: none;
   }
 }
+
+.tn-ink-swatches{display:flex;gap:8px;margin:10px 0}.tn-ink-swatches button{width:25px;height:25px;border-radius:50%;border:2px solid var(--tn-panel-line);cursor:pointer}.tn-ink-swatches button[aria-pressed=true]{outline:2px solid var(--tn-accent);outline-offset:2px}
+.tn-ink-picker>.tn-row,.tn-ink-picker>div>.tn-row{margin-top:12px}
+.tn-ink-preview{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 0}
+.tn-ink-sample{width:14px;height:14px;border:1px solid var(--tn-panel-line);border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.tn-ink-code{font-family:var(--tn-font-mono);font-size:11px}

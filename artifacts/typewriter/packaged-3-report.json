@@ -1,0 +1,26 @@
+{
+  "batch": "3",
+  "checks": [
+    "打包应用真实输入、中英笔记同 ID 保存、AudioContext 击键声",
+    "安装包内三款字体加载切换、中文字体、预设墨色",
+    "安装包 node-pty 真实 PowerShell 键盘输入与 PACKAGED_42 计算回显",
+    "全应用按钮打开命令浮窗并搜索设置命令",
+    "真实 Office 原生视图中点击常驻按钮打开命令浮窗",
+    "关闭命令浮窗后 Office 文档保持、焦点恢复，原生视图未重载",
+    "打包应用插件管理、独立宿主启用、命令面板执行插件、插字联动同 ID 笔记保存",
+    "打包应用停用释放插件命令，卸载清理插件和配置"
+  ],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-3-4zxjbY",
+  "ok": true,
+  "feedback": {
+    "audio": 1,
+    "stage": {
+      "render": "high",
+      "machine": "drawn",
+      "motion": "moving",
+      "keys": "1"
+    },
+    "visible": "visible",
+    "focus": true
+  }
+}
