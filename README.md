@@ -22,7 +22,7 @@ Fixes xterm bright-color mapping and transparent-background contrast calculation
 
 See the [Preview 17 root-cause and validation report](docs/typewriter/07-preview17-root-cause-report.md) for evidence and limits.
 
-Windows x64 installer: [3.0.6.01-preview.19](release/Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe); SHA256: [preview.19 checksum](release/SHA256SUMS-preview.19.txt). The package uses technical version `3.0.6-preview.19` for Electron semver compatibility.
+Windows x64 installer: [3.0.6.01-preview.19](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.01-preview.19/Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe); SHA256: [preview.19 checksum](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.01-preview.19/SHA256SUMS-preview.19.txt). The package uses technical version `3.0.6-preview.19` for Electron semver compatibility.
 
 ## Preview 16: commands, plugins and Obsidian compatibility
 

@@ -22,7 +22,7 @@
 
 根因、实际验证及限制见 [Preview 17 修复报告](docs/typewriter/07-preview17-root-cause-report.md)。
 
-Windows x64 安装包：[3.0.6.01-preview.19](release/Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe)；SHA256：[Preview.19 校验文件](release/SHA256SUMS-preview.19.txt)。Electron 内部使用合法技术版本 `3.0.6-preview.19`。
+Windows x64 安装包：[3.0.6.01-preview.19](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.01-preview.19/Happy-Friday-Lite-3.0.6.01-preview.19-win-x64-setup.exe)；SHA256：[Preview.19 校验文件](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.01-preview.19/SHA256SUMS-preview.19.txt)。Electron 内部使用合法技术版本 `3.0.6-preview.19`。
 
 ## Preview 16：命令、插件与 Obsidian 兼容工作区
 
