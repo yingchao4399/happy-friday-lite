@@ -1,5 +1,13 @@
 # Happy Friday Lite
 
+## 3.0.6.02-preview.20 AI Core task controls and global assistant dock
+
+- Technical version: `3.0.6-preview.20`; release label: `3.0.6.02-preview.20`.
+- Adds checkpoint-safe pause/resume/cancel controls for AI Core tasks, including the note-to-Word flow. Cancellation and approval use the existing Friday confirmation dialog.
+- Adds a root-level Friday Assistant dock that lists AI Core tasks across routes and reuses the same task runtime for approval, pause, resume and cancel actions.
+- Keeps the Preview.19 installer and checksum links below as historical release evidence. A local unsigned Preview.20 x64 installer was generated with `npm run electron:build:win`; checksum and build metadata are in `release/SHA256SUMS-preview.20.txt` and `release/preview.20-build-info.txt`. It has not been uploaded or signed.
+- Design records: [iteration plan](docs/ai-core-next-iteration-plan.md), [Preview.20 PRD](docs/Friday-AI-Core-Global-Assistant-Preview20-PRD.md) and [technical design](docs/Friday-AI-Core-Global-Assistant-Preview20-Technical-Design.md).
+
 ## 3.0.6.02-preview.19 AI Core runtime and conversation continuity
 
 - Completes the AI Core task runtime with live readiness checks, capability planning, approvals, cancellation, verification, idempotency and safe undo.

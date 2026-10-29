@@ -39,6 +39,9 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
       sessionTitle: '',
       activeRequestId: '',
       isDoneReceived: false,
+      lastError: '',
+      canRetryLastMessage: false,
+      lastPayload: null,
       pendingContent: '',
       pendingReasoning: '',
       chunkFrame: null
@@ -237,10 +240,22 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
     state.sessionTitle = '';
     state.activeRequestId = '';
     state.isDoneReceived = false;
+    state.lastError = '';
+    state.canRetryLastMessage = false;
+    state.lastPayload = null;
   }
 
   function resetStreamState() {
     resetStateStream(activeState.value);
+  }
+
+  function hydrateMessages(history) {
+    const state = activeState.value;
+    state.messages = Array.isArray(history) ? history : [];
+    const last = state.messages[state.messages.length - 1];
+    state.lastError = last?.isError ? (last.errorMessage || last.content || hooks.t('friday.retryLater')) : '';
+    state.canRetryLastMessage = last?.isError === true && last.retryable === true;
+    state.lastPayload = null;
   }
 
   function startStreaming() {
@@ -255,6 +270,8 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
     state.pendingApproval = null;
     state.activeRequestId = `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     state.isDoneReceived = false;
+    state.lastError = '';
+    state.canRetryLastMessage = false;
     return state;
   }
 
@@ -281,16 +298,19 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
       state.messages.push({
         role: 'assistant',
         content: `${state.streamingContent}\n\n${errorContent}`.trim(),
+        isError: true,
         reasoning: state.streamingReasoning || undefined,
         sources: state.streamingSources.length ? [...state.streamingSources] : undefined
       });
     } else {
-      state.messages.push({ role: 'assistant', content: errorContent });
+      state.messages.push({ role: 'assistant', content: errorContent, isError: true });
     }
     state.streamingContent = '';
     state.streamingReasoning = '';
     state.streamingSources = [];
     state.agentSegments = [];
+    state.lastError = errorContent;
+    state.canRetryLastMessage = !Array.isArray(state.lastPayload?.attachments) || state.lastPayload.attachments.length === 0;
     setStreaming(state, false);
   }
 
@@ -313,7 +333,7 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
     return merged;
   }
 
-  async function invokeChat(state, { mode, model, userMessage, attachments, thinkMode, kbName, kbCategoryId }) {
+  async function invokeChat(state, { mode, model, userMessage, attachments, thinkMode, kbName, kbCategoryId, retry = false }) {
     const enableThinking = thinkMode === 'deep';
     const args = toIpcPayload({
       requestId: state.activeRequestId,
@@ -325,7 +345,8 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
       scope: 'friday',
       scopeKey: null,
       kbName: kbName || '',
-      kbCategoryId: kbCategoryId || ''
+      kbCategoryId: kbCategoryId || '',
+      retry: retry === true
     });
     if (mode === 'agent') {
       return electronService.invoke('agent-invoke', args);
@@ -344,6 +365,7 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
     if (state.isStreaming && !skipStart) return false;
 
     const mode = data.mode || state.mode || fridayStore.mode || 'chat';
+    state.lastPayload = data;
     const modelId = data.modelId || fridayStore.modelId;
     const model = loadModelConfig(modelId);
     if (!model) {
@@ -370,7 +392,8 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
       attachments: data.attachments || [],
       thinkMode: data.thinkMode || fridayStore.thinkMode,
       kbName: data.kbName || '',
-      kbCategoryId: data.kbCategoryId || ''
+      kbCategoryId: data.kbCategoryId || '',
+      retry: data.retry === true
     }).catch((err) => {
       console.error('Chat invoke error:', err);
       pushErrorMessage(state, `${hooks.t('friday.requestFailed')}${err?.message || hooks.t('friday.retryLater')}`);
@@ -396,6 +419,30 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
   // 关闭 Tab 时终止该 Tab 下所有会话仍在进行的请求
   async function stopAllStreams() {
     await Promise.all([...states.values()].map(state => stopState(state)));
+  }
+
+  async function retryLastMessage() {
+    const state = activeState.value;
+    if (!state || state.isStreaming || !state.canRetryLastMessage) return false;
+    const fallbackUser = [...state.messages].reverse().find(message => message.role === 'user' && typeof message.content === 'string');
+    const retryPayload = state.lastPayload || (fallbackUser ? {
+      mode: state.mode || fridayStore.mode || 'chat',
+      modelId: fridayStore.modelId,
+      userMessage: fallbackUser.content,
+      attachments: [],
+      thinkMode: fridayStore.thinkMode || 'fast'
+    } : null);
+    if (!retryPayload) return false;
+    if (!loadModelConfig(retryPayload.modelId || fridayStore.modelId)) {
+      window.alert(hooks.t('friday.modelRequired'));
+      router.push('/settings/model');
+      return false;
+    }
+    const last = state.messages[state.messages.length - 1];
+    if (last?.isError) state.messages.pop();
+    state.lastError = '';
+    state.canRetryLastMessage = false;
+    return sendChatMessage({ ...retryPayload, retry: true }, { skipUserPush: true });
   }
 
   async function handleApproveTool() {
@@ -495,6 +542,8 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
       const state = findStateByRequest(data.requestId);
       if (!state || state.isDoneReceived) return;
       state.isDoneReceived = true;
+      state.lastError = '';
+      state.canRetryLastMessage = false;
       flushPendingChunksImmediately(state);
       setStreaming(state, false);
 
@@ -544,6 +593,7 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
       state.isDoneReceived = true;
       // 兜底：错误事件也带 sessionId，确保失败的新会话能按真实 id 对应到已有状态
       if (data.sessionId) migrateStateKey(state, data.sessionId);
+      state.lastError = data.error || hooks.t('friday.modelUnavailable');
       pushErrorMessage(state, `${hooks.t('friday.requestFailed')}${data.error || hooks.t('friday.modelUnavailable')}`);
       console.error('Stream error:', data.error);
       maybeDispose();
@@ -715,6 +765,12 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
     get hasActiveStreams() {
       return anyStreaming();
     },
+    get lastError() {
+      return activeState.value.lastError;
+    },
+    get canRetryLastMessage() {
+      return activeState.value.canRetryLastMessage;
+    },
     messages,
     currentSessionId,
     currentMode,
@@ -728,10 +784,12 @@ function createChatStreamRuntime({ key, router, fridayStore, t }) {
     sessionTitle,
     isThinking,
     resetStreamState,
+    hydrateMessages,
     startStreaming,
     startNewConversation,
     attachRequest,
     sendChatMessage,
+    retryLastMessage,
     handleStop,
     stopAllStreams,
     handleApproveTool,
@@ -779,11 +837,15 @@ export function useChatStream({ onHistoryRefresh, t, tabKey } = {}) {
     pendingApproval: runtime.pendingApproval,
     sessionTitle: runtime.sessionTitle,
     isThinking: runtime.isThinking,
+    lastError: computed(() => runtime.lastError),
+    canRetryLastMessage: computed(() => runtime.canRetryLastMessage),
     resetStreamState: runtime.resetStreamState,
+    hydrateMessages: runtime.hydrateMessages,
     startStreaming: runtime.startStreaming,
     startNewConversation: runtime.startNewConversation,
     attachRequest: runtime.attachRequest,
     sendChatMessage: runtime.sendChatMessage,
+    retryLastMessage: runtime.retryLastMessage,
     handleStop: runtime.handleStop,
     stopAllStreams: runtime.stopAllStreams,
     handleApproveTool: runtime.handleApproveTool,

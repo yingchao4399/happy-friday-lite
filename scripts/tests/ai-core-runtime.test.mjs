@@ -51,11 +51,81 @@ test('AI Core 写能力先等待审批，审批后才执行', async () => {
   const pending = await runtime.submit({ ...request('note.write'), requestedCapabilities: ['note.write', 'note.readback'], idempotencyKey: 'id:note-write-readback' })
   assert.equal(pending.status, 'awaiting_approval')
   assert.equal(calls, 0)
+  assert.throws(() => runtime.pause(pending.id, 'user:local'), /只有运行中的任务可以暂停/)
   const done = await runtime.approve(pending.id, 'user:local')
   assert.equal(done.status, 'running')
   const completed = await waitForTerminal(runtime, pending.id)
   assert.equal(completed.status, 'completed')
   assert.equal(calls, 2)
+})
+
+test('AI Core 在当前能力完成后暂停，继续时跳过已完成步骤', async () => {
+  const calls = []
+  let releaseSecond
+  const secondGate = new Promise(resolve => { releaseSecond = resolve })
+  const facade = createAiCoreFacade({ capabilities: [
+    { id: 'step.one', type: 'read', requiredScopes: ['read'] },
+    { id: 'step.two', type: 'read', requiredScopes: ['read'] },
+    { id: 'step.three', type: 'read', requiredScopes: ['read'] }
+  ] })
+  const runtime = createAiCoreRuntime({ facade, executeCapability: async name => {
+    calls.push(name)
+    if (name === 'step.two') await secondGate
+    return { ok: true, name }
+  } })
+  const task = await runtime.submit({ ...request('step.one'), requestedCapabilities: ['step.one', 'step.two', 'step.three'], idempotencyKey: 'pause:resume' })
+  for (let i = 0; i < 100 && !calls.includes('step.two'); i++) await new Promise(resolve => setTimeout(resolve, 2))
+  assert.deepEqual(calls, ['step.one', 'step.two'])
+  const requested = runtime.pause(task.id, 'user:local')
+  assert.equal(requested.pauseRequested, true)
+  releaseSecond()
+  for (let i = 0; i < 100; i++) {
+    const current = runtime.get(task.id, 'user:local')
+    if (current.status === 'paused') break
+    await new Promise(resolve => setTimeout(resolve, 2))
+  }
+  assert.equal(runtime.get(task.id, 'user:local').status, 'paused')
+  assert.deepEqual(calls, ['step.one', 'step.two'])
+  await runtime.resume(task.id, 'user:local')
+  const completed = await waitForTerminal(runtime, task.id)
+  assert.equal(completed.status, 'completed')
+  assert.deepEqual(calls, ['step.one', 'step.two', 'step.three'])
+  assert.ok(completed.events.some(event => event.type === 'task.paused'))
+  assert.ok(completed.events.some(event => event.type === 'task.resumed'))
+})
+
+test('AI Core honors pause requested before the worker starts', async () => {
+  const calls = []
+  const facade = createAiCoreFacade({ capabilities: [
+    { id: 'step.first', type: 'read', requiredScopes: ['read'] },
+    { id: 'step.second', type: 'read', requiredScopes: ['read'] }
+  ] })
+  const runtime = createAiCoreRuntime({ facade, executeCapability: async name => { calls.push(name); return { ok: true } } })
+  const task = await runtime.submit({ ...request('step.first'), requestedCapabilities: ['step.first', 'step.second'], idempotencyKey: 'pause:before-start' })
+  runtime.pause(task.id, 'user:local')
+  for (let i = 0; i < 100 && runtime.get(task.id, 'user:local').status !== 'paused'; i++) await new Promise(resolve => setTimeout(resolve, 2))
+  assert.equal(runtime.get(task.id, 'user:local').status, 'paused')
+  assert.deepEqual(calls, [])
+  await runtime.resume(task.id, 'user:local')
+  const completed = await waitForTerminal(runtime, task.id)
+  assert.equal(completed.status, 'completed')
+  assert.deepEqual(calls, ['step.first', 'step.second'])
+})
+
+test('AI Core cancellation during the last capability stays cancelled', async () => {
+  let releaseCapability
+  let capabilityStarted = false
+  const capabilityGate = new Promise(resolve => { releaseCapability = resolve })
+  const facade = createAiCoreFacade({ capabilities: [{ id: 'step.read', type: 'read', requiredScopes: ['read'] }] })
+  const runtime = createAiCoreRuntime({ facade, executeCapability: async () => { capabilityStarted = true; await capabilityGate; return { ok: true } } })
+  const task = await runtime.submit({ ...request('step.read'), idempotencyKey: 'cancel:single-step' })
+  for (let i = 0; i < 100 && !capabilityStarted; i++) await new Promise(resolve => setTimeout(resolve, 2))
+  assert.equal(capabilityStarted, true)
+  runtime.cancel(task.id, 'user:local')
+  releaseCapability()
+  const cancelled = await waitForTerminal(runtime, task.id)
+  assert.equal(cancelled.status, 'cancelled')
+  assert.equal(cancelled.output.verification.status, 'not_run')
 })
 
 test('AI Core 可把写能力结果引用到受控回读，并验证目标 ID', async () => {
@@ -136,6 +206,10 @@ test('AI Core 撤销只删除本任务创建且哈希未变化的文件', async 
 test('Core 目录拒绝剪贴板与敏感能力，并将写能力标记为写入', () => {
   assert.equal(isAllowedAiCoreCapability({ name: 'clipboard_read' }), false)
   assert.equal(isAllowedAiCoreCapability({ name: 'notes_read' }), true)
+  assert.equal(isAllowedAiCoreCapability({ name: 'execute_command' }), false)
+  assert.equal(isAllowedAiCoreCapability({ name: 'python_repl' }), false)
+  assert.equal(isAllowedAiCoreCapability({ name: 'requests_post' }), false)
+  assert.equal(isAllowedAiCoreCapability({ name: 'create_note' }), true)
   assert.equal(isAllowedAiCoreCapability({ name: 'private_lookup', meta: { sensitive: true } }), false)
   assert.equal(isAllowedAiCoreCapability({ name: 'secret_cache', meta: { privateOnly: true } }), false)
   assert.equal(isWriteCapability({ name: 'office_create' }), true)
@@ -144,7 +218,7 @@ test('Core 目录拒绝剪贴板与敏感能力，并将写能力标记为写入
 test('AI Core Runtime 初始化失败后允许下一次健康检查重试', async () => {
   let attempts = 0
   const runtime = {
-    submit() {}, approve() {}, get() {}, list() {}, cancel() {}, undo() {}
+    submit() {}, approve() {}, pause() {}, resume() {}, get() {}, list() {}, cancel() {}, undo() {}
   }
   const getRuntime = createRetryableAsyncGetter(async () => {
     attempts += 1

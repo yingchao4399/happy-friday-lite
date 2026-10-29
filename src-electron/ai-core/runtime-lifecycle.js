@@ -14,7 +14,7 @@ export function createRetryableAsyncGetter(factory) {
   }
 }
 
-const REQUIRED_RUNTIME_METHODS = ['submit', 'approve', 'get', 'list', 'cancel', 'undo']
+const REQUIRED_RUNTIME_METHODS = ['submit', 'approve', 'pause', 'resume', 'get', 'list', 'cancel', 'undo']
 
 /** 健康检查需同时验证 Runtime 接口与可用能力目录，避免静态误报 ready。 */
 export function createAiCoreHealthCheck({ getRuntime, loadCapabilities, contractVersion }) {

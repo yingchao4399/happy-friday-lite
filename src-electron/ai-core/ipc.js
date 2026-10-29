@@ -13,6 +13,10 @@ import { createAiCoreHealthCheck, createRetryableAsyncGetter } from './runtime-l
 const defaultIpcMain = electron.ipcMain
 let registeredMainWindow = null
 
+// Renderer 只提交页面上下文；能力 scope 由主进程根据本地用户会话授予，
+// 避免通过 DevTools 或篡改 IPC payload 获得通配权限。
+const LOCAL_USER_SCOPES = Object.freeze(['read', 'write', 'ui'])
+
 async function loadCatalog() {
   const registry = await import('../agent/tools/registry.js')
   await import('../agent/tools/index.js')
@@ -70,25 +74,35 @@ export function registerAiCoreCommands(mainWindow, ipcMain = defaultIpcMain) {
   ipcMain.handle('ai-core-list-capabilities', async (_event, args = {}) => {
     const capabilities = await loadCatalog()
     const facade = createAiCoreFacade({ capabilities })
-    return { contractVersion: AI_CORE_CONTRACT_VERSION, capabilities: facade.listCapabilities(args.context || {}) }
+    return { contractVersion: AI_CORE_CONTRACT_VERSION, capabilities: facade.listCapabilities({ ...(args.context || {}), scopes: LOCAL_USER_SCOPES }) }
   })
 
   ipcMain.handle('ai-core-plan', async (_event, request) => {
     const capabilities = await loadCatalog()
     const facade = createAiCoreFacade({ capabilities })
-    return facade.plan(request)
+    return facade.plan({ ...request, context: { ...(request?.context || {}), actor: { id: 'user:local', type: 'user' }, scopes: LOCAL_USER_SCOPES } })
   })
 
   ipcMain.handle('ai-core-execute', async (_event, request) => {
     const runtime = await getRuntime()
     return runtime.submit({ ...request, mode: 'execute', context: {
-      ...(request?.context || {}), actor: { id: 'user:local', type: 'user' }, scopes: request?.context?.scopes || []
+      ...(request?.context || {}), actor: { id: 'user:local', type: 'user' }, scopes: LOCAL_USER_SCOPES
     } })
   })
 
   ipcMain.handle('ai-core-task-approve', async (_event, args = {}) => {
     const runtime = await getRuntime()
     return runtime.approve(args.taskId, 'user:local')
+  })
+
+  ipcMain.handle('ai-core-task-pause', async (_event, args = {}) => {
+    const runtime = await getRuntime()
+    return runtime.pause(args.taskId, 'user:local')
+  })
+
+  ipcMain.handle('ai-core-task-resume', async (_event, args = {}) => {
+    const runtime = await getRuntime()
+    return runtime.resume(args.taskId, 'user:local')
   })
 
   ipcMain.handle('ai-core-task-get', async (_event, args = {}) => {

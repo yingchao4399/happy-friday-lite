@@ -1,6 +1,6 @@
 {
   "name": "happy-friday-lite",
-  "version": "3.0.6-preview.19",
+  "version": "3.0.6-preview.20",
   "description": "Happy Friday Lite - Electron + Vue3",
   "author": "Chen Jie <chenjie.plus@qq.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -227,6 +227,7 @@
       "src/i18n/locales/*/startup.json",
       "main.js",
       "preload.cjs",
+      "preload-office-dock.cjs",
       "src/features/shortcuts/keymap.js",
       "src-electron/**/*",
       "src/config/prompts.js",
@@ -423,12 +424,12 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Happy-Friday-Lite-3.0.6.02-preview.19-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.6.02-preview.20-win-${arch}-setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Happy-Friday-Lite-3.0.6.02-preview.19-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.6.02-preview.20-win-${arch}-setup.${ext}"
     },
     "linux": {
       "icon": "build/icons/icon.png",
@@ -440,5 +441,5 @@
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     }
   },
-  "releaseVersion": "3.0.6.02-preview.19"
+  "releaseVersion": "3.0.6.02-preview.20"
 }

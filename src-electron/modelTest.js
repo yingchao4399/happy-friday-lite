@@ -12,6 +12,7 @@
  */
 
 import { buildChatCompletionsUrl } from './openaiUrl.js'
+import { fetchWithFiniteRetry } from './ai-core/network-policy.js'
 
 const TEST_TIMEOUT_MS = 30000
 
@@ -20,7 +21,7 @@ async function postJson(url, apiKey, body) {
   const timer = setTimeout(() => controller.abort(), TEST_TIMEOUT_MS)
   const startedAt = Date.now()
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithFiniteRetry(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -28,7 +29,7 @@ async function postJson(url, apiKey, body) {
       },
       body: JSON.stringify(body),
       signal: controller.signal
-    })
+    }, { provider: 'model-test', requestId: 'model-test', maxAttempts: 2 })
     const text = await res.text()
     let parsed = null
     try { parsed = JSON.parse(text) } catch (_e) { /* 非 JSON 响应 */ }
@@ -45,7 +46,7 @@ function extractApiErrorMessage(parsed, rawText) {
 
 function buildRequestError(status, parsed, rawText) {
   const detail = extractApiErrorMessage(parsed, rawText)
-  return detail ? `请求失败（${status}）：${detail}` : `请求失败（${status}）`
+  return detail ? `请求失败（${status}）：${String(detail).slice(0, 200)}` : `请求失败（${status}）`
 }
 
 /**

@@ -36,6 +36,7 @@ import {
 } from './lazy-agent-commands.js'
 import { getLogDir, setLoggingEnabled } from './logger.js'
 import { getShareUrl, getNoteShareUrl, getDrawingShareUrl } from './shareServer.js'
+import { safeNetworkErrorSummary, sanitizeNetworkDiagnostic } from './ai-core/network-policy.js'
 import {
   createAutomationTask,
   getActiveAutomationRun,
@@ -73,6 +74,11 @@ function noteFileName(title, usedNames, exportDir) {
   }
   usedNames.add(fileName.toLowerCase())
   return fileName
+}
+
+function sessionScopeArgs(args = {}) {
+  const scope = typeof args?.scope === 'string' && args.scope.trim() ? args.scope : 'friday'
+  return { scope, scopeKey: args?.scopeKey == null || args.scopeKey === '' ? null : args.scopeKey }
 }
 
 function noteHtmlToMarkdown(html) {
@@ -315,15 +321,18 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('get_sessions', (_event, args = {}) => {
-    return db.getSessions(args?.scope, args?.scopeKey)
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.getSessions(scope, scopeKey)
   })
 
   ipcMain.handle('get_sessions_with_stats', (_event, args = {}) => {
-    return db.getSessionsWithStats(args?.startDate, args?.endDate, args?.scope, args?.scopeKey)
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.getSessionsWithStats(args?.startDate, args?.endDate, scope, scopeKey)
   })
 
   ipcMain.handle('get_session', (_event, args = {}) => {
-    return db.getSession(args.sessionId, args.scope, args.scopeKey)
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.getSession(args.sessionId, scope, scopeKey)
   })
 
   ipcMain.handle('create_session', (_event, args) => {
@@ -331,7 +340,8 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('update_session_title', (_event, args = {}) => {
-    const result = db.updateSessionTitle(args.sessionId, args.title, args.scope, args.scopeKey)
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    const result = db.updateSessionTitle(args.sessionId, args.title, scope, scopeKey)
     if (result) {
       mainWindow.webContents.send(SESSION_TITLE_UPDATED, {
         sessionId: args.sessionId,
@@ -342,7 +352,8 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('delete_session', (_event, args = {}) => {
-    const result = db.deleteSession(args.sessionId, args.scope, args.scopeKey)
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    const result = db.deleteSession(args.sessionId, scope, scopeKey)
     if (result.automationRunsDeleted > 0) {
       mainWindow.webContents.send('automation-updated')
     }
@@ -350,7 +361,8 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('get_session_messages', (_event, args = {}) => {
-    return db.getMessages(args.sessionId, args.scope, args.scopeKey)
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.getMessages(args.sessionId, scope, scopeKey)
   })
 
   // 生成内网分享链接：返回只读对话查看页面的 URL
@@ -385,12 +397,12 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('rollback_session', (_event, args) => {
-    db.rollbackSession(args.sessionId, args.messageId)
-    return true
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.rollbackSession(args.sessionId, args.messageId, scope, scopeKey)
   })
 
   ipcMain.handle('chat_with_memory', async (_event, args) => {
-    const { requestId, sessionId, model, message, enableThinking, systemPrompt, useKnowledgeBase, kbName, kbCategoryId, folderPath, topK, attachments, scope = 'friday', scopeKey = null } = args
+    const { requestId, sessionId, model, message, enableThinking, systemPrompt, useKnowledgeBase, kbName, kbCategoryId, folderPath, topK, attachments, retry = false, scope = 'friday', scopeKey = null } = args
 
     let currentSessionId = sessionId
     let isNewSession = false
@@ -412,9 +424,16 @@ export function registerCommands(mainWindow) {
         if (existing.scope !== scope || (existing.scopeKey || null) !== (scopeKey || null)) throw new Error('Session scope mismatch')
       }
 
-      // 保存用户消息到数据库（简洁引用格式）
-      const userMsg = db.saveMessage(currentSessionId, 'user', message)
-      userMessageId = userMsg.id
+      // 重试本轮复用同一条用户消息，避免网络恢复后把用户内容写入两次。
+      // 若会话不存在匹配消息，仍按普通发送保存，防止外部调用伪造 retry 标记。
+      const existingUser = retry && currentSessionId ? db.findLatestUserMessage(currentSessionId, message, scope, scopeKey) : null
+      if (existingUser) {
+        userMessageId = existingUser.id
+        db.removeLatestFailedAssistantMessage(currentSessionId, userMessageId, scope, scopeKey)
+      } else {
+        const userMsg = db.saveMessage(currentSessionId, 'user', message)
+        userMessageId = userMsg.id
+      }
       db.updateSessionTimestamp(currentSessionId)
 
       if (isNewSession) {
@@ -429,11 +448,14 @@ export function registerCommands(mainWindow) {
         setImmediate(async () => {
           try {
             const title = await generateTitle(modelClone, userMsgClone)
-            db.updateSessionTitle(sessionIdClone, title, scope, scopeKey)
-            mainWindow.webContents.send(SESSION_TITLE_UPDATED, {
-              sessionId: sessionIdClone,
-              title
-            })
+            // 自动标题只能填充仍处于自动状态的会话，不能覆盖用户手动命名。
+            const updated = db.updateSessionTitle(sessionIdClone, title, scope, scopeKey, false)
+            if (updated) {
+              mainWindow.webContents.send(SESSION_TITLE_UPDATED, {
+                sessionId: sessionIdClone,
+                title
+              })
+            }
           } catch (_e) {
           }
         })
@@ -510,17 +532,18 @@ export function registerCommands(mainWindow) {
 
       return { sessionId: currentSessionId }
     } catch (e) {
+      const errorMessage = safeNetworkErrorSummary(e)
+      const diagnostic = sanitizeNetworkDiagnostic(e?.diagnostic, e)
       // 将异常也作为助手消息保存，历史记录再次打开时不会出现用户消息后空白。
       if (currentSessionId && userMessageId) {
-        const errorContent = `请求失败：${e?.message || String(e)}`
-        db.saveMessage(currentSessionId, 'assistant', errorContent, { error: true })
-        db.updateSessionTimestamp(currentSessionId)
+        db.saveChatFailure(currentSessionId, e, { retryable: !Array.isArray(attachments) || attachments.length === 0 })
       }
       // 任何阶段出错都通知前端，避免前端一直处于 streaming 状态
       mainWindow.webContents.send(CHAT_ERROR, {
         requestId,
         sessionId: currentSessionId || null,
-        error: e?.message || String(e)
+        error: errorMessage,
+        ...(diagnostic ? { classification: diagnostic.classification, diagnostic } : {})
       })
       throw e
     }
@@ -586,12 +609,15 @@ export function registerCommands(mainWindow) {
 
       return {}
     } catch (e) {
+      const errorMessage = safeNetworkErrorSummary(e)
+      const diagnostic = sanitizeNetworkDiagnostic(e?.diagnostic, e)
       // 无记忆模式没有 session，错误由前端展示即可。
       // 任何阶段出错都通知前端，避免前端一直处于 streaming 状态
       mainWindow.webContents.send(CHAT_ERROR, {
         requestId,
         sessionId: null,
-        error: e?.message || String(e)
+        error: errorMessage,
+        ...(diagnostic ? { classification: diagnostic.classification, diagnostic } : {})
       })
       throw e
     }

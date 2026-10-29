@@ -5,10 +5,6 @@ import { createAiRequest, assertTaskTransition } from './contracts.js'
 import { AiCoreError, policyDenied } from './errors.js'
 
 const TERMINAL = new Set(['completed', 'failed', 'cancelled'])
-// 待审批正文只在当前主进程短期保留，绝不写入 Core 数据库；重启后要求重新提交。
-const pendingRequests = new Map()
-const controllers = new Map()
-
 function clone(value) {
   return value == null ? value : structuredClone(value)
 }
@@ -59,6 +55,7 @@ function publicResult(result) {
     steps: result.steps,
     error: result.error,
     approvalRequired: result.approvalRequired === true,
+    pauseRequested: result.pauseRequested === true,
     events: result.events
   })
 }
@@ -138,6 +135,12 @@ function readbackSatisfies(step, writeStep, writeArgs, writeOutput, readArgs) {
 export function createAiCoreRuntime({ facade, executeCapability, store = null, now = nowIso, executionContext = {} } = {}) {
   if (!facade || typeof facade.plan !== 'function') throw new TypeError('AI Core facade 未提供')
   if (typeof executeCapability !== 'function') throw new TypeError('AI Core capability executor 未提供')
+  // 待审批正文、控制信号和 AbortController 只属于当前 Runtime 实例，
+  // 绝不写入 Core 数据库；进程重启后要求重新提交。
+  const pendingRequests = new Map()
+  const controllers = new Map()
+  // 控制命令通过 Store 读取的是任务副本；用内存信号交给活动执行循环。
+  const pauseRequests = new Set()
   const memory = new Map()
   const events = new Map()
   const backend = store || {
@@ -184,6 +187,17 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
     return plan.steps.some(step => step.approvalRequired)
   }
 
+  function pauseAtCheckpoint(task, request, step) {
+    if (!task.pauseRequested && !pauseRequests.has(task.id)) return false
+    pauseRequests.delete(task.id)
+    task.pauseRequested = false
+    task.interruption = { reason: 'user-paused', stepId: step?.id || null, capabilityId: step?.capabilityId || null, at: now() }
+    pendingRequests.set(task.id, request)
+    transition(task, 'paused')
+    event(task, 'task.paused', { stepId: step?.id || null, capabilityId: step?.capabilityId || null })
+    return true
+  }
+
   function makeTask(request, prepared) {
     const task = {
       id: prepared.task.id,
@@ -202,6 +216,7 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
       output: null,
       error: null,
       checkpoint: null,
+      pauseRequested: false,
       requestInput: clone(request.input),
       requestContext: clone(request.context),
       createdAt: now(),
@@ -215,9 +230,14 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
     const controller = controllers.get(task.id) || new AbortController()
     controllers.set(task.id, controller)
     if (task.status !== 'running') transition(task, 'running')
-    const outputs = []
+    // 继续任务时复用当前进程中已经完成的步骤，避免重复写入。
+    const outputs = Array.isArray(task.steps) ? task.steps.map(clone) : []
     try {
       for (const step of prepared.plan.steps) {
+        if (outputs.some(item => item.stepId === step.id && item.capabilityId === step.capabilityId)) continue
+        if (pauseAtCheckpoint(task, request, step)) {
+          return publicResult({ ...task, events: backend.listEvents(task.id) })
+        }
         if (controller.signal.aborted) throw Object.assign(new Error('任务已取消'), { code: 'AI_CORE_TASK_CANCELLED' })
         task.checkpoint = { stepId: step.id, capabilityId: step.capabilityId, status: 'running' }
         persist(task)
@@ -248,6 +268,15 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
         task.checkpoint = { stepId: step.id, capabilityId: step.capabilityId, status: 'completed' }
         persist(task)
         event(task, 'capability.completed', { stepId: step.id, capabilityId: step.capabilityId })
+        if (controller.signal.aborted) {
+          task.output = { steps: outputs, verification: { status: 'not_run', reason: 'cancelled' } }
+          task.checkpoint = { stepId: step.id, capabilityId: step.capabilityId, status: 'cancelled' }
+          transition(task, 'cancelled')
+          return publicResult({ ...task, events: backend.listEvents(task.id) })
+        }
+        if (pauseAtCheckpoint(task, request, step)) {
+          return publicResult({ ...task, events: backend.listEvents(task.id) })
+        }
       }
       transition(task, 'verifying')
       const writeSteps = prepared.plan.steps.filter(step => step.type === 'write')
@@ -284,7 +313,7 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
       return publicResult({ ...task, events: backend.listEvents(task.id) })
     } finally {
       controllers.delete(task.id)
-      pendingRequests.delete(task.id)
+      if (task.status !== 'paused') pendingRequests.delete(task.id)
     }
   }
 
@@ -329,9 +358,39 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
     return publicTask(task)
   }
 
+  function pause(id, actorId) {
+    const task = getTask(id, actorId)
+    if (task.status === 'paused') return publicTask(task)
+    if (task.status !== 'running') {
+      throw policyDenied(`只有运行中的任务可以暂停：${task.status}`, { taskId: task.id })
+    }
+    task.pauseRequested = true
+    pauseRequests.add(task.id)
+    event(task, 'task.pause_requested', { status: task.status, currentStep: task.currentStep })
+    persist(task)
+    return publicTask(task)
+  }
+
+  function resume(id, actorId) {
+    const task = getTask(id, actorId)
+    if (task.status !== 'paused') throw policyDenied(`只有已暂停任务可以继续：${task.status}`, { taskId: task.id })
+    const request = pendingRequests.get(task.id)
+    if (!request) throw policyDenied('此任务的临时输入已随应用关闭清除，请重新提交并确认任务内容', { taskId: task.id, nextActions: ['resubmit_request'] })
+    const prepared = facade.plan(request)
+    pauseRequests.delete(task.id)
+    task.pauseRequested = false
+    task.interruption = null
+    task.error = null
+    transition(task, 'running', { reason: 'user-resumed' })
+    event(task, 'task.resumed', { completedSteps: task.steps?.map(step => step.stepId) || [] })
+    setImmediate(() => { run(task, request, prepared) })
+    return publicTask(task)
+  }
+
   function cancel(id, actorId) {
     const task = getTask(id, actorId)
     pendingRequests.delete(task.id)
+    pauseRequests.delete(task.id)
     controllers.get(task.id)?.abort()
     if (!TERMINAL.has(task.status) && task.status !== 'running' && task.status !== 'verifying') transition(task, 'cancelled')
     return publicTask(task)
@@ -387,6 +446,8 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
   return Object.freeze({
     submit,
     approve,
+    pause,
+    resume,
     cancel,
     undo,
     recoverInterrupted,

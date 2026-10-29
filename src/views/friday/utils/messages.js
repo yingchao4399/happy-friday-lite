@@ -35,7 +35,11 @@ export function mapHistoryMessage(raw) {
     role: raw.role,
     content: raw.content,
     id: raw.id,
-    reasoning
+    reasoning,
+    isError: metadata?.error === true,
+    streamInterrupted: metadata?.streamInterrupted === true,
+    retryable: metadata?.retryable === true,
+    errorMessage: metadata?.errorMessage || ''
   };
   if (metadata?.segments && Array.isArray(metadata.segments)) {
     msg.segments = metadata.segments;

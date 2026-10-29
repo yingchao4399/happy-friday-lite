@@ -37,7 +37,11 @@ registerTool({
       const createOutput = await executeCapability('office_create', {
         type: 'docx', out, from: sourcePath,
         riskAssessment: { level: 'medium', evaluation: `为笔记“${title}”创建新的 Word 文件 ${out}` }
-      }, ctx, { actor: 'user:local', scopes: ['write'], approvalGranted: true })
+      }, ctx, {
+        actor: ctx.actor || 'user:local',
+        scopes: Array.isArray(ctx.scopes) ? ctx.scopes : [],
+        approvalGranted: true
+      })
       if (typeof createOutput === 'string' && /^(?:错误[:：]|工具执行失败[:：]|操作失败[:：])/.test(createOutput.trim())) throw new Error(createOutput)
       const created = await fs.stat(out).catch(() => null)
       if (!created?.isFile() || created.size <= 0) throw new Error('Word 文件未生成或文件为空')

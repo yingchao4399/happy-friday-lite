@@ -16,6 +16,7 @@
         </div>
       </main>
     </div>
+    <GlobalAgentDock v-if="!isShareView && !startupOpening" />
     <!-- 启动时处理系统打开文件请求的遮罩：先完成跳转再露出界面，避免首页闪现 -->
     <div v-if="startupOpening" class="startup-open-overlay"></div>
   </div>
@@ -30,6 +31,7 @@ import {useNoteStore} from '@/store/modules/note';
 import {useTypewriterStore} from '@/store/modules/typewriter';
 import Sidebar from '@/components/layout/Sidebar.vue';
 import TabBar from '@/components/layout/TabBar.vue';
+import GlobalAgentDock from '@/components/ai-core/GlobalAgentDock.vue';
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAppStore, useTabStore } from '@/store';
 import { electronService } from '@/services/electron';
@@ -67,6 +69,7 @@ const routerViewKey = computed(() => {
 let disposeCommands,disposePlugins;
 let unlistenConfig = null;
 let unlistenOfficeOpened = null;
+let unlistenOfficeDockOpenFriday = null;
 let unlistenOpenFileRequest = null;
 let unlistenClipboardHotkey = null;
 let sessionSaveUnwatch = null;
@@ -300,6 +303,9 @@ onMounted(async () => {
         router.push(`/office/${viewId.replace('-', '/')}`);
       }
     });
+    unlistenOfficeDockOpenFriday = electronService.listen('office-dock-open-friday', () => {
+      router.push('/friday');
+    });
 
     // 操作系统打开文件请求（系统文件关联双击/open-file 事件）：
     // Markdown 进文件查看器，Office 类型进内置编辑器，其余兜底系统默认程序
@@ -348,6 +354,10 @@ onUnmounted(() => {
   if (unlistenOfficeOpened) {
     unlistenOfficeOpened();
     unlistenOfficeOpened = null;
+  }
+  if (unlistenOfficeDockOpenFriday) {
+    unlistenOfficeDockOpenFriday();
+    unlistenOfficeDockOpenFriday = null;
   }
   if (unlistenOpenFileRequest) {
     unlistenOpenFileRequest();

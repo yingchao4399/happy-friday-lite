@@ -5,6 +5,7 @@ import { CHAT_CHUNK, CHAT_REASONING_CHUNK, CHAT_RAG_SOURCES, CHAT_ERROR, NOTE_AI
 import { recordUsage } from './usage.js'
 import { buildChatCompletionsUrl } from './openaiUrl.js'
 import { formatRagSources } from './rag/sources.js'
+import { NETWORK_ERROR_CLASSIFICATIONS, annotateNetworkError, classifyNetworkError, fetchWithFiniteRetry } from './ai-core/network-policy.js'
 import {
   FIM_SYSTEM_PROMPT,
   SESSION_TITLE_SYSTEM_PROMPT,
@@ -32,6 +33,24 @@ function recordUsageFromChunk(parsed, model, source) {
 
 function buildApiUrl(baseUrl) {
   return buildChatCompletionsUrl(baseUrl)
+}
+
+function attachStreamPartial(error, { content = '', reasoning = '', interrupted = false } = {}) {
+  const target = error instanceof Error ? error : new Error(String(error || 'Stream interrupted'))
+  target.partialContent = typeof content === 'string' ? content : ''
+  target.partialReasoning = typeof reasoning === 'string' ? reasoning : ''
+  target.streamInterrupted = interrupted || target.classification === NETWORK_ERROR_CLASSIFICATIONS.STREAM_INTERRUPTED
+  return target
+}
+
+function createStreamInterruptedError(model, requestId, content = '', reasoning = '') {
+  const error = annotateNetworkError(AppError.llm('Stream ended before completion'), {
+    provider: model.provider,
+    requestId,
+    phase: 'stream',
+    classification: NETWORK_ERROR_CLASSIFICATIONS.STREAM_INTERRUPTED
+  })
+  return attachStreamPartial(error, { content, reasoning })
 }
 
 function buildStreamBody(model, messages, enableThinking) {
@@ -91,16 +110,23 @@ export function streamChat(mainWindow, messages, model, requestId, sessionId, en
   return new Promise((resolve, reject) => {
     const req = client.request(options, (res) => {
       if (res.statusCode !== 200) {
-        let errorData = ''
-        res.on('data', chunk => { errorData += chunk.toString() })
+        res.resume()
         res.on('end', () => {
-          const errorMsg = `API request failed (${res.statusCode}): ${errorData}`
+          const networkError = annotateNetworkError(AppError.llm(`API request failed (${res.statusCode})`), {
+            provider: model.provider,
+            requestId,
+            phase: 'response',
+            status: res.statusCode
+          })
           mainWindow.webContents.send(CHAT_ERROR, {
             requestId,
             sessionId: sessionId || null,
-            error: errorMsg
+            error: networkError.message,
+            code: networkError.code,
+            classification: networkError.classification,
+            diagnostic: networkError.diagnostic
           })
-          reject(AppError.llm(errorMsg))
+          reject(networkError)
         })
         return
       }
@@ -109,6 +135,64 @@ export function streamChat(mainWindow, messages, model, requestId, sessionId, en
       let fullContent = ''
       let fullReasoning = ''
       let lastUsage = null
+      let sawDone = false
+      let usageRecorded = false
+
+      function processLine(line) {
+        const normalized = String(line || '').trim()
+        if (!normalized.startsWith('data: ')) return true
+
+        const data = normalized.substring(6).trim()
+        if (data === '[DONE]') {
+          sawDone = true
+          if (lastUsage && !usageRecorded) {
+            recordUsageFromChunk({ usage: lastUsage }, model, 'chat')
+            usageRecorded = true
+          }
+          resolve({ fullContent, fullReasoning })
+          return false
+        }
+
+        try {
+          const parsed = JSON.parse(data)
+          if (parsed.error) {
+            const networkError = annotateNetworkError(AppError.llm('模型返回错误'), {
+              provider: model.provider,
+              requestId,
+              phase: 'response',
+              classification: NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST
+            })
+            mainWindow.webContents.send(CHAT_ERROR, {
+              requestId,
+              sessionId: sessionId || null,
+              error: networkError.message,
+              code: networkError.code,
+              classification: networkError.classification,
+              diagnostic: networkError.diagnostic
+            })
+            reject(attachStreamPartial(networkError, { content: fullContent, reasoning: fullReasoning }))
+            return false
+          }
+
+          if (parsed.usage) lastUsage = parsed.usage
+          const reasoning = parsed.choices?.[0]?.delta?.reasoning_content
+          if (reasoning) {
+            fullReasoning += reasoning
+            partialReasoning = fullReasoning
+            mainWindow.webContents.send(CHAT_REASONING_CHUNK, { requestId, sessionId: sessionId || null, content: reasoning })
+          }
+
+          const content = parsed.choices?.[0]?.delta?.content
+          if (content) {
+            fullContent += content
+            partialContent = fullContent
+            mainWindow.webContents.send(CHAT_CHUNK, { requestId, sessionId: sessionId || null, content })
+          }
+        } catch (_e) {
+          // ignore SSE parse errors
+        }
+        return true
+      }
 
       res.on('data', (chunk) => {
         // 兜底：cancel() 已通过 token.abort() => req.destroy() 中止请求，
@@ -122,71 +206,25 @@ export function streamChat(mainWindow, messages, model, requestId, sessionId, en
 
         while (buffer.includes('\n')) {
           const newlinePos = buffer.indexOf('\n')
-          const line = buffer.substring(0, newlinePos).trim()
+          const line = buffer.substring(0, newlinePos)
           buffer = buffer.substring(newlinePos + 1)
-
-          if (!line) continue
-
-          if (line.startsWith('data: ')) {
-            const data = line.substring(6).trim()
-
-            if (data === '[DONE]') {
-              // 流结束：若之前已收到 usage chunk 则落库
-              if (lastUsage) recordUsageFromChunk({ usage: lastUsage }, model, 'chat')
-              resolve({ fullContent, fullReasoning })
-              return
-            }
-
-            try {
-              const parsed = JSON.parse(data)
-
-              if (parsed.error) {
-                const errorMsg = parsed.error.message || 'Unknown API error'
-                mainWindow.webContents.send(CHAT_ERROR, {
-                  requestId,
-                  sessionId: sessionId || null,
-                  error: errorMsg
-                })
-                reject(AppError.llm(errorMsg))
-                return
-              }
-
-              // usage 通常出现在最后一个 chunk（choices 为空数组）
-              if (parsed.usage) {
-                lastUsage = parsed.usage
-              }
-
-              const reasoning = parsed.choices?.[0]?.delta?.reasoning_content
-              if (reasoning) {
-                fullReasoning += reasoning
-                partialReasoning = fullReasoning
-                mainWindow.webContents.send(CHAT_REASONING_CHUNK, {
-                  requestId,
-                  sessionId: sessionId || null,
-                  content: reasoning
-                })
-              }
-
-              const content = parsed.choices?.[0]?.delta?.content
-              if (content) {
-                fullContent += content
-                partialContent = fullContent
-                mainWindow.webContents.send(CHAT_CHUNK, {
-                  requestId,
-                  sessionId: sessionId || null,
-                  content
-                })
-              }
-            } catch (_e) {
-              // ignore SSE parse errors
-            }
-          }
+          if (!processLine(line)) return
         }
       })
 
       res.on('end', () => {
-        // 部分厂商在 res 结束时未发送 [DONE]，但有 usage chunk
-        if (lastUsage) recordUsageFromChunk({ usage: lastUsage }, model, 'chat')
+        if (cancelToken && cancelToken.cancelled) {
+          resolve({ fullContent, fullReasoning })
+          return
+        }
+        const finalLine = buffer.trim()
+        if (finalLine && !processLine(finalLine)) return
+        if (!sawDone) {
+          reject(createStreamInterruptedError(model, requestId, fullContent, fullReasoning))
+          return
+        }
+        // 部分厂商在 [DONE] 前发送 usage chunk
+        if (lastUsage && !usageRecorded) recordUsageFromChunk({ usage: lastUsage }, model, 'chat')
         resolve({ fullContent, fullReasoning })
       })
 
@@ -196,7 +234,12 @@ export function streamChat(mainWindow, messages, model, requestId, sessionId, en
           resolve({ fullContent, fullReasoning })
           return
         }
-        reject(AppError.llm(`Stream error: ${err.message}`))
+        reject(attachStreamPartial(annotateNetworkError(AppError.llm('Stream error'), {
+          provider: model.provider,
+          requestId,
+          phase: 'stream',
+          classification: classifyNetworkError(err, { phase: 'stream' })
+        }), { content: fullContent, reasoning: fullReasoning, interrupted: true }))
       })
     })
 
@@ -214,7 +257,12 @@ export function streamChat(mainWindow, messages, model, requestId, sessionId, en
         resolve({ fullContent: partialContent, fullReasoning: partialReasoning })
         return
       }
-      reject(AppError.llm(`Request error: ${err.message}`))
+      reject(attachStreamPartial(annotateNetworkError(AppError.llm('Request error'), {
+        provider: model.provider,
+        requestId,
+        phase: 'connect',
+        classification: classifyNetworkError(err, { phase: 'connect' })
+      }), { content: partialContent, reasoning: partialReasoning }))
     })
 
     req.write(bodyStr)
@@ -291,11 +339,11 @@ export function fimCompletion(model, prefix, suffix, cancelToken) {
         if (checkCancel()) return
 
         if (!response.ok) {
-          response.text().then(text => {
-            reject(AppError.llm(`FIM API request failed (${response.status}): ${text}`))
-          }).catch(() => {
-            reject(AppError.llm(`FIM API request failed (${response.status})`))
-          })
+          reject(annotateNetworkError(AppError.llm(`FIM API request failed (${response.status})`), {
+            provider: model.provider,
+            phase: 'response',
+            status: response.status
+          }))
           return
         }
 
@@ -317,7 +365,15 @@ export function fimCompletion(model, prefix, suffix, cancelToken) {
           resolve({ completion: '' })
           return
         }
-        reject(AppError.llm(`FIM request error: ${err.message}`))
+        if (err?.diagnostic) {
+          reject(err)
+          return
+        }
+        reject(annotateNetworkError(AppError.llm('FIM request error'), {
+          provider: model.provider,
+          phase: 'connect',
+          classification: classifyNetworkError(err, { phase: 'connect' })
+        }))
       })
   })
 }
@@ -455,7 +511,7 @@ async function streamRound(mainWindow, url, body, model, requestId, sessionId, c
 
   let response
   try {
-    response = await fetch(url, {
+    response = await fetchWithFiniteRetry(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${model.apiKey}`,
@@ -463,7 +519,7 @@ async function streamRound(mainWindow, url, body, model, requestId, sessionId, c
       },
       body: JSON.stringify(body),
       signal: controller.signal
-    })
+    }, { provider: model.provider, requestId, maxAttempts: 2 })
   } catch (e) {
     // 取消导致的 abort 视为正常结束，返回部分内容（不发 CHAT_ERROR）
     if (cancelToken && cancelToken.cancelled) {
@@ -473,14 +529,24 @@ async function streamRound(mainWindow, url, body, model, requestId, sessionId, c
   }
 
   if (!response.ok) {
-    const errorText = await response.text()
-    const errorMsg = `API request failed (${response.status}): ${errorText}`
+    try { await response.body?.cancel?.() } catch (_e) { /* discard provider error body without exposing it */ }
+    // 不把服务端原始响应正文回传或写入日志；只保留可操作的状态分类。
+    const networkError = annotateNetworkError(AppError.llm(`API request failed (${response.status})`), {
+      provider: model.provider,
+      requestId,
+      phase: 'response',
+      status: response.status,
+      retryAfterMs: Number.isFinite(Number(response.headers.get('retry-after'))) ? Number(response.headers.get('retry-after')) * 1000 : null
+    })
     mainWindow.webContents.send(CHAT_ERROR, {
       requestId,
       sessionId: sessionId || null,
-      error: errorMsg
+      error: networkError.message,
+      code: networkError.code,
+      classification: networkError.classification,
+      diagnostic: networkError.diagnostic
     })
-    throw AppError.llm(errorMsg)
+    throw networkError
   }
 
   const reader = response.body.getReader()
@@ -489,7 +555,70 @@ async function streamRound(mainWindow, url, body, model, requestId, sessionId, c
   let fullContent = ''
   let fullReasoning = ''
   let lastUsage = null
+  let sawDone = false
   const toolCallMap = {}
+
+  function processAgentLine(line) {
+    const normalized = String(line || '').trim()
+    if (!normalized.startsWith('data: ')) return true
+
+    const data = normalized.slice(6).trim()
+    if (data === '[DONE]') {
+      sawDone = true
+      return false
+    }
+
+    let parsed = null
+    try {
+      parsed = JSON.parse(data)
+    } catch (_e) {
+      // 忽略 SSE 解析错误
+      return true
+    }
+
+    if (parsed.error) {
+      const networkError = annotateNetworkError(AppError.llm('模型返回错误'), {
+        provider: model.provider,
+        requestId,
+        phase: 'response',
+        classification: NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST
+      })
+      mainWindow.webContents.send(CHAT_ERROR, {
+        requestId,
+        sessionId: sessionId || null,
+        error: networkError.message,
+        code: networkError.code,
+        classification: networkError.classification,
+        diagnostic: networkError.diagnostic
+      })
+      throw attachStreamPartial(networkError, { content: fullContent, reasoning: fullReasoning })
+    }
+
+    if (parsed.usage) lastUsage = parsed.usage
+    const delta = parsed.choices?.[0]?.delta
+    if (!delta) return true
+
+    if (delta.reasoning_content) {
+      fullReasoning += delta.reasoning_content
+      mainWindow.webContents.send(CHAT_REASONING_CHUNK, { requestId, sessionId: sessionId || null, content: delta.reasoning_content })
+    }
+
+    if (delta.content) {
+      fullContent += delta.content
+      mainWindow.webContents.send(CHAT_CHUNK, { requestId, sessionId: sessionId || null, content: delta.content })
+    }
+
+    if (delta.tool_calls) {
+      for (const tc of delta.tool_calls) {
+        const idx = tc.index != null ? tc.index : 0
+        if (!toolCallMap[idx]) toolCallMap[idx] = { id: '', function: { name: '', arguments: '' } }
+        if (tc.id) toolCallMap[idx].id = tc.id
+        if (tc.function?.name) toolCallMap[idx].function.name += tc.function.name
+        if (tc.function?.arguments) toolCallMap[idx].function.arguments += tc.function.arguments
+      }
+    }
+    return true
+  }
 
   try {
     while (true) {
@@ -505,69 +634,13 @@ async function streamRound(mainWindow, url, body, model, requestId, sessionId, c
 
       while (buffer.includes('\n')) {
         const pos = buffer.indexOf('\n')
-        const line = buffer.slice(0, pos).trim()
+        const line = buffer.slice(0, pos)
         buffer = buffer.slice(pos + 1)
-
-        if (!line || !line.startsWith('data: ')) continue
-
-        const data = line.slice(6).trim()
-        if (data === '[DONE]') continue
-
-        let parsed = null
-        try {
-          parsed = JSON.parse(data)
-        } catch (_e) {
-          // 忽略 SSE 解析错误
-          continue
-        }
-
-        if (parsed.error) {
-          const errorMsg = parsed.error.message || 'Unknown API error'
-          mainWindow.webContents.send(CHAT_ERROR, {
-            requestId,
-            sessionId: sessionId || null,
-            error: errorMsg
-          })
-          throw AppError.llm(errorMsg)
-        }
-
-        // usage 通常出现在最后一个 chunk（choices 为空数组）
-        if (parsed.usage) {
-          lastUsage = parsed.usage
-        }
-
-        const delta = parsed.choices?.[0]?.delta
-        if (!delta) continue
-
-        if (delta.reasoning_content) {
-          fullReasoning += delta.reasoning_content
-          mainWindow.webContents.send(CHAT_REASONING_CHUNK, {
-            requestId,
-            sessionId: sessionId || null,
-            content: delta.reasoning_content
-          })
-        }
-
-        if (delta.content) {
-          fullContent += delta.content
-          mainWindow.webContents.send(CHAT_CHUNK, {
-            requestId,
-            sessionId: sessionId || null,
-            content: delta.content
-          })
-        }
-
-        if (delta.tool_calls) {
-          for (const tc of delta.tool_calls) {
-            const idx = tc.index != null ? tc.index : 0
-            if (!toolCallMap[idx]) {
-              toolCallMap[idx] = { id: '', function: { name: '', arguments: '' } }
-            }
-            if (tc.id) toolCallMap[idx].id = tc.id
-            if (tc.function?.name) toolCallMap[idx].function.name += tc.function.name
-            if (tc.function?.arguments) toolCallMap[idx].function.arguments += tc.function.arguments
-          }
-        }
+        if (!processAgentLine(line)) break
+      }
+      if (sawDone) {
+        try { await reader.cancel() } catch (_e) { /* release the completed response */ }
+        break
       }
     }
   } catch (e) {
@@ -575,8 +648,37 @@ async function streamRound(mainWindow, url, body, model, requestId, sessionId, c
     if (cancelToken && cancelToken.cancelled) {
       try { await reader.cancel() } catch (_e) { /* ignore */ }
     } else {
-      throw e
+      const streamError = e?.diagnostic
+        ? e
+        : annotateNetworkError(AppError.llm('Stream error'), {
+          provider: model.provider,
+          requestId,
+          phase: 'stream',
+          classification: classifyNetworkError(e, { phase: 'stream' })
+        })
+      throw attachStreamPartial(streamError, { content: fullContent, reasoning: fullReasoning, interrupted: !e?.diagnostic })
     }
+  }
+
+  buffer += decoder.decode()
+  if (!sawDone && buffer.trim()) {
+    try {
+      processAgentLine(buffer)
+    } catch (e) {
+      const streamError = e?.diagnostic
+        ? e
+        : annotateNetworkError(AppError.llm('Stream error'), {
+          provider: model.provider,
+          requestId,
+          phase: 'stream',
+          classification: classifyNetworkError(e, { phase: 'stream' })
+        })
+      throw attachStreamPartial(streamError, { content: fullContent, reasoning: fullReasoning, interrupted: !e?.diagnostic })
+    }
+  }
+
+  if (!sawDone && !(cancelToken && cancelToken.cancelled)) {
+    throw createStreamInterruptedError(model, requestId, fullContent, fullReasoning)
   }
 
   const toolCalls = Object.keys(toolCallMap)
@@ -585,7 +687,7 @@ async function streamRound(mainWindow, url, body, model, requestId, sessionId, c
     .filter(tc => tc.function.name)
 
   // 落库本轮 token 用量（RAG Agent 可能多轮，每轮分别记录）
-  if (lastUsage) recordUsageFromChunk({ usage: lastUsage }, model, 'agent')
+  if (sawDone && lastUsage) recordUsageFromChunk({ usage: lastUsage }, model, 'agent')
 
   return { fullContent, fullReasoning, toolCalls }
 }
@@ -681,7 +783,20 @@ export async function streamChatWithRagAgent(mainWindow, messages, model, reques
 
     console.log(`[RAG-Agent] 第 ${iteration + 1} 轮：调用 LLM (stream)`)
 
-    const round = await streamRound(mainWindow, url, body, model, requestId, sessionId, cancelToken)
+    let round
+    try {
+      round = await streamRound(mainWindow, url, body, model, requestId, sessionId, cancelToken)
+    } catch (error) {
+      // streamRound 只知道当前轮次的 partial；RAG Agent 可能已经完成了前几轮，
+      // 因此在向上抛出前把此前累计的正文与思考一并附加到最终错误，供断流落库与重试恢复使用。
+      const roundContent = typeof error?.partialContent === 'string' ? error.partialContent : ''
+      const roundReasoning = typeof error?.partialReasoning === 'string' ? error.partialReasoning : ''
+      throw attachStreamPartial(error, {
+        content: fullContent + roundContent,
+        reasoning: fullReasoning + roundReasoning,
+        interrupted: Boolean(error?.streamInterrupted)
+      })
+    }
     fullContent += round.fullContent
     fullReasoning += round.fullReasoning
 
@@ -802,15 +917,21 @@ export function streamNoteAI(mainWindow, action, noteContent, selectedText, mode
   return new Promise((resolve, reject) => {
     const req = client.request(options, (res) => {
       if (res.statusCode !== 200) {
-        let errorData = ''
-        res.on('data', chunk => { errorData += chunk.toString() })
         res.on('end', () => {
-          const errorMsg = `API request failed (${res.statusCode}): ${errorData}`
+          const networkError = annotateNetworkError(AppError.llm(`API request failed (${res.statusCode})`), {
+            provider: model.provider,
+            requestId,
+            phase: 'response',
+            status: res.statusCode
+          })
           mainWindow.webContents.send(NOTE_AI_ERROR, {
             requestId,
-            error: errorMsg
+            error: networkError.message,
+            code: networkError.code,
+            classification: networkError.classification,
+            diagnostic: networkError.diagnostic
           })
-          reject(AppError.llm(errorMsg))
+          reject(networkError)
         })
         return
       }
@@ -848,12 +969,20 @@ export function streamNoteAI(mainWindow, action, noteContent, selectedText, mode
               const parsed = JSON.parse(data)
 
               if (parsed.error) {
-                const errorMsg = parsed.error.message || 'Unknown API error'
+                const networkError = annotateNetworkError(AppError.llm('模型返回错误'), {
+                  provider: model.provider,
+                  requestId,
+                  phase: 'response',
+                  classification: NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST
+                })
                 mainWindow.webContents.send(NOTE_AI_ERROR, {
                   requestId,
-                  error: errorMsg
+                  error: networkError.message,
+                  code: networkError.code,
+                  classification: networkError.classification,
+                  diagnostic: networkError.diagnostic
                 })
-                reject(AppError.llm(errorMsg))
+                reject(networkError)
                 return
               }
 
@@ -887,7 +1016,12 @@ export function streamNoteAI(mainWindow, action, noteContent, selectedText, mode
           resolve({ fullContent })
           return
         }
-        reject(AppError.llm(`Stream error: ${err.message}`))
+        reject(annotateNetworkError(AppError.llm('Stream error'), {
+          provider: model.provider,
+          requestId,
+          phase: 'stream',
+          classification: classifyNetworkError(err, { phase: 'stream' })
+        }))
       })
     })
 
@@ -905,7 +1039,12 @@ export function streamNoteAI(mainWindow, action, noteContent, selectedText, mode
         resolve({ fullContent: '' })
         return
       }
-      reject(AppError.llm(`Request error: ${err.message}`))
+      reject(annotateNetworkError(AppError.llm('Request error'), {
+        provider: model.provider,
+        requestId,
+        phase: 'connect',
+        classification: classifyNetworkError(err, { phase: 'connect' })
+      }))
     })
 
     req.write(bodyStr)

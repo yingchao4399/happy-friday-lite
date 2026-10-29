@@ -355,7 +355,7 @@ const loadSessions = async () => {
   loading.value = true;
   try {
     const startDate = getMonthsAgoISO(MONTHS_PER_PAGE);
-    const result = await electronService.invoke('get_sessions_with_stats', { startDate });
+    const result = await electronService.invoke('get_sessions_with_stats', { startDate, scope: 'friday', scopeKey: null });
     allSessions.value = result?.sessions || [];
     hasMore.value = !!result?.hasMore;
     loadedMonths.value = MONTHS_PER_PAGE;
@@ -379,7 +379,9 @@ const loadMore = async () => {
     const endDate = getMonthsAgoISO(previousMonths);
     const result = await electronService.invoke('get_sessions_with_stats', {
       startDate: newStartDate,
-      endDate
+      endDate,
+      scope: 'friday',
+      scopeKey: null
     });
     const newSessions = result?.sessions || [];
     // 合并并去重
@@ -552,7 +554,7 @@ const handleRowMenuSaveAsNote = async (session) => {
   showSaveToast(t('history.saveAsNoteToast'));
 
   try {
-    const messages = await electronService.invoke('get_session_messages', { sessionId: session.id });
+    const messages = await electronService.invoke('get_session_messages', { sessionId: session.id, scope: 'friday', scopeKey: null });
     if (!messages || messages.length === 0) {
       showSaveToast('暂无对话内容');
       return;
@@ -712,7 +714,7 @@ const handleBatchDelete = async () => {
 const confirmBatchDelete = async () => {
   try {
     for (const id of selectedIds.value) {
-      await electronService.invoke('delete_session', { sessionId: id });
+      await electronService.invoke('delete_session', { sessionId: id, scope: 'friday', scopeKey: null });
     }
     allSessions.value = allSessions.value.filter(s => !selectedIds.value.has(s.id));
   } catch (err) {
@@ -783,7 +785,7 @@ const confirmRename = async () => {
   if (!session || !newTitle) return;
 
   try {
-    await electronService.invoke('update_session_title', { sessionId: session.id, title: newTitle });
+    await electronService.invoke('update_session_title', { sessionId: session.id, title: newTitle, scope: 'friday', scopeKey: null });
     session.title = newTitle;
   } catch (err) {
     console.error('Failed to rename session:', err);
@@ -817,7 +819,7 @@ const confirmDelete = async () => {
   if (!session) return;
 
   try {
-    await electronService.invoke('delete_session', { sessionId: session.id });
+    await electronService.invoke('delete_session', { sessionId: session.id, scope: 'friday', scopeKey: null });
     allSessions.value = allSessions.value.filter(s => s.id !== session.id);
   } catch (err) {
     console.error('Failed to delete session:', err);

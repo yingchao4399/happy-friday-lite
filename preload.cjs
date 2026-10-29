@@ -172,6 +172,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'ai-core-plan',
       'ai-core-execute',
       'ai-core-task-approve',
+      'ai-core-task-pause',
+      'ai-core-task-resume',
       'ai-core-task-get',
       'ai-core-task-list',
       'ai-core-task-cancel',
@@ -332,6 +334,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'office-view-closed',
       'office-file-saved',
       'office-layout-sync',
+      'office-dock-open-friday',
       'obsidian-sync-status',
       'open-file-request'
       , 'clipboard-item-added'

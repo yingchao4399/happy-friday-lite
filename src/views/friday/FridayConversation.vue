@@ -46,6 +46,11 @@
       </div>
     </main>
 
+    <div v-if="lastError" class="conversation-error" role="alert">
+      <span>{{ lastError }}</span>
+      <button v-if="canRetryLastMessage" type="button" :disabled="isStreaming" @click="retryLastMessage">{{ t('friday.retry') }}</button>
+    </div>
+
     <FridayComposer
       v-if="!isShareMode"
       :model-binding="composerBinding"
@@ -151,6 +156,8 @@ const {
   currentSessionId,
   currentMode,
   isStreaming,
+  lastError,
+  canRetryLastMessage,
   streamingContent,
   streamingReasoning,
   isReasoningStreaming,
@@ -160,8 +167,10 @@ const {
   isThinking,
   sessionTitle,
   startNewConversation,
+  hydrateMessages,
   attachRequest,
   sendChatMessage,
+  retryLastMessage,
   handleStop,
   stopAllStreams,
   handleApproveTool,
@@ -339,7 +348,7 @@ async function initConversation() {
     if (queryTitle) sessionTitle.value = queryTitle;
     const loadedMessages = await loadSessionHistory(sessionParam);
     if (seq !== initSeq) return;
-    messages.value = loadedMessages;
+    hydrateMessages(loadedMessages);
     try {
       const sessionInfo = await electronService.invoke('get_session', { sessionId: sessionParam, scope: 'friday', scopeKey: null });
       if (seq !== initSeq) return;
@@ -449,7 +458,9 @@ async function executeRollback() {
   try {
     await electronService.invoke('rollback_session', {
       sessionId: currentSessionId.value,
-      messageId: pendingRollbackUserMsgId
+      messageId: pendingRollbackUserMsgId,
+      scope: 'friday',
+      scopeKey: null
     });
     const userMsgContent = messages.value[pendingRollbackUserMsgIndex].content;
     messages.value = messages.value.slice(0, pendingRollbackUserMsgIndex);
@@ -548,6 +559,32 @@ onUnmounted(() => {
   overflow: hidden;
   position: relative;
 }
+
+.conversation-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 16px 8px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--color-danger, #b33) 35%, var(--border-color));
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.conversation-error button {
+  flex: none;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 9px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.conversation-error button:disabled { opacity: .5; cursor: default; }
 
 .conversation-header {
   display: flex;

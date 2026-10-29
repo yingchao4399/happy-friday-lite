@@ -1,10 +1,27 @@
 # Friday 下一轮迭代交付清单
 
+## Preview.20 当前复核（2026-10-29）
+
+本次源码复核已完成：全量 Node 回归 **298/298**，Vite 生产构建通过；Docs、Sheets、Slides、PDF 的 Office host 生命周期探针均通过，Office Dock 覆盖层探针验证折叠/展开边界、层级和隐藏。新增覆盖层在开发态无 Vite 服务时会回退到本地 `dist`，安装包已显式包含 `preload-office-dock.cjs`。
+
+按当前源码重新生成的 Windows x64 安装器：
+
+- 文件：`release/Happy-Friday-Lite-3.0.6.02-preview.20-win-x64-setup.exe`
+- 大小：268,721,754 bytes
+- SHA256：`c9ed5449fac0abf85efcaf783376a44fb82a83a5d38976aba9bbcce117ad9ef3`
+- `latest.yml` 与 `release/SHA256SUMS-preview.20.txt` 已按本次构建更新；未配置代码签名。
+
+仍未满足正式版门禁的项目：真实安装目录的升级/回退/卸载/重装人工流程、Typewriter 全量性能/声音/图片与 Obsidian 兼容矩阵，以及 Office/PDF/Typewriter 各自完整的 AI 会话历史入口。它们保留为已知限制，不能以局部源码测试替代。GitHub 发布需在提交后使用当前有写权限的 `yingchao4399/happy-friday-lite` 目标完成并核验资产。
+
+## Preview.20 当前状态（2026-10-29）
+
+源码技术版本为 `3.0.6-preview.20`，发布展示标签为 `3.0.6.02-preview.20`。本轮已完成 AI Core 任务暂停/继续/取消、Word 写入审批控制、根级 Friday Assistant Dock、网络错误分类/有限重试、手动标题保护和受限 DSH Core Adapter；当前全量 Node 回归 286/286、Vite 构建和 Windows x64 electron-builder 构建通过。已生成本地未签名安装包并记录 SHA256；安装升级回退、完整历史迁移和最终 Windows 人工验收仍未完成，因此不能称为已发布安装版。
+
 ## 范围调整（2026-10-24）
 
 用户已明确把外部剪贴板场景移到下一轮：跨应用复制粘贴、外部浮窗/屏幕钉窗、全局快捷粘贴和手机 LAN 分享。本次 preview 不再以这些场景作为交付门禁。已有开发实现不等于本次已验收交付；本轮保留应用内剪贴板功能的基本回归、数据持久化、敏感内容保护及原版界面核验。下表中涉及这些外部场景的“剩余工作”均属于下一轮。
 
-当前仍须完成 Office 打印预览与参数/实际 Windows 输出、首开性能、应用内功能回归、最终安装生命周期和源码可重建检查，再形成安装包。
+当前候选安装包已经重新生成；Office 打印预览与参数/实际 Windows 输出、首开性能、最终安装生命周期、升级回退和源码可重建检查仍是发布门禁，不能把本地候选包称为正式发布版。
 
 ## 本次续做状态（2026-10-24）
 

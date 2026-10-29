@@ -47,6 +47,76 @@ test('笔记置顶重启后保留，取消置顶不改正文', async () => {
   } finally { db.closeDb(); fs.rmSync(root, { recursive: true, force: true }) }
 })
 
+test('会话手动标题不会被异步自动标题覆盖', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-session-title-'))
+  db.setDataDir(root)
+  try {
+    await db.initDb()
+    const manual = db.createSession('首条消息', 'chat', 'friday', null)
+    assert.equal(db.updateSessionTitle(manual.id, '用户命名', 'friday', null), true)
+    assert.equal(db.updateSessionTitle(manual.id, 'AI 建议标题', 'friday', null, false), false)
+    assert.equal(db.getSession(manual.id, 'friday', null).title, '用户命名')
+
+    const automatic = db.createSession('另一条消息', 'chat', 'friday', null)
+    assert.equal(db.updateSessionTitle(automatic.id, 'AI 建议标题', 'friday', null, false), true)
+    assert.equal(db.getSession(automatic.id, 'friday', null).title, 'AI 建议标题')
+  } finally {
+    db.closeDb()
+    fs.rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('会话历史按 scope 和 scopeKey 隔离，省略范围只回退到 Friday 全局', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-session-scope-'))
+  db.setDataDir(root)
+  try {
+    await db.initDb()
+    const friday = db.createSession('Friday 全局', 'chat', 'friday', null)
+    const noteA = db.createSession('笔记 A', 'agent', 'note-agent', 'note:a')
+    const noteB = db.createSession('笔记 B', 'agent', 'note-agent', 'note:b')
+    const noteMessage = db.saveMessage(noteA.id, 'user', '只属于笔记 A')
+
+    assert.deepEqual(db.getSessions().map(item => item.id), [friday.id])
+    const unscopedStats = db.getSessionsWithStats()
+    assert.deepEqual(unscopedStats.sessions.map(item => item.id), [friday.id])
+    assert.equal(unscopedStats.sessions.some(item => item.preview === '只属于笔记 A'), false)
+    assert.deepEqual(db.getSessions('note-agent', 'note:a').map(item => item.id), [noteA.id])
+    assert.deepEqual(db.getSessions('note-agent', 'note:b').map(item => item.id), [noteB.id])
+    assert.equal(db.getSession(noteA.id), null)
+    assert.equal(db.getMessages(noteA.id).length, 0)
+    assert.equal(db.updateSessionTitle(noteA.id, '越权改名'), false)
+    assert.equal(db.deleteSession(noteA.id).deleted, false)
+    assert.equal(db.updateSessionTitle(noteA.id, '越权改名', 'note-agent', 'note:b'), false)
+    assert.equal(db.deleteSession(noteA.id, 'note-agent', 'note:b').deleted, false)
+    assert.equal(db.rollbackSession(noteA.id, noteMessage.id), false)
+    assert.equal(db.getSession(noteA.id, 'note-agent', 'note:a').title, '笔记 A')
+    assert.equal(db.getMessages(noteA.id, 'note-agent', 'note:b').length, 0)
+    assert.equal(db.getMessages(noteA.id, 'note-agent', 'note:a').length, 1)
+    assert.equal(db.rollbackSession(noteA.id, noteMessage.id, 'note-agent', 'note:a'), true)
+    assert.equal(db.getMessages(noteA.id, 'note-agent', 'note:a').length, 0)
+  } finally {
+    db.closeDb()
+    fs.rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('重试同一轮定位原用户消息而不产生重复用户记录', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-session-retry-'))
+  db.setDataDir(root)
+  try {
+    await db.initDb()
+    const session = db.createSession('重试测试', 'chat', 'friday', null)
+    const first = db.saveMessage(session.id, 'user', '同一条消息')
+    db.saveMessage(session.id, 'assistant', '请求失败：暂时离线', { error: true })
+    const found = db.findLatestUserMessage(session.id, '同一条消息', 'friday', null)
+    assert.equal(found.id, first.id)
+    assert.equal(db.getMessages(session.id, 'friday', null).filter(item => item.role === 'user').length, 1)
+  } finally {
+    db.closeDb()
+    fs.rmSync(root, { recursive: true, force: true })
+  }
+})
+
 test('敏感识别先于链接类型，加密不可用不返回原文', () => {
   for (const value of ['验证码：123456', '密码 abc', 'token=secret-value', 'https://example.test/?token=secret', 'sk-1234567890123456', '123456']) assert.equal(classifyClipboard(value), 'secret')
   assert.equal(classifyClipboard('普通笔记正文'), 'text')

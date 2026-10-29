@@ -23,7 +23,21 @@ window.addEventListener('keydown', (event) => {
 async function mountApp() {
 const pinnedWindow = window.location.hash.startsWith('#/clipboard-pin/')
 const quickWindow = window.location.hash.startsWith('#/clipboard-quick')
-const app = createApp(quickWindow ? (await import('./views/clipboard/ClipboardQuick.vue')).default : pinnedWindow ? (await import('./views/clipboard/ClipboardPinned.vue')).default : App)
+const officeDockWindow = window.location.hash.includes('__officeDock=1')
+if (officeDockWindow) {
+  document.documentElement.style.background = 'transparent'
+  document.body.style.background = 'transparent'
+  document.body.style.overflow = 'hidden'
+  document.getElementById('app').style.background = 'transparent'
+}
+const root = officeDockWindow
+  ? (await import('./components/ai-core/GlobalAgentDock.vue')).default
+  : quickWindow
+    ? (await import('./views/clipboard/ClipboardQuick.vue')).default
+    : pinnedWindow
+      ? (await import('./views/clipboard/ClipboardPinned.vue')).default
+      : App
+const app = createApp(root, officeDockWindow ? { officeOverlay: true } : undefined)
 
 app.use(pinia)
 if (!pinnedWindow && !quickWindow) app.use(router)

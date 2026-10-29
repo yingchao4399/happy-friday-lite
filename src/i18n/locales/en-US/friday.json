@@ -55,6 +55,7 @@
   "modelRequired": "No model configured. Add a model in Settings first.",
   "requestFailed": "Request failed: ",
   "retryLater": "Unable to reach the model. Please try again later.",
+  "retry": "Retry this turn",
   "modelUnavailable": "The model is temporarily unavailable. Please try again later.",
   "userRejected": "Rejected by user",
   "copySuccess": "Copied to clipboard",

@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import {extractNoteLinks, resolveTarget} from './notes/link-index.js'
 import { openSqliteStorage } from './sqlite-storage.js'
 import { applyPreviewMigrations } from './preview-migrations.js'
+import { safeNetworkErrorSummary, sanitizeNetworkDiagnostic } from './ai-core/network-policy.js'
 
 let dataDir = null
 let db = null
@@ -96,6 +97,7 @@ async function initDatabase() {
       mode TEXT NOT NULL DEFAULT 'chat',
       scope TEXT NOT NULL DEFAULT 'friday',
       scopeKey TEXT,
+      titleManuallySet INTEGER NOT NULL DEFAULT 0,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     );
@@ -111,6 +113,7 @@ async function initDatabase() {
   // 新的笔记、知识库、日程和 Office 会话通过 scope/scopeKey 隔离。
   try { db.run("ALTER TABLE sessions ADD COLUMN scope TEXT NOT NULL DEFAULT 'friday'") } catch (_e) {}
   try { db.run('ALTER TABLE sessions ADD COLUMN scopeKey TEXT') } catch (_e) {}
+  try { db.run('ALTER TABLE sessions ADD COLUMN titleManuallySet INTEGER NOT NULL DEFAULT 0') } catch (_e) {}
   db.run('CREATE INDEX IF NOT EXISTS idx_sessions_scope ON sessions(scope, scopeKey, updatedAt)')
 
   // AI Core 任务与事件是控制层事实源；正文能力仍由各业务表保存。
@@ -579,21 +582,29 @@ export function createSession(title, mode = 'chat', scope = 'friday', scopeKey =
   const now = nowISO()
   const id = generateId()
   db.run(
-    'INSERT INTO sessions (id, title, mode, scope, scopeKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [id, title || '新对话', mode, scope || 'friday', scopeKey || null, now, now]
+    'INSERT INTO sessions (id, title, mode, scope, scopeKey, titleManuallySet, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [id, title || '新对话', mode, scope || 'friday', scopeKey || null, 0, now, now]
   )
   saveDb()
-  return { id, title: title || '新对话', mode, scope: scope || 'friday', scopeKey: scopeKey || null, createdAt: now, updatedAt: now }
+  return { id, title: title || '新对话', mode, scope: scope || 'friday', scopeKey: scopeKey || null, titleManuallySet: 0, createdAt: now, updatedAt: now }
 }
 
-export function getSessions(scope, scopeKey) {
+function normalizeSessionScope(scope, scopeKey) {
+  return {
+    // 旧调用缺少 scope 时只允许访问 Friday 全局会话，不能退化成全库查询。
+    scope: typeof scope === 'string' && scope.trim() ? scope : 'friday',
+    scopeKey: scopeKey == null || scopeKey === '' ? null : scopeKey
+  }
+}
+
+export function getSessions(scope = 'friday', scopeKey = null) {
+  ({ scope, scopeKey } = normalizeSessionScope(scope, scopeKey))
   const clauses = []
   const params = []
-  if (scope !== undefined) { clauses.push('scope = ?'); params.push(scope) }
-  if (scope !== undefined || scopeKey !== undefined) {
-    if (scopeKey == null) clauses.push('scopeKey IS NULL')
-    else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
-  }
+  clauses.push('scope = ?')
+  params.push(scope)
+  if (scopeKey == null) clauses.push('scopeKey IS NULL')
+  else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
   const where = clauses.length ? ` WHERE ${clauses.join(' AND ')}` : ''
   return queryAll(`SELECT * FROM sessions${where} ORDER BY updatedAt DESC`, params)
 }
@@ -628,7 +639,7 @@ export function saveAiCoreTask(task) {
      requestedCapabilitiesJson, requestFingerprint, planJson, stepsJson, inputJson, contextJson, outputJson, errorJson, checkpointJson, createdAt, updatedAt)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
     task.id, task.actorId, task.spaceId, task.sessionId || null, task.threadId || null, task.requestId,
-    'AI Core 任务', task.mode || 'execute', task.status, task.idempotencyKey,
+    String(task.intent || 'AI Core 任务').slice(0, 240), task.mode || 'execute', task.status, task.idempotencyKey,
     JSON.stringify(task.requestedCapabilities || []), task.requestFingerprint || '', JSON.stringify(safePlan), JSON.stringify(safeSteps), '{}',
     JSON.stringify(safeContext), task.output == null ? null : JSON.stringify({ status: task.output.verification?.status || task.status }),
     task.error == null ? null : JSON.stringify({ code: task.error.code || 'AI_CORE_EXECUTION_FAILED', stage: task.error.stage || 'execute' }),
@@ -667,16 +678,16 @@ export function listAiCoreTaskEvents(taskId) {
   return queryAll('SELECT id, taskId, type, payloadJson, createdAt FROM ai_core_task_events WHERE taskId = ? ORDER BY createdAt ASC', [taskId]).map(row => ({ id: row.id, taskId: row.taskId, type: row.type, payload: parseJsonField(row, 'payloadJson', {}), createdAt: row.createdAt }))
 }
 
-export function getSessionsWithStats(startDate, endDate, scope, scopeKey) {
+export function getSessionsWithStats(startDate, endDate, scope = 'friday', scopeKey = null) {
+  ({ scope, scopeKey } = normalizeSessionScope(scope, scopeKey))
   const clauses = []
   const params = []
   if (startDate) { clauses.push('updatedAt >= ?'); params.push(startDate) }
   if (endDate) { clauses.push('updatedAt < ?'); params.push(endDate) }
-  if (scope !== undefined) { clauses.push('scope = ?'); params.push(scope) }
-  if (scope !== undefined || scopeKey !== undefined) {
-    if (scopeKey == null) clauses.push('scopeKey IS NULL')
-    else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
-  }
+  clauses.push('scope = ?')
+  params.push(scope)
+  if (scopeKey == null) clauses.push('scopeKey IS NULL')
+  else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
   const where = clauses.length ? ' WHERE ' + clauses.join(' AND ') : ''
   const sql = 'SELECT * FROM sessions' + where + ' ORDER BY updatedAt DESC'
   const sessions = queryAll(sql, params).map(s => {
@@ -700,11 +711,10 @@ export function getSessionsWithStats(startDate, endDate, scope, scopeKey) {
   if (startDate) {
     const olderClauses = ['updatedAt < ?']
     const olderParams = [startDate]
-    if (scope !== undefined) { olderClauses.push('scope = ?'); olderParams.push(scope) }
-    if (scope !== undefined || scopeKey !== undefined) {
-      if (scopeKey == null) olderClauses.push('scopeKey IS NULL')
-      else { olderClauses.push('scopeKey = ?'); olderParams.push(scopeKey) }
-    }
+    olderClauses.push('scope = ?')
+    olderParams.push(scope)
+    if (scopeKey == null) olderClauses.push('scopeKey IS NULL')
+    else { olderClauses.push('scopeKey = ?'); olderParams.push(scopeKey) }
     const olderSql = 'SELECT COUNT(*) as count FROM sessions WHERE ' + olderClauses.join(' AND ')
     const older = queryOne(olderSql, olderParams)
     hasMore = !!(older && older.count > 0)
@@ -713,13 +723,14 @@ export function getSessionsWithStats(startDate, endDate, scope, scopeKey) {
   return { sessions, hasMore }
 }
 
-export function getSession(sessionId, scope, scopeKey) {
+export function getSession(sessionId, scope = 'friday', scopeKey = null) {
+  ({ scope, scopeKey } = normalizeSessionScope(scope, scopeKey))
   const row = queryOne('SELECT * FROM sessions WHERE id = ?', [sessionId])
-  if (!row || (scope !== undefined && row.scope !== scope) || ((scope !== undefined || scopeKey !== undefined) && (row.scopeKey || null) !== (scopeKey || null))) return null
+  if (!row || row.scope !== scope || (row.scopeKey || null) !== scopeKey) return null
   return row
 }
 
-export function deleteSession(sessionId, scope, scopeKey) {
+export function deleteSession(sessionId, scope = 'friday', scopeKey = null) {
   if (!getSession(sessionId, scope, scopeKey)) return { automationRunsDeleted: 0, deleted: false }
   db.run('DELETE FROM automation_runs WHERE sessionId = ?', [sessionId])
   const automationRunsDeleted = db.getRowsModified()
@@ -729,11 +740,12 @@ export function deleteSession(sessionId, scope, scopeKey) {
   return { automationRunsDeleted, deleted: true }
 }
 
-export function updateSessionTitle(sessionId, title, scope, scopeKey) {
-  if (!getSession(sessionId, scope, scopeKey)) return false
+export function updateSessionTitle(sessionId, title, scope = 'friday', scopeKey = null, manual = true) {
+  const existing = getSession(sessionId, scope, scopeKey)
+  if (!existing || (!manual && Number(existing.titleManuallySet) === 1)) return false
   db.run(
-    'UPDATE sessions SET title = ?, updatedAt = ? WHERE id = ?',
-    [title, nowISO(), sessionId]
+    'UPDATE sessions SET title = ?, titleManuallySet = CASE WHEN ? THEN 1 ELSE titleManuallySet END, updatedAt = ? WHERE id = ?',
+    [title, manual ? 1 : 0, nowISO(), sessionId]
   )
   saveDb()
   return db.getRowsModified() > 0
@@ -771,7 +783,29 @@ export function saveMessage(sessionId, role, content, metadata = null) {
   return { id, sessionId, role, content, createdAt: now, metadata }
 }
 
-export function getMessages(sessionId, scope, scopeKey) {
+/** Persist the visible partial response and a safe failure summary for history recovery. */
+export function saveChatFailure(sessionId, error, { retryable = true } = {}) {
+  const errorMessage = safeNetworkErrorSummary(error)
+  const partialContent = typeof error?.partialContent === 'string' ? error.partialContent : ''
+  const partialReasoning = typeof error?.partialReasoning === 'string' ? error.partialReasoning : ''
+  const diagnostic = sanitizeNetworkDiagnostic(error?.diagnostic, error || {})
+  const errorContent = partialContent
+    ? `${partialContent}\n\n请求失败：${errorMessage}`.trim()
+    : `请求失败：${errorMessage}`
+  const saved = saveMessage(sessionId, 'assistant', errorContent, {
+    error: true,
+    streamInterrupted: error?.streamInterrupted === true,
+    retryable: retryable === true,
+    classification: diagnostic?.classification || error?.classification || null,
+    errorMessage,
+    ...(diagnostic ? { diagnostic } : {}),
+    ...(partialReasoning ? { reasoning: partialReasoning } : {})
+  })
+  updateSessionTimestamp(sessionId)
+  return saved
+}
+
+export function getMessages(sessionId, scope = 'friday', scopeKey = null) {
   if (!getSession(sessionId, scope, scopeKey)) return []
   const rows = queryAll('SELECT * FROM messages WHERE sessionId = ? ORDER BY id ASC', [sessionId])
   // 解析 metadata JSON
@@ -787,12 +821,34 @@ export function getMessages(sessionId, scope, scopeKey) {
   })
 }
 
-export function rollbackSession(sessionId, messageId) {
+/** 重试同一轮请求时定位原始用户消息，避免把相同文本再次写入会话。 */
+export function findLatestUserMessage(sessionId, content, scope, scopeKey) {
+  return [...getMessages(sessionId, scope, scopeKey)].reverse().find(message => message.role === 'user' && message.content === content) || null
+}
+
+/** 重试同一轮请求前删除该用户消息之后最近一条失败助手消息，避免历史出现重复回复。 */
+export function removeLatestFailedAssistantMessage(sessionId, userMessageId, scope = 'friday', scopeKey = null) {
+  const messages = getMessages(sessionId, scope, scopeKey)
+  const userIndex = messages.findIndex(message => Number(message.id) === Number(userMessageId))
+  if (userIndex < 0) return false
+  const failed = [...messages.slice(userIndex + 1)].reverse().find(message => {
+    if (message.role !== 'assistant' || !message.metadata) return false
+    return message.metadata.error === true || message.metadata.streamInterrupted === true
+  })
+  if (!failed) return false
+  db.run('DELETE FROM messages WHERE sessionId = ? AND id = ?', [sessionId, failed.id])
+  saveDb()
+  return db.getRowsModified() > 0
+}
+
+export function rollbackSession(sessionId, messageId, scope = 'friday', scopeKey = null) {
+  if (!getSession(sessionId, scope, scopeKey)) return false
   db.run(
     'DELETE FROM messages WHERE sessionId = ? AND id >= ?',
     [sessionId, messageId]
   )
   updateSessionTimestamp(sessionId)
+  return true
 }
 
 /**

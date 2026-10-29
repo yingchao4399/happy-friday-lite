@@ -7,6 +7,7 @@ import { registerOfficeAiBridge } from './office-ai-bridge.js'
 import { getDataDir } from '../config.js'
 import { normalizeOfficeDocumentSelection } from './document-selection.js'
 import { registerOfficeFileCommands } from './file-commands.js'
+import { showOfficeDockOverlay, updateOfficeDockBounds, hideOfficeDockOverlay, destroyOfficeDockOverlay } from './dock-overlay.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const _require = createRequire(import.meta.url)
@@ -326,6 +327,7 @@ function layout() {
   if (entry && !entry.view.webContents.isDestroyed()) {
     entry.view.setBounds(state.htmlFullScreen ? fullContentBounds() : contentBounds())
   }
+  updateOfficeDockBounds(contentBounds())
 }
 
 /** 进入编辑器全屏放映：应用窗口切换为系统全屏（整屏放映，视图盖住 TabBar/侧栏）。
@@ -336,6 +338,7 @@ function enterHtmlFullScreen() {
   state.wasWindowFullScreen =
     state.mainWindow.isFullScreen() || (state.mainWindow.isSimpleFullScreen?.() ?? false)
   state.htmlFullScreen = true
+  hideOfficeDockOverlay()
   try {
     if (!state.wasWindowFullScreen) {
       if (process.platform === 'darwin' && !state.mainWindow.isFullScreen()) {
@@ -364,6 +367,7 @@ function leaveHtmlFullScreen() {
     }
   } catch { /* ignore */ }
   layout()
+  if (state.visibleId) showOfficeDockOverlay(state.mainWindow, state.visibleId, contentBounds())
 }
 
 function attachView(entry) {
@@ -404,6 +408,7 @@ function showView(viewId) {
     entry.view.setBounds(state.htmlFullScreen ? fullContentBounds() : contentBounds())
     entry.view.setVisible(true)
     state.visibleId = viewId
+    if (!state.htmlFullScreen) showOfficeDockOverlay(state.mainWindow, viewId, contentBounds())
   }
 }
 
@@ -415,6 +420,7 @@ function hideView(viewId, destroy = false) {
   state.views.delete(viewId)
   if (state.visibleId === viewId) {
     state.visibleId = null
+    hideOfficeDockOverlay()
     // 视图关闭时若正处于 HTML5 全屏放映，恢复窗口状态
     if (state.htmlFullScreen) leaveHtmlFullScreen()
   }
@@ -882,6 +888,7 @@ export function hideAllOfficeViews() {
     if (!entry.view.webContents.isDestroyed()) entry.view.setVisible(false)
   }
   state.visibleId = null
+  hideOfficeDockOverlay()
 }
 
 /** 路由回到 Office 工作区时恢复该 Tab 的编辑器视图 */
@@ -1126,6 +1133,7 @@ export async function queryOfficeDirty(viewId) {
 
 /** 应用退出前释放资源（停止 sidecar、关闭视图） */
 export function shutdownOfficeHost() {
+  destroyOfficeDockOverlay()
   state.latestDocumentSelection = null
   try { state.bundles?.sheets?.stopSheetsSidecar?.() } catch { /* ignore */ }
   for (const [viewId, entry] of [...state.views]) {

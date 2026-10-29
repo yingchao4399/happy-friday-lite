@@ -26,6 +26,7 @@ import path from 'path'
 import http from 'http'
 import { randomBytes, timingSafeEqual, createHash, randomUUID } from 'crypto'
 import { createLogger } from './logger.js'
+import { createDshCoreContext } from '../ai-core/dsh-adapter.js'
 import { getDataDir, loadConfig, saveConfig } from '../config.js'
 import { getAgentRootDir } from './backend.js'
 import { executeCapability, getRequiredScopes, listRegisteredTools } from './tools/registry.js'
@@ -440,6 +441,8 @@ const VIRTUAL_TOOLS = [
   { name: 'submit_core_task', description: '提交 Friday AI Core 任务；返回与桌面端相同的 taskId、计划和审批状态。', inputSchema: { type: 'object', properties: { intent: { type: 'string' }, requestedCapabilities: { type: 'array', items: { type: 'string' } }, input: { type: 'object' }, context: { type: 'object' }, idempotencyKey: { type: 'string' } }, required: ['intent', 'requestedCapabilities'] } },
   { name: 'get_core_task_status', description: '查询 AI Core 任务状态、结果、事件和验证信息。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
   { name: 'approve_core_task', description: '批准一个等待用户授权的 AI Core 写任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'pause_core_task', description: '在当前能力步骤结束后暂停 AI Core 任务，保留已完成结果。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
+  { name: 'resume_core_task', description: '继续已暂停的 AI Core 任务，不重复已完成步骤。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
   { name: 'cancel_core_task', description: '取消一个 AI Core 任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
   { name: 'undo_core_task', description: '撤销已完成且仍满足安全条件的 AI Core 任务。', inputSchema: { type: 'object', properties: { taskId: { type: 'string' } }, required: ['taskId'] } },
   { name: 'submit_task', description: '提交异步任务，可提供自然语言 instruction 或已规划的 steps。', inputSchema: { type: 'object', properties: { instruction: { type: 'string' }, steps: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, args: { type: 'object' } }, required: ['name'] } } } } },
@@ -485,22 +488,27 @@ function buildLocalServer(client) {
         result = availableToolSpecs(client).map(item => ({ name: item.name, description: item.description, inputSchema: item.inputSchema, scopes: getRequiredScopes(item.def) }))
       } else if (name === 'submit_core_task') {
         const { getAiCoreRuntime } = await import('../ai-core/ipc.js')
-        const actor = { id: ctx.actor, type: 'mcp', clientId: client.id }
+        const dshContext = client.id === 'legacy' || args.context?.source === 'dsh'
+          ? createDshCoreContext({ clientId: client.id, requestId: ctx.requestId, context: args.context, scopes: client.scopes })
+          : null
+        const actor = dshContext?.actor || { id: ctx.actor, type: 'mcp', clientId: client.id }
         const request = {
           intent: args.intent,
           requestedCapabilities: args.requestedCapabilities,
           input: args.input || {},
           idempotencyKey: args.idempotencyKey,
           mode: 'execute',
-          context: { ...(args.context || {}), actor, scopes: client.scopes, requestId: ctx.requestId, spaceId: args.context?.spaceId || `mcp:${client.id}` }
+          context: dshContext || { ...(args.context || {}), actor, scopes: client.scopes, requestId: ctx.requestId, spaceId: args.context?.spaceId || `mcp:${client.id}` }
         }
         result = await (await getAiCoreRuntime()).submit(request)
-      } else if (name === 'get_core_task_status' || name === 'approve_core_task' || name === 'cancel_core_task' || name === 'undo_core_task') {
+      } else if (name === 'get_core_task_status' || name === 'approve_core_task' || name === 'pause_core_task' || name === 'resume_core_task' || name === 'cancel_core_task' || name === 'undo_core_task') {
         const { getAiCoreRuntime } = await import('../ai-core/ipc.js')
         const runtime = await getAiCoreRuntime()
         const taskId = args.taskId
         if (name === 'get_core_task_status') result = runtime.get(taskId, ctx.actor)
         else if (name === 'approve_core_task') result = runtime.approve(taskId, ctx.actor)
+        else if (name === 'pause_core_task') result = runtime.pause(taskId, ctx.actor)
+        else if (name === 'resume_core_task') result = runtime.resume(taskId, ctx.actor)
         else if (name === 'cancel_core_task') result = runtime.cancel(taskId, ctx.actor)
         else result = await runtime.undo(taskId, ctx.actor)
       } else if (name === 'submit_task') {

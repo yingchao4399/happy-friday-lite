@@ -362,9 +362,18 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               {{ t('note.toolbar.exportMarkdown') }}
             </div>
-            <div class="menu-item" :class="{ disabled: isExportingWord || !props.noteId }" @click="exportWordViaAiCore">
+            <div class="menu-item" :class="{ disabled: isExportingWord || !!activeWordTaskId || !props.noteId }" @click="exportWordViaAiCore">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m8 15 2 3 2-3 2 3 2-3"/></svg>
               {{ t(isExportingWord ? 'note.toolbar.exportingWord' : 'note.toolbar.exportWord') }}
+            </div>
+            <div v-if="activeWordTaskId && ['running', 'verifying'].includes(activeWordTaskStatus)" class="menu-item" :class="{ disabled: isControllingWordTask || activeWordPauseRequested }" @click="pauseWordViaAiCore">
+              {{ t(activeWordPauseRequested ? 'note.toolbar.wordPauseRequested' : 'note.toolbar.pauseWordTask') }}
+            </div>
+            <div v-if="activeWordTaskId && activeWordTaskStatus === 'paused'" class="menu-item" :class="{ disabled: isControllingWordTask }" @click="resumeWordViaAiCore">
+              {{ t(isControllingWordTask ? 'note.toolbar.resumingWordTask' : 'note.toolbar.resumeWordTask') }}
+            </div>
+            <div v-if="activeWordTaskId && ['running', 'verifying', 'paused'].includes(activeWordTaskStatus)" class="menu-item" :class="{ disabled: isControllingWordTask }" @click="requestCancelWordViaAiCore">
+              {{ t('note.toolbar.cancelWordTask') }}
             </div>
             <div v-if="lastWordTaskId" class="menu-item" :class="{ disabled: isUndoingWord }" @click="undoWordViaAiCore">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/></svg>
@@ -822,6 +831,29 @@
         {{ shareToastMessage }}
       </div>
     </Transition>
+
+    <div v-if="wordOperationError" class="note-operation-error" role="alert">
+      {{ wordOperationError }}
+      <button type="button" :aria-label="t('note.toolbar.dismissWordError')" @click="wordOperationError = ''">×</button>
+    </div>
+    <FridayConfirmDialog
+      :visible="showWordApprovalDialog"
+      :title="t('note.toolbar.exportWordApprovalTitle')"
+      :message="wordApprovalMessage"
+      :cancel-label="t('note.toolbar.cancel')"
+      :confirm-label="t('note.toolbar.allowWordWrite')"
+      @cancel="resolveWordApproval(false)"
+      @confirm="resolveWordApproval(true)"
+    />
+    <FridayConfirmDialog
+      :visible="showWordCancelDialog"
+      :title="t('note.toolbar.cancelWordTaskTitle')"
+      :message="t('note.toolbar.cancelWordTaskMessage')"
+      :cancel-label="t('note.toolbar.cancel')"
+      :confirm-label="t('note.toolbar.confirmCancelWordTask')"
+      @cancel="showWordCancelDialog = false"
+      @confirm="cancelWordViaAiCore"
+    />
   </div>
 </template>
 
@@ -849,6 +881,7 @@ import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessa
 import AgentMessageBlock from '@/views/friday/components/AgentMessageBlock.vue';
 import ChatInputBox from '@/components/chat/ChatInputBox.vue';
 import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
+import FridayConfirmDialog from '@/components/ui/FridayConfirmDialog.vue';
 import { electronService } from '@/services/electron';
 import { getChatSession, setChatSession } from '@/utils/chatSessionCache';
 import StarterKit from '@tiptap/starter-kit';
@@ -919,6 +952,7 @@ const { t } = useI18n();
 const appStore = useAppStore();
 const router = useRouter();
 const mediaError = ref('');
+const wordOperationError = ref('');
 
 const lowlight = createLowlight();
 lowlight.register('javascript', javascript);
@@ -1312,6 +1346,15 @@ const showMoreMenu = ref(false);
 const isExportingWord = ref(false);
 const isUndoingWord = ref(false);
 const lastWordTaskId = ref('');
+const activeWordTaskId = ref('');
+const activeWordTaskStatus = ref('');
+const activeWordTargetPath = ref('');
+const activeWordPauseRequested = ref(false);
+const isControllingWordTask = ref(false);
+const showWordApprovalDialog = ref(false);
+const wordApprovalMessage = ref('');
+const showWordCancelDialog = ref(false);
+let wordApprovalResolver = null;
 const showPresentation = ref(false);
 const presentationSource = ref('');
 const presentationFormat = ref('html');
@@ -2487,10 +2530,41 @@ const exportMarkdown = async () => {
   }
 };
 
+const resolveWordApproval = (approved) => {
+  showWordApprovalDialog.value = false;
+  const resolve = wordApprovalResolver;
+  wordApprovalResolver = null;
+  resolve?.(approved);
+};
+
+const requestWordApproval = (title, out) => {
+  wordApprovalMessage.value = t('note.toolbar.exportWordApproval', { title, out });
+  showWordApprovalDialog.value = true;
+  return new Promise(resolve => { wordApprovalResolver = resolve; });
+};
+
+const waitForWordTask = async (taskId, fallback) => {
+  let current = fallback;
+  for (let i = 0; i < 480; i++) {
+    activeWordTaskStatus.value = current.status;
+    activeWordPauseRequested.value = current.pauseRequested === true;
+    if (current.status === 'paused') return current;
+    if (['completed', 'failed', 'partially_completed', 'cancelled'].includes(current.status)) {
+      activeWordTaskId.value = '';
+      activeWordPauseRequested.value = false;
+      return current;
+    }
+    await new Promise(resolve => setTimeout(resolve, 250));
+    current = await electronService.aiCoreGetTask(taskId) || current;
+  }
+  throw new Error(t('note.toolbar.wordTaskTimeout'));
+};
+
 const exportWordViaAiCore = async () => {
   showMoreMenu.value = false;
-  if (!props.noteId || isExportingWord.value) return;
+  if (!props.noteId || isExportingWord.value || activeWordTaskId.value) return;
   isExportingWord.value = true;
+  wordOperationError.value = '';
   try {
     await noteStore.flushPendingSave();
     const note = noteStore.notes.find(item => item.id === props.noteId) || await noteStore.fetchNote(props.noteId);
@@ -2502,6 +2576,7 @@ const exportWordViaAiCore = async () => {
     });
     const out = typeof selected === 'string' ? selected : selected?.filePath;
     if (!out) return;
+    activeWordTargetPath.value = out;
     const requestId = `note-to-word-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const task = await electronService.aiCoreExecute({
       intent: 'note_to_word',
@@ -2520,27 +2595,103 @@ const exportWordViaAiCore = async () => {
       }
     });
     if (!task?.id) throw new Error('AI Core 未返回任务');
+    activeWordTaskId.value = task.id;
+    activeWordTaskStatus.value = task.status;
     if (task.status === 'awaiting_approval') {
-      const approved = window.confirm(t('note.toolbar.exportWordApproval', { title, out }));
+      const approved = await requestWordApproval(title, out);
       if (!approved) {
         await electronService.aiCoreCancelTask(task.id);
+        activeWordTaskStatus.value = 'cancelled';
+        activeWordTaskId.value = '';
+        activeWordTargetPath.value = '';
         return;
       }
       await electronService.aiCoreApproveTask(task.id);
     }
-    let current = task;
-    for (let i = 0; i < 480 && !['completed', 'failed', 'partially_completed', 'cancelled'].includes(current.status); i++) {
-      await new Promise(resolve => setTimeout(resolve, 250));
-      current = await electronService.aiCoreGetTask(task.id) || current;
-    }
+    const current = await waitForWordTask(task.id, task);
+    if (current.status === 'paused') return;
     if (current.status !== 'completed') throw new Error(current.error?.message || `任务未完成：${current.status}`);
     lastWordTaskId.value = current.id;
     await electronService.invoke('office-open-file', { filePath: out });
+    activeWordTargetPath.value = '';
   } catch (error) {
     console.error('AI Core 笔记转 Word 失败:', error);
-    window.alert(t('note.toolbar.exportWordFailed', { error: error?.message || error }));
+    wordOperationError.value = t('note.toolbar.exportWordFailed', { error: error?.message || error });
+    if (activeWordTaskStatus.value !== 'paused') {
+      activeWordTaskId.value = '';
+      activeWordTargetPath.value = '';
+      activeWordPauseRequested.value = false;
+    }
   } finally {
     isExportingWord.value = false;
+  }
+};
+
+const pauseWordViaAiCore = async () => {
+  showMoreMenu.value = false;
+  if (!activeWordTaskId.value || isControllingWordTask.value) return;
+  isControllingWordTask.value = true;
+  try {
+    const task = await electronService.aiCorePauseTask(activeWordTaskId.value);
+    activeWordTaskStatus.value = task.status;
+    activeWordPauseRequested.value = task.pauseRequested === true;
+  } catch (error) {
+    wordOperationError.value = t('note.toolbar.wordTaskControlFailed', { error: error?.message || error });
+  } finally {
+    isControllingWordTask.value = false;
+  }
+};
+
+const resumeWordViaAiCore = async () => {
+  showMoreMenu.value = false;
+  if (!activeWordTaskId.value || isControllingWordTask.value) return;
+  isControllingWordTask.value = true;
+  isExportingWord.value = true;
+  try {
+    const task = await electronService.aiCoreResumeTask(activeWordTaskId.value);
+    activeWordTaskStatus.value = task.status;
+    const current = await waitForWordTask(task.id, task);
+    if (current.status === 'paused') return;
+    if (current.status !== 'completed') throw new Error(current.error?.message || `任务未完成：${current.status}`);
+    lastWordTaskId.value = current.id;
+    if (activeWordTargetPath.value) await electronService.invoke('office-open-file', { filePath: activeWordTargetPath.value });
+    activeWordTargetPath.value = '';
+  } catch (error) {
+    wordOperationError.value = t('note.toolbar.wordTaskControlFailed', { error: error?.message || error });
+    if (activeWordTaskStatus.value !== 'paused') {
+      activeWordTaskId.value = '';
+      activeWordTargetPath.value = '';
+      activeWordPauseRequested.value = false;
+    }
+  } finally {
+    isControllingWordTask.value = false;
+    isExportingWord.value = false;
+  }
+};
+
+const requestCancelWordViaAiCore = () => {
+  showMoreMenu.value = false;
+  if (!activeWordTaskId.value || isControllingWordTask.value) return;
+  showWordCancelDialog.value = true;
+};
+
+const cancelWordViaAiCore = async () => {
+  showWordCancelDialog.value = false;
+  showMoreMenu.value = false;
+  if (!activeWordTaskId.value || isControllingWordTask.value) return;
+  isControllingWordTask.value = true;
+  try {
+    const task = await electronService.aiCoreCancelTask(activeWordTaskId.value);
+    activeWordTaskStatus.value = task.status;
+    activeWordPauseRequested.value = false;
+    if (task.status === 'cancelled') {
+      activeWordTaskId.value = '';
+      activeWordTargetPath.value = '';
+    }
+  } catch (error) {
+    wordOperationError.value = t('note.toolbar.wordTaskControlFailed', { error: error?.message || error });
+  } finally {
+    isControllingWordTask.value = false;
   }
 };
 
@@ -2552,7 +2703,7 @@ const undoWordViaAiCore = async () => {
     await electronService.aiCoreUndoTask(lastWordTaskId.value);
     lastWordTaskId.value = '';
   } catch (error) {
-    window.alert(t('note.toolbar.undoWordFailed', { error: error?.message || error }));
+    wordOperationError.value = t('note.toolbar.undoWordFailed', { error: error?.message || error });
   } finally {
     isUndoingWord.value = false;
   }

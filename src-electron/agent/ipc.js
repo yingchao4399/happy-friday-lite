@@ -96,7 +96,7 @@ export function registerAgentCommands(mainWindow, ipcMain = defaultIpcMain) {
 
   // ========== agent-invoke: 发起 Agent 调用 ==========
   ipcMain.handle('agent-invoke', async (_event, args) => {
-    const { requestId, sessionId, model, message, enableThinking, attachments, folderPath, runtimeInstructions = '', scope = 'friday-agent', scopeKey = null } = args
+    const { requestId, sessionId, model, message, enableThinking, attachments, folderPath, runtimeInstructions = '', retry = false, scope = 'friday-agent', scopeKey = null } = args
     log.info(`====== agent-invoke 开始: requestId=${requestId} ======`)
     log.info(`model=${model?.modelName}, enableThinking=${!!enableThinking}, sessionId=${sessionId || '(new)'}, folderPath=${folderPath || '(none)'}`)
 
@@ -123,9 +123,13 @@ export function registerAgentCommands(mainWindow, ipcMain = defaultIpcMain) {
       createThread(message.slice(0, 20) || '新 Agent 对话')
       touchThread(currentSessionId)
 
-      // 2. 保存用户消息到 messages 表（简洁引用格式，前端展示一致）
-      const userMsg = db.saveMessage(currentSessionId, 'user', message)
-      userMessageId = userMsg.id
+      // 2. 保存用户消息到 messages 表。重试复用原用户消息，避免同一轮
+      // 网络恢复后在 Agent 历史中出现两条相同用户消息。
+      const existingUser = retry && currentSessionId
+        ? db.findLatestUserMessage(currentSessionId, message, scope, scopeKey)
+        : null
+      if (existingUser) userMessageId = existingUser.id
+      else userMessageId = db.saveMessage(currentSessionId, 'user', message).id
       db.updateSessionTimestamp(currentSessionId)
 
       // 新会话立即通知前端绑定真实 sessionId，避免侧边栏切回时找不到正在输出的流

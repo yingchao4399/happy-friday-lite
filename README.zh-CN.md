@@ -1,5 +1,13 @@
 # Happy Friday Lite
 
+## 3.0.6.02-preview.20 AI Core 任务控制与全局助手
+
+- 技术版本：`3.0.6-preview.20`；发布标签：`3.0.6.02-preview.20`。
+- 增加 AI Core 任务的检查点暂停、继续和取消控制，笔记写入 Word 流程复用原有 Friday 确认弹窗。
+- 增加根级 Friday 全局助手 Dock，跨路由查看 AI Core 任务，并复用同一个任务运行时处理审批、暂停、继续和取消。
+- 下方保留 Preview.19 安装包和校验链接作为历史发布证据。已通过 `npm run electron:build:win` 生成本地未签名 Preview.20 x64 安装包；校验和与构建元数据位于 `release/SHA256SUMS-preview.20.txt` 和 `release/preview.20-build-info.txt`，尚未上传或签名。
+- 设计文档：[迭代方案](docs/ai-core-next-iteration-plan.md)、[Preview.20 PRD](docs/Friday-AI-Core-Global-Assistant-Preview20-PRD.md) 与 [技术设计](docs/Friday-AI-Core-Global-Assistant-Preview20-Technical-Design.md)。
+
 ## 3.0.6.02-preview.19 AI Core 运行时与对话连续性
 
 - 补齐 AI Core 任务运行时：真实就绪检查、能力计划、审批、取消、回读验证、幂等和安全撤销。
