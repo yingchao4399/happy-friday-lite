@@ -74,6 +74,11 @@
   "saving": "正在保存…",
   "operationFailed": "操作失败，内容仍保留在当前页面，请重试",
   "textFiles": "文本和代码文件",
+  "insertImage": "插入图片",
+  "images": "图片预览",
+  "image": "图片",
+  "imageTooLarge": "图片不能超过 12 MB",
+  "imageFailed": "图片读取失败，请重试",
   "original": {
     "1t_2r_36_33_37_37_w_38_2w_2t_w_34_2p_2v_2t": "页面横向位置",
     "1t_2x_31": "朝向",

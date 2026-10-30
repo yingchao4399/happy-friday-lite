@@ -9,6 +9,14 @@ export function defaultConfig() {
     runtimeLogsEnabled: true,
     systemPrompt: DEFAULT_SYSTEM_PROMPT,
     noteFimCompletion: true,
+    // Global assistant dock preferences. Agent routing is a UI preference
+    // until the chat runtime exposes an agent-aware execution contract.
+    globalAgentDock: {
+      visible: true,
+      appearance: 'default',
+      mode: 'auto',
+      agentId: 'friday'
+    },
     // 侧边栏可选功能模块：默认全部开启，兼容旧配置时缺失字段也视为开启
     sidebarModules: {
       drawing: true,

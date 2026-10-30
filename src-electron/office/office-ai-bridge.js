@@ -1,9 +1,8 @@
-import http from 'http'
-import https from 'https'
 import fs from 'fs'
 import path from 'path'
-import { app, ipcMain, webContents } from 'electron'
+import { app, ipcMain, net, webContents } from 'electron'
 import { buildChatCompletionsUrl } from '../openaiUrl.js'
+import { NETWORK_ERROR_CLASSIFICATIONS, annotateNetworkError, classifyNetworkError, fetchWithFiniteRetry, safeNetworkErrorSummary } from '../ai-core/network-policy.js'
 import { executeCapability } from '../agent/tools/registry.js'
 import { createAiChatCapabilityInvoker } from './ai-inference-adapter.js'
 
@@ -27,11 +26,18 @@ const state = {
 
 /** 主窗口侧推送当前模型配置（OfficeWorkspace 挂载/模型切换时调用） */
 export function setOfficeAiModel(model) {
-  if (!model || !model.apiKey || !model.modelName || !model.baseUrl) {
+  const baseUrl = model?.baseUrl || model?.modelUrl
+  if (!model || !String(model.apiKey || '').trim() || !String(model.modelName || '').trim() || !String(baseUrl || '').trim()) {
     state.model = null
+    console.warn('[Office AI] model configuration is incomplete', {
+      hasApiKey: Boolean(model?.apiKey),
+      hasModelName: Boolean(model?.modelName),
+      hasBaseUrl: Boolean(baseUrl),
+    })
     return
   }
-  state.model = model
+  state.model = { ...model, baseUrl: String(baseUrl).trim().replace(/\/+$/, '') }
+  console.info('[Office AI] model selected:', state.model.provider || 'custom', state.model.modelName, state.model.baseUrl)
 }
 
 /** 编辑器 renderer 读取的 AI 设置：锁定为 Friday 托管形态（provider: genspark + 已登录态） */
@@ -110,10 +116,9 @@ function toOpenAiTools(tools = []) {
 
 const NORMALIZE_STOP = { tool_calls: 'tool_calls', length: 'max_tokens', max_tokens: 'max_tokens', stop: 'stop' }
 
-function fridayStreamRequest(chatMessages, tools, { signal, onDelta, onReasoning }) {
+export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta, onReasoning, requestId }) {
   const model = state.model
-  const url = new URL(buildChatCompletionsUrl(model.baseUrl))
-  const client = url.protocol === 'https:' ? https : http
+  const url = buildChatCompletionsUrl(model.baseUrl)
   const body = {
     model: model.modelName,
     messages: chatMessages,
@@ -124,79 +129,118 @@ function fridayStreamRequest(chatMessages, tools, { signal, onDelta, onReasoning
     body.tools = tools
     body.tool_choice = 'auto'
   }
-  const bodyStr = JSON.stringify(body)
-  const options = {
-    hostname: url.hostname,
-    port: url.port || (url.protocol === 'https:' ? 443 : 80),
-    path: url.pathname + url.search,
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${model.apiKey}`,
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(bodyStr),
-    },
+  const controller = new AbortController()
+  let timeout = null
+  let timedOut = false
+  let phase = 'connect'
+  let reader = null
+  const resetTimeout = () => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      timedOut = true
+      controller.abort(new Error('Office AI request timed out'))
+    }, 45000)
   }
-  return new Promise((resolve, reject) => {
-    const req = client.request(options, (res) => {
-      if (res.statusCode !== 200) {
-        let errText = ''
-        res.on('data', (c) => { errText += c.toString() })
-        res.on('end', () => reject(new Error(`API ${res.statusCode}: ${errText.slice(0, 300)}`)))
-        return
-      }
-      let buffer = ''
-      let content = ''
-      let stopReason
-      const pendingCalls = new Map() // index -> { id, name, args }
-      const handleParsed = (parsed) => {
-        const choice = parsed.choices?.[0]
-        const delta = choice?.delta
-        if (delta?.reasoning_content && onReasoning) onReasoning(delta.reasoning_content)
-        if (delta?.content) {
-          content += delta.content
-          if (onDelta) onDelta(delta.content)
-        }
-        if (Array.isArray(delta?.tool_calls)) {
-          for (const tc of delta.tool_calls) {
-            const idx = Number.isInteger(tc.index) ? tc.index : 0
-            const cur = pendingCalls.get(idx) || { id: '', name: '', args: '' }
-            if (tc.id) cur.id = tc.id
-            if (tc.function?.name) cur.name = tc.function.name
-            if (tc.function?.arguments) cur.args += tc.function.arguments
-            pendingCalls.set(idx, cur)
-          }
-        }
-        if (choice?.finish_reason) stopReason = NORMALIZE_STOP[choice.finish_reason] || choice.finish_reason
-      }
-      res.on('data', (chunk) => {
-        buffer += chunk.toString()
-        let idx
-        while ((idx = buffer.indexOf('\n')) >= 0) {
-          const line = buffer.slice(0, idx).trim()
-          buffer = buffer.slice(idx + 1)
-          if (!line.startsWith('data:')) continue
-          const payload = line.slice(5).trim()
-          if (payload === '[DONE]') continue
-          try { handleParsed(JSON.parse(payload)) } catch { /* partial line */ }
-        }
-      })
-      res.on('end', () => {
-        const toolCalls = [...pendingCalls.values()].map((c) => {
-          let input
-          let inputError
-          try { input = c.args ? JSON.parse(c.args) : {} } catch (e) { input = {}; inputError = `invalid tool input JSON: ${e.message}` }
-          return { id: c.id || `call_${c.name}`, name: c.name, input, ...(inputError ? { inputError } : {}) }
-        })
-        resolve({ content, toolCalls, stopReason })
-      })
-      res.on('error', reject)
+  const abort = () => controller.abort(signal.reason)
+  if (signal?.aborted) abort()
+  else signal?.addEventListener('abort', abort, { once: true })
+  resetTimeout()
+  try {
+    const response = await fetchWithFiniteRetry(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${model.apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    }, {
+      provider: model.provider,
+      requestId,
+      maxAttempts: 2,
+      fetchImpl: (input, options) => net.fetch(input, options),
     })
-    req.on('error', reject)
-    if (signal) {
-      signal.addEventListener('abort', () => req.destroy(new Error('aborted')), { once: true })
+    if (!response.ok) {
+      try { await response.body?.cancel?.() } catch { /* 释放服务端响应 */ }
+      throw annotateNetworkError(new Error('模型请求失败'), {
+        provider: model.provider, requestId, phase: 'response', status: response.status,
+      })
     }
-    req.end(bodyStr)
-  })
+
+    phase = 'stream'
+    reader = response.body?.getReader()
+    if (!reader) throw new Error('AI response body is empty')
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let content = ''
+    let stopReason
+    let sawDone = false
+    const pendingCalls = new Map()
+    const consumeLine = line => {
+      const normalized = line.trim()
+      if (!normalized.startsWith('data:')) return
+      const payload = normalized.slice(5).trim()
+      if (payload === '[DONE]') { sawDone = true; return }
+      let parsed
+      try { parsed = JSON.parse(payload) } catch { return }
+      if (parsed.error) throw annotateNetworkError(new Error('AI provider returned a stream error'), {
+        provider: model.provider, requestId, phase: 'stream',
+        classification: NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST,
+      })
+      const choice = parsed.choices?.[0]
+      const delta = choice?.delta
+      if (delta?.reasoning_content) onReasoning?.(delta.reasoning_content)
+      if (delta?.content) { content += delta.content; onDelta?.(delta.content) }
+      if (Array.isArray(delta?.tool_calls)) {
+        for (const tc of delta.tool_calls) {
+          const index = Number.isInteger(tc.index) ? tc.index : 0
+          const current = pendingCalls.get(index) || { id: '', name: '', args: '' }
+          if (tc.id) current.id = tc.id
+          if (tc.function?.name) current.name = tc.function.name
+          if (tc.function?.arguments) current.args += tc.function.arguments
+          pendingCalls.set(index, current)
+        }
+      }
+      if (choice?.finish_reason) stopReason = NORMALIZE_STOP[choice.finish_reason] || choice.finish_reason
+    }
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      resetTimeout()
+      buffer += decoder.decode(value, { stream: true })
+      let index
+      while ((index = buffer.indexOf('\n')) >= 0) {
+        consumeLine(buffer.slice(0, index))
+        buffer = buffer.slice(index + 1)
+      }
+      if (buffer.length > 8 * 1024 * 1024) throw new Error('AI stream line exceeds limit')
+    }
+    buffer += decoder.decode()
+    if (buffer.trim()) consumeLine(buffer)
+    if (!sawDone && !stopReason) {
+      throw annotateNetworkError(new Error('AI stream ended before completion'), {
+        provider: model.provider, requestId, phase: 'stream',
+        classification: NETWORK_ERROR_CLASSIFICATIONS.STREAM_INTERRUPTED,
+      })
+    }
+    const toolCalls = [...pendingCalls.values()].map(call => {
+      let input
+      let inputError
+      try { input = call.args ? JSON.parse(call.args) : {} } catch (error) { input = {}; inputError = `invalid tool input JSON: ${error.message}` }
+      return { id: call.id || `call_${call.name}`, name: call.name, input, ...(inputError ? { inputError } : {}) }
+    })
+    return { content, toolCalls, stopReason }
+  } catch (error) {
+    if (signal?.aborted) throw error
+    if (timedOut) throw annotateNetworkError(new Error('模型请求超时'), {
+      provider: model.provider, requestId, phase,
+      classification: NETWORK_ERROR_CLASSIFICATIONS.TIMEOUT,
+    })
+    if (error?.diagnostic) throw error
+    throw annotateNetworkError(error, { provider: model.provider, requestId, phase })
+  } finally {
+    clearTimeout(timeout)
+    signal?.removeEventListener('abort', abort)
+    reader?.releaseLock()
+  }
 }
 
 const invokeAiChat = createAiChatCapabilityInvoker(executeCapability, fridayStreamRequest)
@@ -213,7 +257,11 @@ async function runFridayStream(request, send) {
       requestId,
       type: 'error',
       error: 'Friday 模型未配置，请在本项目设置中添加模型',
-      errorCode: 'network',
+      // Configuration errors must not be translated into the renderer's
+      // generic connectivity message.  That message is reserved for an
+      // actual transport failure and otherwise hides the selected model
+      // problem (especially when Office opens before settings are synced).
+      errorCode: 'provider',
     })
     return
   }
@@ -248,8 +296,12 @@ async function runFridayStream(request, send) {
     if (controller.signal.aborted) {
       sendSafe({ requestId, type: 'done' })
     } else {
-      console.warn('[Office AI] stream error:', err.message, `(${Date.now() - t0}ms)`)
-      sendSafe({ requestId, type: 'error', error: err.message, errorCode: 'network' })
+      const classification = err?.classification || classifyNetworkError(err)
+      console.warn('[Office AI] stream error:', classification, `(${Date.now() - t0}ms)`)
+      const errorCode = classification === NETWORK_ERROR_CLASSIFICATIONS.TIMEOUT ? 'timeout'
+        : [NETWORK_ERROR_CLASSIFICATIONS.DNS_CONNECTION, NETWORK_ERROR_CLASSIFICATIONS.PROXY, NETWORK_ERROR_CLASSIFICATIONS.TLS].includes(classification) ? 'network'
+          : [NETWORK_ERROR_CLASSIFICATIONS.RATE_LIMIT, NETWORK_ERROR_CLASSIFICATIONS.SERVER].includes(classification) ? 'overloaded' : undefined
+      sendSafe({ requestId, type: 'error', error: safeNetworkErrorSummary(err), errorCode })
     }
   } finally {
     clearInterval(ping)

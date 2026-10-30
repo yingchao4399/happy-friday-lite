@@ -1,5 +1,15 @@
 # Friday 下一轮迭代交付清单
 
+## Preview.21 已完成并准备发布（2026-10-30）
+
+Preview.21 已完成本轮 AI Core 与全局助手体验改造，并完成 Windows x64 安装包验收：
+
+- 六类 AI 对话窗口均具备独立会话范围、历史列表、选择恢复、续聊和新建入口；Office Docs/Sheets/Slides/PDF 进一步按文件隔离多会话。
+- Office DeepSeek 网络错误分类、SSE 断流/取消/有限重试、Dock 输入/拖拽/历史、Typewriter 图片与流式性能、Friday 全局助手设置和 Obsidian 宿主兼容性已完成。
+- 回归：Node 288/288、打包侧 20/20、Office ProjectStore 65/65、UI 9/9、Obsidian 兼容 10/10；安装包真实工作区探针 13/13。
+- 安装包：`release/Happy-Friday-Lite-3.0.6.02-preview.21-win-x64-setup.exe`，大小 268,755,226 bytes，SHA256 `4A3DF4C29C3763FC233A99832473E40924B1E359B2087CECD1EA785AA5CE27B4`。
+- GitHub Release：[3.0.6.02-preview.21](https://github.com/yingchao4399/happy-friday-lite/releases/tag/3.0.6.02-preview.21)；安装器未配置代码签名。
+
 ## Preview.20 当前复核（2026-10-29）
 
 本次源码复核已完成：全量 Node 回归 **298/298**，Vite 生产构建通过；Docs、Sheets、Slides、PDF 的 Office host 生命周期探针均通过，Office Dock 覆盖层探针验证折叠/展开边界、层级和隐藏。新增覆盖层在开发态无 Vite 服务时会回退到本地 `dist`，安装包已显式包含 `preload-office-dock.cjs`。

@@ -13,6 +13,10 @@ let workspaceBounds = null
 let currentViewId = null
 let expanded = false
 let panelHeight = 0
+// Position is relative to the Office content workspace. Keeping it in the
+// main process lets a WebContentsView move outside its original bottom-right
+// 48px rectangle while still leaving transparent areas click-through.
+let position = null
 let loaded = false
 
 function routeHash(viewId) {
@@ -35,7 +39,7 @@ function hasFridayShell(window) {
 
 function applyBounds() {
   if (!dockView || !mainWindow || mainWindow.isDestroyed()) return
-  const bounds = officeDockBounds(workspaceBounds, { expanded, panelHeight })
+  const bounds = officeDockBounds(workspaceBounds, { expanded, panelHeight, position })
   if (!bounds) {
     dockView.setVisible(false)
     return
@@ -106,6 +110,24 @@ export function setOfficeDockExpanded(nextExpanded, nextPanelHeight = 0) {
   panelHeight = expanded && Number.isFinite(nextPanelHeight) ? nextPanelHeight : 0
   applyBounds()
   return { expanded }
+}
+
+export function moveOfficeDock(dx = 0, dy = 0) {
+  const x = Number(dx)
+  const y = Number(dy)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return { success: false }
+  position = { x: (position?.x || 0) + x, y: (position?.y || 0) + y }
+  applyBounds()
+  return { success: true, position: { ...position } }
+}
+
+export function setOfficeDockPosition(next = {}) {
+  const x = Number(next.x)
+  const y = Number(next.y)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return { success: false }
+  position = { x, y }
+  applyBounds()
+  return { success: true, position: { ...position } }
 }
 
 export function hideOfficeDockOverlay() {

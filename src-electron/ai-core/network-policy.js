@@ -135,12 +135,12 @@ export function annotateNetworkError(error, options = {}) {
  * Retry only the request establishment/response-header phase. A caller must not
  * use this helper after a streamed body has been exposed or a side effect ran.
  */
-export async function fetchWithFiniteRetry(url, options = {}, { provider = '', requestId = '', maxAttempts = 2, hasSideEffect = false, sleep = delay } = {}) {
+export async function fetchWithFiniteRetry(url, options = {}, { provider = '', requestId = '', maxAttempts = 2, hasSideEffect = false, sleep = delay, fetchImpl = fetch } = {}) {
   let lastError
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const startedAt = Date.now()
     try {
-      const response = await fetch(url, options)
+      const response = await fetchImpl(url, options)
       if (response.ok || !shouldRetryNetworkError({ classification: classifyNetworkError(null, { status: response.status }), attempt, maxAttempts, hasSideEffect })) return response
       const classification = classifyNetworkError(null, { status: response.status })
       const retryAfterMs = parseRetryAfter(response.headers.get('retry-after'))
@@ -153,7 +153,7 @@ export async function fetchWithFiniteRetry(url, options = {}, { provider = '', r
       // in the response branch above. Preserve their status classification.
       if (error?.diagnostic) throw error
       const classification = classifyNetworkError(error, { phase: 'connect' })
-      lastError = annotateNetworkError(error, { provider, requestId, phase: 'connect', classification, elapsedMs: Date.now() })
+      lastError = annotateNetworkError(error, { provider, requestId, phase: 'connect', classification, elapsedMs: Date.now() - startedAt })
       if (!shouldRetryNetworkError({ classification, attempt, maxAttempts, hasSideEffect })) throw lastError
       await sleep(backoff(attempt))
     }

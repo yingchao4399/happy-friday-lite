@@ -17,7 +17,11 @@ test('Global Agent Dock exposes route context without fabricating agents or task
   assert.match(source, /office-dock-set-expanded/)
   assert.match(source, /office-dock-open-friday/)
   assert.doesNotMatch(source, /friday:\/\/route/)
-  assert.doesNotMatch(source, /aiCoreListAgents|agentId\s*:/)
+  assert.doesNotMatch(source, /aiCoreListAgents/)
+  // The selected agent is a persisted UI preference. The backend remains
+  // AI Core auto-routing and the dock must state that fallback explicitly.
+  assert.match(source, /assistantSettings[\s\S]*agentId/)
+  assert.match(source, /agentUnavailable/)
 })
 
 test('Global Agent Dock context copy is present in both locales', async () => {

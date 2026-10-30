@@ -1,0 +1,209 @@
+{
+  "ok": true,
+  "generatedAt": "2026-10-30T04:07:10.741Z",
+  "platform": "win32",
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-obsidian-compat-9TuaUq",
+  "plugins": [
+    {
+      "id": "calendar-beta",
+      "catalogId": "calendar",
+      "repo": "liamcain/obsidian-calendar-plugin",
+      "tag": "2.0.0-beta.2",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "show-calendar-view",
+        "toggle-week-numbers",
+        "reveal-active-note"
+      ],
+      "version": "2.0.0",
+      "mainSha256": "64d1c6c620803246724bc922c5c2e0a17c406ffc23f6bbcfbfb14c643958fbb7",
+      "compatibility": "verified"
+    },
+    {
+      "id": "dataview",
+      "repo": "blacksmithgu/obsidian-dataview",
+      "tag": "0.5.70",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "dataview-force-refresh-views",
+        "dataview-drop-cache",
+        "dataview-rebuild-current-view"
+      ],
+      "version": "0.5.68",
+      "mainSha256": "6bb1cf7010afad830e73575fca0e2bfbd3279c562e3d9d24f2d2f45161eb7d00",
+      "compatibility": "verified"
+    },
+    {
+      "id": "obsidian-outliner",
+      "repo": "vslinko/obsidian-outliner",
+      "tag": "4.10.2",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "system-info",
+        "move-list-item-up",
+        "move-list-item-down",
+        "indent-list",
+        "outdent-list",
+        "fold",
+        "unfold"
+      ],
+      "version": "4.10.2",
+      "mainSha256": "3d5bc634d3045ead4df9747d07ab51f16d9722f4601f9fee27e0c7fe9828fb33",
+      "compatibility": "verified"
+    },
+    {
+      "id": "obsidian-admonition",
+      "repo": "ebullient/obsidian-admonition",
+      "tag": "12.0.11",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "collapse-admonitions",
+        "open-admonitions",
+        "insert-admonition",
+        "insert-callout"
+      ],
+      "version": "12.0.11",
+      "mainSha256": "dba6486aa95e1832d03deda3d32790e4b1cef7bb780874bd6a8722e3bc3d0bff",
+      "compatibility": "verified"
+    },
+    {
+      "id": "obsidian-tasks-plugin",
+      "repo": "obsidian-tasks-group/obsidian-tasks",
+      "tag": "8.6.0",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "edit-task",
+        "toggle-done",
+        "quick-search",
+        "add-query-file-defaults-properties",
+        "set-status-symbol-to-space",
+        "set-status-symbol-to-x",
+        "set-status-symbol-to-/",
+        "set-status-symbol-to--"
+      ],
+      "version": "8.6.0",
+      "mainSha256": "500f8106d05ddb483bbfec135cac7948022bf6ba7386d1851b28f4d087866e8f",
+      "compatibility": "verified"
+    },
+    {
+      "id": "obsidian-linter",
+      "repo": "platers/obsidian-linter",
+      "tag": "1.34.2",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "lint-file",
+        "lint-file-unless-ignored",
+        "lint-all-files",
+        "lint-all-files-in-folder",
+        "paste-as-plain-text",
+        "ignore-folder",
+        "ignore-file",
+        "preview-lint-file"
+      ],
+      "version": "1.34.2",
+      "mainSha256": "a2f6b4476eed616aba64e953eaddaeb79f21d7a8db0759ebb070fbd02814218b",
+      "compatibility": "verified"
+    },
+    {
+      "id": "obsidian-sort-and-permute-lines",
+      "repo": "vinzent03/obsidian-sort-and-permute-lines",
+      "tag": "0.9.0",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "sort-alphabetically-with-checkboxes",
+        "sort-list-alphabetically-with-checkboxes",
+        "sort-alphabetically",
+        "sort-list-alphabetically",
+        "sort-checkboxes",
+        "sort-length",
+        "sort-headings",
+        "sort-headings-reverse",
+        "permute-reverse",
+        "permute-shuffle",
+        "permute-unique",
+        "sort-list-recursively",
+        "sort-list-recursively-with-checkboxes"
+      ],
+      "version": "0.9.0",
+      "mainSha256": "7f2c18028dc325b5d41c425bd91a3be350a00ca907f7988a8f6d50aa75f1ad8e",
+      "compatibility": "verified"
+    },
+    {
+      "id": "better-word-count",
+      "repo": "lukeleppan/better-word-count",
+      "tag": "0.10.1",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [],
+      "version": "0.10.1",
+      "mainSha256": "ce8ea4a7c4bb162206e5eb5b27d965883ce4b1beddae1de41fbeba0843c52dc9",
+      "compatibility": "verified"
+    },
+    {
+      "id": "quickadd",
+      "repo": "chhoumann/quickadd",
+      "tag": "2.33.1",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "runQuickAdd",
+        "resumePrompt",
+        "runTemplateFromFolder",
+        "applyTemplateToActiveFile",
+        "reloadQuickAdd",
+        "openQuickAddSettings",
+        "openAIAssistantSettings"
+      ],
+      "version": "2.33.1",
+      "mainSha256": "641ae5f5683c69472a8a8890d83ec67173b7a574b6ae4bca8751df7b9fe56c33",
+      "compatibility": "verified"
+    },
+    {
+      "id": "cmdr",
+      "repo": "jsmorabito/obsidian-commander",
+      "tag": "0.7.0",
+      "license": "MIT",
+      "installed": true,
+      "started": true,
+      "restarted": true,
+      "commands": [
+        "open-commander-settings"
+      ],
+      "version": "0.7.0",
+      "mainSha256": "9742736b4ff1534a22bee266a6ce9cd2d777d10e5eff2e5ecdcbdf355cc95c40",
+      "compatibility": "verified"
+    }
+  ],
+  "gate": {
+    "requiredCommunitySamples": 10,
+    "evaluated": 10,
+    "verified": 10,
+    "blocking": [],
+    "pass": true
+  }
+}

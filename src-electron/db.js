@@ -98,6 +98,13 @@ async function initDatabase() {
       scope TEXT NOT NULL DEFAULT 'friday',
       scopeKey TEXT,
       titleManuallySet INTEGER NOT NULL DEFAULT 0,
+      resourceUri TEXT,
+      agentId TEXT,
+      modelId TEXT,
+      pinnedAt TEXT,
+      archivedAt TEXT,
+      deletedAt TEXT,
+      lastMessageAt TEXT,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     );
@@ -114,7 +121,11 @@ async function initDatabase() {
   try { db.run("ALTER TABLE sessions ADD COLUMN scope TEXT NOT NULL DEFAULT 'friday'") } catch (_e) {}
   try { db.run('ALTER TABLE sessions ADD COLUMN scopeKey TEXT') } catch (_e) {}
   try { db.run('ALTER TABLE sessions ADD COLUMN titleManuallySet INTEGER NOT NULL DEFAULT 0') } catch (_e) {}
+  for (const column of ['resourceUri', 'agentId', 'modelId', 'pinnedAt', 'archivedAt', 'deletedAt', 'lastMessageAt']) {
+    try { db.run(`ALTER TABLE sessions ADD COLUMN ${column} TEXT`) } catch (_e) {}
+  }
   db.run('CREATE INDEX IF NOT EXISTS idx_sessions_scope ON sessions(scope, scopeKey, updatedAt)')
+  db.run('CREATE INDEX IF NOT EXISTS idx_sessions_history ON sessions(scope, scopeKey, deletedAt, archivedAt, pinnedAt, updatedAt)')
 
   // AI Core 任务与事件是控制层事实源；正文能力仍由各业务表保存。
   db.run(`
@@ -578,15 +589,18 @@ function normalizeAutomationTask(row) {
   return row
 }
 
-export function createSession(title, mode = 'chat', scope = 'friday', scopeKey = null) {
+export function createSession(title, mode = 'chat', scope = 'friday', scopeKey = null, metadata = {}) {
   const now = nowISO()
   const id = generateId()
+  const resourceUri = typeof metadata.resourceUri === 'string' ? metadata.resourceUri : null
+  const agentId = typeof metadata.agentId === 'string' ? metadata.agentId : null
+  const modelId = typeof metadata.modelId === 'string' ? metadata.modelId : null
   db.run(
-    'INSERT INTO sessions (id, title, mode, scope, scopeKey, titleManuallySet, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [id, title || '新对话', mode, scope || 'friday', scopeKey || null, 0, now, now]
+    'INSERT INTO sessions (id, title, mode, scope, scopeKey, titleManuallySet, resourceUri, agentId, modelId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [id, title || '新对话', mode, scope || 'friday', scopeKey || null, 0, resourceUri, agentId, modelId, now, now]
   )
   saveDb()
-  return { id, title: title || '新对话', mode, scope: scope || 'friday', scopeKey: scopeKey || null, titleManuallySet: 0, createdAt: now, updatedAt: now }
+  return { id, title: title || '新对话', mode, scope: scope || 'friday', scopeKey: scopeKey || null, titleManuallySet: 0, resourceUri, agentId, modelId, pinnedAt: null, archivedAt: null, deletedAt: null, lastMessageAt: null, createdAt: now, updatedAt: now }
 }
 
 function normalizeSessionScope(scope, scopeKey) {
@@ -597,7 +611,7 @@ function normalizeSessionScope(scope, scopeKey) {
   }
 }
 
-export function getSessions(scope = 'friday', scopeKey = null) {
+export function getSessions(scope = 'friday', scopeKey = null, view = 'active') {
   ({ scope, scopeKey } = normalizeSessionScope(scope, scopeKey))
   const clauses = []
   const params = []
@@ -605,8 +619,14 @@ export function getSessions(scope = 'friday', scopeKey = null) {
   params.push(scope)
   if (scopeKey == null) clauses.push('scopeKey IS NULL')
   else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
+  if (view === 'trash') clauses.push('deletedAt IS NOT NULL')
+  else if (view === 'archived') clauses.push('deletedAt IS NULL', 'archivedAt IS NOT NULL')
+  else clauses.push('deletedAt IS NULL', 'archivedAt IS NULL')
   const where = clauses.length ? ` WHERE ${clauses.join(' AND ')}` : ''
-  return queryAll(`SELECT * FROM sessions${where} ORDER BY updatedAt DESC`, params)
+  const order = view === 'trash' ? 's.deletedAt DESC' : view === 'archived' ? 's.archivedAt DESC' : 's.pinnedAt DESC, s.updatedAt DESC'
+  return queryAll(`SELECT s.*, (SELECT substr(m.content, 1, 180) FROM messages m WHERE m.sessionId = s.id ORDER BY m.id DESC LIMIT 1) AS preview,
+    (SELECT COUNT(*) FROM messages m WHERE m.sessionId = s.id) AS messageCount
+    FROM sessions s${where} ORDER BY ${order}`, params)
 }
 
 function parseJsonField(row, key, fallback) {
@@ -688,8 +708,9 @@ export function getSessionsWithStats(startDate, endDate, scope = 'friday', scope
   params.push(scope)
   if (scopeKey == null) clauses.push('scopeKey IS NULL')
   else { clauses.push('scopeKey = ?'); params.push(scopeKey) }
+  clauses.push('deletedAt IS NULL', 'archivedAt IS NULL')
   const where = clauses.length ? ' WHERE ' + clauses.join(' AND ') : ''
-  const sql = 'SELECT * FROM sessions' + where + ' ORDER BY updatedAt DESC'
+  const sql = 'SELECT * FROM sessions' + where + ' ORDER BY pinnedAt DESC, updatedAt DESC'
   const sessions = queryAll(sql, params).map(s => {
     const stats = queryOne(
       'SELECT COUNT(*) as messageCount FROM messages WHERE sessionId = ?',
@@ -715,6 +736,7 @@ export function getSessionsWithStats(startDate, endDate, scope = 'friday', scope
     olderParams.push(scope)
     if (scopeKey == null) olderClauses.push('scopeKey IS NULL')
     else { olderClauses.push('scopeKey = ?'); olderParams.push(scopeKey) }
+    olderClauses.push('deletedAt IS NULL', 'archivedAt IS NULL')
     const olderSql = 'SELECT COUNT(*) as count FROM sessions WHERE ' + olderClauses.join(' AND ')
     const older = queryOne(olderSql, olderParams)
     hasMore = !!(older && older.count > 0)
@@ -731,13 +753,43 @@ export function getSession(sessionId, scope = 'friday', scopeKey = null) {
 }
 
 export function deleteSession(sessionId, scope = 'friday', scopeKey = null) {
-  if (!getSession(sessionId, scope, scopeKey)) return { automationRunsDeleted: 0, deleted: false }
-  db.run('DELETE FROM automation_runs WHERE sessionId = ?', [sessionId])
-  const automationRunsDeleted = db.getRowsModified()
-  db.run('DELETE FROM messages WHERE sessionId = ?', [sessionId])
-  db.run('DELETE FROM sessions WHERE id = ?', [sessionId])
+  const session = getSession(sessionId, scope, scopeKey)
+  if (!session || session.deletedAt) return { automationRunsDeleted: 0, deleted: false, softDeleted: true }
+  db.run('UPDATE sessions SET deletedAt = ?, pinnedAt = NULL WHERE id = ?', [nowISO(), sessionId])
   saveDb()
-  return { automationRunsDeleted, deleted: true }
+  return { automationRunsDeleted: 0, deleted: true, softDeleted: true }
+}
+
+export function setSessionPinned(sessionId, pinned, scope = 'friday', scopeKey = null) {
+  const session = getSession(sessionId, scope, scopeKey)
+  if (!session || session.deletedAt || session.archivedAt) return false
+  db.run('UPDATE sessions SET pinnedAt = ? WHERE id = ?', [pinned ? nowISO() : null, sessionId])
+  saveDb()
+  return true
+}
+
+export function setSessionArchived(sessionId, archived, scope = 'friday', scopeKey = null) {
+  const session = getSession(sessionId, scope, scopeKey)
+  if (!session || session.deletedAt) return false
+  db.run('UPDATE sessions SET archivedAt = ?, pinnedAt = NULL WHERE id = ?', [archived ? nowISO() : null, sessionId])
+  saveDb()
+  return true
+}
+
+export function moveSessionToTrash(sessionId, scope = 'friday', scopeKey = null) {
+  const session = getSession(sessionId, scope, scopeKey)
+  if (!session || session.deletedAt) return false
+  db.run('UPDATE sessions SET deletedAt = ?, pinnedAt = NULL WHERE id = ?', [nowISO(), sessionId])
+  saveDb()
+  return true
+}
+
+export function restoreSessionFromTrash(sessionId, scope = 'friday', scopeKey = null) {
+  const session = getSession(sessionId, scope, scopeKey)
+  if (!session?.deletedAt) return false
+  db.run('UPDATE sessions SET deletedAt = NULL WHERE id = ?', [sessionId])
+  saveDb()
+  return true
 }
 
 export function updateSessionTitle(sessionId, title, scope = 'friday', scopeKey = null, manual = true) {
@@ -777,6 +829,7 @@ export function saveMessage(sessionId, role, content, metadata = null) {
     'INSERT INTO messages (sessionId, role, content, createdAt, metadata) VALUES (?, ?, ?, ?, ?)',
     [sessionId, role, content, now, metadataStr]
   )
+  db.run('UPDATE sessions SET lastMessageAt = ?, updatedAt = ? WHERE id = ?', [now, now, sessionId])
   const row = queryOne('SELECT last_insert_rowid() as id')
   const id = row ? row.id : 0
   saveDb()

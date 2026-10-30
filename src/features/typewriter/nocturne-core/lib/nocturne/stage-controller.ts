@@ -109,6 +109,9 @@ export class StageController {
   private lastHeavy = 0;
   private dirty = true;
   private cursorMoved = false;
+  // Continuous typing gets priority over decorative WebGL/paper redraws. The
+  // physics still advances and a full frame is rendered as soon as input rests.
+  private inputBusyUntil = 0;
   private drawnMachine = '';
   private drawnLight = '';
   private origin = {left: 0, top: 0};
@@ -148,10 +151,15 @@ export class StageController {
       on('selection', ({uid, cells}) => this.onSelection(uid, cells))
     );
     const wake = () => this.invalidate();
+    // The textarea emits this synchronously before Vue schedules its update.
+    // Give typing priority so a decorative frame cannot consume its budget.
+    const inputPriority = () => { this.inputBusyUntil = performance.now() + 150; };
     document.addEventListener('visibilitychange', wake);
+    document.addEventListener('friday:typewriter-input', inputPriority);
     this.reduceMotion.addEventListener('change', wake);
     this.disposers.push(() => {
       document.removeEventListener('visibilitychange', wake);
+      document.removeEventListener('friday:typewriter-input', inputPriority);
       this.reduceMotion.removeEventListener('change', wake);
     });
   }
@@ -175,6 +183,7 @@ export class StageController {
   // Events
 
   private onCursor(frame: CursorFrame) {
+    this.inputBusyUntil = performance.now() + 120;
     const first = this.cursor === null;
     const previousGrid = JSON.stringify(this.grid);
     this.cursor = frame;
@@ -225,6 +234,7 @@ export class StageController {
       return;
     }
     const stage = this.elements.stage;
+    this.inputBusyUntil = performance.now() + 120;
     stage.dataset.keys = String(Number(stage.dataset.keys ?? 0) + 1);
     const {typewriter} = this.settings;
     switch (kind) {
@@ -574,7 +584,8 @@ export class StageController {
     if (this.elements.stage.dataset.motion !== motion) {
       this.elements.stage.dataset.motion = motion;
     }
-    const ambient = this.ambient();
+    const inputBusy = now < this.inputBusyUntil;
+    const ambient = !inputBusy && this.ambient();
     const ambientDue = ambient && now - this.lastAmbient >= AMBIENT_INTERVAL;
     const effects = this.effects();
     const paper = activePaper(this.settings);
@@ -587,7 +598,7 @@ export class StageController {
     const lightLook = `${Math.round(state.headX * 4)},${state.lamp}`;
     const lightChanged = this.dirty || lightLook !== this.drawnLight;
 
-    if (effects && this.full()) {
+    if (!inputBusy && effects && this.full()) {
       const rig = this.rig(theme, layout);
       const grainDue = ambientDue && this.movingGrain();
       if (lightChanged || grainDue) {
@@ -609,12 +620,16 @@ export class StageController {
       this.glow.clear();
     }
 
-    if (layout.machine && this.full() && (this.dirty || look !== this.drawnMachine)) {
+    if (!inputBusy && layout.machine && this.full() && (this.dirty || look !== this.drawnMachine)) {
       if (heavyDue || this.lastHeavy === now) {
         // While its shaders compile the model is not drawn; it asks for a frame once they are ready.
         if (this.machine?.render(state)) {
           this.drawnMachine = look;
           this.elements.stage.dataset.machine = 'drawn';
+        } else {
+          // Shader compilation may finish asynchronously. Keep a cheap
+          // retry frame alive even when typing has paused the physics loop.
+          deferred = true;
         }
         this.lastHeavy = now;
       } else {
@@ -623,8 +638,11 @@ export class StageController {
     }
 
     const viewport = this.inkViewport(layout);
-    const inking = this.ink.render(now, this.inkStyle(paper, effects), viewport);
-    const selecting = this.selection.render(now, this.selectionLook(paper), viewport);
+    // Ink and selection canvases can be large for long notes. Defer their
+    // raster pass while a key is being handled; the next idle frame renders
+    // the queued strike/selection without competing with the input event.
+    const inking = inputBusy ? false : this.ink.render(now, this.inkStyle(paper, effects), viewport);
+    const selecting = inputBusy ? false : this.selection.render(now, this.selectionLook(paper), viewport);
     this.dirty = this.dirty && deferred;
     this.cursorMoved = false;
     if (stillMoving || ambient || inking || selecting || deferred) {

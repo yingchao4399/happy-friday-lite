@@ -23,7 +23,7 @@ import {
   isOfficeMainSender,
 } from './office-host.js'
 import { resolveEditorType } from './office-files.js'
-import { isOfficeDockSender, openFridayFromOfficeDock, setOfficeDockExpanded } from './dock-overlay.js'
+import { isOfficeDockSender, moveOfficeDock, openFridayFromOfficeDock, setOfficeDockExpanded, setOfficeDockPosition } from './dock-overlay.js'
 
 /**
  * Vue 主界面 ↔ Office Host 的 IPC 白名单。
@@ -42,6 +42,14 @@ export function registerOfficeIpc() {
   ipcMain.handle('office-dock-open-friday', event => {
     if (!isOfficeDockSender(event.sender)) throw new Error('OFFICE_DOCK_OWNER_REQUIRED')
     return openFridayFromOfficeDock()
+  })
+  ipcMain.handle('office-dock-move', (event, { dx, dy } = {}) => {
+    if (!isOfficeDockSender(event.sender)) throw new Error('OFFICE_DOCK_OWNER_REQUIRED')
+    return moveOfficeDock(dx, dy)
+  })
+  ipcMain.handle('office-dock-set-position', (event, position = {}) => {
+    if (!isOfficeDockSender(event.sender)) throw new Error('OFFICE_DOCK_OWNER_REQUIRED')
+    return setOfficeDockPosition(position)
   })
 
   ipcMain.handle('office-menu-command',(event,{viewId,command}={})=>{

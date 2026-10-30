@@ -1,5 +1,13 @@
 # Happy Friday Lite
 
+## 3.0.6.02-preview.21 AI Core、分域历史与全局助手体验
+
+- 技术版本：`3.0.6-preview.21`；发布标签：`3.0.6.02-preview.21`。
+- 主对话、Office Docs/Sheets/Slides/PDF、笔记/打字机、知识库、日程和 Friday Dock 均支持类似 DeepSeek 的可选择历史、恢复、续聊和新建；Office 按文件隔离会话。
+- 修复 Office DeepSeek 连通性分类和自定义协议 Web Crypto 初始化，补齐 Dock 输入框/拖拽/历史、打字机图片与流式性能，以及 Friday 全局助手显示、形象和模式设置。
+- Windows x64 安装包：[3.0.6.02-preview.21](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.02-preview.21/Happy-Friday-Lite-3.0.6.02-preview.21-win-x64-setup.exe)；SHA256：`4A3DF4C29C3763FC233A99832473E40924B1E359B2087CECD1EA785AA5CE27B4`。
+- 验证：Node 288/288、打包侧 20/20、Obsidian 兼容 10/10、安装包工作区探针 13/13。安装器未签名。
+
 ## 3.0.6.02-preview.20 AI Core 任务控制与全局助手
 
 - 技术版本：`3.0.6-preview.20`；发布标签：`3.0.6.02-preview.20`。

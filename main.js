@@ -1,5 +1,5 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron'
-import { fileURLToPath } from 'url'
+import { app, BrowserWindow, ipcMain, Menu, net, protocol } from 'electron'
+import { fileURLToPath, pathToFileURL } from 'url'
 import path from 'path'
 import fs from 'fs'
 import { setDataDir as setConfigDataDir } from './src-electron/config.js'
@@ -22,9 +22,45 @@ import { installIpcCapabilityGateway } from './src-electron/agent/ipcGateway.js'
 import { installEditContextMenu } from './src-electron/edit-context-menu.js'
 import { captureInternalClipboard } from './src-electron/clipboard.js'
 import { showStartupError } from './src-electron/startup-error.js'
+import { NOTE_ASSET_SCHEME, resolveNoteAssetPath } from './src-electron/note-resources.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// Renderer markdown runs from http://localhost in development and from
+// file:// in packaged builds. Register all app-owned schemes in one call before
+// app.ready. Electron only honors the first registerSchemesAsPrivileged call;
+// keeping the Office renderer scheme in this list preserves its secure context
+// (including Web Crypto randomUUID) while still serving managed note assets.
+protocol.registerSchemesAsPrivileged([{
+  scheme: NOTE_ASSET_SCHEME,
+  privileges: {
+    standard: true,
+    secure: true,
+    supportFetchAPI: true,
+    corsEnabled: true,
+    stream: true,
+  },
+}, {
+  scheme: 'genoffice-app',
+  privileges: {
+    standard: true,
+    secure: true,
+    supportFetchAPI: true,
+    corsEnabled: true,
+    stream: true,
+    codeCache: true,
+  },
+}, {
+  scheme: 'genoffice-docx-media',
+  privileges: {
+    standard: true,
+    secure: true,
+    supportFetchAPI: true,
+    corsEnabled: true,
+    stream: true,
+  },
+}])
 
 const isDev = !app.isPackaged
 
@@ -76,6 +112,14 @@ let shutdownStarted = false
 let localMcpStarted = false
 let backgroundSchedulers = null
 let backgroundSchedulersTimer = null
+
+function registerNoteAssetProtocol() {
+  protocol.handle(NOTE_ASSET_SCHEME, request => {
+    const filePath = resolveNoteAssetPath(request.url)
+    if (!filePath) return new Response(null, { status: 404 })
+    return net.fetch(pathToFileURL(filePath).href).catch(() => new Response(null, { status: 404 }))
+  })
+}
 
 /**
  * These services are useful after the shell is usable, but none of them is
@@ -305,6 +349,7 @@ app.whenReady().then(async () => {
     app.quit()
     return
   }
+  registerNoteAssetProtocol()
   // 读取持久化配置后应用日志开关，兼容升级前已存在的配置文件。
   try {
     const configPath = path.join(dataDir, 'config.json')

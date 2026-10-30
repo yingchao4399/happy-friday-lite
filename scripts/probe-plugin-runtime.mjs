@@ -46,6 +46,12 @@ app.whenReady().then(async()=>{
   assert.equal((await manager.store.list()).find(p=>p.manifest.id==='unsupported-example').compatibility,'unsupported')
   assert.equal(manager.hosts.size,0)
   report.checks.push('未支持的 Node 接口明确报错且销毁失败进程，不留下已启用状态')
+  const raceManifest={...manifest,id:'toggle-race-example',permissions:[]}
+  await manager.store.installFiles({'manifest.json':JSON.stringify(raceManifest),'main.js':`exports.activate=async api=>{await new Promise(resolve=>setTimeout(resolve,300));api.commands.register({id:'ready',name:'Ready',run:()=>true})}`})
+  await Promise.all([manager.enable(raceManifest.id),manager.disable(raceManifest.id)])
+  const raceState=(await manager.snapshot()).find(record=>record.manifest.id===raceManifest.id)
+  assert.equal(raceState.enabled,false);assert.equal(raceState.running,false)
+  report.checks.push('插件启用中立即停用，宿主和持久化状态最终一致')
   const agentManifest={...manifest,id:'agent-example',category:'agent',permissions:['agent.tools']}
   await manager.installPackage({'manifest.json':JSON.stringify(agentManifest),'main.js':`exports.activate=async api=>{await api.agent.registerTool({name:'count',description:'统计测试文本长度',parameters:{text:{type:'string'}},run:async args=>args.text.length})}`})
   await manager.enable(agentManifest.id)
@@ -59,6 +65,7 @@ app.whenReady().then(async()=>{
   await assert.rejects(manager.installPackage({...files,'manifest.json':JSON.stringify({...stable,version:'1.0.1'}),'main.js':`exports.activate=()=>{throw new Error('BROKEN_UPDATE')}`}),/BROKEN_UPDATE/)
   assert.equal((await manager.snapshot()).find(r=>r.manifest.id===stable.id).manifest.version,'1.0.0');assert.equal((await manager.execute(stable.id,'alive')).result,42)
   const runtime=manager.hosts.get(stable.id);runtime.win.webContents.forcefullyCrashRenderer();for(let i=0;i<100&&manager.hosts.has(stable.id);i++)await pause(50);assert.ok(!manager.hosts.has(stable.id))
+  assert.equal((await manager.snapshot()).find(r=>r.manifest.id===stable.id).compatibility,'unverified')
   report.checks.push('启用插件升级启动失败自动回滚旧版本并恢复命令；宿主进程真实崩溃后停用清理')
   await manager.enable(stable.id);const hanging=manager.hosts.get(stable.id)
   await hanging.win.webContents.executeJavaScript('window.__fridayNever=()=>new Promise(()=>{});true')

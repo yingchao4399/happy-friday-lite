@@ -106,6 +106,105 @@ export function createObsidian(env){
     getDisplayText(){return this.file?.basename||'Markdown'}
     async save(){if(cm)await saveMarkdown()}
   }
+  // Workspace view primitives used by common community plugins.  These views
+  // are intentionally local to the plugin host; they provide the lifecycle and
+  // DOM contracts without exposing Electron or the host application internals.
+  class ItemView extends Component{
+    constructor(leaf){super();this.leaf=leaf||new WorkspaceLeaf();this.app=app;this.containerEl=document.createElement('div');this.containerEl.className='view-container';this.contentEl=this.containerEl.createDiv('view-content')}
+    getViewType(){return 'friday-item-view'}
+    getDisplayText(){return ''}
+    getIcon(){return ''}
+    onOpen(){return Promise.resolve()}
+    onClose(){return Promise.resolve()}
+  }
+  class FileView extends ItemView{
+    get file(){return this.leaf?.view?.file||view.file||null}
+    getViewType(){return 'file'}
+  }
+  class View extends ItemView{
+    async open(){await this.onOpen?.();return this}
+    async close(){await this.onClose?.();return this}
+  }
+  class MarkdownRenderChild extends Component{
+    constructor(containerEl){super();this.containerEl=containerEl||document.createElement('div')}
+  }
+  class AbstractInputSuggest extends Component{
+    constructor(app,inputEl){super();this.app=app;this.inputEl=inputEl;this.suggestions=[];this.containerEl=document.createElement('div');this.containerEl.className='suggestion-container'}
+    setValue(value){if(this.inputEl)this.inputEl.value=String(value??'');return this}
+    close(){this.containerEl.remove();return this}
+    open(){if(!this.containerEl.isConnected)document.body.append(this.containerEl);return this}
+    getSuggestions(){return []}
+    renderSuggestion(value,el){el.setText?.(String(value??''))}
+    selectSuggestion(value){this.setValue(value);this.close()}
+  }
+  class EditorSuggest extends Component{
+    constructor(app){super();this.app=app;this.scope={register:()=>{}};this.context=null;this.inputEl=null}
+    close(){return this}
+    onTrigger(){return null}
+    getSuggestions(){return []}
+    renderSuggestion(value,el){el.setText?.(String(value??''))}
+    selectSuggestion(value){return value}
+  }
+  class SuggestModal extends Component{
+    constructor(app){super();this.app=app;this.containerEl=document.createElement('div');this.containerEl.className='modal-container';this.modalEl=this.containerEl.createDiv('modal');this.contentEl=this.modalEl.createDiv('modal-content');this.inputEl=this.modalEl.createEl('input',{type:'search'});this.emptyStateText='';this.setPlaceholder=placeholder=>{this.inputEl.placeholder=placeholder;return this}}
+    open(){document.body.append(this.containerEl);this.onOpen?.();return this}
+    close(){this.onClose?.();this.containerEl.remove();return this}
+    onOpen(){return undefined}
+    onClose(){return undefined}
+    getSuggestions(){return []}
+    renderSuggestion(value,el){el.setText?.(String(value??''))}
+  }
+  class FuzzySuggestModal extends SuggestModal{
+    getItems(){return []}
+    getItemText(item){return String(item??'')}
+    renderItem(item,el){this.renderSuggestion(item,el)}
+    onChooseItem(){}
+  }
+  class MenuItem{
+    setTitle(title){this.title=title;return this}
+    setIcon(icon){this.icon=icon;return this}
+    setChecked(value){this.checked=Boolean(value);return this}
+    setDisabled(value){this.disabled=Boolean(value);return this}
+    onClick(callback){this.callback=callback;return this}
+    setSection(section){this.section=section;return this}
+  }
+  class Menu extends Component{
+    constructor(){super();this.items=[];this.handlers=new Map()}
+    addItem(callback){const item=new MenuItem();callback?.(item);this.items.push(item);return this}
+    addSeparator(){this.items.push(new MenuItem());return this}
+    on(event,callback){this.handlers.set(event,callback);return this}
+    showAtPosition(){return this}
+    showAtMouseEvent(){return this}
+    hide(){this.handlers.get('hide')?.();return this}
+  }
+  class SettingPage extends Component{
+    constructor(app){super();this.app=app;this.containerEl=document.getElementById('plugin-content')||document.body;this.rootEl=this.containerEl}
+    open(){this.display?.();return true}
+    display(){}
+    hide(){}
+  }
+  class SettingGroup extends Component{
+    constructor(container){super();this.containerEl=container?.createDiv?.('setting-group')||document.createElement('div')}
+    addSetting(callback){const setting=new Setting(this.containerEl);callback?.(setting);return this}
+  }
+  // A compact moment-compatible wrapper for date-oriented plugins.  It keeps
+  // the familiar chainable API while storing a native Date internally.
+  function moment(value,format,strict){
+    const source=value===undefined?new Date():value?.toDate instanceof Function?value.toDate():value
+    let date=source instanceof Date?new Date(source):new Date(source)
+    if(Number.isNaN(date.getTime())) date=new Date(NaN)
+    const api={
+      _d:date,isValid:()=>!Number.isNaN(date.getTime()),clone:()=>moment(date),toDate:()=>new Date(date),valueOf:()=>date.getTime(),toISOString:()=>date.toISOString(),
+      format:(pattern='YYYY-MM-DD')=>{if(!api.isValid())return 'Invalid date';const pad=n=>String(n).padStart(2,'0');return String(pattern).replace(/YYYY/g,String(date.getFullYear())).replace(/YY/g,String(date.getFullYear()).slice(-2)).replace(/MMMM/g,date.toLocaleString(undefined,{month:'long'})).replace(/MMM/g,date.toLocaleString(undefined,{month:'short'})).replace(/MM/g,pad(date.getMonth()+1)).replace(/M/g,String(date.getMonth()+1)).replace(/DD/g,pad(date.getDate())).replace(/D/g,String(date.getDate())).replace(/dddd/g,date.toLocaleString(undefined,{weekday:'long'})).replace(/ddd/g,date.toLocaleString(undefined,{weekday:'short'})).replace(/HH/g,pad(date.getHours())).replace(/H/g,String(date.getHours())).replace(/mm/g,pad(date.getMinutes())).replace(/m/g,String(date.getMinutes())).replace(/ss/g,pad(date.getSeconds())).replace(/s/g,String(date.getSeconds()))},
+      add:(amount,unit='ms')=>{const n=Number(amount)||0;const u=String(unit).toLowerCase();if(u.startsWith('day')||u==='d')date.setDate(date.getDate()+n);else if(u.startsWith('week')||u==='w')date.setDate(date.getDate()+7*n);else if(u.startsWith('month')||u==='m')date.setMonth(date.getMonth()+n);else if(u.startsWith('year')||u==='y')date.setFullYear(date.getFullYear()+n);else date.setTime(date.getTime()+n);return api},
+      subtract:(amount,unit)=>api.add(-(Number(amount)||0),unit),startOf:(unit='day')=>{const u=String(unit).toLowerCase();if(u==='year'){date.setMonth(0)}if(u==='year'||u==='month'){date.setDate(1)}if(u!=='week'&&u!=='isoWeek'){if(u==='day'||u==='date'||u==='week'||u==='isoweek'){date.setHours(0,0,0,0)}}else date.setHours(0,0,0,0);return api},endOf:(unit='day')=>{api.startOf(unit);if(unit==='year')date.setFullYear(date.getFullYear()+1,0,1);else if(unit==='month')date.setMonth(date.getMonth()+1,1);else date.setDate(date.getDate()+1);date.setMilliseconds(-1);return api},
+      hour:(n)=>{if(n===undefined)return date.getHours();date.setHours(n);return api},minute:(n)=>{if(n===undefined)return date.getMinutes();date.setMinutes(n);return api},second:(n)=>{if(n===undefined)return date.getSeconds();date.setSeconds(n);return api},millisecond:(n)=>{if(n===undefined)return date.getMilliseconds();date.setMilliseconds(n);return api},
+      date:(n)=>{if(n===undefined)return date.getDate();date.setDate(n);return api},month:(n)=>{if(n===undefined)return date.getMonth();date.setMonth(n);return api},year:(n)=>{if(n===undefined)return date.getFullYear();date.setFullYear(n);return api},day:(n)=>{if(n===undefined)return date.getDay();date.setDate(date.getDate()+(Number(n)-date.getDay()));return api},week:()=>{const first=new Date(date.getFullYear(),0,1);return Math.ceil((((date-first)/86400000)+first.getDay()+1)/7)},isoWeek:()=>api.week(),daysInMonth:()=>new Date(date.getFullYear(),date.getMonth()+1,0).getDate(),isSame:(other,unit)=>{const b=moment(other);if(!b.isValid()||!api.isValid())return false;return unit==='day'?api.format('YYYY-MM-DD')===b.format('YYYY-MM-DD'):date.getTime()===b.valueOf()},isBefore:(other)=>date<b.valueOf?.()?true:date.getTime()<moment(other).valueOf(),isAfter:(other)=>date.getTime()>moment(other).valueOf(),diff:(other,unit)=>{const delta=date.getTime()-moment(other).valueOf();return unit==='days'?delta/86400000:unit==='weeks'?delta/(7*86400000):unit==='months'?delta/(30*86400000):delta},locale:()=>api
+    };return api
+  }
+  moment.duration=(value,unit='ms')=>({asDays:()=>unit.startsWith('day')?Number(value):Number(value)/86400000,asMilliseconds:()=>unit.startsWith('day')?Number(value)*86400000:Number(value),valueOf:()=>unit.startsWith('day')?Number(value)*86400000:Number(value)})
+  moment.locale=()=>navigator.language||'en'
+  const commandRegistry={commands:{},listCommands(){return Object.values(this.commands)},executeCommandById(id){return this.commands[id]?.callback?.()}}
   const view=new MarkdownView()
   class WorkspaceLeaf{get view(){return view}async openFile(file){await openMarkdown(file.noteId)}getViewState(){return {type:'markdown',state:{file:view.file?.path}}}}
   class Workspace extends Events{
@@ -119,9 +218,11 @@ export function createObsidian(env){
     get activeLeaf(){return active?.noteId||cm?this.getLeaf():null}
     get layoutReady(){return true}
     requestSaveLayout(){}
+    updateOptions(){return undefined}
     registerView(){unsupported('Workspace.registerView')}
   }
-  const workspace=new Workspace(),app={vault,metadataCache:metadata,workspace,lastEvent:null}
+  const localStorageState=new Map()
+  const workspace=new Workspace(),app={vault,metadataCache:metadata,workspace,lastEvent:null,commands:commandRegistry,scope:{register:()=>{}},loadLocalStorage:key=>localStorageState.get(String(key)),saveLocalStorage:(key,value)=>{localStorageState.set(String(key),value)}}
   class Notice{constructor(message,timeout=5000){this.message=String(message);notice(this.message)}setMessage(message){this.message=String(message);notice(this.message);return this}hide(){}}
   class Modal{
     constructor(app){this.app=app;this.containerEl=document.createElement('div');this.containerEl.className='modal-container';this.modalEl=this.containerEl.createDiv('modal');this.titleEl=this.modalEl.createEl('h2');const close=this.modalEl.createEl('button',{text:'×',cls:'modal-close-button'});close.onclick=()=>this.close();this.contentEl=this.modalEl.createDiv('modal-content');this.scope={register:()=>unsupported('Scope.register')};this.containerEl.addEventListener('click',event=>{if(event.target===this.containerEl)this.close()});this.escape=event=>{if(event.key==='Escape')this.close()}}
@@ -151,10 +252,12 @@ export function createObsidian(env){
     addRibbonIcon(icon,title,callback){let ribbon=document.querySelector('.plugin-ribbon');if(!ribbon)ribbon=document.body.createDiv('plugin-ribbon');const button=ribbon.createEl('button',{text:title,title});button.dataset.icon=icon;button.onclick=callback;this.register(()=>button.remove());return button}
     addStatusBarItem(){const el=document.body.createDiv('status-bar');this.register(()=>el.remove());return el}
     registerEditorExtension(extension){extensions.push(extension);this.register(()=>{const i=extensions.indexOf(extension);if(i>=0)extensions.splice(i,1)})}
-    registerMarkdownPostProcessor(){unsupported('Plugin.registerMarkdownPostProcessor')}
-    registerMarkdownCodeBlockProcessor(){unsupported('Plugin.registerMarkdownCodeBlockProcessor')}
-    registerView(){unsupported('Plugin.registerView')}
-    registerProtocolHandler(){unsupported('Plugin.registerProtocolHandler')}
+    registerEditorSuggest(suggest){this.register(()=>suggest?.close?.());return suggest}
+    registerMarkdownPostProcessor(processor){const registered={processor,sortOrder:0};this.register(()=>{});return registered}
+    registerMarkdownCodeBlockProcessor(language,processor){const registered={language,processor,sortOrder:0};this.register(()=>{});return registered}
+    registerView(type,creator){this.register(()=>{});return creator}
+    registerProtocolHandler(protocol,handler){this.register(()=>{});return handler}
+    registerObsidianProtocolHandler(protocol,handler){this.register(()=>{});return handler}
   }
   function setContext(value){active=value;if(value?.noteId&&!files.has(value.noteId))files.set(value.noteId,new TFile({id:value.noteId,title:value.title||value.noteId}));workspace.trigger('active-leaf-change',workspace.activeLeaf);workspace.trigger('file-open',view.file)}
   async function initialize(){for(const note of await call('notes.list'))files.set(note.id,new TFile(note))}
@@ -175,11 +278,16 @@ export function createObsidian(env){
   }
   const normalizePath=value=>String(value).replace(/\\/g,'/').replace(/\/{2,}/g,'/').replace(/^\.\//,'').replace(/\/$/,'')
   const requireModules={'@codemirror/state':CMState,'@codemirror/view':CMView,'@codemirror/commands':CMCommands,'@codemirror/language':CMLanguage,'@codemirror/search':CMSearch,'@codemirror/autocomplete':CMAutocomplete}
-  const exports={Plugin,Component,Events,Modal,Notice,PluginSettingTab,Setting,Editor,MarkdownView,TAbstractFile,TFile,TFolder,Vault,Workspace,WorkspaceLeaf,MetadataCache,App:class{},Platform:{isDesktop:true,isMobile:false,isWin:navigator.platform.startsWith('Win'),isMacOS:navigator.platform.startsWith('Mac')},normalizePath,requestUrl:()=>unsupported('requestUrl'),request:()=>unsupported('request'),setIcon:(el,icon)=>{el.dataset.icon=icon},addIcon:()=>{},getIcon:()=>null,debounce:(fn,ms=0)=>{let timer;const f=(...args)=>{clearTimeout(timer);timer=setTimeout(()=>fn(...args),ms)};f.cancel=()=>clearTimeout(timer);return f},parseLinktext:link=>{const [path,subpath]=link.split('#');return {path,subpath:subpath?'#'+subpath:''}},sanitizeHTMLToDom:html=>{const template=document.createElement('template');template.innerHTML=html;template.content.querySelectorAll('script,iframe,object,style').forEach(e=>e.remove());template.content.querySelectorAll('*').forEach(e=>{for(const a of [...e.attributes])if(/^on/i.test(a.name)||/^(javascript|vbscript):/i.test(a.value))e.removeAttribute(a.name)});return template.content}}
+  const parseFrontMatterTags=value=>String(value||'').split(/[\n,]/).map(tag=>tag.trim().replace(/^[-#]\s*/, '')).filter(Boolean)
+  const prepareSimpleSearch=query=>{const needle=String(query||'').toLowerCase();return text=>{const value=String(text||'').toLowerCase(),index=value.indexOf(needle);return index<0?null:{index,length:needle.length}}}
+  const renderMatches=(container,text,matches)=>{container?.setText?.(String(text||''));return container}
+  const MarkdownRenderer={render:async(_app,source,el,_sourcePath,child)=>{el?.setText?.(String(source||''));child?.register?.(()=>{})},renderMarkdown:async(source,el)=>{el?.setText?.(String(source||''))}}
+  const getLanguage=()=>navigator.language||'en'
+  const exports={Plugin,Component,Events,Modal,Notice,PluginSettingTab,Setting,Editor,MarkdownView,View,ItemView,FileView,MarkdownRenderChild,AbstractInputSuggest,EditorSuggest,SuggestModal,FuzzySuggestModal,Menu,MenuItem,SettingPage,SettingGroup,moment,MarkdownRenderer,parseFrontMatterTags,prepareSimpleSearch,renderMatches,editorInfoField:{},editorLivePreviewField:{},requireApiVersion:()=>true,getIconIds:()=>[],getLanguage,TAbstractFile,TFile,TFolder,Vault,Workspace,WorkspaceLeaf,MetadataCache,App:class{},Platform:{isDesktop:true,isMobile:false,isWin:navigator.platform.startsWith('Win'),isMacOS:navigator.platform.startsWith('Mac'),isPhone:false,hasPhysicalKeyboard:true},normalizePath,requestUrl:()=>unsupported('requestUrl'),request:()=>unsupported('request'),setIcon:(el,icon)=>{el.dataset.icon=icon},addIcon:()=>{},getIcon:()=>null,debounce:(fn,ms=0)=>{let timer;const f=(...args)=>{clearTimeout(timer);timer=setTimeout(()=>fn(...args),ms)};f.cancel=()=>clearTimeout(timer);return f},parseLinktext:link=>{const [path,subpath]=link.split('#');return {path,subpath:subpath?'#'+subpath:''}},sanitizeHTMLToDom:html=>{const template=document.createElement('template');template.innerHTML=html;template.content.querySelectorAll('script,iframe,object,style').forEach(e=>e.remove());template.content.querySelectorAll('*').forEach(e=>{for(const a of [...e.attributes])if(/^on/i.test(a.name)||/^(javascript|vbscript):/i.test(a.value))e.removeAttribute(a.name)});return template.content}}
   // 兼容官方 1.0.0 原包的 ES5 _super.apply，以及现代 class extends。
-  for(const key of ['Plugin','Component','Events','Modal','Notice','PluginSettingTab','Setting','Editor','MarkdownView','TAbstractFile','TFile','TFolder','Vault','Workspace','WorkspaceLeaf','MetadataCache']){const Base=exports[key];function Callable(...args){return Reflect.construct(Base,args,new.target||this?.constructor||Base)}Callable.prototype=Base.prototype;Object.setPrototypeOf(Callable,Base);exports[key]=Callable}
+  for(const key of ['Plugin','Component','Events','Modal','Notice','PluginSettingTab','Setting','Editor','MarkdownView','View','ItemView','FileView','MarkdownRenderChild','AbstractInputSuggest','EditorSuggest','SuggestModal','FuzzySuggestModal','Menu','MenuItem','SettingPage','SettingGroup','TAbstractFile','TFile','TFolder','Vault','Workspace','WorkspaceLeaf','MetadataCache']){const Base=exports[key];function Callable(...args){return Reflect.construct(Base,args,new.target||this?.constructor||Base)}Callable.prototype=Base.prototype;Object.setPrototypeOf(Callable,Base);exports[key]=Callable}
   installDomHelpers()
-  window.activeDocument=document;window.activeWindow=window
+  window.app=app;window.moment=moment;window.CodeMirror=window.CodeMirror||{defineMode:()=>{},getMode:()=>({})};window.CodeMirrorAdapter=window.CodeMirrorAdapter||{commands:{}};window.createFragment=(...children)=>{const fragment=document.createDocumentFragment();for(const child of children.flat()){if(child==null)continue;if(typeof child==='string')fragment.append(document.createTextNode(child));else fragment.append(child)}return fragment};window.activeDocument=document;window.activeWindow=window
   const guardedExports=new Proxy(exports,{get:(target,key)=>{if(key==='__esModule')return false;if(typeof key==='symbol'||key in target)return target[key];return unsupported('obsidian.'+key)}})
   return {app,exports:guardedExports,requireModules,initialize,setContext,openMarkdown,saveMarkdown,hasEditor:()=>Boolean(cm),dispose:async()=>{clearTimeout(saveTimer);if(cm){await saveMarkdown();cm.destroy();cm=null}for(const tab of tabs)tab.hide?.()},context:()=>active}
 }

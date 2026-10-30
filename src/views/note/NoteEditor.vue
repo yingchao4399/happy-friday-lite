@@ -718,7 +718,7 @@
             </div>
             <span class="sidebar-title">{{ t('note.aiSidebar.assistant') }}</span>
           </div>
-          <ScopedHistoryButton scope="note-agent" :scope-key="noteHistoryScopeKey" @select="selectNoteHistory" />
+          <ScopedHistoryButton scope="note-agent" :scope-key="noteHistoryScopeKey" :current-session-id="currentSessionId" @select="selectNoteHistory" @create="startNewNoteChat" @removed="handleNoteHistoryRemoved" />
           <button class="sidebar-close-btn" @click="closeAISidebar">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1007,14 +1007,44 @@ const noteHistoryScopeKey = ref(resolveNoteHistoryScopeKey(props.noteId));
 const emit = defineEmits(['update:modelValue', 'change', 'toggle-toc', 'close-sidebar', 'close-toc', 'open-note']);
 
 function selectNoteHistory({ session, messages }) {
+  stopNoteStreamForHistory();
   currentSessionId.value = session.id
+  historyModelId.value = session.modelId || '';
   chatMessages.value = (messages || []).map(message => {
     const item = { ...message, content: message.content || '' }
     if (message.metadata?.segments) item.segments = message.metadata.segments
     if (message.metadata?.reasoning) item.reasoning = message.metadata.reasoning
     return item
   })
+  saveChatSession();
   nextTick(() => scrollSidebarToBottom(true))
+}
+
+function stopNoteStreamForHistory() {
+  if (isStreaming.value) handleChatStop();
+  activeRequestId = '';
+  clearPendingChunks();
+  isStreaming.value = false;
+  isDoneReceived = true;
+  streamingContent.value = '';
+  streamingReasoning.value = '';
+  agentSegments.value = [];
+}
+
+function startNewNoteChat() {
+  stopNoteStreamForHistory();
+  currentSessionId.value = '';
+  historyModelId.value = '';
+  chatMessages.value = [];
+  noteReferences.value = [];
+  chatInputText.value = '';
+  attachments.value = [];
+  saveChatSession();
+  nextTick(() => chatInputBoxRef.value?.focus());
+}
+
+function handleNoteHistoryRemoved(sessionId) {
+  if (currentSessionId.value === sessionId) startNewNoteChat();
 }
 
 const searchVisible = ref(false);
@@ -2928,6 +2958,7 @@ const noteStreamingState = {
 
 const chatMessages = ref([]);
 const currentSessionId = ref('');
+const historyModelId = ref('');
 const chatInputBoxRef = ref(null);
 
 // 点击常用对话按钮，填充指令到输入框
@@ -2945,27 +2976,28 @@ let attachmentIdCounter = 0;
 const kbList = ref(JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)));
 const selectableKbList = computed(() => kbList.value.filter(c => c.id !== 'agent'));
 
-function saveChatSession() {
-  const id = props.noteId;
+function saveChatSession(id = props.noteId) {
   if (!id) return;
   setChatSession(id, {
     chatMessages: chatMessages.value,
     currentSessionId: currentSessionId.value,
+    historyModelId: historyModelId.value,
     showAISidebar: showAISidebar.value
   });
 }
 
-function restoreChatSession() {
-  const id = props.noteId;
+function restoreChatSession(id = props.noteId) {
   if (!id) return;
   const cached = getChatSession(id);
   if (cached) {
     chatMessages.value = cached.chatMessages;
     currentSessionId.value = cached.currentSessionId;
+    historyModelId.value = cached.historyModelId || '';
     showAISidebar.value = cached.showAISidebar;
   } else {
     chatMessages.value = [];
     currentSessionId.value = '';
+    historyModelId.value = '';
     showAISidebar.value = false;
   }
 }
@@ -2974,6 +3006,7 @@ function resetChatSession() {
   clearPendingChunks();
   chatMessages.value = [];
   currentSessionId.value = '';
+  historyModelId.value = '';
   noteReferences.value = [];
   chatInputText.value = '';
   attachments.value = [];
@@ -3061,11 +3094,12 @@ function loadModelConfig(modelId) {
 async function sendChatMessage(text) {
   if (isStreaming.value || !text.trim()) return;
 
-  const model = loadModelConfig();
+  const model = loadModelConfig(historyModelId.value);
   if (!model) {
     alert(t('note.aiSidebar.noModelConfigured'));
     return;
   }
+  historyModelId.value = model.id || '';
 
   let fullMessage = text;
   let displayContent = text;
@@ -4317,6 +4351,18 @@ watch(() => props.modelValue, (newValue) => {
 
 watch(() => props.noteId, (noteId, previousNoteId) => {
   loadBacklinks();
+  if (previousNoteId && noteId !== previousNoteId) {
+    stopNoteStreamForHistory();
+    saveChatSession(previousNoteId);
+    if (noteId) restoreChatSession(noteId);
+    else {
+      chatMessages.value = [];
+      currentSessionId.value = '';
+      showAISidebar.value = false;
+    }
+    noteHistoryScopeKey.value = resolveNoteHistoryScopeKey(noteId);
+    return;
+  }
   if (!noteId) {
     if (previousNoteId) noteHistoryScopeKey.value = createDraftNoteScopeKey();
     return;

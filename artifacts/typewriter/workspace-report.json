@@ -1,6 +1,9 @@
 {
   "checks": [
     {
+      "name": "受管图片在编辑页与预览页加载，并保存到原笔记"
+    },
+    {
       "name": "新建真实笔记、正文输入、自动保存、击键声与光标联动",
       "feedback": {
         "keys": 5,
@@ -11,15 +14,19 @@
           0,
           0,
           1,
-          1,
           2,
           2,
           3,
           3,
           4,
           4,
-          30,
-          30
+          33,
+          33,
+          0,
+          0,
+          0,
+          0,
+          0
         ],
         "motion": "moving"
       }
@@ -29,7 +36,7 @@
     },
     {
       "name": "选取原有笔记、更新同一 ID、保留图表、无多余副本",
-      "id": "ce834650-4544-45d5-b85a-3eb2ef2f245d"
+      "id": "a8771668-15fd-445a-9c46-6c87e1e3ef9c"
     },
     {
       "name": "原版二级菜单、中英切换、字体/纸张/羽毛笔设置、外壳保持同实例"
@@ -45,6 +52,9 @@
     },
     {
       "name": "终端回形针拖动、终端退出后重新启动"
+    },
+    {
+      "name": "切换笔记后受管图片仍显示"
     },
     {
       "name": "从终端切回笔记、内容恢复、PTY 释放"
@@ -69,10 +79,33 @@
     },
     {
       "name": "数据库写入失败保留输入、Ctrl+S 重试保存同一笔记"
+    },
+    {
+      "name": "十万字长文输入与页面返回 P95 达标",
+      "performance": {
+        "firstOpenMs": 910,
+        "inputP50Ms": 11.200000017881393,
+        "inputP95Ms": 58.5,
+        "inputEventP50Ms": 4.4000000059604645,
+        "inputEventP95Ms": 5.5,
+        "inputSamples": 80,
+        "returnP95Ms": 193,
+        "returnSamples": 20
+      }
     }
   ],
   "platform": "win32",
   "electron": "42.2.0",
+  "performance": {
+    "firstOpenMs": 910,
+    "inputP50Ms": 11.200000017881393,
+    "inputP95Ms": 58.5,
+    "inputEventP50Ms": 4.4000000059604645,
+    "inputEventP95Ms": 5.5,
+    "inputSamples": 80,
+    "returnP95Ms": 193,
+    "returnSamples": 20
+  },
   "feedback": {
     "keys": 5,
     "audio": 5,
@@ -82,19 +115,23 @@
       0,
       0,
       1,
-      1,
       2,
       2,
       3,
       3,
       4,
       4,
-      30,
-      30
+      33,
+      33,
+      0,
+      0,
+      0,
+      0,
+      0
     ],
     "motion": "moving"
   },
   "ok": true,
   "errors": [],
-  "generatedAt": "2026-10-26T17:12:50.610Z"
+  "generatedAt": "2026-10-29T20:47:48.011Z"
 }

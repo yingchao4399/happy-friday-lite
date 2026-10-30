@@ -9,6 +9,8 @@ const channels = new Set([
   'ai-core-task-resume',
   'ai-core-task-cancel',
   'office-dock-set-expanded',
+  'office-dock-move',
+  'office-dock-set-position',
   'office-dock-open-friday'
 ])
 

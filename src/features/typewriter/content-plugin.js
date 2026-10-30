@@ -7,4 +7,6 @@ export function activateContent(plugin) {
 export function contentText(kind) { return active?.text(kind) || '' }
 export function scrollContent(to) { active?.scroll(to) }
 export function focusContent() { active?.focus() }
+export function blurContent() { active?.blur?.() }
+export function insertContent(text) { active?.insert?.(String(text || '')) }
 export function flushContent() { return active?.flush?.() ?? Promise.resolve() }

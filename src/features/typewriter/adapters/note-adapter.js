@@ -2,6 +2,25 @@ import TurndownService from 'turndown'
 import { marked } from 'marked'
 import {readNote,saveNote} from '@/features/notes/documents'
 
+// Route reactivation of an unchanged long note should not run Turndown on
+// every visit. The revision is part of the key, so saved edits invalidate the
+// cached conversion naturally.
+const markdownCache = new Map()
+function cachedNoteMarkdown(note) {
+  const html = note?.content || ''
+  const key = `${note?.id || ''}:${note?.revision || 0}:${html.length}:${html.slice(0, 24)}:${html.slice(-24)}`
+  const hit = markdownCache.get(key)
+  if (hit !== undefined) {
+    markdownCache.delete(key)
+    markdownCache.set(key, hit)
+    return hit
+  }
+  const markdown = noteToMarkdown(html)
+  markdownCache.set(key, markdown)
+  while (markdownCache.size > 16) markdownCache.delete(markdownCache.keys().next().value)
+  return markdown
+}
+
 export function noteToMarkdown(html) {
   const converter = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' })
   // Turndown 的空节点规则先于自定义规则，会吞掉没有 textContent 的图表。
@@ -37,8 +56,8 @@ export function markdownToNote(source) {
   return { content: parsed.body.innerHTML, contentText: parsed.body.textContent || '' }
 }
 export function createNoteDocument(noteStore, note, status = () => {}, initialSource) {
-  let source = initialSource ?? noteToMarkdown(note.content)
-  let saved = source, timer = null, queue = Promise.resolve()
+  let source = initialSource ?? cachedNoteMarkdown(note)
+  let saved = source, timer = null, journalTimer = null, queue = Promise.resolve()
   const id = note.id
   const recoveryKey = `happy-friday-typewriter-draft:${id}`
   let baseline = note.content || ''
@@ -47,27 +66,37 @@ export function createNoteDocument(noteStore, note, status = () => {}, initialSo
     const draft = JSON.parse(localStorage.getItem(recoveryKey) || 'null')
     if (draft?.base === baseline && typeof draft.text === 'string') source = draft.text
   } catch {}
-  const journal = () => {
+  const writeJournal = () => {
     try {
       if (source === saved) localStorage.removeItem(recoveryKey)
       else localStorage.setItem(recoveryKey, JSON.stringify({base: baseline, text: source}))
     } catch { /* 本地缓存满时，仍继续写入笔记数据库。 */ }
   }
+  // Keep typing synchronous and cheap. Recovery data is still written shortly
+  // after the user pauses, and immediate callers (save/blur/close) force a
+  // final write before leaving the document.
+  const journal = (immediate = false) => {
+    clearTimeout(journalTimer)
+    journalTimer = null
+    if (immediate) { writeJournal(); return }
+    journalTimer = setTimeout(() => { journalTimer = null; writeJournal() }, 450)
+  }
   const document = {
     id, viewId: crypto.randomUUID(), type: 'note', title: note.title, content: source, noteId: id,
+    revision,
     refresh(next) {
       if((next.revision||0)<=revision)return
       if(source!==saved){status('saveConflict');return}
-      source=noteToMarkdown(next.content);saved=source;baseline=next.content||'';revision=next.revision||0
-      document.content=source;document.title=next.title;status('saved')
+      source=cachedNoteMarkdown(next);saved=source;baseline=next.content||'';revision=next.revision||0
+      document.content=source;document.title=next.title;document.revision=revision;status('saved')
       window.dispatchEvent(new CustomEvent('friday:note-document',{detail:{noteId:id,text:source}}))
     },
     change(next) {
-      source = next; journal(); clearTimeout(timer); status('unsaved')
+      source = next; document.content = source; journal(); clearTimeout(timer); status('unsaved')
       timer = setTimeout(() => { void document.flush().catch(() => {}) }, 600)
     },
     flush() {
-      clearTimeout(timer); timer = null
+      clearTimeout(timer); timer = null; journal(true)
       queue = queue.catch(() => {}).then(async () => {
         if (source === saved) return
         const next = source; status('saving')
@@ -80,12 +109,12 @@ export function createNoteDocument(noteStore, note, status = () => {}, initialSo
           const index = noteStore.notes.findIndex(item => item.id === id)
           if (index >= 0) noteStore.notes[index] = updated
           else noteStore.notes.unshift(updated)
-          revision = updated.revision || 0; saved = next; baseline = updated.content || ''; journal(); status(source === saved ? 'saved' : 'unsaved')
+           revision = updated.revision || 0; document.revision = revision; saved = next; baseline = updated.content || ''; journal(true); status(source === saved ? 'saved' : 'unsaved')
         } catch (error) { status(error.message?.includes('NOTE_REVISION_CONFLICT') ? 'saveConflict' : 'saveFailed'); throw error }
       })
       return queue
     },
-    async close() { await document.flush() }
+    async close() { await document.flush(); journal(true) }
   }
   if (source !== saved) timer = setTimeout(() => { void document.flush().catch(() => {}) }, 600)
   return document

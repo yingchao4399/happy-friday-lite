@@ -38,7 +38,21 @@
   "scopedHistory": {
     "loading": "正在加载…",
     "empty": "此处暂无对话历史",
-    "untitled": "新对话"
+    "untitled": "新对话",
+    "active": "最近",
+    "archived": "已归档",
+    "trash": "回收站",
+    "rename": "重命名",
+    "save": "保存",
+    "pin": "置顶",
+    "unpin": "取消置顶",
+    "archive": "归档",
+    "unarchive": "取消归档",
+    "delete": "删除",
+    "restore": "恢复",
+    "trashWarning": "对话「{title}」将移入回收站，之后可以恢复。",
+    "loadFailed": "无法加载对话历史",
+    "actionFailed": "操作失败，请重试"
   },
   "moreActions": "更多操作",
   "assistantName": "周五",

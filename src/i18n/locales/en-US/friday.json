@@ -38,7 +38,21 @@
   "scopedHistory": {
     "loading": "Loading…",
     "empty": "No conversation history here yet",
-    "untitled": "New conversation"
+    "untitled": "New conversation",
+    "active": "Recent",
+    "archived": "Archived",
+    "trash": "Trash",
+    "rename": "Rename",
+    "save": "Save",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "delete": "Delete",
+    "restore": "Restore",
+    "trashWarning": "Move \"{title}\" to Trash? You can restore it later.",
+    "loadFailed": "Could not load conversation history",
+    "actionFailed": "Action failed. Try again"
   },
   "moreActions": "More actions",
   "assistantName": "Friday",

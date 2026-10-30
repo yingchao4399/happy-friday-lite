@@ -1,8 +1,8 @@
-version: 3.0.6-preview.20
+version: 3.0.6-preview.21
 files:
-  - url: Happy-Friday-Lite-3.0.6.02-preview.20-win-x64-setup.exe
-    sha512: NVM8sD+gVnc08khtCpzQSqvu5nxKO9X+4xR2gv74qtCvFF52l6rQr+8pyvZOck8KKOeGOsgFy/sV7ilvT3pByw==
-    size: 268721754
-path: Happy-Friday-Lite-3.0.6.02-preview.20-win-x64-setup.exe
-sha512: NVM8sD+gVnc08khtCpzQSqvu5nxKO9X+4xR2gv74qtCvFF52l6rQr+8pyvZOck8KKOeGOsgFy/sV7ilvT3pByw==
-releaseDate: '2026-10-29T14:22:04.040Z'
+  - url: Happy-Friday-Lite-3.0.6.02-preview.21-win-x64-setup.exe
+    sha512: pKfakVvyexp9G9HyeGSLQbLrXaf9XrURO90DiB/6wlzPqFki2i1cos4n1xpTFDBNg0xggwJoX4QWeeMStUY4zQ==
+    size: 268755226
+path: Happy-Friday-Lite-3.0.6.02-preview.21-win-x64-setup.exe
+sha512: pKfakVvyexp9G9HyeGSLQbLrXaf9XrURO90DiB/6wlzPqFki2i1cos4n1xpTFDBNg0xggwJoX4QWeeMStUY4zQ==
+releaseDate: '2026-10-30T04:59:32.256Z'

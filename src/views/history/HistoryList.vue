@@ -271,7 +271,7 @@
             </svg>
           </div>
           <div class="modal-title">{{ t('history.confirmDelete') }}</div>
-          <div class="modal-desc">{{ t('history.deleteWarning', { title: deleteModal.sessionTitle }) }}</div>
+          <div class="modal-desc">{{ t('friday.scopedHistory.trashWarning', { title: deleteModal.sessionTitle }) }}</div>
           <div class="modal-actions">
             <button class="btn btn-cancel" @click="closeDeleteModal">{{ t('history.cancel') }}</button>
             <button class="btn btn-danger" @click="confirmDelete">{{ t('history.delete') }}</button>
@@ -714,7 +714,7 @@ const handleBatchDelete = async () => {
 const confirmBatchDelete = async () => {
   try {
     for (const id of selectedIds.value) {
-      await electronService.invoke('delete_session', { sessionId: id, scope: 'friday', scopeKey: null });
+      await electronService.invoke('trash_session', { sessionId: id, scope: 'friday', scopeKey: null });
     }
     allSessions.value = allSessions.value.filter(s => !selectedIds.value.has(s.id));
   } catch (err) {
@@ -819,7 +819,7 @@ const confirmDelete = async () => {
   if (!session) return;
 
   try {
-    await electronService.invoke('delete_session', { sessionId: session.id, scope: 'friday', scopeKey: null });
+    await electronService.invoke('trash_session', { sessionId: session.id, scope: 'friday', scopeKey: null });
     allSessions.value = allSessions.value.filter(s => s.id !== session.id);
   } catch (err) {
     console.error('Failed to delete session:', err);

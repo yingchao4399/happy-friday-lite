@@ -22,7 +22,7 @@
                 </div>
               </div>
               <div class="header-right">
-                <ScopedHistoryButton scope="knowledge" :scope-key="historyScopeKey" @select="selectHistory" />
+                <ScopedHistoryButton scope="knowledge" :scope-key="historyScopeKey" :current-session-id="currentSessionId" @select="selectHistory" @create="startNewHistory" @removed="handleHistoryRemoved" />
                 <button class="header-btn" @click="handleStop" v-if="isStreaming" title="停止生成">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="6" y="6" width="12" height="12" rx="2"></rect>
@@ -118,6 +118,7 @@ import UserMessage from '@/components/chat/UserMessage.vue';
 import AIMessage from '@/components/chat/AIMessage.vue';
 import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessage.vue';
 import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
+import { loadModelConfig } from '@/views/friday/composables/useModelCatalog';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -138,10 +139,32 @@ const emit = defineEmits(['close']);
 const historyScopeKey = computed(() => props.isFolder ? `folder:${props.folderPath}` : `kb:${props.kbName || props.kbCategoryId || 'default'}`)
 
 function selectHistory({ session, messages: history }) {
-  if (isStreaming.value) handleStop()
-  currentSessionId = session.id
-  messages.value = history.map(item => ({ ...item, content: item.content || '' }))
+  stopForHistorySwitch()
+  currentSessionId.value = session.id
+  historyModelId.value = session.modelId || ''
+  messages.value = history.map(item => ({ ...item, ...(typeof item.metadata === 'object' ? item.metadata : {}), content: item.content || '' }))
   nextTick(() => scrollToBottomForce())
+}
+
+function stopForHistorySwitch() {
+  if (isStreaming.value) handleStop()
+  activeRequestId = ''
+  clearPendingChunks()
+  isStreaming.value = false
+  isDoneReceived = true
+  streamingContent.value = ''
+  streamingReasoning.value = ''
+  streamingSources.value = []
+}
+
+function startNewHistory() {
+  stopForHistorySwitch()
+  resetState()
+  nextTick(() => textareaRef.value?.focus())
+}
+
+function handleHistoryRemoved(sessionId) {
+  if (currentSessionId.value === sessionId) startNewHistory()
 }
 
 // 顶部副标题：工作区不参与 RAG 检索，提示可执行 Agent 工作流
@@ -151,6 +174,7 @@ const subtitleText = computed(() => {
 });
 
 const messages = ref([]);
+const historyModelId = ref('');
 const inputText = ref('');
 const textareaRef = ref(null);
 const messagesContainer = ref(null);
@@ -173,7 +197,7 @@ const dialogStyle = ref({});
 
 let activeRequestId = '';
 let isDoneReceived = false;
-let currentSessionId = '';
+const currentSessionId = ref('');
 // 上一次的 scrollTop，用于判断滚动方向（区分用户主动上滑与程序置底）
 let lastScrollTop = 0;
 
@@ -248,6 +272,10 @@ watch(() => props.visible, (val) => {
   }
 });
 
+watch(historyScopeKey, (nextKey, previousKey) => {
+  if (props.visible && nextKey !== previousKey) startNewHistory();
+});
+
 function resetState() {
   clearPendingChunks();
   messages.value = [];
@@ -257,7 +285,8 @@ function resetState() {
   streamingReasoning.value = '';
   streamingSources.value = [];
   activeRequestId = '';
-  currentSessionId = '';
+  currentSessionId.value = '';
+  historyModelId.value = '';
   isAtBottom.value = true;
   showScrollDownBtn.value = false;
   lastScrollTop = 0;
@@ -327,8 +356,8 @@ function setupListeners() {
       });
     }
 
-    if (data.sessionId && !currentSessionId) {
-      currentSessionId = data.sessionId;
+    if (data.sessionId && !currentSessionId.value) {
+      currentSessionId.value = data.sessionId;
     }
 
     streamingContent.value = '';
@@ -403,7 +432,8 @@ function mergeSources(existing, incoming) {
 
 async function sendChatMessage(text) {
   if (isStreaming.value || !text || !text.trim()) return;
-  if (!props.model) {
+  const selectedModel = historyModelId.value ? loadModelConfig(historyModelId.value) : props.model;
+  if (!selectedModel) {
     console.error('No model configured');
     return;
   }
@@ -428,10 +458,11 @@ async function sendChatMessage(text) {
 
   activeRequestId = `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   isDoneReceived = false;
-  console.log('[KbChat] sendChatMessage 开始, requestId=', activeRequestId, 'mode=', mode, 'model=', props.model?.modelName, 'kbName=', props.kbName, 'folderPath=', props.folderPath);
+  historyModelId.value = selectedModel.id || '';
+  console.log('[KbChat] sendChatMessage 开始, requestId=', activeRequestId, 'mode=', mode, 'model=', selectedModel?.modelName, 'kbName=', props.kbName, 'folderPath=', props.folderPath);
 
   // props.model 是 Vue 响应式 Proxy，无法被 Electron IPC structured clone，必须深拷贝成普通对象
-  const plainModel = JSON.parse(JSON.stringify(props.model));
+  const plainModel = JSON.parse(JSON.stringify(selectedModel));
 
   const baseArgs = {
     requestId: activeRequestId,
@@ -449,7 +480,7 @@ async function sendChatMessage(text) {
     if (mode === 'chat') {
       result = await electronService.invoke('chat_with_memory', {
         ...baseArgs,
-        sessionId: currentSessionId || '',
+        sessionId: currentSessionId.value || '',
         scope: 'knowledge',
         scopeKey: historyScopeKey.value
       });

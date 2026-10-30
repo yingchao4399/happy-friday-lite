@@ -101,9 +101,10 @@ try{
     await until('document.querySelector(".command-results")?.textContent.includes("快捷键设置")')
     report.checks.push('全应用按钮打开命令浮窗并搜索设置命令')
     await evaluate(`document.querySelector('.command-palette header button').click()`)
+    const existingOfficeTargets = new Set((await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).map(page => page.id))
     await evaluate(`(async()=>{window.packagedOffice=await window.electronAPI.invoke('office-new',{type:'docs',name:'Command Focus Probe'});location.hash='#/office/'+packagedOffice.viewId.replace('-','/')})()`)
     let officeTarget
-    for(let i=0;i<150;i++){const pages=await(await fetch(`http://127.0.0.1:${port}/json/list`)).json();officeTarget=pages.find(t=>t.type==='page'&&t.id!==target.id&&/docs/.test(t.url));if(officeTarget)break;await pause(200)}
+    for(let i=0;i<150;i++){const pages=await(await fetch(`http://127.0.0.1:${port}/json/list`)).json();officeTarget=pages.find(t=>t.type==='page'&&!existingOfficeTargets.has(t.id)&&/^genoffice-app:\/\/docs\//.test(t.url));if(officeTarget)break;await pause(200)}
     assert.ok(officeTarget,'真实 Office renderer 应创建')
     const mainSocket=socket,officeSocket=new WebSocket(officeTarget.webSocketDebuggerUrl)
     await new Promise((resolve,reject)=>{officeSocket.onopen=resolve;officeSocket.onerror=reject})

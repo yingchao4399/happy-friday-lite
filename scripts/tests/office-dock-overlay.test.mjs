@@ -17,3 +17,13 @@ test('Office Dock expanded bounds follow measured panel height and stay within w
   assert.equal(narrow.x + narrow.width <= 390, true)
   assert.equal(narrow.y + narrow.height <= 310, true)
 })
+
+test('Office Dock accepts a persisted position and clamps it to the workspace', () => {
+  const workspace = { x: 10, y: 20, width: 800, height: 600 }
+  assert.deepEqual(officeDockBounds(workspace, { expanded: false, position: { x: 100, y: 120 } }), {
+    x: 110, y: 140, width: 48, height: 48
+  })
+  const clamped = officeDockBounds(workspace, { expanded: true, panelHeight: 260, position: { x: 900, y: 900 } })
+  assert.equal(clamped.x + clamped.width <= 810, true)
+  assert.equal(clamped.y + clamped.height <= 620, true)
+})

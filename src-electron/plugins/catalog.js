@@ -4,7 +4,14 @@ import {net} from 'electron'
 export async function fetchBytes(url,max=20*1024*1024){
   const parsed=new URL(url)
   if(parsed.protocol!=='https:'||!['github.com','api.github.com','raw.githubusercontent.com','objects.githubusercontent.com','release-assets.githubusercontent.com'].includes(parsed.hostname))throw new Error('PLUGIN_SOURCE_DENIED')
-  const response=await net.fetch(url,{signal:AbortSignal.timeout(90000)})
+  // GitHub rejects anonymous requests without a user agent in some regions
+  // and rate-limits the API much sooner than the release asset host.  Keep
+  // the request explicit and use a caller-provided token only for api.github.com
+  // (never forward it to release assets or arbitrary plugin content).
+  const headers={'Accept':'application/vnd.github+json','User-Agent':'Happy-Friday-Lite/'+(process.env.npm_package_version||'3.0.6')}
+  const token=process.env.GITHUB_TOKEN||process.env.GH_TOKEN
+  if(token&&parsed.hostname==='api.github.com')headers.Authorization=`Bearer ${token}`
+  const response=await net.fetch(url,{headers,signal:AbortSignal.timeout(90000)})
   if(!response.ok)throw new Error('PLUGIN_DOWNLOAD_FAILED: '+response.status)
   if(Number(response.headers.get('content-length'))>max)throw new Error('PLUGIN_PACKAGE_TOO_LARGE')
   const reader=response.body.getReader();const chunks=[];let size=0

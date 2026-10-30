@@ -1,12 +1,15 @@
 <template>
-  <div class="agent-dock" :class="{ 'agent-dock--office-overlay': officeOverlay }">
+  <div v-show="assistantSettings.visible" class="agent-dock" :class="{ 'agent-dock--office-overlay': officeOverlay, 'agent-dock--compact': assistantSettings.appearance === 'compact' }" :style="dockStyle">
     <section v-if="open" ref="panel" class="agent-dock-panel" role="region" :aria-label="t('common.agentDock.title')">
-      <header class="agent-dock-header">
+      <header class="agent-dock-header" @pointerdown="startDrag">
         <div>
           <strong>{{ t('common.agentDock.title') }}</strong>
           <span class="agent-dock-caption">{{ t('common.agentDock.subtitle') }}</span>
         </div>
-        <button class="agent-dock-icon-button" type="button" :aria-label="t('common.agentDock.close')" @click="open = false">×</button>
+        <div class="agent-dock-header-actions">
+          <span class="agent-dock-grip" aria-hidden="true">⠿</span>
+          <button class="agent-dock-icon-button" type="button" :aria-label="t('common.agentDock.close')" @pointerdown.stop @click="open = false">×</button>
+        </div>
       </header>
 
       <div class="agent-dock-context" :aria-label="t('common.agentDock.contextTitle')">
@@ -14,7 +17,15 @@
           <span class="agent-dock-context-label">{{ t('common.agentDock.agentLabel') }}</span>
           <span class="agent-dock-context-value">{{ t('common.agentDock.coreAgent') }}</span>
         </div>
-        <p class="agent-dock-context-note">{{ t('common.agentDock.agentUnavailable') }}</p>
+        <div class="agent-dock-context-row">
+          <span class="agent-dock-context-label">{{ t('common.agentDock.selectedAgentLabel') }}</span>
+          <span class="agent-dock-context-value">{{ t(`common.agentDock.agents.${assistantSettings.agentId}`) }}</span>
+        </div>
+        <div class="agent-dock-context-row">
+          <span class="agent-dock-context-label">{{ t('common.agentDock.modeLabel') }}</span>
+          <span class="agent-dock-context-value">{{ t(`common.agentDock.modes.${assistantSettings.mode}`) }}</span>
+        </div>
+        <p class="agent-dock-context-note" role="status">{{ t('common.agentDock.agentUnavailable') }}</p>
         <div class="agent-dock-context-row">
           <span class="agent-dock-context-label">{{ t('common.agentDock.routeLabel') }}</span>
           <span class="agent-dock-context-value" :title="routePath">{{ routeLabel }}</span>
@@ -35,6 +46,29 @@
           </span>
         </div>
       </div>
+
+      <section class="agent-dock-chat" :aria-label="t('common.agentDock.chatTitle')">
+        <div class="agent-dock-chat-heading">
+          <strong>{{ t('common.agentDock.chatTitle') }}</strong>
+          <button type="button" class="agent-dock-small-button" @click="startNewDockChat">{{ t('common.agentDock.newChat') }}</button>
+        </div>
+        <input v-model="historyQuery" class="agent-dock-history-search" type="search" :placeholder="t('common.agentDock.historySearch')" />
+        <div class="agent-dock-history-list">
+          <button v-for="session in filteredHistorySessions" :key="session.id" type="button" class="agent-dock-history-item" :class="{ 'is-active': session.id === dockSessionId }" @click="selectHistory(session)">
+            <span>{{ session.title || t('common.agentDock.taskFallback') }}</span>
+            <small>{{ formatHistoryDate(session.updatedAt) }}</small>
+          </button>
+          <span v-if="historyLoading" class="agent-dock-history-empty">{{ t('common.agentDock.historyLoading') }}</span>
+          <span v-else-if="!filteredHistorySessions.length" class="agent-dock-history-empty">{{ t('common.agentDock.historyEmpty') }}</span>
+        </div>
+        <div class="agent-dock-chat-messages" aria-live="polite">
+          <div v-for="(message, index) in dockMessages" :key="`${message.requestId || 'local'}-${index}`" class="agent-dock-chat-message" :class="`message-${message.role}`">{{ message.content }}</div>
+        </div>
+        <form class="agent-dock-composer" @submit.prevent="sendDockMessage">
+          <textarea v-model="dockInput" rows="2" :disabled="dockSending" :placeholder="t('common.agentDock.inputPlaceholder')" @keydown.enter.exact.prevent="sendDockMessage" />
+          <button type="submit" :disabled="dockSending || !dockInput.trim()">{{ dockSending ? t('common.agentDock.sending') : t('common.agentDock.send') }}</button>
+        </form>
+      </section>
 
       <p v-if="error" class="agent-dock-error" role="alert">{{ error }}</p>
       <div v-if="loading && !tasks.length" class="agent-dock-empty">{{ t('common.agentDock.loading') }}</div>
@@ -60,7 +94,7 @@
       </footer>
     </section>
 
-    <button class="agent-dock-trigger" type="button" :aria-label="t(open ? 'common.agentDock.close' : 'common.agentDock.open')" :aria-expanded="open" @click="toggle">
+    <button class="agent-dock-trigger" type="button" :aria-label="t(open ? 'common.agentDock.close' : 'common.agentDock.open')" :aria-expanded="open" @pointerdown="startTriggerDrag" @click="toggle">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 14.5z"/><path d="M8 9h8M8 12h5"/></svg>
       <span v-if="activeCount" class="agent-dock-badge">{{ activeCount }}</span>
     </button>
@@ -92,6 +126,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import FridayConfirmDialog from '@/components/ui/FridayConfirmDialog.vue'
 import { electronService } from '@/services/electron'
+import { loadModelConfig } from '@/views/friday/composables/useModelCatalog'
 
 const { t } = useI18n()
 const props = defineProps({ officeOverlay: { type: Boolean, default: false } })
@@ -108,10 +143,37 @@ const error = ref('')
 const busyTaskId = ref('')
 const approvalTask = ref(null)
 const cancelTask = ref(null)
+const historySessions = ref([])
+const historyQuery = ref('')
+const historyLoading = ref(false)
+const dockMessages = ref([])
+const dockInput = ref('')
+const dockSending = ref(false)
+const dockPosition = ref(null)
+const dockSessionId = ref('')
+const assistantSettings = ref({ visible: true, appearance: 'default', mode: 'auto', agentId: 'friday' })
+let dockRequestId = ''
+let dragState = null
+let triggerDragMoved = false
+let suppressTriggerClick = false
+let unlistenDockChunk = null
+let unlistenDockDone = null
+let unlistenDockError = null
+let unlistenDockSession = null
+let unlistenDockSessionCreated = null
+let unlistenAssistantConfig = null
 let refreshTimer = null
 let resizeObserver = null
 
 const activeCount = computed(() => tasks.value.filter(task => ['awaiting_approval', 'running', 'verifying', 'paused'].includes(task.status)).length)
+const filteredHistorySessions = computed(() => {
+  const query = historyQuery.value.trim().toLowerCase()
+  return historySessions.value.filter(session => !query || String(session.title || '').toLowerCase().includes(query)).slice(0, 30)
+})
+const dockStyle = computed(() => {
+  if (props.officeOverlay || !dockPosition.value) return undefined
+  return { left: `${dockPosition.value.x}px`, top: `${dockPosition.value.y}px`, right: 'auto', bottom: 'auto' }
+})
 const routePath = computed(() => route.path || '/')
 const routeLabel = computed(() => {
   const path = routePath.value
@@ -150,6 +212,132 @@ function statusLabel(status) {
   return translated === key ? String(status || '') : translated
 }
 
+function formatHistoryDate(value) {
+  if (!value) return ''
+  try { return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(value)) } catch { return '' }
+}
+
+async function refreshHistory() {
+  historyLoading.value = true
+  try {
+    const sessions = await electronService.invoke('get_sessions', { scope: 'friday-dock', scopeKey: null })
+    historySessions.value = Array.isArray(sessions) ? sessions : []
+  } catch { historySessions.value = [] } finally { historyLoading.value = false }
+}
+
+async function selectHistory(session) {
+  if (!session?.id || historyLoading.value) return
+  historyLoading.value = true
+  error.value = ''
+  try {
+    const messages = await electronService.invoke('get_session_messages', {
+      sessionId: session.id,
+      scope: 'friday-dock',
+      scopeKey: null
+    })
+    dockSessionId.value = session.id
+    dockMessages.value = (Array.isArray(messages) ? messages : [])
+      .filter(message => message && (message.role === 'user' || message.role === 'assistant'))
+      .map(message => ({
+        role: message.role,
+        content: String(message.content || ''),
+        requestId: `history_${session.id}`
+      }))
+    open.value = true
+    await nextTick()
+    const messageList = panel.value?.querySelector('.agent-dock-chat-messages')
+    if (messageList) messageList.scrollTop = messageList.scrollHeight
+  } catch (err) {
+    error.value = err?.message || t('common.agentDock.historyLoadFailed')
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+function startNewDockChat() {
+  dockMessages.value = []
+  dockInput.value = ''
+  dockSessionId.value = ''
+  dockRequestId = ''
+}
+
+async function sendDockMessage() {
+  const message = dockInput.value.trim()
+  if (!message || dockSending.value) return
+  const model = loadModelConfig()
+  if (!model?.apiKey || !model?.modelName || !(model?.baseUrl || model?.modelUrl)) {
+    error.value = t('common.agentDock.modelMissing')
+    return
+  }
+  dockInput.value = ''
+  const requestId = `dock_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  dockRequestId = requestId
+  dockSending.value = true
+  dockMessages.value.push({ role: 'user', content: message, requestId })
+  dockMessages.value.push({ role: 'assistant', content: '', requestId })
+  try {
+    const result = await electronService.invoke('chat_with_memory', {
+      requestId, sessionId: dockSessionId.value || '', model, message, enableThinking: false,
+      scope: 'friday-dock', scopeKey: null, attachments: [],
+      agentId: assistantSettings.value.agentId,
+      agentMode: assistantSettings.value.mode
+    })
+    if (result?.sessionId) dockSessionId.value = result.sessionId
+    await refreshHistory()
+  } catch (err) {
+    const assistant = dockMessages.value.at(-1)
+    if (assistant?.role === 'assistant') assistant.content = err?.message || t('common.agentDock.chatFailed')
+  } finally { dockSending.value = false }
+}
+
+function startDrag(event) {
+  if (event.button !== 0 || event.target?.closest('button')) return
+  const root = event.currentTarget?.closest('.agent-dock')
+  const rect = root?.getBoundingClientRect()
+  if (!rect) return
+  dragState = { offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, lastX: event.clientX, lastY: event.clientY }
+  window.addEventListener('pointermove', moveDrag)
+  window.addEventListener('pointerup', stopDrag, { once: true })
+  event.currentTarget?.setPointerCapture?.(event.pointerId)
+}
+function startTriggerDrag(event) {
+  if (event.button !== 0) return
+  const root = event.currentTarget?.closest('.agent-dock')
+  const rect = root?.getBoundingClientRect()
+  if (!rect) return
+  triggerDragMoved = false
+  dragState = { offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY, trigger: true }
+  window.addEventListener('pointermove', moveDrag)
+  window.addEventListener('pointerup', stopTriggerDrag, { once: true })
+}
+function moveDrag(event) {
+  if (!dragState) return
+  if (dragState.trigger && Math.hypot(event.clientX - dragState.startX, event.clientY - dragState.startY) > 4) triggerDragMoved = true
+  if (props.officeOverlay) {
+    const dx = event.clientX - dragState.lastX
+    const dy = event.clientY - dragState.lastY
+    dragState.lastX = event.clientX
+    dragState.lastY = event.clientY
+    if (dx || dy) electronService.request('office-dock-move', { dx, dy }).catch(() => {})
+    return
+  }
+  const width = panel.value?.parentElement?.getBoundingClientRect?.().width || 52
+  const height = panel.value?.parentElement?.getBoundingClientRect?.().height || 52
+  const x = Math.max(8, Math.min(window.innerWidth - width - 8, event.clientX - dragState.offsetX))
+  const y = Math.max(8, Math.min(window.innerHeight - height - 8, event.clientY - dragState.offsetY))
+  dockPosition.value = { x, y }
+}
+function stopDrag() {
+  if (dockPosition.value) localStorage.setItem('happy-friday-dock-position', JSON.stringify(dockPosition.value))
+  dragState = null
+  window.removeEventListener('pointermove', moveDrag)
+}
+function stopTriggerDrag() {
+  if (triggerDragMoved) suppressTriggerClick = true
+  stopDrag()
+  window.setTimeout(() => { suppressTriggerClick = false }, 0)
+}
+
 async function refreshTasks() {
   if (loading.value) return
   loading.value = true
@@ -180,6 +368,7 @@ async function refreshCapabilities() {
 }
 
 function toggle() {
+  if (suppressTriggerClick) return
   open.value = !open.value
   syncOfficeOverlayBounds()
   if (open.value) {
@@ -264,8 +453,52 @@ watch(open, async () => {
 })
 
 onMounted(() => {
+  const applyAssistantSettings = (config) => {
+    const saved = config?.globalAgentDock || {}
+    assistantSettings.value = {
+      visible: saved.visible !== false,
+      appearance: saved.appearance === 'compact' ? 'compact' : 'default',
+      mode: ['friday', 'researcher', 'auto'].includes(saved.mode) ? saved.mode : 'auto',
+      agentId: ['friday', 'researcher'].includes(saved.agentId) ? saved.agentId : 'friday'
+    }
+  }
+  electronService.invoke('get-config').then(applyAssistantSettings).catch(() => {})
+  unlistenAssistantConfig = electronService.listen('config-changed', ({ payload }) => applyAssistantSettings(payload))
+  try {
+    const saved = JSON.parse(localStorage.getItem('happy-friday-dock-position') || 'null')
+    if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) dockPosition.value = saved
+  } catch { /* ignore corrupt position */ }
+  refreshHistory()
+  // Tasks are refreshed when the dock opens or after an action. Avoid a
+  // six-second IPC poll that made opening the panel compete with the editor.
   refreshTasks()
-  refreshTimer = window.setInterval(refreshTasks, 6000)
+  unlistenDockChunk = electronService.listen('chat-chunk', ({ payload }) => {
+    if (!payload || payload.requestId !== dockRequestId) return
+    const assistant = dockMessages.value.at(-1)
+    if (assistant?.role === 'assistant') assistant.content += String(payload.content || '')
+  })
+  unlistenDockSessionCreated = electronService.listen('chat-session-created', ({ payload }) => {
+    if (!payload || payload.requestId !== dockRequestId || !payload.sessionId) return
+    dockSessionId.value = payload.sessionId
+  })
+  unlistenDockDone = electronService.listen('chat-done', ({ payload }) => {
+    if (!payload || payload.requestId !== dockRequestId) return
+    const assistant = dockMessages.value.at(-1)
+    if (assistant?.role === 'assistant' && payload.fullContent) assistant.content = payload.fullContent
+    if (payload.sessionId) dockSessionId.value = payload.sessionId
+    dockSending.value = false
+    refreshHistory()
+  })
+  unlistenDockError = electronService.listen('chat-error', ({ payload }) => {
+    if (!payload || payload.requestId !== dockRequestId) return
+    const assistant = dockMessages.value.at(-1)
+    if (assistant?.role === 'assistant') assistant.content = payload.error || t('common.agentDock.chatFailed')
+    if (payload.sessionId && !dockSessionId.value) dockSessionId.value = payload.sessionId
+    dockSending.value = false
+  })
+  unlistenDockSession = electronService.listen('session-title-updated', ({ payload }) => {
+    if (payload?.sessionId) refreshHistory()
+  })
   if (props.officeOverlay) {
     resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(syncOfficeOverlayBounds) : null
     if (resizeObserver && panel.value) resizeObserver.observe(panel.value)
@@ -279,6 +512,9 @@ watch(routePath, () => {
 
 onUnmounted(() => {
   window.clearInterval(refreshTimer)
+  unlistenDockChunk?.(); unlistenDockSessionCreated?.(); unlistenDockDone?.(); unlistenDockError?.(); unlistenDockSession?.()
+  unlistenAssistantConfig?.()
+  window.removeEventListener('pointermove', moveDrag)
   resizeObserver?.disconnect()
   if (props.officeOverlay) electronService.request('office-dock-set-expanded', { expanded: false }).catch(() => {})
 })
@@ -286,13 +522,19 @@ onUnmounted(() => {
 
 <style scoped>
 .agent-dock { position: fixed; right: 22px; bottom: 22px; z-index: 1800; font-family: inherit; color: var(--text-primary); }
+.agent-dock--compact .agent-dock-trigger { width: 40px; height: 40px; }
+.agent-dock--compact .agent-dock-trigger svg { width: 19px; height: 19px; }
+.agent-dock--compact .agent-dock-panel { width: min(320px, calc(100vw - 32px)); }
+.agent-dock--compact .agent-dock-header { padding: 11px 13px 9px; }
 .agent-dock--office-overlay { right: 0; bottom: 0; }
 .agent-dock-trigger { position: relative; display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-primary); color: var(--text-primary); box-shadow: 0 6px 22px #0002; cursor: pointer; }
 .agent-dock-trigger svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .agent-dock-badge { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 10px; background: var(--accent-color, #6558dc); color: #fff; font-size: 11px; line-height: 18px; }
 .agent-dock-panel { position: absolute; right: 0; bottom: 60px; display: flex; flex-direction: column; width: min(360px, calc(100vw - 32px)); max-height: min(520px, calc(100vh - 110px)); overflow: hidden; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-primary); box-shadow: 0 12px 40px #0003; }
 .agent-dock--office-overlay .agent-dock-panel { right: 0; bottom: 48px; width: min(360px, 100vw); max-height: calc(100vh - 48px); border-radius: 14px 0 0 14px; }
-.agent-dock-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 15px 16px 12px; border-bottom: 1px solid var(--border-color); }
+.agent-dock-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 15px 16px 12px; border-bottom: 1px solid var(--border-color); cursor: move; user-select: none; }
+.agent-dock-header-actions { display: flex; align-items: center; gap: 5px; }
+.agent-dock-grip { color: var(--text-secondary); font-size: 17px; line-height: 26px; }
 .agent-dock-header strong { display: block; font-size: 14px; }
 .agent-dock-caption { display: block; margin-top: 3px; color: var(--text-secondary); font-size: 12px; }
 .agent-dock-icon-button { width: 26px; height: 26px; border: 0; border-radius: 6px; background: transparent; color: inherit; font-size: 20px; cursor: pointer; }
@@ -301,7 +543,26 @@ onUnmounted(() => {
 .agent-dock-context-label { flex: none; color: var(--text-secondary); }
 .agent-dock-context-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .agent-dock-context-note { margin: -2px 0 2px; color: var(--text-secondary); line-height: 1.35; }
+.agent-dock-context-note[role="status"] { padding: 5px 7px; border-radius: 6px; background: var(--bg-primary); }
 .agent-dock-context-resource { overflow: hidden; color: var(--text-secondary); text-overflow: ellipsis; white-space: nowrap; }
+.agent-dock-chat { display: flex; flex-direction: column; min-height: 0; padding: 10px 14px 0; border-bottom: 1px solid var(--border-color); }
+.agent-dock-chat-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; font-size: 12px; }
+.agent-dock-small-button { border: 0; background: transparent; color: var(--accent-color, #6558dc); font: inherit; cursor: pointer; }
+.agent-dock-history-search { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 7px; background: var(--bg-primary); color: inherit; font: inherit; font-size: 11px; }
+.agent-dock-history-list { max-height: 115px; overflow: auto; margin-top: 6px; }
+.agent-dock-history-item { display: flex; align-items: center; justify-content: space-between; gap: 7px; width: 100%; padding: 6px 4px; border: 0; border-radius: 5px; background: transparent; color: inherit; text-align: left; font: inherit; font-size: 11px; cursor: pointer; }
+.agent-dock-history-item:hover, .agent-dock-history-item.is-active { background: var(--bg-secondary); }
+.agent-dock-history-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agent-dock-history-item small { flex: none; color: var(--text-secondary); }
+.agent-dock-history-empty { display: block; padding: 8px 2px; color: var(--text-secondary); font-size: 11px; }
+.agent-dock-chat-messages { display: flex; flex-direction: column; gap: 5px; max-height: 125px; overflow: auto; padding: 8px 0; }
+.agent-dock-chat-message { max-width: 88%; padding: 6px 8px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; font-size: 12px; line-height: 1.4; }
+.agent-dock-chat-message.message-user { align-self: flex-end; background: var(--accent-color, #6558dc); color: #fff; }
+.agent-dock-chat-message.message-assistant { align-self: flex-start; background: var(--bg-secondary); }
+.agent-dock-composer { display: flex; align-items: flex-end; gap: 6px; padding: 4px 0 10px; }
+.agent-dock-composer textarea { flex: 1; min-width: 0; resize: vertical; padding: 7px 8px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: inherit; font: inherit; font-size: 12px; line-height: 1.35; }
+.agent-dock-composer button { flex: none; padding: 7px 9px; border: 1px solid var(--accent-color, #6558dc); border-radius: 7px; background: var(--accent-color, #6558dc); color: #fff; font: inherit; font-size: 11px; cursor: pointer; }
+.agent-dock-composer button:disabled { opacity: .5; cursor: default; }
 .agent-dock-capability-list { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .agent-dock-capability, .agent-dock-capability-more { max-width: 145px; overflow: hidden; padding: 2px 5px; border: 1px solid var(--border-color); border-radius: 5px; text-overflow: ellipsis; white-space: nowrap; }
 .agent-dock-capability-more { color: var(--text-secondary); }
@@ -320,6 +581,6 @@ onUnmounted(() => {
 .agent-dock-actions button.danger { color: var(--color-danger, #c0392b); }
 .agent-dock-actions button:disabled, .agent-dock-footer button:disabled { opacity: .5; cursor: default; }
 .agent-dock-footer { display: flex; justify-content: space-between; gap: 8px; padding: 11px 14px; }
-@media (max-width: 600px) { .agent-dock:not(.agent-dock--office-overlay) { right: 14px; bottom: 14px; } }
+@media (max-width: 600px) { .agent-dock:not(.agent-dock--office-overlay) { right: 14px; bottom: 14px; } .agent-dock-panel { width: min(390px, calc(100vw - 16px)); } }
 @media (prefers-reduced-motion: reduce) { .agent-dock *, .agent-dock *::before, .agent-dock *::after { scroll-behavior: auto !important; transition-duration: 0s !important; } }
 </style>

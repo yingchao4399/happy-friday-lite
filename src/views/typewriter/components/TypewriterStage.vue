@@ -9,7 +9,7 @@ import { NocturneShell } from '@/features/typewriter/nocturne-core/lib/nocturne/
 import { connectSettings, setSettings } from '@/features/typewriter/nocturne-core/lib/nocturne/store.ts'
 import { TerminalSurface } from '@/features/typewriter/plugins/TerminalSurface.tsx'
 import { NoteSurface } from '@/features/typewriter/plugins/NoteSurface.tsx'
-import { focusContent } from '@/features/typewriter/content-plugin'
+import { focusContent, blurContent } from '@/features/typewriter/content-plugin'
 import 'xterm/css/xterm.css'
 import '@fontsource/courier-prime/400.css'
 import '@fontsource/courier-prime/700.css'
@@ -33,7 +33,9 @@ function render() {
   root.render(React.createElement(NocturneShell, {header: null}, content))
 }
 function command(name) { window.dispatchEvent(new CustomEvent('nocturne:command', {detail: name})) }
-defineExpose({ command })
+function focus() { focusContent() }
+function blur() { blurContent() }
+defineExpose({ command, focus, blur })
 watch(() => props.settings, next => setSettings(next), {deep: true})
 watch([() => props.source, locale], render)
 function mount() {
@@ -48,7 +50,10 @@ function unmount() {
 }
 onMounted(mount)
 onActivated(mount)
-onDeactivated(unmount)
+// A note surface is kept mounted by KeepAlive so returning from another page
+// does not rebuild the original React/WebGL stage. Terminal mode still tears
+// down its PTY when the route is deactivated.
+onDeactivated(() => { if (!props.source) unmount() })
 onBeforeUnmount(unmount)
 </script>
 <style>

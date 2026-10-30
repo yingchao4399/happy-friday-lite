@@ -27,20 +27,24 @@
       <input v-model="historySearch" type="search" :placeholder="t('friday.historySearch')" @focus="historySearchFocused = true" @blur="historySearchFocused = false" />
     </label>
 
+    <div class="history-views" role="tablist" :aria-label="t('friday.historyTitle')">
+      <button v-for="item in historyViews" :key="item" type="button" role="tab" :aria-selected="historyView === item" :class="{ active: historyView === item }" @click="changeHistoryView(item)">{{ t(`friday.scopedHistory.${item}`) }}</button>
+    </div>
+
     <div class="history-list">
-      <div v-if="loading && !sessions.length" class="history-state">{{ t('history.loading') }}</div>
+      <div v-if="(loading && historyView === 'active' || secondaryLoading) && !shownSessions.length" class="history-state">{{ t('history.loading') }}</div>
       <template v-else-if="filteredSessions.length">
         <div
           v-for="session in filteredSessions"
           :key="session.id"
           class="history-session"
           role="button"
-          tabindex="0"
+          :tabindex="historyView === 'active' ? 0 : -1"
           :class="{ active: session.id === currentSessionId }"
           :title="session.title || t('friday.untitledSession')"
-          @click="$emit('select', session)"
-          @keydown.enter="$emit('select', session)"
-          @keydown.space.prevent="$emit('select', session)"
+          @click="historyView === 'active' && $emit('select', session)"
+          @keydown.enter="historyView === 'active' && $emit('select', session)"
+          @keydown.space.prevent="historyView === 'active' && $emit('select', session)"
         >
           <svg class="history-session-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="15" rx="3"></rect>
@@ -50,7 +54,9 @@
             <path d="M16 10h.01"></path>
           </svg>
           <span class="history-session-content">
-            <span class="history-session-title">{{ session.title || t('friday.untitledSession') }}</span>
+            <span class="history-session-title"><Pin v-if="session.pinnedAt" :size="12" />{{ session.title || t('friday.untitledSession') }}</span>
+            <span v-if="session.preview" class="history-session-preview">{{ session.preview }}</span>
+            <span class="history-session-meta">{{ formatHistoryDate(session.updatedAt) }}<template v-if="session.agentId || session.modelId"> · {{ session.agentId || session.modelId }}</template></span>
           </span>
           <button
             class="history-session-menu-btn"
@@ -76,19 +82,31 @@
   <Teleport to="body">
     <div v-if="activeHistorySessionMenuId" class="history-session-menu-backdrop" @click="closeHistorySessionMenu">
       <div class="history-session-menu" :style="historySessionMenuStyle" @click.stop>
-        <button type="button" class="history-menu-item" @click="renameHistorySession">
+        <button v-if="historyView === 'active'" type="button" class="history-menu-item" @click="renameHistorySession">
           <Pencil :size="14" :stroke-width="1.8" />
           <span>{{ t('history.rename') }}</span>
         </button>
-        <button type="button" class="history-menu-item" @click="saveHistorySessionAsNote">
+        <button v-if="historyView === 'active'" type="button" class="history-menu-item" @click="toggleHistoryPin">
+          <Pin :size="14" :stroke-width="1.8" />
+          <span>{{ t(activeMenuSession?.pinnedAt ? 'friday.scopedHistory.unpin' : 'friday.scopedHistory.pin') }}</span>
+        </button>
+        <button v-if="historyView === 'active'" type="button" class="history-menu-item" @click="saveHistorySessionAsNote">
           <SaveNoteIcon :size="14" :stroke-width="1.8" />
           <span>{{ t('history.saveAsNote') }}</span>
         </button>
-        <button type="button" class="history-menu-item" @click="shareHistorySession">
+        <button v-if="historyView === 'active'" type="button" class="history-menu-item" @click="shareHistorySession">
           <Share2 :size="14" :stroke-width="1.8" />
           <span>{{ t('history.share') }}</span>
         </button>
-        <button type="button" class="history-menu-item delete" @click="deleteHistorySession">
+        <button v-if="historyView !== 'trash'" type="button" class="history-menu-item" @click="toggleHistoryArchive">
+          <Archive :size="14" :stroke-width="1.8" />
+          <span>{{ t(historyView === 'archived' ? 'friday.scopedHistory.unarchive' : 'friday.scopedHistory.archive') }}</span>
+        </button>
+        <button v-if="historyView === 'trash'" type="button" class="history-menu-item" @click="restoreHistorySession">
+          <RotateCcw :size="14" :stroke-width="1.8" />
+          <span>{{ t('friday.scopedHistory.restore') }}</span>
+        </button>
+        <button v-else type="button" class="history-menu-item delete" @click="deleteHistorySession">
           <Trash2 :size="14" :stroke-width="1.8" />
           <span>{{ t('history.delete') }}</span>
         </button>
@@ -113,7 +131,7 @@
     <div v-if="showHistoryDeleteDialog" class="history-delete-overlay" @click.self="showHistoryDeleteDialog = false">
       <div class="history-delete-dialog">
         <div class="history-delete-title">{{ t('history.confirmDelete') }}</div>
-        <p class="history-delete-message">{{ t('history.deleteWarning', { title: historyDeleteTitle }) }}</p>
+        <p class="history-delete-message">{{ t('friday.scopedHistory.trashWarning', { title: historyDeleteTitle }) }}</p>
         <div class="history-rename-actions">
           <button type="button" @click="showHistoryDeleteDialog = false">{{ t('history.cancel') }}</button>
           <button type="button" class="delete-confirm" @click="confirmHistoryDelete">{{ t('history.delete') }}</button>
@@ -133,7 +151,7 @@
 import { computed, nextTick, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { electronService } from '@/services/electron';
-import { Pencil, Share2, Trash2 } from 'lucide-vue-next';
+import { Archive, Pencil, Pin, RotateCcw, Share2, Trash2 } from 'lucide-vue-next';
 import SaveNoteIcon from '@/components/icons/SaveNoteIcon.vue';
 import { useFridayStore } from '@/store';
 import ShareSessionModal from '@/views/history/ShareSessionModal.vue';
@@ -154,6 +172,11 @@ const fridayStore = useFridayStore();
 
 const historySearch = ref('');
 const historySearchFocused = ref(false);
+const historyViews = ['active', 'archived', 'trash'];
+const historyView = ref('active');
+const secondarySessions = ref([]);
+const secondaryLoading = ref(false);
+let secondaryRevision = 0;
 const activeHistorySessionMenuId = ref(null);
 const historyRenameSessionId = ref(null);
 const historySessionMenuStyle = ref({});
@@ -170,11 +193,43 @@ const { handleAddToKnowledge } = useConversationSummary({ messages: sessionMessa
 let historyResizeStartX = 0;
 let historyResizeStartWidth = 0;
 
+const shownSessions = computed(() => historyView.value === 'active' ? props.sessions : secondarySessions.value);
+const activeMenuSession = computed(() => shownSessions.value.find(item => item.id === activeHistorySessionMenuId.value));
 const filteredSessions = computed(() => {
   const keyword = historySearch.value.trim().toLowerCase();
-  if (!keyword) return props.sessions;
-  return props.sessions.filter(session => (session.title || t('friday.untitledSession')).toLowerCase().includes(keyword));
+  if (!keyword) return shownSessions.value;
+  return shownSessions.value.filter(session => `${session.title || t('friday.untitledSession')} ${session.preview || ''}`.toLowerCase().includes(keyword));
 });
+
+async function refreshActiveSessions() {
+  const sessions = await electronService.invoke('get_sessions', { scope: 'friday', scopeKey: null });
+  fridayStore.setHistorySessions((Array.isArray(sessions) ? sessions : []).slice(0, 50));
+}
+
+async function refreshSecondarySessions() {
+  const revision = ++secondaryRevision;
+  const view = historyView.value;
+  secondaryLoading.value = true;
+  try {
+    const sessions = await electronService.invoke('get_sessions', { scope: 'friday', scopeKey: null, view });
+    if (revision === secondaryRevision) secondarySessions.value = Array.isArray(sessions) ? sessions : [];
+  } catch (err) {
+    if (revision === secondaryRevision) showToast(t('friday.scopedHistory.loadFailed'));
+  } finally {
+    if (revision === secondaryRevision) secondaryLoading.value = false;
+  }
+}
+
+function changeHistoryView(view) {
+  historyView.value = view;
+  closeHistorySessionMenu();
+  if (view !== 'active') refreshSecondarySessions();
+}
+
+function formatHistoryDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString(undefined, { month: '2-digit', day: '2-digit' });
+}
 
 function toggleHistorySessionMenu(sessionId, event) {
   if (activeHistorySessionMenuId.value === sessionId) {
@@ -197,7 +252,7 @@ function closeHistorySessionMenu() {
 
 function deleteHistorySession() {
   const sessionId = activeHistorySessionMenuId.value;
-  const session = props.sessions.find(item => item.id === sessionId);
+  const session = shownSessions.value.find(item => item.id === sessionId);
   if (!session) return;
   historyDeleteSessionId.value = session.id;
   historyDeleteTitle.value = session.title || t('friday.untitledSession');
@@ -209,8 +264,10 @@ async function confirmHistoryDelete() {
   const sessionId = historyDeleteSessionId.value;
   if (!sessionId) return;
   try {
-    await electronService.invoke('delete_session', { sessionId, scope: 'friday', scopeKey: null });
-    fridayStore.removeHistorySession(sessionId);
+    const moved = await electronService.invoke('trash_session', { sessionId, scope: 'friday', scopeKey: null });
+    if (!moved) throw new Error('Failed to move session to trash');
+    if (historyView.value === 'active') fridayStore.removeHistorySession(sessionId);
+    else await refreshSecondarySessions();
     emit('deleted', sessionId);
   } catch (err) {
     console.error('Failed to delete session:', err);
@@ -219,6 +276,43 @@ async function confirmHistoryDelete() {
     historyDeleteSessionId.value = null;
     historyDeleteTitle.value = '';
   }
+}
+
+async function toggleHistoryPin() {
+  const session = activeMenuSession.value;
+  closeHistorySessionMenu();
+  if (!session) return;
+  try {
+    const updated = await electronService.invoke('set_session_pinned', { sessionId: session.id, pinned: !session.pinnedAt, scope: 'friday', scopeKey: null });
+    if (!updated) throw new Error('Failed to update pin');
+    await refreshActiveSessions();
+  } catch (err) { showToast(t('friday.scopedHistory.actionFailed')); }
+}
+
+async function toggleHistoryArchive() {
+  const session = activeMenuSession.value;
+  const wasActive = historyView.value === 'active';
+  closeHistorySessionMenu();
+  if (!session) return;
+  try {
+    const updated = await electronService.invoke('set_session_archived', { sessionId: session.id, archived: wasActive, scope: 'friday', scopeKey: null });
+    if (!updated) throw new Error('Failed to update archive');
+    if (wasActive) emit('deleted', session.id);
+    await refreshActiveSessions();
+    if (!wasActive) await refreshSecondarySessions();
+  } catch (err) { showToast(t('friday.scopedHistory.actionFailed')); }
+}
+
+async function restoreHistorySession() {
+  const session = activeMenuSession.value;
+  closeHistorySessionMenu();
+  if (!session) return;
+  try {
+    const restored = await electronService.invoke('restore_session', { sessionId: session.id, scope: 'friday', scopeKey: null });
+    if (!restored) throw new Error('Failed to restore session');
+    await refreshSecondarySessions();
+    await refreshActiveSessions();
+  } catch (err) { showToast(t('friday.scopedHistory.actionFailed')); }
 }
 
 function shareHistorySession() {
@@ -410,6 +504,30 @@ onUnmounted(stopHistoryResize);
   display: none;
 }
 
+.history-views {
+  display: flex;
+  gap: 2px;
+  margin: 0 4px 6px;
+}
+
+.history-views button {
+  flex: 1;
+  padding: 5px 2px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.history-views button.active {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
 .history-list {
   flex: 1;
   min-height: 0;
@@ -472,11 +590,24 @@ onUnmounted(stopHistoryResize);
 }
 
 .history-session-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   overflow: hidden;
   color: inherit;
   font-size: 13px;
   font-weight: 520;
   line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-session-preview,
+.history-session-meta {
+  overflow: hidden;
+  width: 100%;
+  color: var(--text-tertiary);
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

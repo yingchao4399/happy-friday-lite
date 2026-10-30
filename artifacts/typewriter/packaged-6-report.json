@@ -1,0 +1,328 @@
+{
+  "batch": "6",
+  "checks": [
+    "打包应用真实输入、中英笔记同 ID 保存、AudioContext 击键声",
+    "安装包三主题×六纸张×两档灯光 36 组合切换，纸面墨色生效，保持同一输入元素与正文",
+    "安装包 Studio 扩展字体真实下载到本地、校验后加载并切换 Source Code Pro",
+    "安装包内三款字体加载切换、中文字体、预设墨色",
+    "安装包 node-pty 真实 PowerShell 键盘输入与 PACKAGED_42 计算回显",
+    "中文界面可用英文 Command palette 和拼音 mingling 搜索同一命令",
+    "全应用按钮打开命令浮窗并搜索设置命令",
+    "真实 Office 原生视图中点击常驻按钮打开命令浮窗",
+    "关闭命令浮窗后 Office 文档保持、焦点恢复，原生视图未重载",
+    "打包应用插件管理、独立宿主启用、命令面板执行插件、插字联动同 ID 笔记保存",
+    "打包应用停用释放插件命令，卸载清理插件和配置",
+    "安装包官方示例原包 Modal/设置实际运行，隔离宿主 CM6 保存后同 ID 打字机内容自动同步",
+    "安装包从官方目录下载真实社区插件原包，启用并执行 CM6 排序，结果保存同一笔记"
+  ],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-6-vqpLfl",
+  "ok": true,
+  "feedback": {
+    "audio": 1,
+    "stage": {
+      "render": "high",
+      "machine": "drawn",
+      "motion": "moving",
+      "keys": "1"
+    },
+    "visible": "visible",
+    "focus": true
+  },
+  "matrix": [
+    {
+      "theme": 0,
+      "paper": 0,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 0,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 1,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 1,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 2,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 2,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 3,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 3,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 4,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 4,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 5,
+      "brightness": 0.2,
+      "ink": "rgb(230, 225, 234)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 0,
+      "paper": 5,
+      "brightness": 2,
+      "ink": "rgb(230, 225, 234)",
+      "paperColor": "#f4ecdb",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 0,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 0,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 1,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 1,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 2,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 2,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 3,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 3,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 4,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 4,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 5,
+      "brightness": 0.2,
+      "ink": "rgb(230, 225, 234)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 1,
+      "paper": 5,
+      "brightness": 2,
+      "ink": "rgb(230, 225, 234)",
+      "paperColor": "#1c1714",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 0,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 0,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 1,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 1,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 2,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 2,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 3,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 3,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 4,
+      "brightness": 0.2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 4,
+      "brightness": 2,
+      "ink": "rgb(42, 32, 25)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 5,
+      "brightness": 0.2,
+      "ink": "rgb(230, 225, 234)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    },
+    {
+      "theme": 2,
+      "paper": 5,
+      "brightness": 2,
+      "ink": "rgb(230, 225, 234)",
+      "paperColor": "#171826",
+      "machine": "drawn"
+    }
+  ],
+  "community": {
+    "id": "obsidian-sort-and-permute-lines",
+    "repo": "vinzent03/obsidian-sort-and-permute-lines",
+    "version": "0.9.0",
+    "compatibility": "partial",
+    "verifiedCommand": "sort-alphabetically"
+  }
+}

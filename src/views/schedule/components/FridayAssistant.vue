@@ -42,9 +42,12 @@
             </div>
             <ScopedHistoryButton
               scope="schedule-agent"
+              :current-session-id="sessionId"
               label="历史"
               title="日程对话历史"
               @select="selectHistory"
+              @create="startNewHistory"
+              @removed="handleHistoryRemoved"
             />
             <button class="close-btn" @click="close">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -129,9 +132,8 @@ const bubbleContent = ref('');
 const historyMessages = ref([]);
 
 let activeRequestId = null;
-// 注意：不再复用旧 sessionId —— 旧会话历史中可能包含 AI 幻觉数据，会污染后续对话
-// 每次组件加载时使用空 sessionId，由后端创建新会话
-let sessionId = '';
+const sessionId = ref('');
+const historyModelId = ref('');
 let unlistenChunk = null;
 let unlistenDone = null;
 let unlistenError = null;
@@ -147,12 +149,34 @@ const suggestions = [
 ];
 
 function selectHistory({ session, messages }) {
-  sessionId = session?.id || '';
-  historyMessages.value = messages || [];
+  stopForHistorySwitch();
+  sessionId.value = session?.id || '';
+  historyModelId.value = session?.modelId || '';
+  historyMessages.value = (messages || []).filter(item => item.role === 'user' || item.role === 'assistant');
   bubbleContent.value = '';
   bubbleVisible.value = false;
-  isStreaming.value = false;
   nextTick(syncSendState);
+}
+
+function stopForHistorySwitch() {
+  if (isStreaming.value) handleStop();
+  activeRequestId = null;
+  isStreaming.value = false;
+  bubbleVisible.value = false;
+  bubbleContent.value = '';
+}
+
+function startNewHistory() {
+  stopForHistorySwitch();
+  sessionId.value = '';
+  historyModelId.value = '';
+  historyMessages.value = [];
+  setInputText('');
+  nextTick(() => inputRef.value?.focus());
+}
+
+function handleHistoryRemoved(removedId) {
+  if (sessionId.value === removedId) startNewHistory();
 }
 
 function renderContent(text) {
@@ -196,8 +220,8 @@ function useSuggestion(text) {
   });
 }
 
-function loadModelConfig() {
-  const selectedId = localStorage.getItem('happy-friday-selected-model');
+function loadModelConfig(modelId = '') {
+  const selectedId = modelId || localStorage.getItem('happy-friday-selected-model');
   try {
     const stored = localStorage.getItem('happy-friday-custom-models');
     if (stored) {
@@ -216,11 +240,12 @@ async function handleSend() {
   const text = inputText.value.trim();
   if (!text || isStreaming.value) return;
 
-  const model = loadModelConfig();
+  const model = loadModelConfig(historyModelId.value);
   if (!model) {
     showBubble('未配置大模型，请先在设置中添加自己的模型。');
     return;
   }
+  historyModelId.value = model.id || '';
 
   // 构造日程管理专用指令（注入当前系统时间，便于解析"今天/明天/下周X/本周"等相对时间）
   const now = new Date();
@@ -257,7 +282,7 @@ async function handleSend() {
   try {
     await electronService.invoke('agent-invoke', {
       requestId: activeRequestId,
-      sessionId: sessionId,
+      sessionId: sessionId.value,
       model: model,
       message: text,
       runtimeInstructions: scheduleMessage.slice(0, -text.length),
@@ -311,8 +336,7 @@ onMounted(() => {
       historyMessages.value.push({ role: 'assistant', content: data.fullContent });
     }
     if (data.sessionId) {
-      sessionId = data.sessionId;
-      // 不再持久化 sessionId，避免复用包含幻觉数据的旧会话
+      sessionId.value = data.sessionId;
     }
     if (!bubbleContent.value) {
       bubbleVisible.value = false;

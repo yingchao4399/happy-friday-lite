@@ -163,6 +163,40 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
+          <div class="setting-item">
+            <div class="item-label-group">
+              <span class="item-label">{{ t('settings.globalAgentDockVisible') }}</span>
+              <span class="item-hint">{{ t('settings.globalAgentDockHint') }}</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" v-model="globalAgentDock.visible" @change="saveGlobalAgentDock" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <span class="item-label">{{ t('settings.globalAgentDockAppearance') }}</span>
+            <div class="font-size-options">
+              <div v-for="option in globalAgentAppearanceOptions" :key="option.value"
+                :class="['font-size-option', { active: globalAgentDock.appearance === option.value }]"
+                @click="selectGlobalAgentAppearance(option.value)">{{ option.label }}</div>
+            </div>
+          </div>
+          <div class="setting-item">
+            <span class="item-label">{{ t('settings.globalAgentMode') }}</span>
+            <div class="font-size-options">
+              <div v-for="option in globalAgentModeOptions" :key="option.value"
+                :class="['font-size-option', { active: globalAgentDock.mode === option.value }]"
+                @click="selectGlobalAgentMode(option.value)">{{ option.label }}</div>
+            </div>
+          </div>
+          <div class="setting-item">
+            <span class="item-label">{{ t('settings.globalAgentSelection') }}</span>
+            <select v-model="globalAgentDock.agentId" class="text-input global-agent-select" @change="saveGlobalAgentDock">
+              <option value="friday">{{ t('settings.globalAgentFriday') }}</option>
+              <option value="researcher">{{ t('settings.globalAgentResearcher') }}</option>
+            </select>
+          </div>
+          <p v-if="globalAgentDockSaveError" class="global-agent-save-error" role="alert">{{ globalAgentDockSaveError }}</p>
         </div>
       </div>
 
@@ -661,6 +695,8 @@ const themeSelectRef = ref(null);
 const showLangDropdown = ref(false);
 const langSelectRef = ref(null);
 let unsubBackupProgress = null;
+let unsubGlobalAgentDockConfig = null;
+let globalAgentDockSaveQueue = Promise.resolve();
 
 const themeOptions = computed(() => [
   { value: 'light', label: t('settings.themeLight') },
@@ -674,6 +710,57 @@ const langOptions = computed(() => [
 ]);
 
 const currentLanguage = ref(appStore.language || 'zh-CN');
+const globalAgentDock = reactive({ visible: true, appearance: 'default', mode: 'auto', agentId: 'friday' });
+const globalAgentDockSaveError = ref('');
+
+const globalAgentAppearanceOptions = computed(() => [
+  { value: 'default', label: t('settings.globalAgentAppearanceDefault') },
+  { value: 'compact', label: t('settings.globalAgentAppearanceCompact') }
+]);
+
+const globalAgentModeOptions = computed(() => [
+  { value: 'friday', label: t('settings.globalAgentModeFriday') },
+  { value: 'researcher', label: t('settings.globalAgentModeResearcher') },
+  { value: 'auto', label: t('settings.globalAgentModeAuto') }
+]);
+
+function applyGlobalAgentDockConfig(config) {
+  const saved = config?.globalAgentDock || {};
+  globalAgentDock.visible = saved.visible !== false;
+  globalAgentDock.appearance = saved.appearance === 'compact' ? 'compact' : 'default';
+  globalAgentDock.mode = ['friday', 'researcher', 'auto'].includes(saved.mode) ? saved.mode : 'auto';
+  globalAgentDock.agentId = ['friday', 'researcher'].includes(saved.agentId) ? saved.agentId : 'friday';
+}
+
+async function saveGlobalAgentDock() {
+  const snapshot = { ...globalAgentDock };
+  const write = globalAgentDockSaveQueue.catch(() => {}).then(async () => {
+    const config = await electronService.invoke('get-config');
+    if (!config) throw new Error(t('settings.globalAgentDockSaveFailed'));
+    config.globalAgentDock = { ...(config.globalAgentDock || {}), ...snapshot };
+    const result = await electronService.invoke('save-config', config);
+    if (result?.success === false) throw new Error(result.error || t('settings.globalAgentDockSaveFailed'));
+  });
+  globalAgentDockSaveQueue = write;
+  globalAgentDockSaveError.value = '';
+  try {
+    await write;
+  } catch (error) {
+    globalAgentDockSaveError.value = error?.message || t('settings.globalAgentDockSaveFailed');
+  }
+}
+
+function selectGlobalAgentAppearance(value) {
+  if (!['default', 'compact'].includes(value) || globalAgentDock.appearance === value) return;
+  globalAgentDock.appearance = value;
+  saveGlobalAgentDock();
+}
+
+function selectGlobalAgentMode(value) {
+  if (!['friday', 'researcher', 'auto'].includes(value) || globalAgentDock.mode === value) return;
+  globalAgentDock.mode = value;
+  saveGlobalAgentDock();
+}
 
 const fontSizeOptions = computed(() => [
   { value: 14, label: t('settings.fontSizeSmall') },
@@ -1478,10 +1565,12 @@ onMounted(() => {
     if (config) {
       runtimeLogsEnabled.value = config.runtimeLogsEnabled !== false;
       appStore.setSidebarModules(config.sidebarModules);
+      applyGlobalAgentDockConfig(config);
       if (config.reminderLeadMinutes) settings.reminderLeadMinutes = config.reminderLeadMinutes;
       if (config.reminderAllDayTime) settings.reminderAllDayTime = config.reminderAllDayTime;
     }
   });
+  unsubGlobalAgentDockConfig = electronService.listen('config-changed', ({ payload }) => applyGlobalAgentDockConfig(payload));
   loadBackupConfig();
   loadDataDirInfo();
   loadHistoryConfig();
@@ -1497,6 +1586,7 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
   document.removeEventListener('keydown', handleKeydown);
   if (unsubBackupProgress) unsubBackupProgress();
+  unsubGlobalAgentDockConfig?.();
 });
 
 onDeactivated(() => {
@@ -1809,6 +1899,17 @@ const openAuthorEmail = () => {
 
 .text-input:focus {
   border-color: var(--text-tertiary);
+}
+
+.global-agent-select {
+  width: 190px;
+}
+
+.global-agent-save-error {
+  margin: 0;
+  padding: 0 20px 12px;
+  color: var(--color-danger, #c0392b);
+  font-size: 12px;
 }
 
 /* 全天日程提醒时间选择 */

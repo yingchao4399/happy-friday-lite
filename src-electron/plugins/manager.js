@@ -11,17 +11,25 @@ import {projectNote,restoreProjection} from './note-projection.js'
 import {getOfficeState,getOfficeDocumentSelection,newOfficeDocument,autoSaveOfficeFile} from '../office/office-host.js'
 const base=path.dirname(fileURLToPath(import.meta.url))
 export class PluginManager{
-  constructor(owner,root=path.join(getDataDir(),'plugins')){this.owner=owner;this.store=new PluginStore(root);this.hosts=new Map();this.projections=new Map();this.locks=new Set()}
+  constructor(owner,root=path.join(getDataDir(),'plugins')){this.owner=owner;this.store=new PluginStore(root);this.hosts=new Map();this.projections=new Map();this.transitions=new Map()}
   emit(channel,value){if(!this.owner.isDestroyed())this.owner.webContents.send(channel,value)}
   async snapshot(){return (await this.store.list()).map(record=>({...record,running:this.hosts.has(record.manifest.id),commands:this.hosts.get(record.manifest.id)?.commands||[]}))}
   async changed(){this.emit('plugins-changed',await this.snapshot())}
+  transition(id,run){
+    const previous=this.transitions.get(id)||Promise.resolve()
+    const task=previous.catch(()=>{}).then(run)
+    this.transitions.set(id,task)
+    task.then(()=>{if(this.transitions.get(id)===task)this.transitions.delete(id)},()=>{if(this.transitions.get(id)===task)this.transitions.delete(id)})
+    return task
+  }
   async invokeHost(entry,method,value,timeout=15000){
     let timer
     try{return await Promise.race([entry.win.webContents.executeJavaScript(`window.${method}(${JSON.stringify(value??null)})`,true),new Promise((_,reject)=>timer=setTimeout(()=>{entry.win.destroy();reject(new Error('PLUGIN_RUNTIME_TIMEOUT'))},timeout))])}finally{clearTimeout(timer)}
   }
-  async enable(id){
+  enable(id){return this.transition(id,()=>this.start(id))}
+  async start(id){
     if(this.hosts.has(id))return
-    if(this.locks.has(id))throw new Error('PLUGIN_BUSY');this.locks.add(id)
+    if(this.owner.isDestroyed())throw new Error('PLUGIN_OWNER_CLOSED')
     let entry
     try{
       const record=(await this.store.list()).find(r=>r.manifest.id===id);if(!record)throw new Error('PLUGIN_NOT_FOUND')
@@ -32,20 +40,34 @@ export class PluginManager{
       win.setMenu(null);win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',event=>event.preventDefault())
       win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false))
       win.on('close',event=>{if(this.hosts.get(id)===entry){event.preventDefault();win.hide()}})
-      win.on('closed',()=>{if(this.hosts.get(id)===entry&&!entry.unloading)void this.fail(id,'PLUGIN_HOST_CLOSED')})
-      win.webContents.on('render-process-gone',(_event,details)=>{void this.fail(id,details.reason)})
-      win.webContents.on('unresponsive',()=>{win.destroy();void this.fail(id,'PLUGIN_UNRESPONSIVE')})
+      win.on('closed',()=>{if(this.hosts.get(id)===entry&&!entry.unloading)void this.fail(id,'PLUGIN_HOST_CLOSED',entry)})
+      win.webContents.on('render-process-gone',(_event,details)=>{entry.crashed=true;if(this.hosts.get(id)===entry&&!entry.unloading)void this.fail(id,details.reason,entry)})
+      win.webContents.on('unresponsive',()=>{if(this.hosts.get(id)===entry&&!entry.unloading){entry.crashed=true;win.destroy();void this.fail(id,'PLUGIN_UNRESPONSIVE',entry)}})
       await win.loadFile(path.join(base,'host.html'))
       const ready=await this.invokeHost(entry,'__fridayPluginBoot',pkg)
       entry.commands=ready.commands
       await this.store.set(id,{enabled:true,lastError:null,compatibility:pkg.manifest.id==='obsidian-sample-plugin'&&pkg.manifest.version==='1.0.0'&&record.hashes['main.js']==='fb38a50b1dbc3987ef34d7c5de77865e7a5c48719ffe3a11baecb6106124b1ae'?'verified':ready.compatibility||'unverified',runtime:{platform:process.platform,version:pkg.manifest.version,editor:'friday-isolated'}})
       await this.changed()
-    }catch(error){if(entry){for(const dispose of entry.tools)dispose();if(!entry.win.isDestroyed())entry.win.destroy()}this.hosts.delete(id);await this.store.set(id,{enabled:false,lastError:error.message,compatibility:'unsupported'}).catch(()=>{});await this.changed();throw error}finally{this.locks.delete(id)}
+    }catch(error){
+      if(entry){entry.unloading=true;for(const dispose of entry.tools)dispose();if(!entry.win.isDestroyed())entry.win.destroy()}
+      this.hosts.delete(id)
+      const patch={enabled:false,lastError:error.message}
+      if(/(?:UNSUPPORTED|PLUGIN_MODULE_MISSING|OBSIDIAN_PLUGIN_CLASS_MISSING)/.test(error.message))patch.compatibility='unsupported'
+      await this.store.set(id,patch).catch(()=>{})
+      await this.changed()
+      throw error
+    }
   }
-  async fail(id,message){await this.disable(id);await this.store.set(id,{enabled:false,lastError:message,compatibility:'unsupported'}).catch(()=>{});await this.changed()}
-  async disable(id){
+  fail(id,message,expected){return this.transition(id,async()=>{
+    if(this.hosts.get(id)!==expected||expected.unloading)return
+    await this.stop(id)
+    await this.store.set(id,{enabled:false,lastError:String(message||'PLUGIN_HOST_FAILED')}).catch(()=>{})
+    await this.changed()
+  })}
+  disable(id){return this.transition(id,()=>this.stop(id))}
+  async stop(id){
     const entry=this.hosts.get(id);if(entry)entry.unloading=true
-    if(entry){if(!entry.win.isDestroyed()){await this.invokeHost(entry,'__fridayPluginUnload',null,2000).catch(()=>{});if(!entry.win.isDestroyed())entry.win.destroy()}for(const dispose of entry.tools)dispose()}
+    if(entry){if(!entry.win.isDestroyed()){if(!entry.crashed)await this.invokeHost(entry,'__fridayPluginUnload',null,2000).catch(()=>{});if(!entry.win.isDestroyed())entry.win.destroy()}for(const dispose of entry.tools)dispose()}
     this.hosts.delete(id)
     for(const key of this.projections.keys())if(key.startsWith(id+':'))this.projections.delete(key)
     await this.store.set(id,{enabled:false}).catch(()=>{});await this.changed()

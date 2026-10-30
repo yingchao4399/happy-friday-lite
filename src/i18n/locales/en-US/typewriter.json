@@ -74,6 +74,11 @@
   "saving": "Saving…",
   "operationFailed": "Operation failed. Your text is still on this page. Please retry.",
   "textFiles": "Text and code files",
+  "insertImage": "Insert image",
+  "images": "Image previews",
+  "image": "Image",
+  "imageTooLarge": "Images must be 12 MB or smaller",
+  "imageFailed": "Could not read the image; try again",
   "original": {
     "1t_2r_36_33_37_37_w_38_2w_2t_w_34_2p_2v_2t": "Across the page",
     "1t_2x_31": "Aim",

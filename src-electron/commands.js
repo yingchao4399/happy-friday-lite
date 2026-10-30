@@ -322,7 +322,7 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('get_sessions', (_event, args = {}) => {
     const { scope, scopeKey } = sessionScopeArgs(args)
-    return db.getSessions(scope, scopeKey)
+    return db.getSessions(scope, scopeKey, args?.view)
   })
 
   ipcMain.handle('get_sessions_with_stats', (_event, args = {}) => {
@@ -336,7 +336,11 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('create_session', (_event, args) => {
-    return db.createSession(args?.title, args?.mode || 'chat', args?.scope || 'friday', args?.scopeKey || null)
+    return db.createSession(args?.title, args?.mode || 'chat', args?.scope || 'friday', args?.scopeKey || null, {
+      resourceUri: args?.resourceUri,
+      agentId: args?.agentId,
+      modelId: args?.modelId
+    })
   })
 
   ipcMain.handle('update_session_title', (_event, args = {}) => {
@@ -358,6 +362,26 @@ export function registerCommands(mainWindow) {
       mainWindow.webContents.send('automation-updated')
     }
     return !!result.deleted
+  })
+
+  ipcMain.handle('set_session_pinned', (_event, args = {}) => {
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.setSessionPinned(args.sessionId, args.pinned === true, scope, scopeKey)
+  })
+
+  ipcMain.handle('set_session_archived', (_event, args = {}) => {
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.setSessionArchived(args.sessionId, args.archived === true, scope, scopeKey)
+  })
+
+  ipcMain.handle('trash_session', (_event, args = {}) => {
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.moveSessionToTrash(args.sessionId, scope, scopeKey)
+  })
+
+  ipcMain.handle('restore_session', (_event, args = {}) => {
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    return db.restoreSessionFromTrash(args.sessionId, scope, scopeKey)
   })
 
   ipcMain.handle('get_session_messages', (_event, args = {}) => {
@@ -413,7 +437,11 @@ export function registerCommands(mainWindow) {
 
     try {
       if (!currentSessionId) {
-        const session = db.createSession(message.slice(0, 20) || '新对话', 'chat', scope, scopeKey)
+        const session = db.createSession(message.slice(0, 20) || '新对话', 'chat', scope, scopeKey, {
+          resourceUri: args.resourceUri || (scopeKey ? `friday://${scope}/${encodeURIComponent(scopeKey)}` : null),
+          agentId: args.agentId || scope,
+          modelId: model?.id || model?.modelName
+        })
         currentSessionId = session.id
         isNewSession = true
       } else {
@@ -422,6 +450,7 @@ export function registerCommands(mainWindow) {
           throw new Error('Session not found')
         }
         if (existing.scope !== scope || (existing.scopeKey || null) !== (scopeKey || null)) throw new Error('Session scope mismatch')
+        if (existing.deletedAt) throw new Error('Session is in trash')
       }
 
       // 重试本轮复用同一条用户消息，避免网络恢复后把用户内容写入两次。

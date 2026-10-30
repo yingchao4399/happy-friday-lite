@@ -1,0 +1,4 @@
+# Generated Office bundles intentionally preserve whitespace inside template literals.
+# Keep Git's whitespace checks focused on authored source files.
+resources/office/main/*.cjs -whitespace
+resources/office/cli/*.cjs -whitespace

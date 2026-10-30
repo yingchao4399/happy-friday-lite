@@ -110,6 +110,7 @@ import AgentMessageBlock from '@/views/friday/components/AgentMessageBlock.vue';
 import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessage.vue';
 import FridayComposer from '@/views/friday/components/FridayComposer.vue';
 import { useChatStream } from '@/views/friday/composables/useChatStream';
+import { loadModelConfig } from '@/views/friday/composables/useModelCatalog';
 import { refreshHistorySessions } from '@/views/friday/composables/useConversationHistory';
 import { useConversationSummary } from '@/views/friday/composables/useConversationSummary';
 import { useToast } from '@/views/friday/composables/useToast';
@@ -357,6 +358,9 @@ async function initConversation() {
         if (sessionInfo.mode) {
           currentMode.value = sessionInfo.mode;
           fridayStore.setMode(sessionInfo.mode);
+        }
+        if (sessionInfo.modelId && loadModelConfig(sessionInfo.modelId)?.id === sessionInfo.modelId) {
+          fridayStore.setModelId(sessionInfo.modelId);
         }
       }
     } catch {}

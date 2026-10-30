@@ -253,10 +253,9 @@ async function activateEditor() {
 
 // 编辑器 AI 由 Friday 接管：把主窗口配置的模型推送给主进程桥接层
 function pushAiModel() {
-  const model = loadModelConfig();
-  if (api && model) {
-    api.invoke('office-set-ai-model', model).catch(() => {});
-  }
+  if (!api) return Promise.resolve(false);
+  const model = loadModelConfig(fridayStore.modelId);
+  return api.invoke('office-set-ai-model', model).then(() => true).catch(() => false);
 }
 
 let initialActivated = false;
@@ -315,7 +314,11 @@ onMounted(() => {
   }
   if (routeEditor) {
     // 首次进入编辑器 Tab：恢复显示/按原文件重开/新建空白
-    activateEditor().finally(() => { initialActivated = true; });
+    activateEditor().finally(() => {
+      initialActivated = true;
+      // 编辑器初始化可能刚注册 Office AI IPC，重新推送当前模型。
+      void pushAiModel();
+    });
     startSelectionPolling();
   }
 });
@@ -329,7 +332,7 @@ onActivated(() => {
   }
   startSelectionPolling();
   // 首次挂载由 onMounted 处理，避免重复触发打开/新建
-  if (initialActivated) activateEditor();
+  if (initialActivated) void activateEditor().finally(pushAiModel);
 });
 
 /** 切换目标是否为另一个编辑器 Tab（/office/<type>/<instId>，由其 office-show 自行管理视图可见性） */

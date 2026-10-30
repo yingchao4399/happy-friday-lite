@@ -70,7 +70,6 @@ const officeFileStore = () => state.bundles?.docs || protocolInstaller
 // （本模块在 main.js 顶部被导入，早于 app.whenReady）
 try {
   const officeUtils = _require(path.join(officeRoot(), 'main', 'office-utils.cjs'))
-  officeUtils.registerRendererScheme()
   protocolInstaller = officeUtils
 } catch (e) {
   if (e.code !== 'MODULE_NOT_FOUND') {

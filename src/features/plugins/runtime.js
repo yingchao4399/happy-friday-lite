@@ -40,7 +40,7 @@ window.__fridayPluginBoot=async value=>{
   const exported=evaluateModule(value.files)
   if(compatibility){const Class=exported.default||exported;if(typeof Class!=='function')throw new Error('OBSIDIAN_PLUGIN_CLASS_MISSING');plugin=new Class(compatibility.app,manifest);await plugin.load();unload=async()=>{await plugin.unload();await compatibility.dispose()}}
   else{if(typeof exported.activate!=='function')throw new Error('PLUGIN_ACTIVATE_MISSING');unload=await exported.activate(nativeApi())}
-  return {commands:[...registered.values()].filter(c=>!c.id?.startsWith('tool:')).map(({id,name,editor,hotkeys})=>({id,name,editor:Boolean(editor),hotkeys})),compatibility:manifest.id==='friday-writing-tools'?'verified':'partial'}
+  return {commands:[...registered.values()].filter(c=>!c.id?.startsWith('tool:')).map(({id,name,editor,hotkeys})=>({id,name,editor:Boolean(editor),hotkeys})),compatibility:manifest.id==='friday-writing-tools'?'verified':'unverified'}
 }
 window.__fridayPluginExecute=async ({id,context:next,args})=>{
   context=next;operations=[];compatibility?.setContext(next)

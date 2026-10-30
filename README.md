@@ -1,5 +1,13 @@
 # Happy Friday Lite
 
+## 3.0.6.02-preview.21 AI Core, scoped history and global assistant experience
+
+- Technical version: `3.0.6-preview.21`; release label: `3.0.6.02-preview.21`.
+- Completes DeepSeek-style selectable history for the main chat, Office Docs/Sheets/Slides/PDF, Notes/Typewriter, Knowledge Base, Schedule and Friday Dock. Office keeps separate per-file sessions and all windows can restore, continue or start a new chat.
+- Fixes Office DeepSeek connectivity classification and custom-protocol Web Crypto initialization, adds Dock input/drag/history behavior, Typewriter image/streaming performance fixes, and Friday global-assistant visibility/avatar/mode settings.
+- Windows x64 installer: [3.0.6.02-preview.21](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.6.02-preview.21/Happy-Friday-Lite-3.0.6.02-preview.21-win-x64-setup.exe); SHA256: `4A3DF4C29C3763FC233A99832473E40924B1E359B2087CECD1EA785AA5CE27B4`.
+- Validation: Node 288/288, packaging audit 20/20, Obsidian compatibility 10/10, packaged workspace probe 13/13. The installer is unsigned.
+
 ## 3.0.6.02-preview.20 AI Core task controls and global assistant dock
 
 - Technical version: `3.0.6-preview.20`; release label: `3.0.6.02-preview.20`.
