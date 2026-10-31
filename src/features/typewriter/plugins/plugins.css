@@ -3,8 +3,8 @@
 .tn-note-input{position:absolute;inset:0;box-sizing:border-box}
 .tn-note-input .cm-editor{box-sizing:border-box;outline:none!important;box-shadow:none!important;background:transparent!important}
 .tn-note-input .cm-scroller{overflow:auto;font-family:inherit;scrollbar-gutter:stable}
-.tn-scroll-custom .tn-note-input .cm-scroller{scrollbar-width:none}
-.tn-scroll-custom .tn-note-input .cm-scroller::-webkit-scrollbar{width:0;height:0}
+.tn-scroll-custom .tn-note-input,.tn-scroll-custom .tn-note-input .cm-editor,.tn-scroll-custom .tn-note-input .cm-scroller{scrollbar-width:none;-ms-overflow-style:none;scrollbar-color:transparent transparent}
+.tn-scroll-custom .tn-note-input::-webkit-scrollbar,.tn-scroll-custom .tn-note-input .cm-editor::-webkit-scrollbar,.tn-scroll-custom .tn-note-input .cm-scroller::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}
 .tn-note-input .cm-content{min-height:100%;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;font-variant-ligatures:none;text-align:left;text-transform:none}
 .tn-note-input .cm-line{padding:0}
 .tn-note-input .cm-gutters,.tn-note-input .cm-activeLineGutter{display:none}
@@ -43,5 +43,7 @@
 .tn-terminal-host{width:100%;height:100%}
 .tn-terminal-host .xterm{height:100%;padding:0;background:transparent}
 .tn-terminal-host .xterm-viewport{background:transparent!important}
+.tn-scroll-custom .tn-terminal-host,.tn-scroll-custom .tn-terminal-host .xterm,.tn-scroll-custom .tn-terminal-host .xterm-viewport{scrollbar-width:none;-ms-overflow-style:none;scrollbar-color:transparent transparent}
+.tn-scroll-custom .tn-terminal-host::-webkit-scrollbar,.tn-scroll-custom .tn-terminal-host .xterm::-webkit-scrollbar,.tn-scroll-custom .tn-terminal-host .xterm-viewport::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}
 .tn-plugin-status{position:absolute;bottom:8px;right:8px;font:12px var(--tn-font-ui);color:var(--tn-sheet-muted)}
 .tn-plugin-status button{margin-left:10px}
