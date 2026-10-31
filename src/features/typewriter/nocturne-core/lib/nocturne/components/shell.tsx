@@ -18,6 +18,7 @@ import {
   paperEffectsOn,
   quillCursorOn
 } from '../../../app/nocturne/apply-config';
+import {THEMES} from '../../../app/nocturne/themes';
 import {rollerBoxes, stageLayout} from '../../../app/nocturne/stage-layout';
 import type {Box} from '../../../app/nocturne/stage-layout';
 import {detectGpu, renderMode} from '../lighting/gpu';
@@ -52,7 +53,7 @@ const boxStyle = (box: Box, origin: {x: number; y: number} = {x: 0, y: 0}): Reac
 
 export function NocturneShell({header, children}: ShellProps) {
   const settings = useNocturneSettings();
-  const theme = activeTheme(settings);
+  const theme = activeTheme(settings) ?? (settings.focusMode ? THEMES['paper-and-ink'] : null);
   const [studioOpen, setStudioOpen] = useState(false);
   const [press, setPress] = useState<PressTab | null>(null);
   const [size, setSize] = useState<Size | null>(null);

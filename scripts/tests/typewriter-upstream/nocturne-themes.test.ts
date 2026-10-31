@@ -97,15 +97,11 @@ test('changing the paper changes the terminal colours', (t) => {
   t.is(night.foregroundColor, PAPERS.night.ink);
 });
 
-test('focus mode can lay the text on the night paper or on a colour of its own', (t) => {
+test('focus mode keeps the selected paper across the full-stage transition', (t) => {
   const focus = patchSettings(defaultSettings(), {focusMode: true});
   t.is(activePaper(focus).paper, PAPERS[focus.paper.style].paper);
-  t.is(activePaper(patchSettings(focus, {focus: {background: 'dark'}})).paper, PAPERS.night.paper);
-  const deep = activePaper(patchSettings(focus, {focus: {background: 'custom', color: '#102030'}}));
-  t.is(deep.paper, '#102030');
-  t.is(deep.ink, PAPERS.night.ink);
-  const pale = activePaper(patchSettings(focus, {focus: {background: 'custom', color: '#f0f4f8'}}));
-  t.is(pale.ink, PAPERS.cotton.ink);
+  t.is(activePaper(patchSettings(focus, {focus: {background: 'dark'}})).paper, PAPERS[focus.paper.style].paper);
+  t.is(activePaper(patchSettings(focus, {focus: {background: 'custom', color: '#102030'}})).paper, PAPERS[focus.paper.style].paper);
   // Outside focus mode the focus background does nothing.
   const normal = patchSettings(defaultSettings(), {focus: {background: 'dark'}});
   t.is(activePaper(normal).paper, PAPERS[normal.paper.style].paper);

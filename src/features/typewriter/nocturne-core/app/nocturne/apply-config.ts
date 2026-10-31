@@ -4,7 +4,6 @@
 // terminal renders exactly as it would with an equivalent hyper.json. Nothing here touches the
 // terminal stream; it only produces a config object.
 
-import {luminanceOfUnit, toUnit} from './color';
 import {resolveInk} from './ink';
 import {PAPERS} from './papers';
 import type {Paper} from './papers';
@@ -20,36 +19,36 @@ export function activeTheme(settings: NocturneSettings): NocturneTheme | null {
   return settings.theme === 'classic' ? null : THEMES[settings.theme];
 }
 
+// Focus mode is a paper stage even when an older saved profile still has the classic theme.
+// Keep classic unchanged outside focus mode, but never let focus mode fall back to a bare black
+// terminal with the sheet, cursor and paper effects removed.
+export function nocturneStageOn(settings: NocturneSettings): boolean {
+  return settings.theme !== 'classic' || settings.focusMode;
+}
+
 /**
- * The sheet the terminal is typed on. In Focus Mode it can be the night paper or a colour of the
- * user's own; a custom colour takes the light or the night paper's inks, whichever reads on it.
+ * The sheet the terminal is typed on. Focus Mode expands the selected paper across the whole stage.
  */
 export function activePaper(settings: NocturneSettings): Paper {
   return resolveInk(basePaper(settings), settings.typography);
 }
 
 function basePaper(settings: NocturneSettings): Paper {
-  const chosen = PAPERS[settings.paper.style];
-  if (!settings.focusMode || settings.focus.background === 'paper') {
-    return chosen;
-  }
-  if (settings.focus.background === 'dark') {
-    return PAPERS.night;
-  }
-  const dark = luminanceOfUnit(toUnit(settings.focus.color)) < 0.18;
-  const inks = dark ? PAPERS.night : PAPERS.cotton;
-  return {...inks, paper: settings.focus.color, surface: {...inks.surface, mottle: 0, age: 0}};
+  // Focus mode expands the same selected sheet to the whole stage. It must not silently switch
+  // to the night paper or a custom colour, otherwise leaving focus mode changes the paper under the
+  // user's cursor and produces the black/blank screen seen in the broken full-screen view.
+  return PAPERS[settings.paper.style];
 }
 
 /** Paper texture and type impressions are drawn (in Focus Mode only if the user keeps them). */
 export function paperEffectsOn(settings: NocturneSettings): boolean {
-  return settings.theme !== 'classic' && settings.effects && (!settings.focusMode || settings.focus.paper);
+  return nocturneStageOn(settings) && settings.effects && (!settings.focusMode || settings.focus.paper);
 }
 
 /** The lamp's light is drawn (in Focus Mode only if the user keeps it). */
 export function lightOn(settings: NocturneSettings): boolean {
   const allowed = !settings.focusMode || settings.focus.lighting;
-  return settings.theme !== 'classic' && settings.effects && settings.lighting.enabled && allowed;
+  return nocturneStageOn(settings) && settings.effects && settings.lighting.enabled && allowed;
 }
 
 /** The ink selection effect replaces xterm's selection box. */
@@ -59,7 +58,7 @@ export function inkSelectionOn(settings: NocturneSettings): boolean {
 
 /** Paper margins around the text grid, inside the sheet. */
 export function paperPadding(settings: NocturneSettings): string {
-  if (settings.theme === 'classic') {
+  if (!nocturneStageOn(settings)) {
     return '';
   }
   return settings.focusMode ? '10px 14px' : '26px 34px 10px';
@@ -67,12 +66,12 @@ export function paperPadding(settings: NocturneSettings): string {
 
 /** The block is drawn as a blot of ink: the Nocturne look with the block. */
 export function blockCursorOn(settings: NocturneSettings): boolean {
-  return settings.theme !== 'classic' && settings.typography.cursorStyle === 'block';
+  return nocturneStageOn(settings) && settings.typography.cursorStyle === 'block';
 }
 
 /** The quill cursor is drawn: the Nocturne look with the quill chosen. */
 export function quillCursorOn(settings: NocturneSettings): boolean {
-  return settings.theme !== 'classic' && settings.typography.cursorStyle === 'quill';
+  return nocturneStageOn(settings) && settings.typography.cursorStyle === 'quill';
 }
 
 /** Nocturne draws the cursor itself (the ink block or the quill); xterm's own stays unseen under it. */

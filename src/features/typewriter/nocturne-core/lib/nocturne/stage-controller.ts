@@ -7,7 +7,7 @@
 // changed; frames run only while something moves or an ambient effect is on, never while the
 // window is hidden. In `basic` mode (no usable GPU, see lighting/gpu.ts) no WebGL is used at all.
 
-import {activePaper, activeTheme, inkSelectionOn, lightOn, paperEffectsOn} from '../../app/nocturne/apply-config';
+import {activePaper, activeTheme, inkSelectionOn, lightOn, nocturneStageOn, paperEffectsOn} from '../../app/nocturne/apply-config';
 import {CARRIAGE_RETURN, ESCAPEMENT, stepImpact, stepSpring, stepSway} from '../../app/nocturne/carriage-physics';
 import type {Body} from '../../app/nocturne/carriage-physics';
 import {toUnit} from '../../app/nocturne/color';
@@ -27,6 +27,7 @@ import {PaperLight} from './lighting/paper-light';
 import type {Machine, MachineQuality, MachineSpec, MachineState} from './machine/types';
 import {createMachine} from './machine/typewriter-machine';
 import {lightColorOf} from './theme-css';
+import {THEMES} from '../../app/nocturne/themes';
 import {InkLayer} from './typewriter/ink-layer';
 import type {InkStyle, InkViewport} from './typewriter/ink-layer';
 import {SelectionLayer} from './typewriter/selection-layer';
@@ -396,7 +397,7 @@ export class StageController {
   }
 
   private theme(): NocturneTheme | null {
-    return activeTheme(this.settings);
+    return activeTheme(this.settings) ?? (nocturneStageOn(this.settings) ? THEMES['paper-and-ink'] : null);
   }
 
   private quality(): MachineQuality {

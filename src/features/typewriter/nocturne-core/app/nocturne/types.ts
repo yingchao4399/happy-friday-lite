@@ -272,7 +272,7 @@ export type ChromeSettings = {
   pullCord: boolean;
 };
 
-/** The sheet in Focus Mode: the chosen paper, the night paper, or a colour of your own. */
+/** Legacy focus controls retained for settings compatibility; Focus Mode uses the selected paper. */
 export type FocusBackground = 'paper' | 'dark' | 'custom';
 
 export type FocusSettings = {
