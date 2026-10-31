@@ -596,6 +596,26 @@
   box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
   color: var(--tn-panel-ink);
   font-family: var(--tn-font-ui);
+  scrollbar-width: thin;
+  scrollbar-color: var(--tn-accent) transparent;
+}
+
+/* Studio uses the same quiet brass scroll control shown in the official reference. The panel
+ * keeps wheel, keyboard and touch scrolling, while Chromium's thick native rail is removed. */
+.tn-studio::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tn-studio::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tn-studio::-webkit-scrollbar-thumb {
+  min-height: 34px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--tn-accent);
+  background-clip: padding-box;
 }
 
 .tn-studio-head {

@@ -110,7 +110,8 @@ import{activeTerminalText}from'/src/features/typewriter/nocturne-core/lib/noctur
 import{buildRig,lightAmount}from'/src/features/typewriter/nocturne-core/app/nocturne/light-model.ts';
 import{activeTheme}from'/src/features/typewriter/nocturne-core/app/nocturne/apply-config.ts';
 import{stageLayout}from'/src/features/typewriter/nocturne-core/app/nocturne/stage-layout.ts';
-window.probe={keys:0,audio:0,energy:0,cursors:[]};window.__light={buildRig,lightAmount,activeTheme,stageLayout};on('key',()=>probe.keys++);on('cursor',f=>{probe.cursors.push({x:f.x,col:f.col,row:f.row})});
+import{PAPER_IDS,PAPERS}from'/src/features/typewriter/nocturne-core/app/nocturne/papers.ts';
+window.probe={keys:0,audio:0,energy:0,cursors:[]};window.__light={buildRig,lightAmount,activeTheme,stageLayout};window.__papers={PAPER_IDS,PAPERS};on('key',()=>probe.keys++);on('cursor',f=>{probe.cursors.push({x:f.x,col:f.col,row:f.row})});
 const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...a){if(this.context instanceof AudioContext){probe.audio++;probe.audioState=this.context.state;const d=this.buffer?.getChannelData(0);if(d)probe.energy=Math.max(probe.energy,...d.filter((_,i)=>i%100===0).map(Math.abs))}return start.apply(this,a)};
 const pinia=createPinia();const router=createRouter({history:createMemoryHistory(),routes:[{path:'/',component:View},{path:'/note',name:'note',component:{render:()=>h('div','Notes')}}]});
 window.router=router;const app=createApp({render:()=>h(RouterView,null,{default:({Component})=>h(KeepAlive,null,()=>Component)})}).use(pinia).use(i18n).use(router);window.tw=useTypewriterStore();tw.patchSettings({lighting:{quality:'low'},paper:{style:'cotton'}});window.notes=useNoteStore();window.readScreen=()=>activeTerminalText('screen');window.setLanguage=setI18nLanguage;
@@ -281,6 +282,9 @@ router.isReady().then(()=>app.mount('#app'));</script>`)
     assert.ok(await run('document.querySelectorAll(".tn-section").length')>=7)
     assert.ok(await run('document.querySelectorAll(".tn-studio input[type=range]").length')>=12)
     assert.match(await run('document.querySelector(".tn-studio").innerText'),/纹理深度/)
+    const paperSelection=await run(`(async()=>{const cards=[...document.querySelectorAll('.tn-studio .tn-card')].slice(3,9),result=[];for(let i=0;i<window.__papers.PAPER_IDS.length;i++){const id=window.__papers.PAPER_IDS[i],card=cards[i];card.click();await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));result.push({id,selected:tw.settings.paper.style,pressed:card.getAttribute('aria-pressed'),css:getComputedStyle(document.querySelector('.tn-root')).getPropertyValue('--tn-sheet').trim(),expected:window.__papers.PAPERS[id].paper})}return result})()`)
+    for(const sample of paperSelection){assert.equal(sample.selected,sample.id,`纸张选项 ${sample.id} 必须更新设置`);assert.equal(sample.pressed,'true',`纸张选项 ${sample.id} 必须显示选中状态`);assert.equal(sample.css,sample.expected,`纸张选项 ${sample.id} 必须对应正确纸张颜色`)}
+    report.checks.push({name:'Studio 纸张选项逐项真实点击并匹配纸张背景',paperSelection})
     await run(`setLanguage('en-US')`)
     await until(`document.querySelector('.tn-studio').textContent.includes('Texture depth')`)
     await run(`setLanguage('zh-CN');tw.patchSettings({typography:{fontSize:18,cursorStyle:'quill'},paper:{style:'laid'}})`)
