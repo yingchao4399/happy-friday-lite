@@ -25,10 +25,10 @@ export type SpringParams = {
   damping: number;
 };
 
-/** One tooth of the escapement: snappy, with a barely visible rebound. */
-export const ESCAPEMENT: ImpactParams = {acceleration: 60000, maxSpeed: 3200, restitution: 0.22};
-/** Carriage return: slower push, audible thunk at the margin. */
-export const CARRIAGE_RETURN: ImpactParams = {acceleration: 14000, maxSpeed: 2600, restitution: 0.3};
+/** The carriage glides at the same bounded speed in either direction and stops without rebound. */
+export const ESCAPEMENT: ImpactParams = {acceleration: 60000, maxSpeed: 1800, restitution: 0};
+/** Long carriage returns use the same motion curve, speed and stop as ordinary escapement moves. */
+export const CARRIAGE_RETURN: ImpactParams = {acceleration: 60000, maxSpeed: 1800, restitution: 0};
 /** Platen rotation for line feeds. */
 export const LINE_FEED: SpringParams = {frequency: 13, damping: 1};
 

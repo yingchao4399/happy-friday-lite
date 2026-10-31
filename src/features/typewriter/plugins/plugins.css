@@ -1,16 +1,45 @@
-/* 内容插件不绘制纸张/房间，全部使用原版外壳的纸面和字体设置。 */
+/* 内容插件共用原版 Nocturne 的纸张、光照画布和字体。 */
 .tn-note-plugin,.tn-terminal-plugin{position:relative;width:100%;height:100%;min-height:0;background:transparent;overflow:hidden}
-.tn-note-input,.tn-note-mirror{box-sizing:border-box;padding:0;margin:0;border:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;font-variant-ligatures:none;text-align:left;border-radius:0;text-transform:none}
-.tn-note-input{position:absolute;top:26px;left:34px;display:block;width:calc(100% - 68px);height:calc(100% - 36px);resize:none;outline:none!important;box-shadow:none!important;background:transparent!important}
-.tn-scroll-custom .tn-note-input{scrollbar-width:none}
-.tn-scroll-custom .tn-note-input::-webkit-scrollbar{display:none}
-.tn-note-mirror{position:absolute;top:26px;left:34px;min-height:100%;pointer-events:none;opacity:0}
-.tn-note-input::selection{background:rgba(97,60,25,.22)}
-.tn-note-ink .tn-note-input::selection{background:transparent}
+.tn-note-input{position:absolute;inset:0;box-sizing:border-box}
+.tn-note-input .cm-editor{box-sizing:border-box;outline:none!important;box-shadow:none!important;background:transparent!important}
+.tn-note-input .cm-scroller{overflow:auto;font-family:inherit;scrollbar-gutter:stable}
+.tn-scroll-custom .tn-note-input .cm-scroller{scrollbar-width:none}
+.tn-scroll-custom .tn-note-input .cm-scroller::-webkit-scrollbar{width:0;height:0}
+.tn-note-input .cm-content{min-height:100%;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;font-variant-ligatures:none;text-align:left;text-transform:none}
+.tn-note-input .cm-line{padding:0}
+.tn-note-input .cm-gutters,.tn-note-input .cm-activeLineGutter{display:none}
+.tn-note-input .cm-focused{outline:none!important}
+.tn-note-drawn-cursor .cm-cursor{border-left-color:transparent!important}
+.tn-note-cursor-underline .cm-cursor{border-left-color:transparent!important}
+.tn-note-cursor-underline .cm-cursor::after{position:absolute;bottom:0;left:0;width:1em;height:2px;background:var(--tn-cursor-color);content:'';pointer-events:none}
+.tn-note-ink .cm-selectionBackground{background:transparent!important}
+.tn-typewriter-image-node{position:relative;display:flex;align-items:flex-start;box-sizing:border-box;width:100%;min-width:0;margin:12px 0;padding:6px 14px;clear:both;break-inside:avoid;justify-content:center;pointer-events:auto}
+.tn-typewriter-image-node.align-left{justify-content:flex-start}
+.tn-typewriter-image-node.align-right{justify-content:flex-end}
+.tn-typewriter-image-node.is-inline{display:inline-flex;vertical-align:middle;width:auto;max-width:100%;margin:0 4px;padding:0;clear:none}
+.tn-typewriter-image-frame{position:relative;display:inline-block;max-width:100%;line-height:0}
+.tn-typewriter-image-node img{display:block;max-width:100%;object-fit:contain;border-radius:2px;box-shadow:0 5px 18px rgba(39,27,16,calc(var(--tn-image-shadow,.2) * .62));filter:contrast(.98) saturate(.96)}
+.tn-typewriter-image-node.blend-paper img{opacity:calc(1 - var(--tn-image-intensity,.18) * .06)}
+.tn-typewriter-image-node.is-inline img{max-height:1.25em;width:auto!important;box-shadow:none;border-radius:0}
+.tn-typewriter-image-controls{position:absolute;z-index:1;top:-34px;left:0;display:flex;align-items:center;gap:3px;max-width:min(100vw,520px);padding:4px 6px;border:1px solid color-mix(in srgb,var(--tn-accent) 55%,transparent);border-radius:7px;background:color-mix(in srgb,var(--tn-sheet-paper) 94%,white);box-shadow:0 4px 14px rgba(34,25,18,.18);opacity:0;pointer-events:none;transition:opacity .12s ease}
+.tn-typewriter-image-node:hover .tn-typewriter-image-controls,.tn-typewriter-image-node:focus-within .tn-typewriter-image-controls,.tn-typewriter-image-controls:focus-within{opacity:1;pointer-events:auto}
+.tn-typewriter-image-controls button,.tn-typewriter-image-lighting summary{min-height:24px;padding:2px 6px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--tn-ink);font:11px var(--tn-font-ui);white-space:nowrap;cursor:pointer}
+.tn-typewriter-image-controls button:hover,.tn-typewriter-image-controls button:focus-visible,.tn-typewriter-image-lighting summary:hover{border-color:var(--tn-accent);outline:none}
+.tn-typewriter-image-resize{width:18px;min-width:18px;height:18px;padding:0!important;border:1px solid var(--tn-accent)!important;border-radius:3px!important;background:var(--tn-sheet-paper)!important;cursor:nwse-resize!important}
+.tn-typewriter-image-lighting{position:relative}
+.tn-typewriter-image-lighting summary{list-style:none}
+.tn-typewriter-image-lighting summary::-webkit-details-marker{display:none}
+.tn-typewriter-image-lighting[open]{z-index:2}
+.tn-typewriter-image-lighting label{display:flex;align-items:center;gap:8px;padding:5px 8px;font:11px var(--tn-font-ui);color:var(--tn-ink)}
+.tn-typewriter-image-lighting input{width:110px;accent-color:var(--tn-accent)}
+.tn-typewriter-image-node:focus-within .tn-typewriter-image-frame{outline:1px solid var(--tn-accent);outline-offset:2px}
+.tn-typewriter-image-fallback{display:flex;flex-direction:column;align-items:flex-start;gap:5px;max-width:min(100%,360px);padding:12px 14px;border:1px dashed var(--tn-accent);border-radius:6px;background:color-mix(in srgb,var(--tn-sheet-paper) 92%,var(--tn-accent));color:var(--tn-ink);font:12px var(--tn-font-ui);line-height:1.4}
+.tn-typewriter-image-fallback small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tn-sheet-muted)}
+.tn-typewriter-image-fallback button{padding:3px 8px;border:1px solid var(--tn-accent);border-radius:4px;background:transparent;color:inherit;cursor:pointer;font:inherit}
 .tn-terminal-plugin{box-sizing:border-box;padding:26px 34px 10px}
 .tn-focus .tn-terminal-plugin{padding:10px 14px}
-.tn-focus .tn-note-input{top:10px;left:14px;width:calc(100% - 28px);height:calc(100% - 20px)}
-.tn-focus .tn-note-mirror{top:10px;left:14px}
+.tn-focus .tn-note-input .cm-editor{top:10px!important;left:14px!important;width:calc(100% - 28px)!important;height:calc(100% - 20px)!important}
+.tn-focus .tn-typewriter-image-node{margin-top:9px;margin-bottom:9px}
 .tn-terminal-host{width:100%;height:100%}
 .tn-terminal-host .xterm{height:100%;padding:0;background:transparent}
 .tn-terminal-host .xterm-viewport{background:transparent!important}

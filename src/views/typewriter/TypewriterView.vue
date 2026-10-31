@@ -1,5 +1,6 @@
 <template>
   <main class="typewriter-page" :style="chromeStyle">
+    <TypewriterStage v-if="!started" class="typewriter-prewarm" :settings="store.settings" :source="prewarmSource" @settings="store.patchSettings" />
     <section v-if="!started" class="typewriter-start">
       <img :src="iconUrl" class="start-icon" alt="" />
       <p class="eyebrow">Typewriter Nocturne</p>
@@ -30,14 +31,6 @@
           <button class="toolbar-button icon-only" :title="t('typewriter.close')" @click="closeWorkspace">×</button>
         </div>
       </header>
-      <div v-if="source && imageSources.length && !showPreview" class="typewriter-image-strip" :aria-label="t('typewriter.images')">
-        <span class="typewriter-image-label">{{ t('typewriter.images') }}</span>
-        <figure v-for="image in imageSources" :key="image.key" class="typewriter-image-card">
-          <img v-if="!image.failed" :src="image.displaySrc || image.src" :alt="image.alt || t('typewriter.image')" decoding="async" @load="markImageLoaded(image)" @error="markImageFailed(image)" />
-          <button v-else class="typewriter-image-failed" type="button" @click="retryImage(image)">{{ t('typewriter.imageFailed') }}</button>
-          <figcaption>{{ image.alt || t('typewriter.image') }}</figcaption>
-        </figure>
-      </div>
       <p v-if="error" class="workspace-error" role="alert">{{ error }}</p>
       <div class="workspace-body" :class="{ 'is-preview': showPreview }" @paste="handleImagePaste" @dragover="handleImageDragOver" @drop="handleImageDrop"><TypewriterStage ref="stage" v-show="!showPreview" :settings="store.settings" :source="source" @settings="store.patchSettings" @change="handleSourceChange" /><article v-if="source && showPreview" class="typewriter-preview" :style="previewStyle" role="region" :aria-label="t('typewriter.preview')" v-html="previewHtml" /><NoteLinksPanel v-if="source && showLinks" :note-id="source.noteId" :initial-mode="linksMode" @close="showLinks=false" @open="openLinkLocation" /></div>
     </section>
@@ -63,7 +56,7 @@ import {readNote,subscribeNotes} from '@/features/notes/documents'
 import { setI18nLanguage } from '@/i18n'
 import { createNoteDocument, markdownToNote } from '@/features/typewriter/adapters/note-adapter'
 import { insertContent } from '@/features/typewriter/content-plugin'
-import { extractTypewriterImages, markdownImage } from '@/features/typewriter/image-utils'
+import { markdownImage } from '@/features/typewriter/image-utils'
 import { activePaper, activeTheme } from '@/features/typewriter/nocturne-core/app/nocturne/apply-config.ts'
 import { fontStack } from '@/features/typewriter/nocturne-core/app/nocturne/settings.ts'
 import { THEMES } from '@/features/typewriter/nocturne-core/app/nocturne/themes.ts'
@@ -83,21 +76,17 @@ window.addEventListener('friday:show-links',handleLinks)
 window.addEventListener('friday:typewriter-action',handleAction)
 onBeforeUnmount(()=>{window.removeEventListener('friday:show-links',handleLinks);window.removeEventListener('friday:typewriter-action',handleAction)})
 const source = shallowRef(null), stage = ref(null), imageInput = ref(null), imageRevision = ref(0), failedImageSources = ref(new Set()), fallbackImageSources = ref(new Map()), showPreview = ref(false)
+// Keep a real Nocturne stage warm behind the landing screen. This compiles the same paper and
+// machine shaders before the user opens a note, so entering the editor does not reveal paper,
+// carriage and clip in separate cold-start frames.
+const prewarmSource = {id: '__typewriter_prewarm__', viewId: '__typewriter_prewarm__', title: '', content: '', noteId: null,
+  flush: async () => {}, change: () => {}}
 let imageRefreshTimer = 0
 const imageFallbackFiles = new Map()
 const unlistenNotes=subscribeNotes(async event=>{if(event.noteId!==source.value?.noteId)return;const document=source.value;try{const note=await readNote(event.noteId);if(source.value===document&&note){document.refresh(note);refreshImageSourcesSoon(true)}}catch{error.value=t('typewriter.operationFailed')}})
 onBeforeUnmount(()=>unlistenNotes())
 const chromeStyle = computed(() => themeVariables(activeTheme(store.settings) || THEMES['paper-and-ink'], store.settings))
 const visibleNotes = computed(() => notes.notes.filter(note => !note.isDeleted && (note.title + ' ' + (note.contentText || '')).toLowerCase().includes(query.value.toLowerCase())))
-const imageSources = computed(() => {
-  // 图片扫描不参与每次按键的同步路径，保留当前列表直到空闲刷新。
-  void imageRevision.value
-  return extractTypewriterImages(source.value?.content || '').map(image => ({
-    ...image,
-    displaySrc: fallbackImageSources.value.get(image.src) || image.src,
-    failed: failedImageSources.value.has(image.src)
-  }))
-})
 const previewStyle = computed(() => {
   const typography = store.settings.typography
   const paper = activePaper(store.settings)
@@ -112,7 +101,7 @@ const previewHtml = computed(() => {
     for (const attr of [...node.attributes]) {
       const name = attr.name.toLowerCase(), value = attr.value.trim()
       if (name.startsWith('on') || ['style', 'srcset', 'srcdoc', 'contenteditable', 'autofocus'].includes(name)) { node.removeAttribute(attr.name); continue }
-      if (name === 'src' && !/^(data:image\/(?:png|jpe?g|gif|webp|bmp|svg\+xml);|file:\/\/|blob:|friday-asset:\/\/|https?:\/\/)/i.test(value)) node.removeAttribute(attr.name)
+      if (name === 'src' && !/^(data:image\/(?:png|jpe?g|gif|webp|bmp|svg\+xml);|blob:|friday-asset:\/\/)/i.test(value)) node.removeAttribute(attr.name)
       if (name === 'href' && !/^(https?:\/\/|mailto:|friday:|#)/i.test(value)) node.removeAttribute(attr.name)
     }
   })
@@ -143,12 +132,20 @@ function readFileAsDataUrl(file) {
     reader.readAsDataURL(file)
   })
 }
+async function imageDimensions(file) {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const size = { width: bitmap.width, height: bitmap.height }
+    bitmap.close()
+    return size
+  } catch { return { width: 1, height: 1 } }
+}
 async function insertImageFileValue(file) {
   if (!file || !source.value) return false
   const targetDocument = source.value
   const mime = String(file.type || '').toLowerCase()
   if (mime && !mime.startsWith('image/')) return false
-  if (Number(file.size) > 64 * 1024 * 1024) { error.value = t('typewriter.imageTooLarge'); return false }
+  if (Number(file.size) > 12 * 1024 * 1024) { error.value = t('typewriter.imageTooLarge'); return false }
   error.value = ''
   const alt = imageAltForFile(file)
   let src = ''
@@ -169,13 +166,23 @@ async function insertImageFileValue(file) {
   if (!src) {
     try { src = await readFileAsDataUrl(file) } catch { error.value = t('typewriter.imageFailed'); return false }
   }
-  if (!/^((data:image\/)|(file:\/\/)|(blob:)|(friday-asset:\/\/)|(https?:\/\/))/i.test(src)) {
+  if (!/^((data:image\/)|(blob:)|(friday-asset:\/\/))/i.test(src)) {
     error.value = t('typewriter.imageFailed')
     return false
   }
   if (source.value !== targetDocument) return false
   if (/^file:\/\//i.test(src)) imageFallbackFiles.set(src, file)
-  insertContent(markdownImage(alt, src))
+  const dimensions = await imageDimensions(file)
+  const typography = store.settings.typography
+  const lineHeight = Math.max(12, Number(typography.fontSize) * Number(typography.lineHeight))
+  const contentWidth = Math.min(960, document.querySelector('.tn-note-input')?.clientWidth || 960)
+  const scale = Math.min(160, contentWidth) / Math.max(dimensions.width, dimensions.height, 1)
+  const width = Math.max(96, Math.round(dimensions.width * scale))
+  const height = Math.max(48, Math.round(dimensions.height * scale))
+  insertContent(markdownImage(alt, src, {
+    width, height, lineHeight, flowRows: Math.ceil(height / lineHeight) + 1,
+    align: 'center', fit: 'contain', blend: 'paper'
+  }))
   refreshImageSourcesSoon(true)
   return true
 }
@@ -327,13 +334,8 @@ onBeforeUnmount(() => { if (imageRefreshTimer) window.clearTimeout(imageRefreshT
 @media(max-width:720px){.workspace-toolbar{padding:4px 10px}.toolbar-actions{gap:2px}.toolbar-title{max-width:36%}.toolbar-button{padding:4px 5px}}
 </style>
 
-<style scoped>.workspace-body{display:flex}.workspace-body :deep(.typewriter-original-host){flex:1;min-width:0}.typewriter-preview{flex:1;min-width:0;overflow:auto;padding:34px clamp(18px,6vw,96px);box-sizing:border-box;white-space:normal;line-height:1.7;background:var(--tn-room-bg);color:var(--tn-panel-ink)}.typewriter-preview :deep(img){display:block;max-width:100%;height:auto;margin:1.2em auto;border-radius:6px;box-shadow:0 8px 28px rgba(0,0,0,.2)}.typewriter-preview :deep(pre){overflow:auto;padding:12px;background:rgba(0,0,0,.2);border-radius:6px}.typewriter-preview :deep(a){color:var(--tn-accent)}</style>
+<style scoped>.typewriter-prewarm{position:absolute!important;inset:0;z-index:0;opacity:0;pointer-events:none}.typewriter-start,.typewriter-workspace{position:relative;z-index:1}.workspace-body{display:flex}.workspace-body :deep(.typewriter-original-host){flex:1;min-width:0}.typewriter-preview{flex:1;min-width:0;overflow:auto;padding:34px clamp(18px,6vw,96px);box-sizing:border-box;white-space:normal;line-height:1.7;background:var(--tn-room-bg);color:var(--tn-panel-ink)}.typewriter-preview :deep(img){display:block;max-width:100%;height:auto;margin:1.2em auto;border-radius:6px;box-shadow:0 8px 28px rgba(0,0,0,.2)}.typewriter-preview :deep(pre){overflow:auto;padding:12px;background:rgba(0,0,0,.2);border-radius:6px}.typewriter-preview :deep(a){color:var(--tn-accent)}</style>
 
 <style scoped>
 .typewriter-image-input{display:none}
-.typewriter-image-strip{display:flex;align-items:center;gap:8px;min-height:132px;padding:8px 14px;overflow:auto;background:var(--tn-room-edge);border-bottom:1px solid var(--tn-panel-line);color:var(--tn-panel-muted)}
-.typewriter-image-label{flex:none;font:12px var(--tn-font-ui);font-style:italic}
-.typewriter-image-card{display:flex;align-items:center;gap:6px;flex:none;margin:0;padding:3px 6px;border:1px solid var(--tn-panel-line);border-radius:7px;background:rgba(255,255,255,.035)}
-.typewriter-image-card img{width:144px;height:112px;object-fit:contain;border-radius:4px;background:rgba(0,0,0,.18)}
-.typewriter-image-card figcaption{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:11px var(--tn-font-ui)}
 </style>

@@ -15,6 +15,7 @@ import {stepSpring} from '../../../app/nocturne/carriage-physics';
 import type {Body} from '../../../app/nocturne/carriage-physics';
 import type {Box} from '../../../app/nocturne/stage-layout';
 import type {ClipFinish, ScrollbarSettings} from '../../../app/nocturne/types';
+import {stepScrollClip} from './scroll-clip-motion';
 import {on} from '../bus';
 import {scrollActiveTerminal} from '../terminal-bridge';
 
@@ -27,7 +28,6 @@ const ON_PAPER = (CLIP_WIDTH * EDGE) / 100;
 /** A clip slid onto a sheet by hand never sits quite square. */
 const REST_TILT = -0.1;
 const TRACK_MARGIN = 18;
-const GLIDE = {frequency: 5, damping: 0.72};
 const TILT = {frequency: 3.2, damping: 0.35};
 const TILT_REST = {distance: 0.001, speed: 0.002};
 
@@ -93,7 +93,9 @@ export function ScrollClip({settings, sheet, text}: ScrollClipProps) {
     grab: 0
   });
 
-  useEffect(() => {
+  // Apply the first target before paint so the clip, paper and editor do not appear in
+  // successive frames while a note is mounted or a focus mode layout changes.
+  useLayoutEffect(() => {
     return on('cursor', (frame) => {
       setScroll((previous) => {
         if (previous.viewportY === frame.viewportY && previous.baseY === frame.baseY && previous.rows === frame.rows) {
@@ -134,7 +136,7 @@ export function ScrollClip({settings, sheet, text}: ScrollClipProps) {
       elapsed -= dt;
       const before = m.y.velocity;
       if (!m.dragging) {
-        m.y = stepSpring(m.y, m.target, GLIDE, dt);
+        m.y = stepScrollClip(m.y, m.target, dt);
       }
       // The clip leans against its motion and swings back, like a light thing pushed along an edge.
       const lean = -m.y.velocity * 0.0009 - ((m.y.velocity - before) / Math.max(dt, 1 / 240)) * 0.00002;
@@ -156,8 +158,8 @@ export function ScrollClip({settings, sheet, text}: ScrollClipProps) {
     }
   };
 
-  // Follow the terminal's scroll position.
-  useEffect(() => {
+  // Follow the terminal's scroll position before the browser paints the new layout.
+  useLayoutEffect(() => {
     const m = motion.current;
     m.target = trackTop + ratio * travel;
     if (m.y.position < 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

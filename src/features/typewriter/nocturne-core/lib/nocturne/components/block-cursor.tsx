@@ -54,6 +54,8 @@ export function BlockCursor({appearance, fontSize, fontWeight, fontWeightBold}: 
   const blotRef = useRef<HTMLDivElement>(null);
   const haloRef = useRef<HTMLDivElement>(null);
   const glyphRef = useRef<HTMLSpanElement>(null);
+  const animationRef = useRef<Animation | null>(null);
+  const lastTarget = useRef<{x: number; y: number} | null>(null);
 
   useEffect(() => {
     const place = (frame: CursorFrame) => {
@@ -73,7 +75,23 @@ export function BlockCursor({appearance, fontSize, fontWeight, fontWeightBold}: 
       element.style.display = 'block';
       element.style.width = `${(frame.width * frame.glyph.width).toFixed(2)}px`;
       element.style.height = `${frame.height.toFixed(2)}px`;
-      element.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`;
+      const target = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+      const previous = lastTarget.current;
+      lastTarget.current = {x, y};
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!previous || reduced) {
+        animationRef.current?.cancel();
+        element.style.transform = target;
+      } else {
+        const distance = Math.hypot(x - previous.x, y - previous.y);
+        const current = getComputedStyle(element).transform;
+        animationRef.current?.cancel();
+        animationRef.current = element.animate(
+          [{transform: current === 'none' ? `translate3d(${previous.x}px, ${previous.y}px, 0)` : current}, {transform: target}],
+          {duration: Math.min(300, Math.max(70, 70 + distance * 0.55)), easing: distance > 120 ? 'cubic-bezier(.22,.72,.2,1)' : 'cubic-bezier(.16,1,.3,1)', fill: 'forwards'}
+        );
+        animationRef.current.finished.catch(() => {}).finally(() => { if (animationRef.current?.playState === 'finished') animationRef.current = null });
+      }
       element.dataset.focused = String(frame.focused);
       glyph.textContent = frame.glyph.char;
       glyph.dataset.bold = String(frame.glyph.bold);
@@ -97,6 +115,7 @@ export function BlockCursor({appearance, fontSize, fontWeight, fontWeightBold}: 
     let breathing: Animation[] = [];
     const breathe = () => {
       breathing.forEach((animation) => animation.cancel());
+      animationRef.current?.cancel();
       breathing = [];
       if (reduce.matches) {
         return;

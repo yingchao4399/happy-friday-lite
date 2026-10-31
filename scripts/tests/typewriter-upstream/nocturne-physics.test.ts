@@ -43,11 +43,38 @@ test('one escapement step lands on the next cell within a few frames', (t) => {
   t.true(result.max <= 9, 'the escapement stop is never passed');
 });
 
-test('a carriage return hits the margin stop and rebounds without passing it', (t) => {
+test('a carriage return reaches the margin stop without passing or rebounding', (t) => {
   const result = simulate((body) => stepImpact(body, 0, CARRIAGE_RETURN, FRAME), {position: 600, velocity: 0});
   t.is(result.body.position, 0);
   t.true(result.min >= 0, 'never travels past the margin stop');
   t.true(result.settledAt > 10, 'a return is a visible slide, not a jump');
+  t.is(result.body.velocity, 0, 'the carriage stops without rebound');
+});
+
+test('1000px carriage glides are symmetric and capped in both directions', (t) => {
+  const trace = (start: number, target: number, params: typeof ESCAPEMENT) => {
+    let body: Body = {position: start, velocity: 0};
+    let maximumSpeed = 0;
+    let overshoot = false;
+    for (let frame = 1; frame <= 60; frame++) {
+      const previous = body.position;
+      body = stepImpact(body, target, params, FRAME);
+      maximumSpeed = Math.max(maximumSpeed, Math.abs(body.position - previous) / FRAME);
+      overshoot ||= target > start ? body.position > target : body.position < target;
+      if (body.position === target && body.velocity === 0) return {frames: frame, maximumSpeed, overshoot};
+    }
+    throw new Error(`carriage did not settle: ${start} → ${target}`);
+  };
+  for (let trial = 0; trial < 100; trial++) {
+    const right = trace(0, 1000, ESCAPEMENT);
+    const left = trace(1000, 0, CARRIAGE_RETURN);
+    t.true(right.frames <= 48 && left.frames <= 48, '1000px movement settles within 800ms');
+    t.true(Math.abs(right.frames - left.frames) / Math.max(right.frames, left.frames) <= 0.1,
+      `left/right duration differs: ${left.frames} vs ${right.frames} frames`);
+    t.true(right.maximumSpeed <= 1800.1 && left.maximumSpeed <= 1800.1,
+      `speed stays capped: ${right.maximumSpeed} / ${left.maximumSpeed} px/s`);
+    t.false(right.overshoot || left.overshoot, 'the carriage stops without overshoot');
+  }
 });
 
 test('the impact model is stable for any frame time', (t) => {

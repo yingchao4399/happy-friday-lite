@@ -789,8 +789,12 @@ export function createMachine(canvas, onReady) {
     renderer.setPixelRatio(spec.quality === 'low' ? 1 : spec.pixelRatio);
     renderer.setSize(layout.width, layout.height, false);
     renderer.toneMappingExposure = spec.theme.exposure;
+    // Low quality is the first-open path on constrained Windows GPUs. Avoid compiling the
+    // shadow-map material variants there; the paper/glow layers still provide the same visible
+    // lighting while the typewriter body becomes ready in the same frame as the sheet.
+    renderer.shadowMap.enabled = spec.quality !== 'low';
     renderer.shadowMap.type = spec.quality === 'high' ? THREE.VSMShadowMap : THREE.PCFSoftShadowMap;
-    renderer.shadowMap.needsUpdate = true;
+    renderer.shadowMap.needsUpdate = renderer.shadowMap.enabled;
     scene = new THREE.Scene();
     scene.environment = environment.texture;
     camera = new THREE.OrthographicCamera(0, layout.width, 0, -layout.height, -4000, 4000);

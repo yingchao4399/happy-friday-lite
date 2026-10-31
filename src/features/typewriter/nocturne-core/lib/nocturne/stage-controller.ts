@@ -110,8 +110,10 @@ export class StageController {
   private dirty = true;
   private cursorMoved = false;
   // Continuous typing gets priority over decorative WebGL/paper redraws. The
-  // physics still advances and a full frame is rendered as soon as input rests.
+  // physics still advances; one idle frame catches up after input rests.
   private inputBusyUntil = 0;
+  private inputWakeTimer: ReturnType<typeof setTimeout> | undefined;
+  private inputDeferred = false;
   private drawnMachine = '';
   private drawnLight = '';
   private origin = {left: 0, top: 0};
@@ -131,6 +133,7 @@ export class StageController {
   private surfaceKey = '';
   private machineKey = '';
   private rebuildTimer: ReturnType<typeof setTimeout> | undefined;
+  private machineBuildTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
     private elements: StageElements,
@@ -151,9 +154,8 @@ export class StageController {
       on('selection', ({uid, cells}) => this.onSelection(uid, cells))
     );
     const wake = () => this.invalidate();
-    // The textarea emits this synchronously before Vue schedules its update.
-    // Give typing priority so a decorative frame cannot consume its budget.
-    const inputPriority = () => { this.inputBusyUntil = performance.now() + 150; };
+    // Keep the editor responsive during input, then draw one catch-up frame.
+    const inputPriority = () => this.prioritizeInput(150);
     document.addEventListener('visibilitychange', wake);
     document.addEventListener('friday:typewriter-input', inputPriority);
     this.reduceMotion.addEventListener('change', wake);
@@ -183,7 +185,7 @@ export class StageController {
   // Events
 
   private onCursor(frame: CursorFrame) {
-    this.inputBusyUntil = performance.now() + 120;
+    this.prioritizeInput(120);
     const first = this.cursor === null;
     const previousGrid = JSON.stringify(this.grid);
     this.cursor = frame;
@@ -234,7 +236,7 @@ export class StageController {
       return;
     }
     const stage = this.elements.stage;
-    this.inputBusyUntil = performance.now() + 120;
+    this.prioritizeInput(120);
     stage.dataset.keys = String(Number(stage.dataset.keys ?? 0) + 1);
     const {typewriter} = this.settings;
     switch (kind) {
@@ -308,6 +310,21 @@ export class StageController {
     if (this.theme() && this.settings.typewriter.marginBell) {
       this.play('bell');
     }
+  }
+
+  private prioritizeInput(duration: number) {
+    const now = performance.now();
+    const deadline = now + duration;
+    this.inputDeferred = true;
+    if (deadline <= this.inputBusyUntil) return;
+    this.inputBusyUntil = deadline;
+    clearTimeout(this.inputWakeTimer);
+    this.inputWakeTimer = setTimeout(() => {
+      this.inputWakeTimer = undefined;
+      if (!this.inputDeferred) return;
+      this.inputDeferred = false;
+      this.schedule();
+    }, Math.max(0, deadline - performance.now()));
   }
 
   private onCue(kind: CueKind) {
@@ -452,9 +469,27 @@ export class StageController {
     }
     if (machineKey !== this.machineKey) {
       this.machineKey = machineKey;
-      if (spec) {
-        this.ensureMachine()?.build(spec);
+      if (this.machineBuildTimer) {
+        clearTimeout(this.machineBuildTimer);
+        this.machineBuildTimer = undefined;
+      }
+      if (spec && this.machine) {
+        // Once the renderer is warm, settings changes can rebuild the existing scene directly so
+        // menu and lamp controls keep their immediate visual response.
+        this.machine.build(spec);
         this.elements.stage.dataset.machine = 'built';
+      } else if (spec) {
+        // Material compilation can block the first interactive frame for hundreds of ms. Defer
+        // only this decorative build; the editor, paper and all controls remain interactive first.
+        const requestedKey = machineKey;
+        this.machineBuildTimer = setTimeout(() => {
+          this.machineBuildTimer = undefined;
+          if (this.machineKey !== requestedKey || !this.layout || !this.theme()) return;
+          this.ensureMachine()?.build(spec);
+          this.elements.stage.dataset.machine = 'built';
+          this.dirty = true;
+          this.schedule();
+        }, 750);
       }
     }
     this.dirty = true;
@@ -616,7 +651,7 @@ export class StageController {
       if (ambientDue) {
         this.lastAmbient = now;
       }
-    } else if (this.dirty) {
+    } else if (this.dirty && !inputBusy) {
       this.glow.clear();
     }
 
@@ -643,7 +678,7 @@ export class StageController {
     // the queued strike/selection without competing with the input event.
     const inking = inputBusy ? false : this.ink.render(now, this.inkStyle(paper, effects), viewport);
     const selecting = inputBusy ? false : this.selection.render(now, this.selectionLook(paper), viewport);
-    this.dirty = this.dirty && deferred;
+    this.dirty = this.dirty && (deferred || inputBusy);
     this.cursorMoved = false;
     if (stillMoving || ambient || inking || selecting || deferred) {
       this.schedule();
@@ -769,6 +804,8 @@ export class StageController {
 
   dispose() {
     clearTimeout(this.rebuildTimer);
+    clearTimeout(this.inputWakeTimer);
+    clearTimeout(this.machineBuildTimer);
     if (this.frameRequest) {
       cancelAnimationFrame(this.frameRequest);
     }

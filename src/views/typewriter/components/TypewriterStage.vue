@@ -1,13 +1,12 @@
 <template><div ref="host" class="typewriter-original-host" /></template>
 <script setup>
 import { onMounted, onActivated, onDeactivated, onBeforeUnmount, ref, watch } from 'vue'
-import React from 'react'
+import React, {lazy, Suspense} from 'react'
 import {restorePrivateFonts} from '@/features/fonts/loader'
 import { createRoot } from 'react-dom/client'
 import { useI18n } from 'vue-i18n'
 import { NocturneShell } from '@/features/typewriter/nocturne-core/lib/nocturne/components/shell.tsx'
 import { connectSettings, setSettings } from '@/features/typewriter/nocturne-core/lib/nocturne/store.ts'
-import { TerminalSurface } from '@/features/typewriter/plugins/TerminalSurface.tsx'
 import { NoteSurface } from '@/features/typewriter/plugins/NoteSurface.tsx'
 import { focusContent, blurContent } from '@/features/typewriter/content-plugin'
 import 'xterm/css/xterm.css'
@@ -22,14 +21,17 @@ import '@/features/typewriter/nocturne-core/nerd-symbols.css'
 import '@/features/typewriter/plugins/plugins.css'
 const props = defineProps({ settings: {type: Object, required: true}, source: {type: Object, default: null} })
 const emit = defineEmits(['settings', 'change'])
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const host = ref(null)
+const TerminalSurface = lazy(() => import('@/features/typewriter/plugins/TerminalSurface.tsx').then(module => ({default: module.TerminalSurface})))
 let root, disconnect
 function render() {
   if (!root) return
   const content = props.source
     ? React.createElement(NoteSurface, {key: props.source.viewId || props.source.id, document: props.source, onChange: text => emit('change', text)})
-    : React.createElement(TerminalSurface)
+    : React.createElement(Suspense, {fallback: React.createElement('div', {className: 'tn-terminal-plugin'},
+      React.createElement('div', {className: 'tn-plugin-status', role: 'status'}, t('typewriter.terminalStarting')))},
+      React.createElement(TerminalSurface))
   root.render(React.createElement(NocturneShell, {header: null}, content))
 }
 function command(name) { window.dispatchEvent(new CustomEvent('nocturne:command', {detail: name})) }
@@ -43,7 +45,11 @@ function mount() {
   disconnect = connectSettings(props.settings, settings => emit('settings', settings))
   window.focusActiveTerm = focusContent
   root = createRoot(host.value)
-  void restorePrivateFonts().then(render).catch(render)
+  // 原版舞台和输入必须立即可用；私有字体的磁盘/IPC 请求不能挡住首屏。
+  render()
+  void restorePrivateFonts().then(() => {
+    if (root) window.dispatchEvent(new Event('friday:typography-ready'))
+  }).catch(() => { /* 字体失败时继续使用已加载的原版字体 */ })
 }
 function unmount() {
   root?.unmount(); root = null; disconnect?.(); delete window.focusActiveTerm
