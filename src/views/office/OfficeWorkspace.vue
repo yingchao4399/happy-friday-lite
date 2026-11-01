@@ -17,7 +17,28 @@
     </div>
 
     <!-- 编辑器 Tab（/office/:editor/:instId）：原生编辑器视图占位区（由主进程全区域摆放，关闭 Tab 时自动保存） -->
-    <div v-else class="office-canvas" />
+    <div v-else class="office-canvas">
+      <div v-if="openingState" class="office-opening" role="status" aria-live="polite">
+        <template v-if="openingState.stage === 'failed'">
+          <strong>{{ t('workspace.office.openFailed') }}</strong>
+          <span>{{ openingState.error || t('workspace.failed') }}</span>
+          <div class="office-opening-actions">
+            <button type="button" @click="activateEditor">{{ t('workspace.office.retryOpen') }}</button>
+            <button type="button" @click="cancelOpen">{{ t('workspace.office.closeOpen') }}</button>
+          </div>
+        </template>
+        <template v-else-if="openingState.stage === 'cancelled'">
+          <span>{{ t('workspace.office.openCancelled') }}</span>
+          <button type="button" @click="activateEditor">{{ t('workspace.office.retryOpen') }}</button>
+        </template>
+        <template v-else>
+          <span class="office-opening-spinner" aria-hidden="true" />
+          <strong>{{ t('workspace.office.opening') }}</strong>
+          <span>{{ openingState.stage === 'view-created' ? t('workspace.office.initializing') : t('workspace.office.loadingDocument') }}</span>
+          <button type="button" @click="cancelOpen">{{ t('workspace.office.cancelOpen') }}</button>
+        </template>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -53,6 +74,7 @@ const available = ref(true);
 // 防止打开/新建动作重入（编辑器 Tab 无内置工具栏 UI）
 const busy = ref(false);
 const currentFile = ref(null);
+const openingState = ref(null);
 // 本实例对应的路由路径（实例生命周期内恒定）。keep-alive 失活实例的 DOM 会被移入
 // 分离容器（尺寸变为 0），其 ResizeObserver/resize/layout-sync 触发的边界推送会以
 // 0×0 覆盖主进程布局、把正在显示的编辑器视图打没（表现为 Tab 切换后页面空白），
@@ -177,6 +199,23 @@ async function fetchEditorState() {
   }
 }
 
+async function refreshOpeningState() {
+  if (!routeEditor || !api) return
+  const state = await fetchEditorState()
+  if (!state) return
+  openingState.value = ['first-interactive', 'data-ready'].includes(state.openProgress)
+    ? null
+    : { stage: state.openProgress || 'view-created', error: state.openError || '' }
+}
+
+async function cancelOpen() {
+  if (!viewId || !api) return
+  try {
+    const result = await api.invoke('office-cancel-open', { viewId })
+    if (result?.success) openingState.value = { stage: 'cancelled' }
+  } catch { /* retain current state */ }
+}
+
 async function openFileInEditor(filePath) {
   busy.value = true;
   try {
@@ -225,7 +264,15 @@ async function createBlankDoc() {
 /** 恢复显示本 Tab 对应的编辑器视图（Tab 切回时视图仍在） */
 async function showOpenEditor() {
   const st = await fetchEditorState();
-  if (!st || !st.open) return false;
+  if (!st) return false;
+  // A failed renderer may still have a live WebContents object. Tear it down
+  // before the retry path opens the original file, otherwise openOfficeFile
+  // would deduplicate onto the broken view.
+  if (st.openProgress === 'failed' || st.openProgress === 'cancelled') {
+    try { await api.invoke('office-cancel-open', { viewId }); } catch { /* retry below */ }
+    return false;
+  }
+  if (!st.open) return false;
   currentFile.value = st.filePath;
   // 命名新建/从首页打开的文件：激活时同步 Tab 标题与文件路径（openFileInEditor 之外的路径不会设置）
   if (st.filePath) {
@@ -261,6 +308,7 @@ function pushAiModel() {
 let initialActivated = false;
 let unwatchSaved = null;
 let unwatchClosed = null;
+let unwatchOpening = null;
 let unwatchModel = null;
 let onResize = null;
 let resizeObserver = null;
@@ -299,6 +347,12 @@ onMounted(() => {
   unwatchModel = watch(() => fridayStore.modelId, pushAiModel);
   unwatchLayoutSync = api.on?.('office-layout-sync', () => { syncBounds(); });
   if (api.on) {
+    unwatchOpening = api.on('office-open-progress', payload => {
+      if (payload?.viewId !== viewId) return;
+      openingState.value = ['first-interactive', 'data-ready'].includes(payload.stage)
+        ? null
+        : { stage: payload.stage, error: payload.error || '' };
+    });
     unwatchSaved = api.on('office-file-saved', ({ viewId: savedViewId, filePath }) => {
       if (!viewId || savedViewId !== viewId || !filePath) return;
       currentFile.value = filePath;
@@ -313,6 +367,7 @@ onMounted(() => {
     });
   }
   if (routeEditor) {
+    void refreshOpeningState();
     // 首次进入编辑器 Tab：恢复显示/按原文件重开/新建空白
     activateEditor().finally(() => {
       initialActivated = true;
@@ -361,6 +416,7 @@ onBeforeUnmount(() => {
   if (resizeObserver) resizeObserver.disconnect();
   if (unwatchSaved) unwatchSaved();
   if (unwatchClosed) unwatchClosed();
+  if (unwatchOpening) unwatchOpening();
   if (unwatchModel) unwatchModel();
   if (unwatchLayoutSync) unwatchLayoutSync();
 });
@@ -394,6 +450,57 @@ onBeforeUnmount(() => {
   flex: 1;
   position: relative;
   background: #ffffff;
+}
+
+.office-opening {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: var(--text-primary, #1f2937);
+  background: var(--bg-primary, #fff);
+  text-align: center;
+}
+
+.office-opening > span:not(.office-opening-spinner) {
+  max-width: min(560px, 100%);
+  color: var(--text-secondary, #6b7280);
+  overflow-wrap: anywhere;
+}
+
+.office-opening button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 6px;
+  color: var(--text-primary, #1f2937);
+  background: var(--bg-secondary, #f3f4f6);
+  font: inherit;
+  cursor: pointer;
+}
+
+.office-opening-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.office-opening-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-color, #d1d5db);
+  border-top-color: var(--accent-color, #0f7fff);
+  border-radius: 50%;
+  animation: office-opening-spin 0.8s linear infinite;
+}
+
+@keyframes office-opening-spin {
+  to { transform: rotate(360deg); }
 }
 
 .office-unavailable {

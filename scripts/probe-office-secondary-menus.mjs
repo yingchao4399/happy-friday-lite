@@ -60,7 +60,8 @@ async function main() {
     setDataDir(data); db.setDataDir(data); await db.initDb()
     win = new BrowserWindow({ show: false, width: 1280, height: 900, webPreferences: { sandbox: true } })
     assert.equal(await initOfficeSession(win), true); registerOfficeIpc()
-    assert.deepEqual(getOfficeLoadedEditors(), ['docs'], 'Office 启动只加载最近文件所需的文档引擎')
+    // 编辑器现在按文件类型懒加载；Office 壳初始化不应预载任何引擎。
+    assert.deepEqual(getOfficeLoadedEditors(), [], 'Office 启动不应预载编辑器引擎')
     const wordSource = path.join(data, '保持打开的文档.docx')
     fs.copyFileSync(path.join(root, 'vendor/happyoffice/fixtures/generated/kitchen-sink.docx'), wordSource)
     const wordHash = digest(wordSource)

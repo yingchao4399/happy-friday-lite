@@ -18,6 +18,7 @@ textarea,
 
 body {
   font-family: var(--font-family-ui);
+  font-size: var(--ui-font-size, 16px);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;

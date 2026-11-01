@@ -56,6 +56,24 @@ export function cancelCurrentTask() {
 }
 
 /**
+ * 应用异常退出后，processing 状态不会有机会进入完成/失败分支。
+ * 启动时把这些孤儿任务恢复为 pending，避免它们永久卡在队列中。
+ * @returns {number} 恢复的任务数量
+ */
+export function recoverInterruptedTasks() {
+  const rows = db.queryAllRaw(
+    "SELECT kb_type, file_path, last_modified FROM file_status WHERE index_status = 'processing'"
+  )
+  // 用单条更新恢复整个批次，避免启动时对大量孤儿任务逐条 flush 数据库。
+  if (rows.length) db.queryAllRaw(
+    "UPDATE file_status SET index_status = 'pending', error_message = ? WHERE index_status = 'processing'",
+    ['上次索引被中断，已自动恢复']
+  )
+  if (rows.length) scheduleImmediateProcess()
+  return rows.length
+}
+
+/**
  * 将文件入队（如果已存在且状态为 pending/processing 则忽略，避免重复入队）
  * @param {string} kbType - 知识库类型: personal / local（工作区 agent 不入队）
  * @param {string} filePath - 文件路径
@@ -69,7 +87,13 @@ export function enqueue(kbType, filePath, lastModified, forceReindex = false) {
   if (existing) {
     // 已存在记录
     if (existing.index_status === 'processing') {
-      // 正在处理中，忽略
+      // 同一版本正在处理中，忽略重复请求。若文件已变化，保留一个 pending
+      // 版本；当前任务完成后会检测版本并让新版本继续处理。
+      if (existing.last_modified !== lastModified) {
+        db.upsertFileStatus(kbType, filePath, lastModified, 'pending')
+        scheduleImmediateProcess()
+        return true
+      }
       return false
     }
     if (!forceReindex && existing.index_status === 'success' && existing.last_modified === lastModified) {
@@ -137,7 +161,7 @@ async function processOne() {
   processing = true
   cancelRequested = false
   // 标记为 processing
-  db.updateFileStatus(task.kbType, task.filePath, 'processing')
+  db.updateFileStatus(task.kbType, task.filePath, 'processing', null)
   console.log(`[RAG Queue] Task started: ${task.filePath}`)
 
   // 通知前端开始处理
@@ -155,24 +179,45 @@ async function processOne() {
       isCancelled: () => cancelRequested
     })
 
+    const latestStatus = db.getFileStatus(task.kbType, task.filePath)
+    const isCurrentTask = latestStatus
+      && latestStatus.index_status === 'processing'
+      && latestStatus.last_modified === task.lastModified
+
     if (cancelRequested) {
       // 用户取消：清理已插入的向量、父块和状态记录
       console.log(`[RAG Queue] Task cancelled, cleaning up: ${task.filePath}`)
-      db.deleteFileStatus(task.kbType, task.filePath)
+      // 文件在处理期间发生变化时，pending 记录属于新版本，不能被旧任务清掉。
+      if (isCurrentTask) db.deleteFileStatus(task.kbType, task.filePath)
       db.deleteParentDocsBySourcePath(task.filePath)
       const { deleteBySource } = await import('./vectorstore.js')
       await deleteBySource(task.filePath)
       console.log(`[RAG Queue] Cleanup done for cancelled task: ${task.filePath}`)
       if (onTaskComplete) onTaskComplete(task, 'cancelled')
-    } else {
+    } else if (isCurrentTask) {
       db.updateFileStatus(task.kbType, task.filePath, 'success')
       console.log(`[RAG Queue] Task success: ${task.filePath}`)
       if (onTaskComplete) onTaskComplete(task, 'success')
+    } else {
+      // 任务执行期间文件已变更、被删除或被重新排队，旧版本不能覆盖新状态。
+      console.log(`[RAG Queue] Task superseded, keeping latest status: ${task.filePath}`)
+      if (onTaskComplete) onTaskComplete(task, 'superseded')
     }
   } catch (e) {
     console.error(`[RAG Queue] Task failed: ${task.filePath}`, e)
-    db.updateFileStatus(task.kbType, task.filePath, 'failed')
-    if (onTaskComplete) onTaskComplete(task, 'failed')
+    const errorMessage = String(e?.message || e || '索引任务失败').slice(0, 1000)
+    const latestStatus = db.getFileStatus(task.kbType, task.filePath)
+    const isCurrentTask = latestStatus
+      && latestStatus.index_status === 'processing'
+      && latestStatus.last_modified === task.lastModified
+    if (isCurrentTask) {
+      db.updateFileStatus(task.kbType, task.filePath, 'failed', errorMessage)
+      if (onProgressCb) onProgressCb({ phase: 'failed', file: task.filePath, kbType: task.kbType, error: errorMessage, recoverable: true })
+      if (onTaskComplete) onTaskComplete(task, 'failed', errorMessage)
+    } else {
+      console.log(`[RAG Queue] Ignoring stale task failure, latest status was preserved: ${task.filePath}`)
+      if (onTaskComplete) onTaskComplete(task, 'superseded', errorMessage)
+    }
   } finally {
     processing = false
     cancelRequested = false

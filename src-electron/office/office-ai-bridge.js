@@ -23,6 +23,7 @@ import { toOpenAiMessages } from './canonical-transcript.js'
 const state = {
   model: null, // { baseUrl, apiKey, modelName, provider }
   streams: new Map(), // requestId -> AbortController
+  bridgeRegistered: false,
 }
 
 /** 主窗口侧推送当前模型配置（OfficeWorkspace 挂载/模型切换时调用） */
@@ -293,8 +294,16 @@ async function runFridayStream(request, send) {
   }
 }
 
-/** 注册覆写（需在编辑器 IPC 注册之后调用） */
-export function registerOfficeAiBridge() {
+/**
+ * 注册 Office AI IPC。
+ *
+ * OfficeWorkspace 在编辑器 bundle 懒加载前就可能推送模型配置，所以
+ * `office-set-ai-model` 需要在 Office Host 初始化阶段先可用。编辑器 bundle
+ * 加载后会再次以 force 模式注册，让 Friday 覆盖上游同名 ai:* 通道。
+ */
+export function registerOfficeAiBridge({ force = false } = {}) {
+  if (state.bridgeRegistered && !force) return
+
   handle('office-set-ai-model', (_e, model) => {
     setOfficeAiModel(model)
     return { success: true }
@@ -346,6 +355,7 @@ export function registerOfficeAiBridge() {
   // —— AI 面板偏好（左侧/右侧等）：上游由 shell 主进程注册，这里由 Friday 接管 ——
   registerAiPanelPrefsIpc()
 
+  state.bridgeRegistered = true
   console.log('[Office] AI bridge registered: Friday takes over ai:* channels')
 }
 

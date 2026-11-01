@@ -140,6 +140,14 @@
     "print": "打印当前 Office 文档",
     "export-pdf": "Office 导出 PDF",
     "export-csv": "Excel 导出 CSV",
-    "export-images": "PowerPoint 导出图片"
+    "export-images": "PowerPoint 导出图片",
+    "opening": "正在打开 Office 文档",
+    "initializing": "正在初始化编辑器…",
+    "loadingDocument": "正在加载文档内容…",
+    "cancelOpen": "取消打开",
+    "openCancelled": "已取消打开",
+    "openFailed": "Office 文档打开失败",
+    "retryOpen": "重试",
+    "closeOpen": "关闭"
   }
 }

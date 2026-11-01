@@ -16,6 +16,7 @@ import {
   deleteOfficeFile,
   revealOfficePath,
   openOfficeFileDialog,
+  cancelOfficeOpen,
   queryOfficeDirty,
   isOfficeAvailable,
   locateOfficeSpan,
@@ -88,6 +89,8 @@ export function registerOfficeIpc() {
   })
 
   ipcMain.handle('office-show', (_e, { viewId } = {}) => showOfficeView(viewId))
+
+  ipcMain.handle('office-cancel-open', (_e, { viewId } = {}) => cancelOfficeOpen(viewId))
 
   ipcMain.handle('office-get-state', () => getOfficeState())
   ipcMain.handle('office-get-selection', () => getOfficeDocumentSelection())

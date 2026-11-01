@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container" :class="{ 'is-share-view': isShareView }">
+  <div class="app-container" :class="{ 'is-share-view': isShareView }" :style="{ '--ui-font-size': `${appStore.fontSize}px` }">
     <TabBar v-if="!isShareView" />
     <CommandPalette v-if="!isShareView" /><div v-if="pluginState.notice" class="workspace-command-notice" role="status">{{ pluginState.notice }}</div>
     <div v-if="commandState.error" class="workspace-command-notice" role="alert">{{ commandState.error === 'NOTE_SAVE_FAILED' ? $t('workspace.saveError') : commandState.error }} <button @click="commandState.error=''" :aria-label="$t('workspace.close')">×</button></div>
@@ -17,7 +17,7 @@
       </main>
     </div>
     <Teleport to="body">
-      <GlobalAgentDock v-if="!isShareView && !startupOpening" />
+      <GlobalAgentDock v-if="!isShareView" />
     </Teleport>
     <!-- 启动时处理系统打开文件请求的遮罩：先完成跳转再露出界面，避免首页闪现 -->
     <div v-if="startupOpening" class="startup-open-overlay"></div>
@@ -26,11 +26,8 @@
 
 <script setup>
 import CommandPalette from '@/components/commands/CommandPalette.vue';
-import {setupPlugins,pluginState} from '@/features/plugins/client';
-import {setupCommands} from '@/features/commands/setup';
+import { pluginState } from '@/features/plugins/state';
 import {commandState} from '@/features/commands/registry';
-import {useNoteStore} from '@/store/modules/note';
-import {useTypewriterStore} from '@/store/modules/typewriter';
 import Sidebar from '@/components/layout/Sidebar.vue';
 import TabBar from '@/components/layout/TabBar.vue';
 import GlobalAgentDock from '@/components/ai-core/GlobalAgentDock.vue';
@@ -69,6 +66,7 @@ const routerViewKey = computed(() => {
 });
 
 let disposeCommands,disposePlugins;
+let shellUnmounted = false;
 let unlistenConfig = null;
 let unlistenOfficeOpened = null;
 let unlistenOfficeDockOpenFriday = null;
@@ -76,6 +74,9 @@ let unlistenOpenFileRequest = null;
 let unlistenClipboardHotkey = null;
 let sessionSaveUnwatch = null;
 let unlistenBeforeUnload = null;
+let startupFallbackTimer = null;
+let startupDeferredHandle = null;
+let cancelStartupDeferred = null;
 const onHorizontalWheel = (event) => routeHorizontalWheel(event);
 
 /** 系统打开文件请求 → 路由到应用内对应查看器/编辑器 */
@@ -201,8 +202,32 @@ watch(
 );
 
 onMounted(async () => {
-  if(!isShareView.value) disposeCommands=setupCommands({router,notes:useNoteStore(),typewriter:useTypewriterStore()});
-  if(!isShareView.value) disposePlugins=setupPlugins();
+  // 先让壳层和首屏完成绘制，再注册命令/插件，避免启动阶段同步初始化阻塞第一次交互。
+  if(!isShareView.value) {
+    const initializeDeferred = async () => {
+      startupDeferredHandle = null;
+      cancelStartupDeferred = null;
+      // 根壳层可能在热重载或分享视图切换时卸载，避免卸载后继续注册全局资源。
+      if (isShareView.value || shellUnmounted) return;
+      const [{ setupCommands }, { setupPlugins }, { useNoteStore }, { useTypewriterStore }] = await Promise.all([
+        import('@/features/commands/setup'),
+        import('@/features/plugins/client'),
+        import('@/store/modules/note'),
+        import('@/store/modules/typewriter'),
+      ]);
+      if (isShareView.value || shellUnmounted) return;
+      disposeCommands = setupCommands({router, notes: useNoteStore(), typewriter: useTypewriterStore()});
+      disposePlugins = setupPlugins();
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      startupDeferredHandle = window.requestIdleCallback(initializeDeferred, { timeout: 1200 });
+      cancelStartupDeferred = () => window.cancelIdleCallback?.(startupDeferredHandle);
+    } else {
+      // setTimeout 的第二个参数必须是数字；不能把 requestIdleCallback 的 options 对象传入。
+      startupDeferredHandle = window.setTimeout(initializeDeferred, 0);
+      cancelStartupDeferred = () => window.clearTimeout(startupDeferredHandle);
+    }
+  }
   initTheme();
   // 统一处理应用内所有横向溢出区域（笔记表格、代码、Markdown 预览等）。
   // TabBar 自己管理选项卡滚轮，工具函数会跳过该区域。
@@ -210,6 +235,8 @@ onMounted(async () => {
   if (isElectronEnvironment()) unlistenClipboardHotkey = electronService.listen('clipboard-hotkey', ({ payload }) => router.push(payload?.noteId ? '/note/' + encodeURIComponent(payload.noteId) : '/clipboard'));
 
   if (isElectronEnvironment()) {
+    // 任一恢复步骤异常或外部文件请求卡住时，最多 8 秒后放行主界面，避免全局助手和应用入口永久消失。
+    startupFallbackTimer = window.setTimeout(() => { startupOpening.value = false }, 8000);
     let config = null;
     try {
       config = await electronService.invoke('get-config');
@@ -218,6 +245,7 @@ onMounted(async () => {
           appStore.setLanguage(config.language);
           setI18nLanguage(config.language);
         }
+        appStore.setFontSize(config.fontSize);
         // 主题以本地 localStorage（useTheme）为权威源。
         // 旧版本未将 theme 持久化到 config，config.theme 可能停留在默认 'light'；
         // 若直接采用，后续 config-changed 广播会用过期值覆盖当前主题。
@@ -296,6 +324,8 @@ onMounted(async () => {
 
     // 恢复与跳转全部完成后移除遮罩露出界面
     startupOpening.value = false;
+    window.clearTimeout(startupFallbackTimer);
+    startupFallbackTimer = null;
 
     // 主进程内部发起的 Office 打开（如编辑器导出/转换生成的文件）：
     // 视图已在主进程创建，这里跳转到对应编辑器 Tab（Tab 由上方 office 分支自动创建）
@@ -322,6 +352,7 @@ onMounted(async () => {
         appStore.setLanguage(data.language);
         setI18nLanguage(data.language);
       }
+      if (data.fontSize !== undefined) appStore.setFontSize(data.fontSize);
       if (data.theme) {
         appStore.setTheme(data.theme);
         applyThemeFromConfig(data.theme);
@@ -346,6 +377,10 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  shellUnmounted = true;
+  cancelStartupDeferred?.();
+  startupDeferredHandle = null;
+  cancelStartupDeferred = null;
   disposePlugins?.();disposeCommands?.();
   document.removeEventListener('wheel', onHorizontalWheel, true);
   unlistenClipboardHotkey?.();
@@ -373,6 +408,8 @@ onUnmounted(() => {
     unlistenBeforeUnload();
     unlistenBeforeUnload = null;
   }
+  window.clearTimeout(startupFallbackTimer);
+  startupFallbackTimer = null;
 });
 </script>
 
@@ -380,6 +417,7 @@ onUnmounted(() => {
 .app-container {
   display: flex;
   flex-direction: column;
+  font-size: var(--ui-font-size, 16px);
   height: 100vh;
   width: 100vw;
   overflow: hidden;

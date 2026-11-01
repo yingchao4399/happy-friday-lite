@@ -200,6 +200,7 @@ const isEnabled = (key) => appStore.sidebarModules[key] !== false;
 const draggedModule = ref('');
 const orderError = ref('');
 const orderSaving = ref(false);
+let moduleSaveQueue = Promise.resolve();
 const orderedModules = computed(() => {
   const ids = [...new Set([...appStore.moduleOrder, ...sidebarMenuConfig.map(item => item.key)])];
   return ids.map(id => sidebarMenuConfig.find(item => item.key === id)).filter(Boolean);
@@ -303,14 +304,24 @@ onUnmounted(() => {
 
 const persistModules = async (nextModules, previousModules) => {
   appStore.setSidebarModules(nextModules);
-  try {
+  const snapshot = { ...nextModules };
+  // Keep rapid toggles in order. Each write starts from the latest config and
+  // publishes the exact snapshot selected by that toggle.
+  const write = moduleSaveQueue.catch(() => {}).then(async () => {
     const config = await electronService.invoke('get-config');
-    if (!config) return;
-    config.sidebarModules = nextModules;
+    if (!config) throw new Error('Failed to load config');
+    config.sidebarModules = snapshot;
     const result = await electronService.invoke('save-config', config);
     if (result?.success === false) throw new Error(result.error || 'Failed to save configuration');
+  });
+  moduleSaveQueue = write;
+  try {
+    await write;
   } catch (_error) {
-    appStore.setSidebarModules(previousModules);
+    // Do not let an older failed write undo a newer user selection.
+    const current = appStore.sidebarModules;
+    const stillCurrent = Object.keys(snapshot).every(key => current[key] === snapshot[key]);
+    if (stillCurrent) appStore.setSidebarModules(previousModules);
   }
 };
 

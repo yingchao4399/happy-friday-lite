@@ -12,7 +12,7 @@ const root = fileURLToPath(new URL('../', import.meta.url))
 const mode = process.argv.find(value => value.startsWith('--mode='))?.slice(7) || 'host'
 const kind = process.argv.find(value => value.startsWith('--kind='))?.slice(7) || 'docs'
 const iterations = Number(process.argv.find(value => value.startsWith('--iterations='))?.slice(13) || 3)
-assert.ok(['host', 'direct'].includes(mode) && Number.isInteger(iterations) && iterations >= 1 && iterations <= 20)
+assert.ok(['host', 'direct'].includes(mode) && Number.isInteger(iterations) && iterations >= 1 && iterations <= 30)
 assert.ok(['docs', 'sheets', 'slides', 'pdf'].includes(kind))
 
 if (!process.versions.electron) {
@@ -28,7 +28,7 @@ if (!process.versions.electron) {
   const { setDataDir } = await import('../src-electron/config.js')
   const db = await import('../src-electron/db.js')
   const { initOfficeSession } = await import('../src-electron/office/office-session.js')
-  const { openOfficeFile, closeOfficeFile, getOfficeUiTarget, shutdownOfficeHost, setOfficeContentBounds } = await import('../src-electron/office/office-host.js')
+  const { openOfficeFile, closeOfficeFile, getOfficeUiTarget, getOfficeState, shutdownOfficeHost, setOfficeContentBounds } = await import('../src-electron/office/office-host.js')
   const data = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-office-lifecycle-'))
   app.setPath('userData', path.join(data, 'profile'))
   app.on('window-all-closed', () => {})
@@ -78,6 +78,14 @@ if (!process.versions.electron) {
       assert.equal(ready, true, kind + ' 编辑器必须实际就绪')
       if (kind === 'docs') await wc.executeJavaScript('window.__aidocs.whenReady()')
       const readyMs = performance.now() - started
+      let officeMetrics = null
+      for (let attempt = 0; attempt < 350; attempt++) {
+        officeMetrics = getOfficeState().find(item => item.viewId === result.viewId) || null
+        if (officeMetrics?.firstInteractiveMs != null && officeMetrics?.dataReadyMs != null) break
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+      assert.ok(officeMetrics?.firstInteractiveMs != null, kind + ' firstInteractiveMs 必须被记录')
+      assert.ok(officeMetrics?.dataReadyMs != null, kind + ' dataReadyMs 必须被记录')
       assert.equal(await closeOfficeFile(result.viewId), true)
       if (mode === 'direct') {
         console.log(JSON.stringify({ stage: 'closing', iteration: index + 1, contentsId: wc.id }))
@@ -88,6 +96,8 @@ if (!process.versions.electron) {
       await new Promise(resolve => setTimeout(resolve, 200))
       const sample = {
         kind, iteration: index + 1, readyMs: Math.round(readyMs),
+        firstInteractiveMs: officeMetrics.firstInteractiveMs,
+        dataReadyMs: officeMetrics.dataReadyMs,
         contents: webContents.getAllWebContents().length,
         workingSetKB: app.getAppMetrics().reduce((sum, process) => sum + process.memory.workingSetSize, 0),
       }

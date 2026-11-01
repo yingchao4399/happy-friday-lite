@@ -48,6 +48,8 @@ let desktop = null
 let recordings = null
 let recordingIssue = null
 let appendState = { enabled: false, targetId: null, count: 0 }
+// 剪贴板列表会被多个 UI 事件短时间重复读取；缓存只在批量持久化后失效，避免每次打开/搜索都重新解析全部 JSON。
+let itemsCache = null
 
 function clipboardFilePaths() {
   return nativeClipboardAdapter?.readFilePaths?.({ strict: true }) || []
@@ -66,6 +68,7 @@ function ensureStorage() {
 }
 
 function readItems() {
+  if (itemsCache) return itemsCache
   const rows = queryAllRaw('SELECT payload FROM clipboard_items ORDER BY capturedAt DESC')
   if (!rows.length && fs.existsSync(historyPath())) {
     let value
@@ -81,9 +84,10 @@ function readItems() {
       ? { ...item, plainText: encrypt(String(item.plainText || '')), html: '', imagePath: null, maskedPreview: '••••••••' } : item)
     writeItems(items)
     fs.unlinkSync(historyPath())
+    itemsCache = items
     return items
   }
-  return rows.map(row => {
+  itemsCache = rows.map(row => {
     try { return JSON.parse(row.payload) } catch {
       const error = new Error('剪贴板数据库中存在无法读取的历史记录；该记录未被自动删除')
       error.code = 'CLIPBOARD_ITEM_INVALID'
@@ -91,10 +95,12 @@ function readItems() {
       throw error
     }
   })
+  return itemsCache
 }
 
 function writeItems(items) {
   persistClipboardItems(queryAllRaw, items)
+  itemsCache = items
   pins?.refresh()
 }
 
@@ -274,18 +280,48 @@ function publicItem(item) {
   return { ...item, kind: clipboardFileItemKind(item, fileEntries), fileEntries, plainText: item.sensitivity === 'secret' ? '' : decrypt(item.plainText), note: item.sensitivity === 'secret' ? '' : item.note || '', hasNote: Boolean(item.note), expired: false }
 }
 
-export function listClipboardItems({ query = '', kind = '', includeExpired = false, view = 'all', category = '', tag = '', dateFrom = '', dateTo = '' } = {}) {
+// 列表只需要可扫描的预览和轻量元数据。完整 HTML、合并片段和长正文在
+// 打开详情时按 ID 读取，避免 1,000 条历史在首次 IPC 中整体复制到渲染进程。
+const CLIPBOARD_LIST_PREVIEW_LIMIT = 4096
+function compactPublicItem(item) {
+  const result = publicItem(item)
+  if (result.plainText && result.plainText.length > CLIPBOARD_LIST_PREVIEW_LIMIT) {
+    result.plainText = result.plainText.slice(0, CLIPBOARD_LIST_PREVIEW_LIMIT)
+    result.previewTruncated = true
+  }
+  result.hasHtml = Boolean(item.html || item.parts?.some(part => part.html))
+  result.html = ''
+  delete result.parts
+  return result
+}
+
+export function getClipboardItem(id, { compact = false } = {}) {
+  if (typeof id !== 'string' || !id) return null
+  const item = readItems().find(entry => entry.id === id)
+  if (!item || item.deletedAt) return null
+  return compact ? compactPublicItem(item) : publicItem(item)
+}
+
+export function listClipboardItems({ query = '', kind = '', includeExpired = false, view = 'all', category = '', tag = '', dateFrom = '', dateTo = '', limit = 0, offset = 0, includeMeta = false, compact = false } = {}) {
   enforceHistoryRetention()
   const needle = String(query).trim().toLowerCase()
-  return readItems()
+  const filtered = readItems()
     .filter(item => !item.deletedAt)
     .filter(item => includeExpired || !item.expiresAt || Date.parse(item.expiresAt) > Date.now())
     .filter(item => clipboardMatches(item, needle))
     .filter(item => clipboardInDateRange(item, dateFrom, dateTo))
     .filter(item => clipboardInView(item, { view, category, tag }))
     .sort(compareClipboardOrder)
-    .map(publicItem)
-    .filter(item => !kind || item.kind === kind)
+  const filteredByKind = kind
+    ? filtered.filter(item => clipboardFileItemKind(item, item.sensitivity === 'secret' ? [] : clipboardFileEntries(item.filePaths, item.fileEntries)) === kind)
+    : filtered
+  const pageSize = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 200) : 0
+  const pageOffset = Number.isInteger(offset) && offset > 0 ? offset : 0
+  const page = pageSize ? filteredByKind.slice(pageOffset, pageOffset + pageSize) : filteredByKind
+  const items = page.map(compact ? compactPublicItem : publicItem)
+  return includeMeta
+    ? { items, hasMore: pageSize ? pageOffset + page.length < filteredByKind.length : false, total: filteredByKind.length }
+    : items
 }
 
 export async function getClipboardImage({ id, index = 0, thumbnail = true, fileIndex, htmlIndex, loadExternal = false } = {}) {
@@ -745,6 +781,11 @@ export function registerClipboardCommands(win) {
   ipcMain.handle('clipboard-queue-arm', externalUnavailable)
   ipcMain.handle('clipboard-capture-internal', () => captureInternalClipboard())
   ipcMain.handle('clipboard-list', (_event, args) => listClipboardItems(args || {}))
+  ipcMain.handle('clipboard-get', (_event, args) => {
+    const item = getClipboardItem(args?.id, { compact: args?.compact === true })
+    if (!item) throw clipboardAiError('CLIPBOARD_ITEM_UNAVAILABLE')
+    return item
+  })
   ipcMain.handle('clipboard-append-get', () => getClipboardAppend())
   ipcMain.handle('clipboard-append-set', (_event, args) => setClipboardAppend(args?.enabled))
   ipcMain.handle('clipboard-open-link', async (_event, args) => {

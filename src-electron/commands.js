@@ -1678,7 +1678,7 @@ export function registerCommands(mainWindow) {
       const kbType = inferKbType(filePath)
       if (!kbType) return { success: true, status: 'excluded' }
       const status = getFileIndexStatus(filePath)
-      return { success: true, status: status ? status.index_status : 'not-indexed' }
+      return { success: true, status: status ? status.index_status : 'not-indexed', error: status?.error_message || null }
     } catch (e) {
       return { success: false, error: e.message }
     }

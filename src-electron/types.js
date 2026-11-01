@@ -5,6 +5,8 @@ export function defaultConfig() {
   return {
     language: 'zh-CN',
     theme: 'light',
+    // 全局 UI 字号，设置页和应用根节点共同使用，避免只在设置页改变局部状态。
+    fontSize: 16,
     // 主进程运行日志：默认开启，兼容已有版本的行为
     runtimeLogsEnabled: true,
     systemPrompt: DEFAULT_SYSTEM_PROMPT,

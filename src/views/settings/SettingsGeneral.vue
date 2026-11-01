@@ -47,7 +47,7 @@
                 v-for="option in fontSizeOptions"
                 :key="option.value"
                 :class="['font-size-option', { active: settings.fontSize === option.value }]"
-                @click="settings.fontSize = option.value"
+                @click="selectFontSize(option.value)"
               >
                 {{ option.label }}
               </div>
@@ -697,6 +697,7 @@ const langSelectRef = ref(null);
 let unsubBackupProgress = null;
 let unsubGlobalAgentDockConfig = null;
 let globalAgentDockSaveQueue = Promise.resolve();
+let fontSizeSaveQueue = Promise.resolve();
 
 const themeOptions = computed(() => [
   { value: 'light', label: t('settings.themeLight') },
@@ -1455,6 +1456,41 @@ const selectTheme = async (value) => {
   } catch (_e) {}
 };
 
+const selectFontSize = async (value) => {
+  if (![14, 16, 18].includes(Number(value)) || settings.fontSize === Number(value)) return;
+  const previous = settings.fontSize;
+  settings.fontSize = Number(value);
+  appStore.setFontSize(settings.fontSize);
+  const snapshot = settings.fontSize;
+  // Serialize full-config writes so rapid clicks cannot let an older get/save
+  // cycle overwrite the newest selected value.
+  fontSizeSaveQueue = fontSizeSaveQueue.catch(() => {}).then(async () => {
+    const config = await electronService.invoke('get-config');
+    if (!config) throw new Error('Failed to load config');
+    config.fontSize = snapshot;
+    const result = await electronService.invoke('save-config', config);
+    if (result?.success === false) throw new Error(result.error || 'Failed to save font size');
+  });
+  try {
+    await fontSizeSaveQueue;
+  } catch (error) {
+    // A later click owns the current state; do not roll it back because an
+    // earlier queued write failed.
+    if (settings.fontSize === snapshot) {
+      try {
+        const saved = await electronService.invoke('get-config');
+        const restored = [14, 16, 18].includes(Number(saved?.fontSize)) ? Number(saved.fontSize) : previous;
+        settings.fontSize = restored;
+        appStore.setFontSize(restored);
+      } catch {
+        settings.fontSize = previous;
+        appStore.setFontSize(previous);
+      }
+    }
+    notifyError(error?.message || t('settings.saveFailed'));
+  }
+};
+
 const toggleLangDropdown = () => {
   showLangDropdown.value = !showLangDropdown.value;
 };
@@ -1563,6 +1599,8 @@ onMounted(() => {
   currentLanguage.value = appStore.language || 'zh-CN';
   electronService.invoke('get-config').then((config) => {
     if (config) {
+      settings.fontSize = [14, 16, 18].includes(Number(config.fontSize)) ? Number(config.fontSize) : 16;
+      appStore.setFontSize(settings.fontSize);
       runtimeLogsEnabled.value = config.runtimeLogsEnabled !== false;
       appStore.setSidebarModules(config.sidebarModules);
       applyGlobalAgentDockConfig(config);

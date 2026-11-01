@@ -173,11 +173,11 @@ let officeOverlaySyncTimer = 0
 let unlistenDockChunk = null
 let unlistenDockDone = null
 let unlistenDockError = null
-let unlistenDockSession = null
 let unlistenDockSessionCreated = null
 let unlistenAssistantConfig = null
 let refreshTimer = null
 let resizeObserver = null
+let capabilitiesRequestSeq = 0
 
 const activeCount = computed(() => tasks.value.filter(task => ['awaiting_approval', 'running', 'verifying', 'paused'].includes(task.status)).length)
 const dockStyle = computed(() => {
@@ -440,17 +440,20 @@ async function refreshTasks() {
 }
 
 async function refreshCapabilities() {
+  const requestSeq = ++capabilitiesRequestSeq
   capabilitiesLoading.value = true
   capabilitiesError.value = false
   try {
     const result = await electronService.aiCoreListCapabilities()
+    if (requestSeq !== capabilitiesRequestSeq) return
     capabilities.value = Array.isArray(result?.capabilities) ? result.capabilities : []
     capabilitiesError.value = !Array.isArray(result?.capabilities)
   } catch (_error) {
+    if (requestSeq !== capabilitiesRequestSeq) return
     capabilities.value = []
     capabilitiesError.value = true
   } finally {
-    capabilitiesLoading.value = false
+    if (requestSeq === capabilitiesRequestSeq) capabilitiesLoading.value = false
   }
 }
 
@@ -572,9 +575,13 @@ onMounted(() => {
     const saved = JSON.parse(localStorage.getItem('happy-friday-dock-position') || 'null')
     if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) dockPosition.value = saved
   } catch { /* ignore corrupt position */ }
-  // Tasks are refreshed when the dock opens or after an action. Avoid a
-  // six-second IPC poll that made opening the panel compete with the editor.
-  refreshTasks()
+  // 先挂载助手入口，任务列表等非首屏数据在空闲时读取，避免启动/切换模块时竞争主线程。
+  // 保存句柄并在卸载时取消，防止快速切换路由后旧组件继续发 IPC。
+  if (typeof window.requestIdleCallback === 'function') {
+    refreshTimer = window.requestIdleCallback(() => { refreshTimer = null; void refreshTasks() }, { timeout: 1500 })
+  } else {
+    refreshTimer = window.setTimeout(() => { refreshTimer = null; void refreshTasks() }, 0)
+  }
   unlistenDockChunk = electronService.listen('chat-chunk', ({ payload }) => {
     if (!payload || payload.requestId !== dockRequestId) return
     const assistant = dockMessages.value.at(-1)
@@ -598,8 +605,6 @@ onMounted(() => {
     if (payload.sessionId && !dockSessionId.value) dockSessionId.value = payload.sessionId
     dockSending.value = false
   })
-  unlistenDockSession = electronService.listen('session-title-updated', ({ payload }) => {
-  })
   if (props.officeOverlay) {
     resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(scheduleOfficeOverlayBoundsSync) : null
     if (resizeObserver && panel.value) resizeObserver.observe(panel.value)
@@ -612,8 +617,11 @@ watch(routePath, () => {
 })
 
 onUnmounted(() => {
-  window.clearInterval(refreshTimer)
-  unlistenDockChunk?.(); unlistenDockSessionCreated?.(); unlistenDockDone?.(); unlistenDockError?.(); unlistenDockSession?.()
+  if (refreshTimer !== null && typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(refreshTimer)
+  window.clearTimeout(refreshTimer)
+  refreshTimer = null
+  capabilitiesRequestSeq++
+  unlistenDockChunk?.(); unlistenDockSessionCreated?.(); unlistenDockDone?.(); unlistenDockError?.()
   unlistenAssistantConfig?.()
   window.removeEventListener('pointermove', moveDrag)
   resizeObserver?.disconnect()

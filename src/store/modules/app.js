@@ -6,6 +6,7 @@ export const useAppStore = defineStore('app', {
     moduleOrder: [],
     language: 'zh-CN',
     theme: 'light',
+    fontSize: 16,
     loading: false,
     noteFimCompletion: true,
     scheduleDefaultView: 'month',
@@ -46,6 +47,10 @@ export const useAppStore = defineStore('app', {
     },
     setTheme(theme) {
       this.theme = theme
+    },
+    setFontSize(value) {
+      const next = Number(value)
+      this.fontSize = [14, 16, 18].includes(next) ? next : 16
     },
     setNoteFimCompletion(value) {
       this.noteFimCompletion = value

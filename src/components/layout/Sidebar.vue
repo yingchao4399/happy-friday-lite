@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store';
 import { useI18n } from 'vue-i18n';
@@ -107,8 +107,18 @@ const onRouteChange = () => {
   showDrawer.value = false;
 };
 
+let removeRouteHook = null;
+
 onMounted(() => {
-  router.afterEach(onRouteChange);
+  // afterEach returns an unregister function. Keep it so a remounted shell
+  // does not accumulate route callbacks and stale drawer updates.
+  removeRouteHook = router.afterEach(onRouteChange);
+});
+
+onUnmounted(() => {
+  removeRouteHook?.();
+  removeRouteHook = null;
+  hideTooltip();
 });
 </script>
 
@@ -237,12 +247,21 @@ onMounted(() => {
 
 .sidebar-menu {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 18px;
   width: 100%;
 }
+
+.sidebar-menu::-webkit-scrollbar { width: 4px; }
+.sidebar-menu::-webkit-scrollbar-track { background: transparent; }
+.sidebar-menu::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 
 .sidebar-bottom {
   display: flex;

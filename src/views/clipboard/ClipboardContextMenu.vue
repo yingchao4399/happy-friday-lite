@@ -26,7 +26,7 @@ const actions = computed(() => {
     entries.push({ key: 'open-folder', label: t('clipboard.openFolder'), icon: Folder })
     entries.push({ key: 'path', label: t('clipboard.copyPath'), icon: Folder })
   }
-  if (item.html && item.plainText && !sensitive) entries.push({ key: 'text', label: t('clipboard.copyText'), icon: FileText })
+  if ((item.html || item.hasHtml) && item.plainText && !sensitive) entries.push({ key: 'text', label: t('clipboard.copyText'), icon: FileText })
   if ((item.imagePath || item.imagePaths?.length) && !sensitive) entries.push({ key: 'preview', label: t('clipboard.openImage'), icon: Image })
   // 手机二维码/局域网分享属于下一轮外部剪贴板能力，本轮不显示入口。
   entries.push({ key: 'pin', label: t(item.pinned ? 'clipboard.unpin' : 'clipboard.pin'), icon: item.pinned ? PinOff : Pin })

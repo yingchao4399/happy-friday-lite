@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { enqueue, setTaskHandler, setOnTaskComplete, setOnProgress, cancelCurrentTask } from './queue.js'
+import { enqueue, setTaskHandler, setOnTaskComplete, setOnProgress, cancelCurrentTask, recoverInterruptedTasks } from './queue.js'
 import { inferKbType, getKbRootPath, KB_TYPES } from './paths.js'
 
 /**
@@ -26,6 +26,10 @@ let initialized = false
 export async function initRag(sendToRenderer = null) {
   if (initialized) return
   initialized = true
+
+  // 恢复上次异常退出遗留的 processing 任务，再注册处理器即可继续执行。
+  const recovered = recoverInterruptedTasks()
+  if (recovered > 0) console.log(`[RAG] Recovered ${recovered} interrupted task(s)`)
 
   // 注册任务处理器
   setTaskHandler(async (...args) => {

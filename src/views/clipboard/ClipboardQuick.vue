@@ -14,7 +14,7 @@
     <main :aria-busy="loading">
       <p v-if="!items.length" class="empty">{{ t(loading ? 'clipboard.loading' : 'clipboard.noResults') }}</p>
       <article v-for="item in items" :key="item.id" class="quick-row" @contextmenu.prevent="openMenu($event, item)">
-        <button class="quick-preview" type="button" @click="detail = item">
+        <button class="quick-preview" type="button" @click="openDetail(item)">
           <img v-if="thumbnails[item.id]" :src="thumbnails[item.id]" :alt="t('clipboard.image')" />
           <span>{{ item.sensitivity === 'secret' ? t('clipboard.secret') : item.plainText || item.filePaths?.join('\n') || t('clipboard.image') }}</span>
           <small>{{ item.sourceApp }} · {{ new Date(item.capturedAt).toLocaleString() }}</small>
@@ -53,7 +53,7 @@ const state = ref({ target: { available: false, label: '' }, queue: { ids: [], a
 const queue = computed(() => state.value.queue)
 const allItems = ref([])
 const currentItem = computed(() => allItems.value.find(item => item.id === queue.value.ids?.[queue.value.position]))
-let alive = true, revision = 0, debounce, unlisteners = []
+let alive = true, revision = 0, debounce, unlisteners = [], detailRequestId = 0
 function displayError(e) {
   const code = e.code || String(e.message).match(/CLIPBOARD_[A-Z_]+/)?.[0]
   error.value = code && te('clipboard.desktopErrors.' + code) ? t('clipboard.desktopErrors.' + code) : t('clipboard.pasteFailed')
@@ -61,12 +61,15 @@ function displayError(e) {
 async function refresh() {
   const token = ++revision; loading.value = true
   try {
-    const [list, next] = await Promise.all([electronService.request('clipboard-list'), electronService.getClipboardDesktopState()])
+    const listRequest = { limit: 80, includeMeta: true, compact: true }
+    const [listResult, next] = await Promise.all([electronService.request('clipboard-list', listRequest), electronService.getClipboardDesktopState()])
     if (!alive || token !== revision) return
+    const list = Array.isArray(listResult) ? listResult : (listResult?.items || [])
     allItems.value = list; state.value = next
     // 搜索由后端执行，敏感内容不进入普通全文搜索。
-    const filtered = query.value ? await electronService.request('clipboard-list', { query: query.value }) : list
+    const filteredResult = query.value ? await electronService.request('clipboard-list', { ...listRequest, query: query.value }) : listResult
     if (!alive || token !== revision) return
+    const filtered = Array.isArray(filteredResult) ? filteredResult : (filteredResult?.items || [])
     items.value = filtered.slice(0, 80)
     thumbnails.value = {}
     for (const item of items.value.filter(item => item.sensitivity !== 'secret' && (item.imagePath || item.fileEntries?.some(file => file.kind === 'image'))).slice(0, 16)) {
@@ -75,6 +78,14 @@ async function refresh() {
     }
   } catch (e) { if (alive && token === revision) displayError(e) }
   finally { if (alive && token === revision) loading.value = false }
+}
+async function openDetail(item) {
+  const current = ++detailRequestId
+  detail.value = item
+  try {
+    const full = await electronService.request('clipboard-get', { id: item.id })
+    if (alive && current === detailRequestId && full?.id === item.id) detail.value = full
+  } catch {}
 }
 function openMenu(event, item) { menuPosition.value = { x: event.clientX, y: event.clientY }; menuItem.value = item }
 async function menuAction(action) {
@@ -119,7 +130,7 @@ onMounted(async () => {
   unlisteners.push(electronService.listen('clipboard-desktop-changed', ({ payload: next }) => { state.value = next; if (next.queue.error) displayError({ code: next.queue.error }) }))
   await refresh()
 })
-onUnmounted(() => { alive = false; revision++; clearTimeout(debounce); unlisteners.forEach(stop => stop?.()) })
+onUnmounted(() => { alive = false; revision++; detailRequestId++; clearTimeout(debounce); unlisteners.forEach(stop => stop?.()) })
 </script>
 <style scoped>
 .clipboard-quick{height:100vh;display:flex;flex-direction:column;background:var(--bg-primary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:10px;overflow:hidden;box-sizing:border-box;font-size:13px}header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border-color);-webkit-app-region:drag}header>div{display:flex;align-items:center;-webkit-app-region:no-drag}header strong{font-size:13px}.quick-target,.queue-panel{padding:12px 16px;border-bottom:1px solid var(--border-color)}.quick-target>span{color:var(--text-tertiary);margin-right:10px}.quick-target p,.queue-panel p{font-size:12px;color:var(--text-secondary);line-height:1.5;margin:6px 0 0}.queue-panel>p{white-space:pre-wrap;overflow-wrap:anywhere;max-height:58px;overflow:auto}.queue-actions{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.arm-setting{display:flex;gap:7px;align-items:center;font-size:12px;color:var(--text-secondary)}.arm-setting input{accent-color:var(--text-primary)}.quick-search{margin:12px 16px;display:flex;gap:8px;align-items:center;border:1px solid var(--border-color);border-radius:8px;padding:8px 10px;color:var(--text-tertiary)}.quick-search input{width:100%;min-width:0;border:none;outline:none;background:transparent;color:var(--text-primary);font:inherit}main{flex:1;min-height:0;overflow:auto;padding:0 16px 12px}.quick-row{padding:10px 0;border-bottom:1px solid var(--border-color)}.quick-preview{display:block;text-align:left;cursor:pointer;border:0;padding:0;width:100%;font:inherit;background:transparent;color:inherit}.quick-preview>span{white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}.quick-preview img{max-width:100%;height:64px;object-fit:contain;float:left;margin:0 10px 5px 0;border-radius:4px}.quick-preview small{display:block;clear:both;color:var(--text-tertiary);font-size:11px;margin-top:6px}.row-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}.empty{color:var(--text-tertiary);text-align:center;margin:30px 0}.friday-notice{margin:8px 16px}button:focus-visible{outline:2px solid var(--text-primary);outline-offset:2px}@media(max-height:520px){.quick-target p{display:none}.quick-target,.queue-panel{padding:8px 12px}}

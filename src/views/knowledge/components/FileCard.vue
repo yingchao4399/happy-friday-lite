@@ -50,6 +50,7 @@ defineEmits(['open', 'contextmenu']);
 
 // RAG 索引状态
 const indexStatus = ref(null);
+const indexError = ref('');
 
 const indexStatusClass = computed(() => {
   switch (indexStatus.value) {
@@ -66,6 +67,7 @@ const indexStatusClass = computed(() => {
 });
 
 const indexStatusTitle = computed(() => {
+  const detail = indexError.value ? `：${indexError.value}` : '';
   switch (indexStatus.value) {
     case 'success':
       return '已索引';
@@ -74,7 +76,7 @@ const indexStatusTitle = computed(() => {
     case 'processing':
       return '索引中';
     case 'failed':
-      return '索引失败';
+      return `索引失败${detail}`;
     case 'excluded':
       return '';
     default:
@@ -85,17 +87,21 @@ const indexStatusTitle = computed(() => {
 async function loadIndexStatus() {
   if (props.file.isDirectory || !props.file.path) {
     indexStatus.value = '';
+    indexError.value = '';
     return;
   }
+  indexError.value = '';
   try {
     const api = window.electronAPI;
     if (!api) return;
     const result = await api.invoke('rag-get-file-status', { filePath: props.file.path });
     if (result && result.success) {
       indexStatus.value = result.status || 'not-indexed';
+      indexError.value = typeof result.error === 'string' ? result.error.slice(0, 300) : '';
     }
   } catch (e) {
-    // 静默失败
+    indexStatus.value = 'not-indexed';
+    indexError.value = e?.message ? String(e.message).slice(0, 300) : '无法读取索引状态';
   }
 }
 

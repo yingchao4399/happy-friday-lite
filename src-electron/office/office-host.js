@@ -180,16 +180,24 @@ function configureRuntimes(editor) {
 }
 
 function registerEditorIpc(editor) {
-  const { docs, sheets, slides } = state.bundles
+  const { docs, sheets, slides, pdf } = state.bundles
   // ai:* / project:* / app:get-language 等重复通道由 tolerateDuplicateIpcHandlers 兜底
   if (editor === 'docs') {
     docs.registerAiIpc?.()
     docs.registerProjectIpc?.()
     docs.registerDocsIpc()
-  } else if (editor === 'sheets') sheets.registerSheetsIpc()
-  else if (editor === 'slides') slides.registerSlidesIpc()
-  // Friday 接管编辑器 ai:* 通道（须在编辑器注册之后，后注册者覆盖）
-  registerOfficeAiBridge()
+  } else if (editor === 'sheets') {
+    sheets.registerSheetsIpc()
+    sheets.registerProjectIpc?.()
+  } else if (editor === 'slides') {
+    slides.registerSlidesIpc()
+    slides.registerProjectIpc?.()
+  } else if (editor === 'pdf') {
+    pdf.registerPdfProjectIpc?.()
+  }
+  // Friday 接管编辑器 ai:* 通道（须在编辑器注册之后，后注册者覆盖）。
+  // force 允许 Host 初始化阶段的早期注册在 vendor bundle 注册后再次覆盖同名通道。
+  registerOfficeAiBridge({ force: true })
 }
 
 /**
@@ -263,6 +271,9 @@ function wireShellHooks(editor) {
 }
 
 const pendingEditors = new Map()
+// 首页重复点击、最近文件双击和恢复路由可能在同一时间请求同一个文件。
+// 合并同一文件的进行中请求，避免重复创建 WebContentsView 和重复解析文档。
+const pendingOfficeOpens = new Map()
 async function ensureEditor(type) {
   if (!EDITORS.includes(type) || !state.initialized) return false
   if (state.bundles[type]) return true
@@ -370,24 +381,195 @@ function leaveHtmlFullScreen() {
   if (state.visibleId) showOfficeDockOverlay(state.mainWindow, state.visibleId, contentBounds())
 }
 
+function clearInteractiveProbe(entry) {
+  if (entry?.firstInteractiveTimer) clearInterval(entry.firstInteractiveTimer)
+  if (entry?.firstInteractiveWatchdog) clearTimeout(entry.firstInteractiveWatchdog)
+  if (entry) {
+    entry.firstInteractiveTimer = null
+    entry.firstInteractiveWatchdog = null
+  }
+}
+
+function clearDataReadyProbe(entry) {
+  if (entry?.dataReadyTimer) clearInterval(entry.dataReadyTimer)
+  if (entry?.dataReadyWatchdog) clearTimeout(entry.dataReadyWatchdog)
+  if (entry) {
+    entry.dataReadyTimer = null
+    entry.dataReadyWatchdog = null
+  }
+}
+
 function attachView(entry) {
   const { viewId, type, view } = entry
+  // `openMs` measures host-side view creation. Keep a separate timestamp for
+  // the user-visible milestone: the embedded editor has mounted a real,
+  // usable canvas/content surface. This is intentionally asynchronous because
+  // WebContentsView creation returns before the editor renderer is ready.
+  entry.openStartedAt = typeof entry.openStartedAt === 'number' ? entry.openStartedAt : performance.now()
+  entry.openProgress = 'view-created'
+  entry.openError = null
+  entry.firstInteractiveMs = null
+  entry.firstInteractiveTimer = null
+  entry.firstInteractiveWatchdog = null
+  entry.firstInteractiveProbeBusy = false
+  entry.dataReadyMs = null
+  entry.dataReadyTimer = null
+  entry.dataReadyWatchdog = null
+  entry.dataReadyProbeBusy = false
   // 隐藏 Tab 不应继续以全速运行；打印/导出临时窗口由各引擎单独管理。
   view.webContents.setBackgroundThrottling(true)
   state.mainWindow.contentView.addChildView(view)
   view.setVisible(false)
   view.setBounds(contentBounds())
   state.views.set(viewId, entry)
+  notifyVue('office-open-progress', {
+    type,
+    viewId,
+    filePath: entry.filePath || null,
+    stage: entry.openProgress,
+    firstInteractiveMs: null,
+  })
   view.webContents.on('console-message', (event) => {
     if (['warning', 'error'].includes(event.level)) console.error(`[Office:${viewId}] ${event.message} (${event.sourceId}:${event.lineNumber})`)
   })
   view.webContents.on('did-fail-load', (_event, code, description, url, isMainFrame) => {
     console.error(`[Office:${viewId}] load failed (${code}) ${description}: ${url} main=${isMainFrame}`)
+    if (isMainFrame && entry.openProgress !== 'first-interactive') {
+      clearInteractiveProbe(entry)
+      clearDataReadyProbe(entry)
+      entry.openProgress = 'failed'
+      entry.openError = `${code}: ${description}`
+      notifyVue('office-open-progress', {
+        type,
+        viewId,
+        filePath: entry.filePath || null,
+        stage: entry.openProgress,
+        error: entry.openError,
+        firstInteractiveMs: null,
+      })
+    }
   })
+  const startInteractiveProbe = () => {
+    if (entry.firstInteractiveTimer || entry.firstInteractiveMs != null) return
+    entry.openProgress = 'renderer-loading'
+    notifyVue('office-open-progress', {
+      type,
+      viewId,
+      filePath: entry.filePath || null,
+      stage: entry.openProgress,
+      firstInteractiveMs: null,
+    })
+    const selectors = {
+      docs: '[contenteditable="true"], .tiptap, textarea',
+      sheets: 'canvas, [class*="univer" i], [class*="sheet" i], [contenteditable="true"]',
+      slides: 'canvas, [class*="slide" i], [class*="canvas" i], [contenteditable="true"]',
+      pdf: 'canvas, [class*="pdf" i], [class*="page" i]',
+    }
+    const selector = selectors[type] || 'canvas, [contenteditable="true"], textarea'
+    const script = `(function(){
+      const selector = ${JSON.stringify(selector)};
+      const body = document.body;
+      if (!body || (document.readyState !== 'interactive' && document.readyState !== 'complete')) return false;
+      const bodyRect = body.getBoundingClientRect();
+      if (bodyRect.width < 40 || bodyRect.height < 40) return false;
+      return Array.from(document.querySelectorAll(selector)).some((node) => {
+        const rect = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return rect.width >= 20 && rect.height >= 20 && style.visibility !== 'hidden' && style.display !== 'none' && style.opacity !== '0';
+      });
+    })()`
+    const poll = async () => {
+      const wc = view?.webContents
+      if (!wc || entry.firstInteractiveMs != null || wc.isDestroyed()) {
+        clearInteractiveProbe(entry)
+        return
+      }
+      if (entry.firstInteractiveProbeBusy) return
+      entry.firstInteractiveProbeBusy = true
+      try {
+        const ready = await wc.executeJavaScript(script, true)
+        if (ready && entry.firstInteractiveMs == null) {
+          entry.firstInteractiveMs = Math.max(0, Math.round(performance.now() - entry.openStartedAt))
+          entry.openProgress = 'first-interactive'
+          clearInteractiveProbe(entry)
+          const payload = {
+            type,
+            viewId,
+            filePath: entry.filePath || null,
+            stage: entry.openProgress,
+            firstInteractiveMs: entry.firstInteractiveMs,
+          }
+          notifyVue('office-open-progress', payload)
+          console.log(`[Office] 首屏可交互: ${type} ${viewId} ${entry.firstInteractiveMs}ms`)
+          startDataReadyProbe()
+        }
+      } catch {
+        // Renderer may be between navigations; the next interval retries.
+      } finally {
+        entry.firstInteractiveProbeBusy = false
+      }
+    }
+    void poll()
+    entry.firstInteractiveTimer = setInterval(poll, 100)
+    // A permanently broken renderer must not keep a timer alive forever.
+    entry.firstInteractiveWatchdog = setTimeout(() => {
+      if (entry.firstInteractiveMs == null && entry.firstInteractiveTimer) {
+        clearInterval(entry.firstInteractiveTimer)
+        entry.firstInteractiveTimer = null
+      }
+      entry.firstInteractiveWatchdog = null
+    }, 15000)
+  }
+  const startDataReadyProbe = () => {
+    if (entry.dataReadyTimer || entry.dataReadyMs != null) return
+    const dataScript = type === 'docs'
+      ? 'Boolean(window.__aidocs?.editor?.state?.doc?.content?.size > 10)'
+      : 'Boolean(window.__genofficeControl?.({ cmd: "selection" })?.status === "ok")'
+    const poll = async () => {
+      const wc = view?.webContents
+      if (!wc || entry.dataReadyMs != null || wc.isDestroyed()) {
+        clearDataReadyProbe(entry)
+        return
+      }
+      if (entry.dataReadyProbeBusy) return
+      entry.dataReadyProbeBusy = true
+      try {
+        const ready = await wc.executeJavaScript(dataScript, true)
+        if (ready && entry.dataReadyMs == null) {
+          entry.dataReadyMs = Math.max(0, Math.round(performance.now() - entry.openStartedAt))
+          entry.openProgress = 'data-ready'
+          clearDataReadyProbe(entry)
+          const payload = {
+            type,
+            viewId,
+            filePath: entry.filePath || null,
+            stage: entry.openProgress,
+            firstInteractiveMs: entry.firstInteractiveMs,
+            dataReadyMs: entry.dataReadyMs,
+          }
+          notifyVue('office-open-progress', payload)
+          console.log(`[Office] 数据可用: ${type} ${viewId} ${entry.dataReadyMs}ms`)
+        }
+      } catch {
+        // Renderer may still be finishing its model; retry on the next tick.
+      } finally {
+        entry.dataReadyProbeBusy = false
+      }
+    }
+    void poll()
+    entry.dataReadyTimer = setInterval(poll, 100)
+    entry.dataReadyWatchdog = setTimeout(() => {
+      clearDataReadyProbe(entry)
+    }, 30000)
+  }
+  view.webContents.once('dom-ready', startInteractiveProbe)
+  view.webContents.once('did-finish-load', startInteractiveProbe)
   // 编辑器内全屏（如 Slides 放映）：从"窗口内全屏"升级为整个屏幕的系统全屏
   view.webContents.on('enter-html-full-screen', enterHtmlFullScreen)
   view.webContents.on('leave-html-full-screen', leaveHtmlFullScreen)
   view.webContents.once('render-process-gone', () => {
+    clearInteractiveProbe(entry)
+    clearDataReadyProbe(entry)
     console.error(`[Office] ${viewId} renderer crashed`)
     // 保留崩溃现场供上层提示恢复；关闭视图并通知前端（对应 Tab 激活时会重建）
     hideView(viewId, true)
@@ -415,6 +597,8 @@ function showView(viewId) {
 function hideView(viewId, destroy = false) {
   const entry = state.views.get(viewId)
   if (!entry) return
+  clearInteractiveProbe(entry)
+  clearDataReadyProbe(entry)
   entry.view.setVisible(false)
   state.mainWindow?.contentView?.removeChildView(entry.view)
   state.views.delete(viewId)
@@ -483,6 +667,11 @@ export async function initOfficeHost(mainWindow) {
   }
 
   tolerateDuplicateIpcHandlers()
+  // OfficeWorkspace 会在具体编辑器 bundle 懒加载完成前推送模型配置；
+  // 先注册唯一的 office-set-ai-model 及 Friday 降级通道，避免启动竞态报
+  // "No handler registered for 'office-set-ai-model'"。编辑器加载后由
+  // registerEditorIpc(force) 再次覆盖上游同名 ai:* 处理器。
+  registerOfficeAiBridge()
   registerAppPrefsIpc()
   registerOfficeFileCommands({
     findEntry: entryByWebContents,
@@ -737,31 +926,64 @@ async function createBlankOfficeFile(type, displayName) {
  * - 否则创建新视图；opts.viewId 可指定复用的视图 id（Tab 恢复场景）；
  * - opts.notifyOpened：主进程内部发起的打开（如生成文件）需通知前端创建/跳转 Tab。
  */
-export async function openOfficeFile(filePath, opts = {}) {
-  const { resolveEditorType } = await import('./office-files.js')
-  const type = resolveEditorType(filePath)
-  if (!type || !await ensureEditor(type)) {
-    return { success: false, error: `unsupported file type: ${filePath}` }
-  }
+async function openOfficeFileInternal(filePath, type, requestedViewId, openStartedAt) {
   // 同一文件已在某个视图打开 → 直接激活
   for (const [id, entry] of state.views) {
     if (entry.type === type && entry.filePath === filePath && !entry.view.webContents.isDestroyed()) {
-      if (!opts.background) showView(id)
-      if (opts.notifyOpened) notifyVue('office-opened', { type, viewId: id, filePath })
       return { success: true, type, viewId: id, filePath, reused: true }
     }
   }
 
-  const viewId = allocViewId(type, opts.viewId)
+  const viewId = allocViewId(type, requestedViewId)
   const { view } = createTypeView(type, filePath)
-  attachView({ viewId, type, view, filePath })
+  attachView({ viewId, type, view, filePath, openStartedAt })
   // 共用轻量最近文件记录，打开 PDF/Excel/PPT 无需同时加载 Word。
   if (filePath) {
     try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* ignore */ }
   }
-  if (!opts.background) showView(viewId)
-  if (opts.notifyOpened) notifyVue('office-opened', { type, viewId, filePath })
   return { success: true, type, viewId, filePath }
+}
+
+export async function openOfficeFile(filePath, opts = {}) {
+  const started = performance.now()
+  const { resolveEditorType } = await import('./office-files.js')
+  const type = resolveEditorType(filePath)
+  const coldStart = Boolean(type && !state.bundles?.[type])
+  if (!type || !await ensureEditor(type)) {
+    return { success: false, error: `unsupported file type: ${filePath}` }
+  }
+
+  const canonicalPath = process.platform === 'win32'
+    ? path.resolve(filePath).toLowerCase()
+    : path.resolve(filePath)
+  const key = `${type}:${canonicalPath}:${opts.viewId || ''}`
+  let pending = pendingOfficeOpens.get(key)
+  if (!pending) {
+    pending = openOfficeFileInternal(filePath, type, opts.viewId, started)
+    pendingOfficeOpens.set(key, pending)
+  }
+
+  try {
+    const result = await pending
+    if (result.success && !opts.background) showView(result.viewId)
+    if (result.success && opts.notifyOpened) notifyVue('office-opened', result)
+    if (result.success) {
+      const openMs = Math.round(performance.now() - started)
+      const entry = state.views.get(result.viewId)
+      console.log(`[Office] 打开完成: ${type} ${result.reused ? 'reused' : 'created'} ${openMs}ms${coldStart ? ' cold' : ' hot'}`)
+      return {
+        ...result,
+        openMs,
+        coldStart,
+        openProgress: entry?.openProgress || 'view-created',
+        firstInteractiveMs: entry?.firstInteractiveMs ?? null,
+        dataReadyMs: entry?.dataReadyMs ?? null,
+      }
+    }
+    return result
+  } finally {
+    if (pendingOfficeOpens.get(key) === pending) pendingOfficeOpens.delete(key)
+  }
 }
 
 /**
@@ -770,12 +992,27 @@ export async function openOfficeFile(filePath, opts = {}) {
  * 上限 120s，与上游 requestRendererSave 一致（覆盖另存为对话框的等待时间）。
  */
 export async function autoSaveOfficeFile(viewId) {
+  const saveStartedAt = performance.now()
   const b = state.bundles
   const entry = state.views.get(viewId)
-  if (!b || !entry) return { success: true, saved: false }
+  const finish = (result, stage = result?.success === false ? 'failed' : 'complete', metrics = {}) => {
+    const payload = {
+      ...(result || { success: false, error: 'office save failed' }),
+      viewId,
+      type: entry?.type || null,
+      stage,
+      saveMs: metrics.saveMs ?? Math.max(0, Math.round(performance.now() - saveStartedAt)),
+      saveDurableMs: metrics.saveDurableMs ?? null,
+    }
+    notifyVue('office-save-progress', payload)
+    if (payload.success === false) console.warn(`[Office] 保存失败: ${viewId} ${payload.saveMs}ms ${payload.error || ''}`)
+    else console.log(`[Office] 保存完成: ${viewId} ${payload.saveMs}ms${payload.saved ? '' : ' (clean)'}`)
+    return payload
+  }
+  if (!b || !entry) return finish({ success: true, saved: false })
   const type = entry.type
   const view = entry.view
-  if (!view || view.webContents.isDestroyed()) return { success: true, saved: false }
+  if (!view || view.webContents.isDestroyed()) return finish({ success: true, saved: false })
   const wc = view.webContents
   const waitClean = async (isDirty, timeoutMs = 120000) => {
     const deadline = Date.now() + timeoutMs
@@ -790,33 +1027,73 @@ export async function autoSaveOfficeFile(viewId) {
     }
     return false
   }
+  const waitDurable = async (filePath, timeoutMs = 120000) => {
+    if (!filePath) return false
+    const deadline = Date.now() + timeoutMs
+    let previous = null
+    let stableReads = 0
+    while (Date.now() < deadline) {
+      if (wc.isDestroyed()) return false
+      try {
+        const stat = await fs.promises.stat(filePath)
+        const signature = `${stat.size}:${stat.mtimeMs}`
+        stableReads = signature === previous ? stableReads + 1 : 1
+        previous = signature
+        if (stableReads >= 2) return true
+      } catch {
+        stableReads = 0
+        previous = null
+      }
+      await new Promise((r) => setTimeout(r, 100))
+    }
+    return false
+  }
   try {
+    notifyVue('office-save-progress', { viewId, type, stage: 'saving', saveMs: 0, saveDurableMs: null })
     if (type === 'docs') {
-      if (!(await b.docs.docsQueryDirty(wc))) return { success: true, saved: false }
+      if (!(await b.docs.docsQueryDirty(wc))) return finish({ success: true, saved: false })
       wc.send('menu:command', 'save')
-      return { success: await waitClean(() => b.docs.docsQueryDirty(wc)), saved: true }
+      const clean = await waitClean(() => b.docs.docsQueryDirty(wc))
+      const saveMs = Math.max(0, Math.round(performance.now() - saveStartedAt))
+      const durable = clean && await waitDurable(entry.filePath)
+      return finish({ success: clean && durable, saved: true }, clean && durable ? 'complete' : 'failed', {
+        saveMs,
+        saveDurableMs: durable ? Math.max(0, Math.round(performance.now() - saveStartedAt)) : null,
+      })
     }
     if (type === 'sheets') {
-      if (b.sheets.sheetsPendingEditCount(wc.id) <= 0) return { success: true, saved: false }
+      if (b.sheets.sheetsPendingEditCount(wc.id) <= 0) return finish({ success: true, saved: false })
       wc.send('menu:action', 'save')
-      return {
-        success: await waitClean(() => Promise.resolve(b.sheets.sheetsPendingEditCount(wc.id) > 0)),
-        saved: true,
-      }
+      const clean = await waitClean(() => Promise.resolve(b.sheets.sheetsPendingEditCount(wc.id) > 0))
+      const saveMs = Math.max(0, Math.round(performance.now() - saveStartedAt))
+      const durable = clean && await waitDurable(entry.filePath)
+      return finish({ success: clean && durable, saved: true }, clean && durable ? 'complete' : 'failed', {
+        saveMs,
+        saveDurableMs: durable ? Math.max(0, Math.round(performance.now() - saveStartedAt)) : null,
+      })
     }
     if (type === 'slides') {
-      if (!(await b.slides.slidesIsDirty(wc.id))) return { success: true, saved: false }
+      if (!(await b.slides.slidesIsDirty(wc.id))) return finish({ success: true, saved: false })
       wc.send('slides:menu', 'save')
-      return { success: await waitClean(() => b.slides.slidesIsDirty(wc.id)), saved: true }
+      const clean = await waitClean(() => b.slides.slidesIsDirty(wc.id), 120000)
+      const saveMs = Math.max(0, Math.round(performance.now() - saveStartedAt))
+      const durable = clean && await waitDurable(entry.filePath)
+      return finish({ success: clean && durable, saved: true }, clean && durable ? 'complete' : 'failed', {
+        saveMs,
+        saveDurableMs: durable ? Math.max(0, Math.round(performance.now() - saveStartedAt)) : null,
+      })
     }
     if (type === 'pdf') {
       const ok = await b.pdf.flushPdfSave(wc)
-      return { success: ok !== false, saved: true }
+      const durable = ok !== false && await waitDurable(entry.filePath)
+      return finish({ success: ok !== false && durable, saved: true }, ok !== false && durable ? 'complete' : 'failed', {
+        saveDurableMs: durable ? Math.max(0, Math.round(performance.now() - saveStartedAt)) : null,
+      })
     }
   } catch (e) {
-    return { success: false, error: e?.message || String(e) }
+    return finish({ success: false, error: e?.message || String(e) }, 'failed')
   }
-  return { success: false, error: 'unsupported editor type' }
+  return finish({ success: false, error: 'unsupported editor type' }, 'failed')
 }
 
 /** 关闭前查询脏状态并弹出保存/放弃/取消确认；返回是否可以安全关闭 */
@@ -856,6 +1133,8 @@ export async function closeOfficeFile(viewId) {
  * 再按普通文件打开，文档即刻拥有真实文件名并进入最近列表；落盘失败回退原空白视图行为。
  */
 export async function newOfficeDocument(type, requestedViewId, name) {
+  const started = performance.now()
+  const coldStart = Boolean(type && !state.bundles?.[type])
   if (!await ensureEditor(type)) return { success: false, error: 'editor unavailable' }
   // 与 renameOfficeFile 一致的非法字符清理
   const fallbackName = `${({ docs: 'Word 文档', sheets: 'Excel 工作簿', slides: 'PowerPoint 演示', pdf: 'PDF 文档' }[type] || 'Office 文档')} ${new Date().toISOString().slice(0, 10)}`
@@ -874,12 +1153,20 @@ export async function newOfficeDocument(type, requestedViewId, name) {
   }
   const viewId = allocViewId(type, requestedViewId)
   const { view, filePath } = createTypeView(type, namedPath)
-  attachView({ viewId, type, view, filePath })
+  attachView({ viewId, type, view, filePath, openStartedAt: started })
   if (namedPath) {
     try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* ignore */ }
   }
   showView(viewId)
-  return { success: true, type, viewId, blank: !namedPath, filePath }
+  return {
+    success: true,
+    type,
+    viewId,
+    blank: !namedPath,
+    filePath,
+    openMs: Math.round(performance.now() - started),
+    coldStart,
+  }
 }
 
 /** 隐藏所有 Office 视图（路由离开 Office 工作区时调用，不销毁） */
@@ -901,12 +1188,38 @@ export function showOfficeView(viewId) {
   return false
 }
 
+/** Cancel a renderer load that has not reached the first interactive milestone. */
+export function cancelOfficeOpen(viewId) {
+  const entry = state.views.get(viewId)
+  if (!entry) return { success: false, error: 'office view not found' }
+  if (entry.firstInteractiveMs != null || entry.openProgress === 'first-interactive') {
+    return { success: false, error: 'office document is already interactive' }
+  }
+  clearInteractiveProbe(entry)
+  clearDataReadyProbe(entry)
+  entry.openProgress = 'cancelled'
+  entry.openError = null
+  notifyVue('office-open-progress', {
+    type: entry.type,
+    viewId: entry.viewId,
+    filePath: entry.filePath || null,
+    stage: entry.openProgress,
+    firstInteractiveMs: null,
+  })
+  hideView(viewId, true)
+  return { success: true, viewId }
+}
+
 export function getOfficeState() {
   return [...state.views.values()].map(e => ({
     type: e.type,
     viewId: e.viewId,
     filePath: e.filePath,
     open: !e.view.webContents.isDestroyed(),
+    openProgress: e.openProgress || 'view-created',
+    openError: e.openError || null,
+    firstInteractiveMs: e.firstInteractiveMs ?? null,
+    dataReadyMs: e.dataReadyMs ?? null,
   }))
 }
 
@@ -1134,6 +1447,7 @@ export async function queryOfficeDirty(viewId) {
 /** 应用退出前释放资源（停止 sidecar、关闭视图） */
 export function shutdownOfficeHost() {
   destroyOfficeDockOverlay()
+  pendingOfficeOpens.clear()
   state.latestDocumentSelection = null
   try { state.bundles?.sheets?.stopSheetsSidecar?.() } catch { /* ignore */ }
   for (const [viewId, entry] of [...state.views]) {

@@ -140,6 +140,14 @@
     "print": "Print current Office document",
     "export-pdf": "Office export PDF",
     "export-csv": "Excel export CSV",
-    "export-images": "PowerPoint export images"
+    "export-images": "PowerPoint export images",
+    "opening": "Opening Office document",
+    "initializing": "Initializing editor…",
+    "loadingDocument": "Loading document content…",
+    "cancelOpen": "Cancel opening",
+    "openCancelled": "Opening cancelled",
+    "openFailed": "Failed to open Office document",
+    "retryOpen": "Retry",
+    "closeOpen": "Close"
   }
 }

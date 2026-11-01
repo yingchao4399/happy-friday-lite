@@ -277,7 +277,7 @@ export async function rebuildKbStore(kbType, onProgress = null) {
       }
     } catch (e) {
       console.error(`[RAG] Failed to index ${file.filePath}:`, e.message)
-      db.upsertFileStatus(kbType, file.filePath, file.lastModified, 'failed')
+      db.upsertFileStatus(kbType, file.filePath, file.lastModified, 'failed', String(e?.message || e || '索引任务失败').slice(0, 1000))
       failedCount++
       if (onProgress) {
         onProgress({ phase: 'failed', current: i + 1, total, file: file.filePath, fileName, kbType, error: e.message })

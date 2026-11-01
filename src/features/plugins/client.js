@@ -1,11 +1,12 @@
-import {reactive} from 'vue'
 import {i18n} from '@/i18n'
 import {electronService} from '@/services/electron'
 import {registerCommand,commandState,commandContext} from '@/features/commands/registry'
 import {getActiveEditor} from '@/features/commands/editor-context'
 import {flushContent} from '@/features/typewriter/content-plugin'
 import {useNoteStore} from '@/store/modules/note'
-export const pluginState=reactive({records:[],busy:'',error:'',notice:''})
+import { pluginState } from './state'
+
+export { pluginState }
 const disposers=new Map()
 export async function refreshPlugins(){const records=await electronService.request('plugins-list');sync(records);return records}
 function sync(records){

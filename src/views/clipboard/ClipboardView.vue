@@ -31,7 +31,7 @@
       <FridayButton compact class="batch-toggle" :aria-expanded="showBatchActions" :aria-controls="batchPanelId" @click="showBatchActions = !showBatchActions">{{ t('clipboard.itemActions') }}<ChevronUp v-if="showBatchActions" :size="13" /><ChevronDown v-else :size="13" /></FridayButton>
       <div v-if="showBatchActions" :id="batchPanelId" class="batch-actions"><FridayButton compact :disabled="!selectedItems.length || batchBusy || selectedSensitive" @click="startSequence">{{ t('clipboard.sequencePaste') }}</FridayButton><FridayButton compact :disabled="!selectedItems.length || batchBusy" @click="batchAction(allFavorites ? 'unfavorite' : 'favorite')">{{ t(allFavorites ? 'clipboard.batchUnfavorite' : 'clipboard.batchFavorite') }}</FridayButton><FridayButton compact :disabled="!selectedItems.length || batchBusy || selectedSensitive" :title="selectedSensitive ? t('clipboard.batchSensitiveHint') : ''" @click="organizeSelected">{{ t('clipboard.editOrganization') }}</FridayButton><FridayButton compact :disabled="selectedItems.length < 2 || batchBusy || selectedSensitive" :title="t(selectedSensitive ? 'clipboard.batchSensitiveHint' : 'clipboard.mergeCopyHint')" @click="batchAction('merge')">{{ t('clipboard.mergeCopy') }}</FridayButton><FridayButton compact variant="danger" :disabled="!selectedItems.length || batchBusy" @click="deleteSelection = selectedItems.map(item => item.id)">{{ t('clipboard.batchDelete') }}</FridayButton></div>
     </div>
-    <div class="history-scroll clipboard-scroll">
+    <div class="history-scroll clipboard-scroll" @scroll="handleScroll">
       <div class="history-content clipboard-content">
         <div v-if="loading && !items.length" class="state-wrap"><LoaderCircle :size="28" class="spin state-icon" /><p class="state-text">{{ t('clipboard.loading') }}</p></div>
         <div v-else-if="!items.length" class="state-wrap"><Clipboard :size="56" :stroke-width="1.2" class="state-icon" /><p class="state-title">{{ query || kind || category || tag || dateFrom || dateTo || view !== 'all' ? t('clipboard.noResults') : t('clipboard.empty') }}</p><p class="state-text">{{ query || kind || category || tag || dateFrom || dateTo || view !== 'all' ? t('clipboard.searchHint') : t('clipboard.emptyHint') }}</p></div>
@@ -52,6 +52,7 @@
         <div class="clipboard-actions" @click.stop><FridayButton icon-only variant="text" :disabled="pendingIds.has(item.id)" :class="{ favorited: item.favorite }" :title="t(item.favorite ? 'clipboard.unfavorite' : 'clipboard.favorite')" :aria-label="t(item.favorite ? 'clipboard.unfavorite' : 'clipboard.favorite')" :aria-pressed="item.favorite" @click="toggleFavorite(item)"><Star :size="15" :fill="item.favorite ? 'currentColor' : 'none'" /></FridayButton><FridayButton compact :disabled="pendingIds.has(item.id)" @click="requestUse(item)"><Copy :size="14" />{{ t(item.filePaths?.length ? 'clipboard.copyFile' : 'clipboard.copy') }}</FridayButton><FridayButton v-if="item.filePaths?.length" compact :disabled="pendingIds.has(item.id)" @click="useItem(item, false, 'path')">{{ t('clipboard.copyPath') }}</FridayButton><FridayButton icon-only variant="text" :disabled="pendingIds.has(item.id)" :class="{ pinned: item.pinned }" :title="item.pinned ? t('clipboard.unpin') : t('clipboard.pin')" :aria-label="item.pinned ? t('clipboard.unpin') : t('clipboard.pin')" :aria-pressed="item.pinned" @click="togglePinned(item)"><PinOff v-if="item.pinned" :size="15" /><Pin v-else :size="15" /></FridayButton><FridayButton icon-only variant="text" :aria-label="t('clipboard.itemActions')" :title="t('clipboard.itemActions')" @click="openMenu($event, item)"><MoreHorizontal :size="16" /></FridayButton></div>
       </article>
         </div>
+        <div v-if="loadingMore" class="list-loading-more" role="status"><LoaderCircle :size="14" class="spin" />{{ t('clipboard.loading') }}</div>
       </div>
     </div>
     <FridayConfirmDialog :visible="!!sensitiveItem" :title="t('clipboard.secret')" :message="t('clipboard.confirmSecret')" :cancel-label="t('clipboard.cancel')" :confirm-label="t('clipboard.use')" @cancel="sensitiveItem = null" @confirm="confirmUse" />
@@ -90,6 +91,7 @@ import { electronService } from '@/services/electron'
 const { t, te } = useI18n()
 const router = useRouter()
 const desktop = electronService.isElectron
+const PAGE_SIZE = 60
 const items = ref([])
 const query = ref('')
 const kind = ref('')
@@ -114,7 +116,9 @@ function removeFilter(key) { const filters = { category, tag, dateFrom, dateTo }
 function clearFilters() { category.value = ''; tag.value = ''; dateFrom.value = ''; dateTo.value = '' }
 const contextItem = ref(null), menuPosition = ref({ x: 0, y: 0 }), showGroups = ref(false), showOrganize = ref(false), organizeItem = ref(null), editingPhrase = ref(false)
 const detailItem = ref(null), qrItem = ref(null), fileActionItem = ref(null), fileActionMode = ref('open')
+let detailRequestId = 0
 const selecting = ref(false), selectedIds = ref(new Set()), batchBusy = ref(false), organizeIds = ref([]), deleteSelection = ref([])
+const loadingMore = ref(false), hasMore = ref(false), listOffset = ref(0)
 let selectionAnchor = ''
 const selectedItems = computed(() => items.value.filter(item => selectedIds.value.has(item.id)))
 const allSelected = computed(() => items.value.length > 0 && selectedItems.value.length === items.value.length)
@@ -180,6 +184,7 @@ let unlistenTrash = null
 let unlistenSettings = null
 let unlistenCapability = null
 let searchTimer = null
+let refreshTimer = null
 let feedbackTimer = null
 let requestId = 0
 const kinds = ['text', 'html', 'link', 'image', 'audio', 'video', 'code', 'file', 'folder', 'mixed', 'secret']
@@ -188,11 +193,41 @@ const formatTime = value => value ? new Date(value).toLocaleString() : ''
 const typeLabel = value => t(`clipboard.${value}`, value)
 const sourceLabel = value => value === 'friday-merge' ? t('clipboard.sourceMerge') : value === 'screen-recording' ? t('clipboard.sourceRecording') : value === 'friday-phrase' ? t('clipboard.sourcePhrase') : value === 'system-clipboard' ? t('clipboard.sourceSystem') : (value || t('clipboard.sourceUnknown'))
 const typeIcon = value => ({ image: Image, file: File, folder: Folder, secret: LockKeyhole, link: Link })[value] || Text
-async function loadItems() {
+async function loadItems(options = {}) {
   if (!desktop) return
+  const appendPage = options?.append === true
+  if (appendPage && (!hasMore.value || loadingMore.value)) return
   const current = ++requestId
-  loading.value = true; error.value = ''
-  try { const [result, organization] = await Promise.all([electronService.request('clipboard-list', { query: query.value, kind: kind.value, view: view.value, category: category.value, tag: tag.value, dateFrom: dateFrom.value, dateTo: dateTo.value }), electronService.getClipboardOrganization()]); if (current === requestId && Array.isArray(result)) { items.value = result; groups.value = organization; if (category.value && category.value !== '__uncategorized__' && !organization.categories.includes(category.value)) category.value = ''; if (tag.value && !organization.tags.includes(tag.value)) tag.value = '' } } catch (e) { if (current === requestId) error.value = e.message || t('clipboard.useFailed') } finally { if (current === requestId) loading.value = false }
+  if (appendPage) loadingMore.value = true
+  else { loading.value = true; loadingMore.value = false; listOffset.value = 0; hasMore.value = false }
+  error.value = ''
+  try {
+    const request = { query: query.value, kind: kind.value, view: view.value, category: category.value, tag: tag.value, dateFrom: dateFrom.value, dateTo: dateTo.value, limit: PAGE_SIZE, offset: appendPage ? listOffset.value : 0, includeMeta: true, compact: true }
+    const [result, organization] = await Promise.all([
+      electronService.request('clipboard-list', request),
+      appendPage ? Promise.resolve(groups.value) : electronService.getClipboardOrganization()
+    ])
+    if (current !== requestId) return
+    const pageItems = Array.isArray(result) ? result : (Array.isArray(result?.items) ? result.items : [])
+    const pageHasMore = !Array.isArray(result) && result?.hasMore === true
+    if (appendPage) items.value = [...items.value, ...pageItems]
+    else items.value = pageItems
+    listOffset.value = appendPage ? listOffset.value + pageItems.length : pageItems.length
+    hasMore.value = pageHasMore
+    if (!appendPage && organization) {
+      groups.value = organization
+      if (category.value && category.value !== '__uncategorized__' && !organization.categories.includes(category.value)) category.value = ''
+      if (tag.value && !organization.tags.includes(tag.value)) tag.value = ''
+    }
+  } catch (e) {
+    if (current === requestId) error.value = e.message || t('clipboard.useFailed')
+  } finally {
+    if (current === requestId) { loading.value = false; loadingMore.value = false }
+  }
+}
+function handleScroll(event) {
+  const element = event.currentTarget
+  if (element && element.scrollTop + element.clientHeight >= element.scrollHeight - 480) void loadItems({ append: true })
 }
 function requestUse(item) { if (item.sensitivity === 'secret') sensitiveItem.value = item; else useItem(item) }
 function confirmUse() { const item = sensitiveItem.value; sensitiveItem.value = null; if (item) useItem(item, true) }
@@ -213,7 +248,16 @@ async function organizedChanged(item) {
   await loadItems()
 }
 function newPhrase() { organizeIds.value = []; organizeItem.value = null; editingPhrase.value = true; showOrganize.value = true }
-function openDetail(item) { detailItem.value = item }
+async function openDetail(item) {
+  const current = ++detailRequestId
+  detailItem.value = item
+  try {
+    const full = await electronService.request('clipboard-get', { id: item.id })
+    if (current === detailRequestId && full?.id === item.id) detailItem.value = full
+  } catch {
+    // Keep the compact row available; the detail dialog can still show its preview.
+  }
+}
 function openQr(item) { if (item.sensitivity === 'secret') return; detailItem.value = null; qrItem.value = item }
 function startItemDrag(event, item) { draggedId.value = item.id; event.dataTransfer.setData('application/x-friday-clipboard-id', item.id); event.dataTransfer.effectAllowed = 'move' }
 async function dropItem(event, target) {
@@ -263,13 +307,18 @@ async function removeItem(item) { await withPending(item, async () => { await el
 watch(query, () => { clearTimeout(searchTimer); searchTimer = setTimeout(loadItems, 180) })
 watch(kind, loadItems)
 watch([view, category, tag, dateFrom, dateTo], loadItems)
+// 捕获监听、AI 进度和设置广播可能在同一帧内连续到达；合并刷新，避免重复 IPC 和整列表重渲染。
+function scheduleLoadItems() {
+  clearTimeout(refreshTimer)
+  refreshTimer = setTimeout(() => { refreshTimer = null; loadItems() }, 80)
+}
 function recordingProblem(code) { return t('clipboard.recordingErrors.' + code, t('clipboard.recordingCaptureFailed')) }
 function loadCaptureStatus() { if (desktop) electronService.getClipboardSettings().then(settings => { capturePaused.value = !settings.captureEnabled; if (settings.captureIssue) notice.value = t('clipboard.nativeCaptureUnavailable'); else if (settings.recordingIssue) notice.value = recordingProblem(settings.recordingIssue.code) }).catch(() => {}) }
-onMounted(() => { loadItems(); loadCaptureStatus(); unlistenSettings = electronService.listen('clipboard-settings-changed', ({ payload }) => { capturePaused.value = !payload.captureEnabled; loadItems() }); unlistenAdded = electronService.listen('clipboard-item-added', loadItems); unlistenHotkey = electronService.listen('clipboard-hotkey', loadItems); unlistenTrash = electronService.listen('trash-changed', loadItems) })
-onActivated(() => { loadItems(); loadCaptureStatus() })
-onMounted(() => { if (desktop) { unlistenCapability = electronService.listen('capability-error', ({ payload }) => { if (payload.stage === 'capture') notice.value = t(payload.code === 'CLIPBOARD_NATIVE_UNAVAILABLE' ? 'clipboard.nativeCaptureUnavailable' : 'clipboard.captureFailed'); else if (payload.stage === 'clipboard-recording') notice.value = recordingProblem(payload.code); else if (payload.stage === 'clipboard-append') notice.value = t('clipboard.appendLimitReached') }); unlistenAi = electronService.listen('clipboard-ai-progress', loadItems); unlistenAppend = electronService.listen('clipboard-append-changed', ({ payload }) => { append.value = payload }); electronService.getClipboardAppend().then(value => { append.value = value }).catch(() => {}) } })
+onMounted(() => { loadItems(); loadCaptureStatus(); unlistenSettings = electronService.listen('clipboard-settings-changed', ({ payload }) => { capturePaused.value = !payload.captureEnabled; scheduleLoadItems() }); unlistenAdded = electronService.listen('clipboard-item-added', scheduleLoadItems); unlistenHotkey = electronService.listen('clipboard-hotkey', scheduleLoadItems); unlistenTrash = electronService.listen('trash-changed', scheduleLoadItems) })
+onActivated(() => { scheduleLoadItems(); loadCaptureStatus() })
+onMounted(() => { if (desktop) { unlistenCapability = electronService.listen('capability-error', ({ payload }) => { if (payload.stage === 'capture') notice.value = t(payload.code === 'CLIPBOARD_NATIVE_UNAVAILABLE' ? 'clipboard.nativeCaptureUnavailable' : 'clipboard.captureFailed'); else if (payload.stage === 'clipboard-recording') notice.value = recordingProblem(payload.code); else if (payload.stage === 'clipboard-append') notice.value = t('clipboard.appendLimitReached') }); unlistenAi = electronService.listen('clipboard-ai-progress', scheduleLoadItems); unlistenAppend = electronService.listen('clipboard-append-changed', ({ payload }) => { append.value = payload }); electronService.getClipboardAppend().then(value => { append.value = value }).catch(() => {}) } })
 onDeactivated(() => { selecting.value = false; showBatchActions.value = false; clearSelection(); deleteSelection.value = []; showSettings.value = false; sensitiveItem.value = null; contextItem.value = null; showGroups.value = false; showOrganize.value = false; detailItem.value = null; qrItem.value = null; fileActionItem.value = null })
-onUnmounted(() => { unlistenCapability?.(); unlistenAppend?.(); unlistenAi?.(); unlistenSettings?.(); unlistenAdded?.(); unlistenHotkey?.(); unlistenTrash?.(); clearTimeout(searchTimer); clearTimeout(feedbackTimer); requestId++ })
+onUnmounted(() => { unlistenCapability?.(); unlistenAppend?.(); unlistenAi?.(); unlistenSettings?.(); unlistenAdded?.(); unlistenHotkey?.(); unlistenTrash?.(); clearTimeout(searchTimer); clearTimeout(refreshTimer); clearTimeout(feedbackTimer); requestId++; detailRequestId++ })
 </script>
 
 <style scoped>
@@ -282,6 +331,6 @@ onUnmounted(() => { unlistenCapability?.(); unlistenAppend?.(); unlistenAi?.(); 
 .additional-filters{width:100%;max-width:720px;box-sizing:border-box;padding:0 24px 10px}.group-filters,.date-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}.group-filters>label{display:flex;flex:1;min-width:130px;flex-direction:column;gap:5px;font-size:12px;color:var(--text-secondary)}.group-filters :deep(.friday-select){height:32px;min-width:0}.date-filters label{display:flex;flex:1;min-width:140px;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary)}.date-filters input{padding:5px 7px;width:0;flex:1;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-primary);color:var(--text-primary);font:inherit;min-width:0}.filter-count{min-width:16px;border-radius:4px;background:var(--bg-active);font-size:11px;line-height:17px}.filter-summary{display:flex;gap:6px;flex-wrap:wrap;width:100%;max-width:720px;box-sizing:border-box;padding:0 24px 8px}.filter-summary button{display:flex;align-items:center;gap:5px;max-width:100%;padding:4px 6px;border:0;border-radius:5px;background:var(--bg-secondary);color:var(--text-secondary);font:inherit;font-size:11px;cursor:pointer}.filter-summary button span{max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.filter-summary button svg{flex-shrink:0}.filter-summary button:hover{background:var(--bg-hover);color:var(--text-primary)}.code-preview{font-family:Consolas,monospace}.header-actions{flex-wrap:wrap}
 .header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .organization-bar{display:flex;align-items:center;gap:7px;width:100%;max-width:720px;box-sizing:border-box;padding:0 24px 8px}.organization-bar :deep(.friday-select){min-width:0;height:32px;flex:1}.organization-bar :deep(.dropdown-trigger){font-size:12px}.organization-bar :deep(.dropdown-trigger>span),.group-filters :deep(.dropdown-trigger>span){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.filter-toggle{height:32px;flex-shrink:0}.item-tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}.item-tags button,.ai-state button{border:0;border-radius:4px;padding:3px 6px;background:var(--bg-secondary);color:var(--text-secondary);font:inherit;font-size:11px;cursor:pointer}.item-tags button:hover,.ai-state button:hover{background:var(--bg-hover)}.ai-state{display:flex;align-items:center;gap:5px;margin-top:7px;color:var(--text-tertiary);font-size:12px;line-height:1.5}.ai-state.failed{color:#d9544d}.clipboard-row:focus-visible{outline:2px solid var(--accent-color);outline-offset:-2px}
-.clipboard-page{display:flex;flex-direction:column;align-items:center;width:100%;height:100%;background:var(--bg-primary);overflow:hidden}.clipboard-header{width:100%;max-width:720px;padding:28px 24px 0;box-sizing:border-box;flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.page-title{margin:0;color:var(--text-primary);font-size:20px;font-weight:700;letter-spacing:-.03em}.page-description{margin:5px 0 0;color:var(--text-secondary);font-size:13px;line-height:1.5}.refresh-button{height:30px;padding:0 10px;border:0;border-radius:7px;display:inline-flex;align-items:center;gap:6px;background:var(--bg-secondary);color:var(--text-primary);font:inherit;font-size:12.5px;cursor:pointer;transition:background-color .15s ease,transform .15s ease}.refresh-button:hover:not(:disabled){background:var(--bg-active)}.refresh-button:active:not(:disabled){transform:translateY(1px)}.refresh-button:disabled{opacity:.45;cursor:default}.clipboard-filter-bar{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:720px;padding:16px 24px 8px;box-sizing:border-box;flex-shrink:0}.clipboard-filter-bar .search-box{display:flex;align-items:center;gap:8px;flex:1;max-width:400px;margin:0;padding:9px 14px;background:var(--bg-secondary);border:1.5px solid transparent;border-radius:10px;transition:all .2s ease;color:var(--text-tertiary)}.clipboard-filter-bar .search-box input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--text-primary);font:inherit;font-size:13.5px}.clipboard-filter-bar .search-box input::placeholder{color:var(--text-tertiary)}.clipboard-filter-bar .search-box:focus-within{border-color:var(--border-color);background:var(--bg-primary);box-shadow:0 0 0 3px var(--accent-light)}.clipboard-filter-bar .search-box input::-webkit-search-cancel-button{display:none}.clipboard-filter-bar :deep(.friday-select){height:38px;min-width:112px;flex:0 0 150px}.clipboard-filter-bar .search-icon{color:var(--text-tertiary);flex-shrink:0}.clipboard-filter-bar .clear-btn{display:flex;align-items:center;justify-content:center;width:18px;height:18px;border:0;border-radius:4px;background:transparent;color:var(--text-tertiary);cursor:pointer;flex-shrink:0;transition:all .15s}.clipboard-filter-bar .clear-btn:hover{background:var(--bg-hover);color:var(--text-primary)}.clipboard-scroll{flex:1;overflow-y:auto;overflow-x:hidden;width:100%}.clipboard-scroll::-webkit-scrollbar{width:5px}.clipboard-scroll::-webkit-scrollbar-track{background:transparent}.clipboard-scroll::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:3px}.clipboard-content{width:100%;max-width:720px;padding:0 24px 32px;box-sizing:border-box;margin:0 auto}.page-notice{width:min(672px,calc(100% - 48px));margin:12px auto 0;flex-shrink:0}.state-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 0;gap:12px;text-align:center}.state-icon{color:var(--text-tertiary);opacity:.5}.state-title{font-size:15px;font-weight:600;color:var(--text-secondary)}.state-text{font-size:13px;color:var(--text-tertiary);line-height:1.6}.clipboard-list{display:flex;flex-direction:column;gap:4px}.clipboard-row{display:flex;align-items:flex-start;gap:14px;padding:14px 12px;border:1px solid transparent;border-radius:10px;transition:all .15s ease}.clipboard-row:hover{background:var(--bg-secondary);border-color:var(--border-color)}.row-icon{color:var(--text-tertiary);flex-shrink:0;margin-top:3px}.clipboard-main{min-width:0;flex:1}.clipboard-preview{white-space:pre-wrap;overflow:hidden;max-height:84px;line-height:1.6;word-break:break-word;font-size:13px;user-select:text;-webkit-user-select:text}.clipboard-image{max-width:220px;max-height:120px;object-fit:contain;border-radius:6px}.clipboard-meta{display:flex;align-items:center;gap:10px;margin-top:7px;color:var(--text-tertiary);font-size:12px;flex-wrap:wrap}.clipboard-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}.copied-feedback{display:flex;align-items:center;gap:3px;color:#3c8056}.pinned{color:var(--accent-color)}.spin{animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.clipboard-page{display:flex;flex-direction:column;align-items:center;width:100%;height:100%;background:var(--bg-primary);overflow:hidden}.clipboard-header{width:100%;max-width:720px;padding:28px 24px 0;box-sizing:border-box;flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.page-title{margin:0;color:var(--text-primary);font-size:20px;font-weight:700;letter-spacing:-.03em}.page-description{margin:5px 0 0;color:var(--text-secondary);font-size:13px;line-height:1.5}.refresh-button{height:30px;padding:0 10px;border:0;border-radius:7px;display:inline-flex;align-items:center;gap:6px;background:var(--bg-secondary);color:var(--text-primary);font:inherit;font-size:12.5px;cursor:pointer;transition:background-color .15s ease,transform .15s ease}.refresh-button:hover:not(:disabled){background:var(--bg-active)}.refresh-button:active:not(:disabled){transform:translateY(1px)}.refresh-button:disabled{opacity:.45;cursor:default}.clipboard-filter-bar{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:720px;padding:16px 24px 8px;box-sizing:border-box;flex-shrink:0}.clipboard-filter-bar .search-box{display:flex;align-items:center;gap:8px;flex:1;max-width:400px;margin:0;padding:9px 14px;background:var(--bg-secondary);border:1.5px solid transparent;border-radius:10px;transition:all .2s ease;color:var(--text-tertiary)}.clipboard-filter-bar .search-box input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--text-primary);font:inherit;font-size:13.5px}.clipboard-filter-bar .search-box input::placeholder{color:var(--text-tertiary)}.clipboard-filter-bar .search-box:focus-within{border-color:var(--border-color);background:var(--bg-primary);box-shadow:0 0 0 3px var(--accent-light)}.clipboard-filter-bar .search-box input::-webkit-search-cancel-button{display:none}.clipboard-filter-bar :deep(.friday-select){height:38px;min-width:112px;flex:0 0 150px}.clipboard-filter-bar .search-icon{color:var(--text-tertiary);flex-shrink:0}.clipboard-filter-bar .clear-btn{display:flex;align-items:center;justify-content:center;width:18px;height:18px;border:0;border-radius:4px;background:transparent;color:var(--text-tertiary);cursor:pointer;flex-shrink:0;transition:all .15s}.clipboard-filter-bar .clear-btn:hover{background:var(--bg-hover);color:var(--text-primary)}.clipboard-scroll{flex:1;overflow-y:auto;overflow-x:hidden;width:100%}.clipboard-scroll::-webkit-scrollbar{width:5px}.clipboard-scroll::-webkit-scrollbar-track{background:transparent}.clipboard-scroll::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:3px}.clipboard-content{width:100%;max-width:720px;padding:0 24px 32px;box-sizing:border-box;margin:0 auto}.page-notice{width:min(672px,calc(100% - 48px));margin:12px auto 0;flex-shrink:0}.state-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 0;gap:12px;text-align:center}.state-icon{color:var(--text-tertiary);opacity:.5}.state-title{font-size:15px;font-weight:600;color:var(--text-secondary)}.state-text{font-size:13px;color:var(--text-tertiary);line-height:1.6}.clipboard-list{display:flex;flex-direction:column;gap:4px}.clipboard-row{display:flex;align-items:flex-start;gap:14px;padding:14px 12px;border:1px solid transparent;border-radius:10px;transition:background-color .15s ease,border-color .15s ease;content-visibility:auto;contain-intrinsic-size:auto 140px}.clipboard-row:hover{background:var(--bg-secondary);border-color:var(--border-color)}.list-loading-more{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px;color:var(--text-tertiary);font-size:12px}.row-icon{color:var(--text-tertiary);flex-shrink:0;margin-top:3px}.clipboard-main{min-width:0;flex:1}.clipboard-preview{white-space:pre-wrap;overflow:hidden;max-height:84px;line-height:1.6;word-break:break-word;font-size:13px;user-select:text;-webkit-user-select:text}.clipboard-image{max-width:220px;max-height:120px;object-fit:contain;border-radius:6px}.clipboard-meta{display:flex;align-items:center;gap:10px;margin-top:7px;color:var(--text-tertiary);font-size:12px;flex-wrap:wrap}.clipboard-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}.copied-feedback{display:flex;align-items:center;gap:3px;color:#3c8056}.pinned{color:var(--accent-color)}.spin{animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:640px){.clipboard-header{padding:20px 20px 0;flex-wrap:wrap;gap:12px}.clipboard-filter-bar{padding:12px 20px 8px}.clipboard-filter-bar .search-box{max-width:none}.organization-bar,.additional-filters,.filter-summary,.create-group-actions,.selection-bar{padding-left:20px;padding-right:20px}.organization-bar{gap:6px}.create-group-actions{gap:5px}.create-group-actions :deep(.friday-button){padding-left:7px;padding-right:7px;gap:4px}.page-notice{width:calc(100% - 40px)}.clipboard-row{flex-wrap:wrap;gap:10px}.clipboard-actions{margin-left:28px}.clipboard-main{flex-basis:calc(100% - 40px)}}
 </style>

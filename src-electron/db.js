@@ -292,6 +292,7 @@ async function initDatabase() {
       index_status TEXT NOT NULL DEFAULT 'pending',
       last_indexed_at TEXT,
       chunk_count INTEGER NOT NULL DEFAULT 0,
+      error_message TEXT,
       UNIQUE(kb_type, file_path)
     );
   `)
@@ -299,6 +300,11 @@ async function initDatabase() {
   // 迁移：为旧版 file_status 表补充 chunk_count 列（已存在则忽略）
   try {
     db.run('ALTER TABLE file_status ADD COLUMN chunk_count INTEGER NOT NULL DEFAULT 0')
+  } catch (_e) {
+    // 列已存在，忽略
+  }
+  try {
+    db.run('ALTER TABLE file_status ADD COLUMN error_message TEXT')
   } catch (_e) {
     // 列已存在，忽略
   }
@@ -1518,14 +1524,15 @@ export function deleteNotebook(notebookId) {
 // ========== RAG: file_status 表操作 ==========
 
 // 插入或更新文件索引状态（不存在则插入，存在则更新）
-export function upsertFileStatus(kbType, filePath, lastModified, indexStatus = 'pending') {
+export function upsertFileStatus(kbType, filePath, lastModified, indexStatus = 'pending', errorMessage = null) {
   db.run(
-    `INSERT INTO file_status (kb_type, file_path, last_modified, index_status, last_indexed_at)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO file_status (kb_type, file_path, last_modified, index_status, last_indexed_at, error_message)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(kb_type, file_path) DO UPDATE SET
        last_modified = excluded.last_modified,
-       index_status = excluded.index_status`,
-    [kbType, filePath, lastModified, indexStatus, indexStatus === 'success' ? nowISO() : null]
+       index_status = excluded.index_status,
+       error_message = excluded.error_message`,
+    [kbType, filePath, lastModified, indexStatus, indexStatus === 'success' ? nowISO() : null, errorMessage || null]
   )
   saveDb()
 }
@@ -1555,11 +1562,11 @@ export function getFileStatusByStatus(kbType, status) {
 }
 
 // 更新文件索引状态
-export function updateFileStatus(kbType, filePath, indexStatus) {
+export function updateFileStatus(kbType, filePath, indexStatus, errorMessage = null) {
   const lastIndexedAt = indexStatus === 'success' ? nowISO() : null
   db.run(
-    'UPDATE file_status SET index_status = ?, last_indexed_at = ? WHERE kb_type = ? AND file_path = ?',
-    [indexStatus, lastIndexedAt, kbType, filePath]
+    'UPDATE file_status SET index_status = ?, last_indexed_at = ?, error_message = ? WHERE kb_type = ? AND file_path = ?',
+    [indexStatus, lastIndexedAt, errorMessage || null, kbType, filePath]
   )
   saveDb()
 }
