@@ -1,0 +1,4 @@
+{
+  "ok": false,
+  "error": "Error: 验收超时：Boolean(document.querySelector(\".tn-note-input .cm-content\"))\n    at until (file:///C:/%E9%A1%B9%E7%9B%AE%E7%BB%83%E4%B9%A0/doc/Happy%20Friday%20Lite%20%E8%84%91%E6%B4%9E/Friday-3.0.6-preview.1-source/scripts/probe-typewriter-visual.mjs:16:140)\n    at async file:///C:/%E9%A1%B9%E7%9B%AE%E7%BB%83%E4%B9%A0/doc/Happy%20Friday%20Lite%20%E8%84%91%E6%B4%9E/Friday-3.0.6-preview.1-source/scripts/probe-typewriter-visual.mjs:29:5"
+}

@@ -1,5 +1,6 @@
 {
   "batch": "4",
+  "scale": 1,
   "checks": [
     "打包应用真实输入、中英笔记同 ID 保存、AudioContext 击键声",
     "安装包三主题×六纸张×两档灯光 36 组合切换，纸面墨色生效，保持同一输入元素与正文",
@@ -15,14 +16,14 @@
     "安装包官方示例原包 Modal/设置实际运行，隔离宿主 CM6 保存后同 ID 打字机内容自动同步",
     "安装包从官方目录下载真实社区插件原包，启用并执行 CM6 排序，结果保存同一笔记"
   ],
-  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-4-4YzE48",
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-4-9OUJ9Z",
   "ok": true,
   "feedback": {
     "audio": 1,
     "stage": {
       "render": "high",
-      "machine": "drawn",
-      "motion": "moving",
+      "machine": "built",
+      "motion": "still",
       "keys": "1"
     },
     "visible": "visible",
@@ -35,7 +36,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -43,7 +44,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -51,7 +52,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -59,7 +60,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -67,7 +68,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -75,7 +76,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -83,7 +84,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -91,7 +92,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -99,7 +100,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -107,7 +108,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -115,7 +116,7 @@
       "brightness": 0.2,
       "ink": "rgb(230, 225, 234)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 0,
@@ -123,7 +124,7 @@
       "brightness": 2,
       "ink": "rgb(230, 225, 234)",
       "paperColor": "#f4ecdb",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -131,7 +132,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -139,7 +140,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -147,7 +148,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -155,7 +156,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -163,7 +164,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -171,7 +172,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -179,7 +180,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -187,7 +188,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -195,7 +196,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -203,7 +204,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -211,7 +212,7 @@
       "brightness": 0.2,
       "ink": "rgb(230, 225, 234)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 1,
@@ -219,7 +220,7 @@
       "brightness": 2,
       "ink": "rgb(230, 225, 234)",
       "paperColor": "#1c1714",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -227,7 +228,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -235,7 +236,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -243,7 +244,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -251,7 +252,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -259,7 +260,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -267,7 +268,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -275,7 +276,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -283,7 +284,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -291,7 +292,7 @@
       "brightness": 0.2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -299,7 +300,7 @@
       "brightness": 2,
       "ink": "rgb(42, 32, 25)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -307,7 +308,7 @@
       "brightness": 0.2,
       "ink": "rgb(230, 225, 234)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     },
     {
       "theme": 2,
@@ -315,7 +316,7 @@
       "brightness": 2,
       "ink": "rgb(230, 225, 234)",
       "paperColor": "#171826",
-      "machine": "drawn"
+      "machine": "built"
     }
   ],
   "community": {

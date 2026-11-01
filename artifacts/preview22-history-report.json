@@ -1,0 +1,100 @@
+{
+  "ok": true,
+  "checkedAt": "2026-10-31T14:24:42.805Z",
+  "totalSessions": 260,
+  "restart": true,
+  "scopeIsolation": true,
+  "scopes": {
+    "friday:": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "dock:global": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "office-docs:file:docx": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "office-sheets:file:xlsx": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "office-slides:file:pptx": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "office-pdf:file:pdf": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "note-agent:note:a": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "note-agent:note:b": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "knowledge:kb:acceptance-a": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "knowledge:kb:acceptance-b": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "knowledge:folder:acceptance": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "knowledge-agent:folder:acceptance": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    },
+    "schedule-agent:": {
+      "count": 20,
+      "restored": 20,
+      "messagesPerSession": 2,
+      "metadata": true,
+      "renamePinArchiveTrashRestore": true
+    }
+  }
+}

@@ -287,7 +287,7 @@ test('网络错误持久化时只保留脱敏摘要与白名单诊断', async ()
     assert.equal(saved.metadata.errorMessage.includes(secret), false)
     assert.equal(JSON.stringify(saved.metadata.diagnostic).includes(secret), false)
     assert.deepEqual(Object.keys(saved.metadata.diagnostic).sort(), [
-      'classification', 'elapsedMs', 'phase', 'provider', 'requestId', 'retryAfterMs', 'retryable', 'status'
+      'classification', 'elapsedMs', 'phase', 'provider', 'providerCode', 'providerParam', 'requestId', 'retryAfterMs', 'retryable', 'status'
     ])
   } finally {
     db.closeDb()

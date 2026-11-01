@@ -1,7 +1,10 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { resolve } from "path";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 import { createReadStream, readFileSync } from "node:fs";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const PDFJS_WASM_FILES = ['openjpeg.wasm', 'jbig2.wasm'];
 const pdfjsWasmDir = resolve(__dirname, 'node_modules/pdfjs-dist/wasm');
@@ -42,6 +45,11 @@ export default defineConfig(() => ({
     // different package entry points. Keep one runtime copy so generated
     // anonymous plugin keys remain unique across the whole editor.
     dedupe: [
+      // The typewriter React island and react-dom/client must share the same
+      // dispatcher. Without this, Vite can prebundle two React copies and
+      // hooks such as useSyncExternalStore fail at runtime.
+      "react",
+      "react-dom",
       "@tiptap/pm",
       "prosemirror-state",
       "prosemirror-model",
@@ -52,6 +60,9 @@ export default defineConfig(() => ({
 
   clearScreen: false,
   server: {
+    watch: {
+      ignored: ['**/app-data/**', '**/release/**', '**/artifacts/**', '**/resources/office/**'],
+    },
     port: 5173,
     strictPort: true,
     hmr: {

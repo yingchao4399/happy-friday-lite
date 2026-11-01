@@ -1,0 +1,44 @@
+{
+  "ok": true,
+  "checkedAt": "2026-10-31T14:43:34.217Z",
+  "kindResults": [
+    {
+      "kind": "docs",
+      "ok": true,
+      "rounds": 25,
+      "requests": 26,
+      "toolContinuations": 25,
+      "firstEventP95Ms": 1077,
+      "messageCount": 52
+    },
+    {
+      "kind": "sheets",
+      "ok": true,
+      "rounds": 25,
+      "requests": 26,
+      "toolContinuations": 25,
+      "firstEventP95Ms": 1229,
+      "messageCount": 52
+    },
+    {
+      "kind": "slides",
+      "ok": true,
+      "rounds": 25,
+      "requests": 26,
+      "toolContinuations": 25,
+      "firstEventP95Ms": 1434,
+      "messageCount": 52
+    },
+    {
+      "kind": "pdf",
+      "ok": true,
+      "rounds": 25,
+      "requests": 26,
+      "toolContinuations": 25,
+      "firstEventP95Ms": 1016,
+      "messageCount": 52
+    }
+  ],
+  "scope": "真实 Office renderer / 原版 AgentLoop + 各自 transport / preload IPC / AI Core / 真模型；工具执行读取当前编辑器状态",
+  "model": "deepseek-flash"
+}

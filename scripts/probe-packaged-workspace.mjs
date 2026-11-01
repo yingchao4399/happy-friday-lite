@@ -4,11 +4,13 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import {spawn} from 'node:child_process'
 const root=process.cwd(),batch=process.argv[2]||'1',port=9440+Number(batch)
+const scaleArg=process.argv.find(value=>value.startsWith('--scale='))
+const scale=scaleArg?Number(scaleArg.slice('--scale='.length)):1
 const output=path.join(root,'artifacts/typewriter'),profile=fs.mkdtempSync(path.join(os.tmpdir(),'friday-packaged-'+batch+'-'))
-const executable=path.join(root,'release/win-unpacked/Happy Friday Lite.exe')
+const executable=process.env.FRIDAY_PACKAGED_EXECUTABLE||path.join(root,'release/win-unpacked/Happy Friday Lite.exe')
 const log=fs.openSync(path.join(output,`packaged-${batch}.log`),'w'),env={...process.env};delete env.ELECTRON_RUN_AS_NODE
-const child=spawn(executable,[`--friday-data-dir=${profile}`,`--remote-debugging-port=${port}`],{env,stdio:['ignore',log,log],windowsHide:!process.argv.includes('--manual-keys')})
-const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)),report={batch,checks:[],profile,ok:false},pending=new Map()
+const child=spawn(executable,[`--friday-data-dir=${profile}`,`--remote-debugging-port=${port}`,...(scale!==1?[`--force-device-scale-factor=${scale}`]:[])],{env,stdio:['ignore',log,log],windowsHide:!process.argv.includes('--manual-keys')})
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)),report={batch,scale,checks:[],profile,ok:false},pending=new Map()
 let socket,seq=0
 async function rpc(method,params={}){const id=++seq;return new Promise((resolve,reject)=>{const timeout=setTimeout(()=>{pending.delete(id);reject(new Error(method+' timeout'))},45000);pending.set(id,{resolve:value=>{clearTimeout(timeout);resolve(value)},reject});socket.send(JSON.stringify({id,method,params}))})}
 async function evaluate(expression){const value=await rpc('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture:true});if(value.exceptionDetails)throw new Error(value.exceptionDetails.exception?.description||value.exceptionDetails.text);return value.result?.value}

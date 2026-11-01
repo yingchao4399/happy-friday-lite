@@ -110,6 +110,17 @@ function validateModelConfig(model) {
   return model
 }
 
+function resolveAgentSystemPrompt(basePrompt, agentId, agentMode) {
+  if (!agentId && !agentMode) return basePrompt
+  const id = ['friday', 'researcher'].includes(agentId) ? agentId : 'friday'
+  const mode = ['friday', 'researcher', 'auto'].includes(agentMode) ? agentMode : id
+  const selected = mode === 'auto' ? id : mode
+  if (selected === 'researcher') {
+    return `${basePrompt}\n\n[当前 Agent profile: researcher]\n你负责严谨研究与资料整理。先区分已知事实、推断和待核实信息；需要外部资料时使用可用工具并给出来源，不要把未验证内容说成事实。`
+  }
+  return `${basePrompt}\n\n[当前 Agent profile: friday]\n你是 Friday 全局助手，优先直接完成用户请求；需要工具时先执行并如实报告结果。`
+}
+
 // 扫描 KB 根目录下所有 .note 文件，返回匹配 noteId 的文件路径列表
 function findNoteRefFiles(noteId) {
   const dataDir = getDataDir()
@@ -322,7 +333,12 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('get_sessions', (_event, args = {}) => {
     const { scope, scopeKey } = sessionScopeArgs(args)
-    return db.getSessions(scope, scopeKey, args?.view)
+    try {
+      return db.getSessions(scope, scopeKey, args?.view)
+    } catch (error) {
+      console.error('[Sessions] get_sessions failed', { scope, scopeKey, view: args?.view, message: error?.message })
+      throw error
+    }
   })
 
   ipcMain.handle('get_sessions_with_stats', (_event, args = {}) => {
@@ -417,7 +433,9 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('save_message', (_event, args) => {
-    return db.saveMessage(args.sessionId, args.role, args.content)
+    const { scope, scopeKey } = sessionScopeArgs(args)
+    if (!db.getSession(args.sessionId, scope, scopeKey)) throw new Error('Session scope mismatch')
+    return db.saveMessage(args.sessionId, args.role, args.content, args.metadata || null)
   })
 
   ipcMain.handle('rollback_session', (_event, args) => {
@@ -426,7 +444,7 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('chat_with_memory', async (_event, args) => {
-    const { requestId, sessionId, model, message, enableThinking, systemPrompt, useKnowledgeBase, kbName, kbCategoryId, folderPath, topK, attachments, retry = false, scope = 'friday', scopeKey = null } = args
+    const { requestId, sessionId, model, message, enableThinking, systemPrompt, useKnowledgeBase, kbName, kbCategoryId, folderPath, topK, attachments, retry = false, scope = 'friday', scopeKey = null, agentId = '', agentMode = '' } = args
 
     let currentSessionId = sessionId
     let isNewSession = false
@@ -505,7 +523,7 @@ export function registerCommands(mainWindow) {
       }
 
       const appConfig = loadConfig()
-      const effectiveSystemPrompt = systemPrompt || appConfig.systemPrompt
+      const effectiveSystemPrompt = resolveAgentSystemPrompt(systemPrompt || appConfig.systemPrompt, agentId, agentMode)
       const allMessages = [
         { role: 'system', content: effectiveSystemPrompt },
         ...historyMessages

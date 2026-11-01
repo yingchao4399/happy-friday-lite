@@ -2,7 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { app, WebContentsView } from 'electron'
-import { officeDockBounds } from './dock-overlay-layout.js'
+import { officeDockBounds, moveOfficeDockPosition, resizeOfficeDockPosition } from './dock-overlay-layout.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const VIEW_ID = /^(docs|sheets|slides|pdf)-\d+$/
@@ -44,31 +44,44 @@ function applyBounds() {
     dockView.setVisible(false)
     return
   }
-  dockView.setBounds(bounds)
+  // Chromium reports a zero-sized viewport for a hidden WebContentsView at
+  // high DPI. Make it visible before applying the real bounds so fixed
+  // positioning and ResizeObserver get a valid CSS viewport.
   dockView.setVisible(Boolean(currentViewId))
+  dockView.setBounds(bounds)
 }
 
-function ensureDockView(viewId) {
+function ensureDockView(viewId, initialBounds = null) {
   if (dockView && !dockView.webContents.isDestroyed()) return
   dockView = new WebContentsView({
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      backgroundThrottling: true,
+      // The overlay is interactive even while the Office WebContentsView is
+      // not the focused editor. Background throttling can leave its CSS
+      // viewport at 0×0 at 150% DPI, which makes the trigger unclickable.
+      backgroundThrottling: false,
       preload: path.join(root, 'preload-office-dock.cjs')
     }
   })
   dockView.setBackgroundColor('#0000')
-  dockView.setVisible(false)
-  dockView.setBounds({ x: 0, y: 0, width: 1, height: 1 })
+  // Keep the view visible while its first document is created. Loading a
+  // hidden child view at high DPI can permanently freeze Chromium's viewport
+  // at 0×0; the parent still controls the actual clickable rectangle.
+  dockView.setVisible(Boolean(currentViewId))
+  dockView.setBounds(initialBounds || { x: 0, y: 0, width: 1, height: 1 })
   mainWindow.contentView.addChildView(dockView)
   loaded = false
   dockView.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   dockView.webContents.once('did-finish-load', () => {
     loaded = true
     if (currentViewId && currentViewId !== viewId) syncRoute(currentViewId)
-    applyBounds()
+    // Let Chromium commit the initial non-zero layout viewport before the
+    // collapsed 48-DIP rectangle is applied. Without this handoff, high-DPI
+    // WebContentsView instances can remain at innerWidth=0 for their lifetime.
+    dockView.setVisible(Boolean(currentViewId))
+    setTimeout(() => applyBounds(), 120)
   })
   dockView.webContents.once('render-process-gone', () => {
     hideOfficeDockOverlay()
@@ -93,11 +106,16 @@ export function showOfficeDockOverlay(window, viewId, bounds) {
   workspaceBounds = bounds
   const changed = currentViewId !== viewId
   currentViewId = viewId
-  ensureDockView(viewId)
+  // Give Chromium a real layout viewport during the first navigation. A
+  // 48-DIP hidden view can report innerWidth=0 at 150% DPI and never recover
+  // after the first resize. The view is immediately reduced to the collapsed
+  // trigger rectangle by applyBounds once the document is ready.
+  const initialBounds = officeDockBounds(workspaceBounds, { expanded: true, panelHeight: 360, position })
+  ensureDockView(viewId, initialBounds)
   // Office WebContentsView 可能后于 Dock 添加；重复添加可将 Dock 提到最前。
   mainWindow.contentView.addChildView(dockView)
   if (changed) syncRoute(viewId)
-  applyBounds()
+  if (loaded) applyBounds()
 }
 
 export function updateOfficeDockBounds(bounds) {
@@ -106,8 +124,10 @@ export function updateOfficeDockBounds(bounds) {
 }
 
 export function setOfficeDockExpanded(nextExpanded, nextPanelHeight = 0) {
+  const before = officeDockBounds(workspaceBounds, { expanded, panelHeight, position })
   expanded = nextExpanded === true
   panelHeight = expanded && Number.isFinite(nextPanelHeight) ? nextPanelHeight : 0
+  if (position) position = resizeOfficeDockPosition(workspaceBounds, before, { expanded, panelHeight, position })
   applyBounds()
   return { expanded }
 }
@@ -116,7 +136,8 @@ export function moveOfficeDock(dx = 0, dy = 0) {
   const x = Number(dx)
   const y = Number(dy)
   if (!Number.isFinite(x) || !Number.isFinite(y)) return { success: false }
-  position = { x: (position?.x || 0) + x, y: (position?.y || 0) + y }
+  position = moveOfficeDockPosition(workspaceBounds, { expanded, panelHeight, position }, x, y)
+  if (!position) return { success: false }
   applyBounds()
   return { success: true, position: { ...position } }
 }

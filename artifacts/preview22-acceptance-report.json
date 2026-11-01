@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-10-31T18:39:45+08:00",
+  "status": "incomplete",
+  "packageAndGithub": "blocked_until_all_gates_pass",
+  "passed": [
+    "typewriter-image-body-fusion",
+    "typewriter-core-terminal-machine-lighting-regression",
+    "typewriter-100k-input-and-preview-performance",
+    "typewriter-100-scroll-clip-performance",
+    "office-docs-sheets-slides-pdf-overlay-source-window",
+    "dock-chinese-input-send-cancel-state-source-window",
+    "dock-history-popup-anchor-source-window",
+    "dock-new-chat-source-window",
+    "office-dock-preload-conversation-contract",
+    "office-drag-source-window",
+    "office-dock-overlay-bounds-probe",
+    "office-custom-scheme-csp-and-privileged-origin-fix",
+    "office-docs-sheets-slides-pdf-lifecycle-after-origin-fix",
+    "office-422-safe-parameter-diagnostic-mock",
+    "real-deepseek-flash-100-tool-continuations",
+    "scoped-history-20-sessions-per-scope-restart-probe",
+    "packaged-unpacked-cold-start-and-core-regression",
+    "packaged-unpacked-dpi-100-125-150",
+    "packaged-unpacked-dock-history-new-input-dpi-matrix",
+    "packaged-cross-module-regression-batch-4",
+    "root-tests-299-pass-serial",
+    "agent-core-tests-18-pass",
+    "vite-build",
+    "git-diff-check"
+  ],
+  "unverified": [
+    "Windows packaged installer cold-start",
+    "Windows packaged installer upgrade-and-rollback",
+    "full cross-module button contract with keyboard navigation in installed build"
+  ],
+  "evidence": {
+    "typewriter": "artifacts/typewriter/workspace-report.json",
+    "office422": "scripts/probe-office-ai-stream.mjs",
+    "realDeepSeek": "scripts/probe-deepseek-tool-loop.mjs (100/100, 101 requests)",
+    "packaged": "scripts/probe-packaged-workspace.mjs 1, 11 --scale=1.25, 12 --scale=1.5",
+    "packagedBatch4": "scripts/probe-packaged-workspace.mjs 4",
+    "officeLifecycle": "scripts/probe-office-lifecycle.mjs --kind={docs,sheets,slides,pdf} --iterations=1",
+    "packagedDock": "scripts/probe-packaged-dock.mjs dock100/dock125/dock150",
+    "packagedDock": "scripts/probe-packaged-dock.mjs dock100/dock125/dock150",
+    "history20": "scripts/probe-preview22-history.mjs",
+    "tests": "node --test --test-concurrency=1 scripts/tests/*.test.mjs (299 passed)",
+    "dockPreload": "scripts/tests/global-agent-dock.test.mjs",
+    "build": "npm run build; npm run office:build"
+  }
+}

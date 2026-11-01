@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "checkedAt": "2026-10-31T14:29:23.466Z",
+  "sourceVersion": "3.0.6-preview.21",
+  "targetVersion": "3.0.6-preview.22",
+  "sourceDatabaseBytes": 2465792,
+  "originalTables": 29,
+  "originalRows": 6117,
+  "upgradedTables": 8,
+  "originalRowsUnchanged": true,
+  "newRowsPreservedOnRollback": true,
+  "installedLegacyReopen": true,
+  "reupgradeIdempotent": true,
+  "preUpgradeSnapshotVerified": true,
+  "officialSnapshotRestore": true,
+  "invalidBackupPreservesCurrent": true,
+  "runtimeProfilePreserved": true,
+  "configAndSessionBytesUnchanged": true,
+  "originalSourceFilesUnchanged": true,
+  "limitation": "数据层副本验收；不代替最终安装升级、回退、卸载和重装验收"
+}

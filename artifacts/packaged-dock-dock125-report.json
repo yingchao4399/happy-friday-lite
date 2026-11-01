@@ -1,0 +1,11 @@
+{
+  "batch": "dock125",
+  "scale": 1.25,
+  "ok": true,
+  "checks": [
+    "安装版 Dock 展开、历史、新建、输入框和边界",
+    "安装版历史弹窗加载、可见且锚定在历史按钮附近",
+    "安装版 Dock 中文输入后发送按钮启用"
+  ],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-dock-dock125-VDHvNN"
+}

@@ -5,6 +5,7 @@ import { buildChatCompletionsUrl } from '../openaiUrl.js'
 import { NETWORK_ERROR_CLASSIFICATIONS, annotateNetworkError, classifyNetworkError, fetchWithFiniteRetry, safeNetworkErrorSummary } from '../ai-core/network-policy.js'
 import { executeCapability } from '../agent/tools/registry.js'
 import { createAiChatCapabilityInvoker } from './ai-inference-adapter.js'
+import { toOpenAiMessages } from './canonical-transcript.js'
 
 /**
  * Office 编辑器 AI 桥接：用 Friday 的模型层覆写编辑器注册的 ai:* IPC。
@@ -36,7 +37,13 @@ export function setOfficeAiModel(model) {
     })
     return
   }
-  state.model = { ...model, baseUrl: String(baseUrl).trim().replace(/\/+$/, '') }
+  state.model = {
+    ...model,
+    baseUrl: String(baseUrl).trim().replace(/\/+$/, ''),
+    // Office tool loops default to the protocol-safe mode. Thinking is only
+    // enabled when the caller explicitly proves the provider contract.
+    thinking: model.thinking === 'enabled' && model.reasoningRoundTrip === true ? 'enabled' : 'disabled',
+  }
   console.info('[Office AI] model selected:', state.model.provider || 'custom', state.model.modelName, state.model.baseUrl)
 }
 
@@ -60,45 +67,7 @@ function handle(channel, listener) {
   ipcMain.handle(channel, listener)
 }
 
-const safeJson = (v) => {
-  try { return JSON.stringify(v ?? {}) } catch { return '{}' }
-}
-
-/** vendor AgentMessage[] → OpenAI chat messages（含 tool_calls / tool 结果往返） */
-function toOpenAiMessages(system, messages = []) {
-  const out = []
-  if (system) out.push({ role: 'system', content: String(system) })
-  for (const m of messages) {
-    if (m?.role === 'user') {
-      if (Array.isArray(m.images) && m.images.length) {
-        out.push({
-          role: 'user',
-          content: [
-            { type: 'text', text: String(m.text || '') },
-            ...m.images.map((i) => ({ type: 'image_url', image_url: { url: `data:${i.mime};base64,${i.base64}` } })),
-          ],
-        })
-      } else {
-        out.push({ role: 'user', content: String(m.text || '') })
-      }
-    } else if (m?.role === 'assistant') {
-      const entry = { role: 'assistant', content: m.text || null }
-      if (Array.isArray(m.toolCalls) && m.toolCalls.length) {
-        entry.tool_calls = m.toolCalls.map((tc, i) => ({
-          id: String(tc.id || `call_${i}_${tc.name}`),
-          type: 'function',
-          function: { name: tc.name, arguments: safeJson(tc.input) },
-        }))
-      }
-      out.push(entry)
-    } else if (m?.role === 'tool' && Array.isArray(m.results)) {
-      for (const r of m.results) {
-        out.push({ role: 'tool', tool_call_id: String(r.id || r.name || ''), content: String(r.output ?? '') })
-      }
-    }
-  }
-  return out
-}
+export { toOpenAiMessages } from './canonical-transcript.js'
 
 /** vendor AgentToolDef[] → OpenAI tools 定义 */
 function toOpenAiTools(tools = []) {
@@ -124,6 +93,7 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
     messages: chatMessages,
     stream: true,
     stream_options: { include_usage: true },
+    thinking: { type: model.thinking === 'enabled' ? 'enabled' : 'disabled' },
   }
   if (tools.length) {
     body.tools = tools
@@ -158,9 +128,20 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
       fetchImpl: (input, options) => net.fetch(input, options),
     })
     if (!response.ok) {
-      try { await response.body?.cancel?.() } catch { /* 释放服务端响应 */ }
-      throw annotateNetworkError(new Error('模型请求失败'), {
+      let providerCode = ''
+      let providerParam = ''
+      let providerMessage = ''
+      try {
+        const raw = await response.text()
+        const parsed = JSON.parse(raw)
+        const detail = parsed?.error || parsed
+        providerCode = String(detail?.code || detail?.type || '').slice(0, 80)
+        providerParam = String(detail?.param || detail?.field || '').slice(0, 160)
+        providerMessage = String(detail?.message || '').slice(0, 240)
+      } catch { /* provider may return an empty/non-JSON body */ }
+      throw annotateNetworkError(new Error(providerMessage || '模型请求失败'), {
         provider: model.provider, requestId, phase: 'response', status: response.status,
+        providerCode, providerParam,
       })
     }
 
@@ -271,7 +252,7 @@ async function runFridayStream(request, send) {
   const ping = setInterval(() => sendSafe({ requestId, type: 'ping' }), 5000)
   try {
     const { content, toolCalls, stopReason } = await invokeAiChat(
-      toOpenAiMessages(system, messages),
+      toOpenAiMessages(system, messages, { thinking: state.model?.thinking }),
       toOpenAiTools(tools),
       {
         actor: 'office-ai',
@@ -298,10 +279,13 @@ async function runFridayStream(request, send) {
     } else {
       const classification = err?.classification || classifyNetworkError(err)
       console.warn('[Office AI] stream error:', classification, `(${Date.now() - t0}ms)`)
-      const errorCode = classification === NETWORK_ERROR_CLASSIFICATIONS.TIMEOUT ? 'timeout'
+      const errorCode = err?.code === 'TRANSCRIPT_INVALID' ? 'transcript'
+        : classification === NETWORK_ERROR_CLASSIFICATIONS.AUTH ? 'auth'
+        : classification === NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST ? 'parameter'
+        : classification === NETWORK_ERROR_CLASSIFICATIONS.TIMEOUT ? 'timeout'
         : [NETWORK_ERROR_CLASSIFICATIONS.DNS_CONNECTION, NETWORK_ERROR_CLASSIFICATIONS.PROXY, NETWORK_ERROR_CLASSIFICATIONS.TLS].includes(classification) ? 'network'
           : [NETWORK_ERROR_CLASSIFICATIONS.RATE_LIMIT, NETWORK_ERROR_CLASSIFICATIONS.SERVER].includes(classification) ? 'overloaded' : undefined
-      sendSafe({ requestId, type: 'error', error: safeNetworkErrorSummary(err), errorCode })
+      sendSafe({ requestId, type: 'error', error: safeNetworkErrorSummary(err), errorCode, diagnostic: err?.diagnostic || undefined })
     }
   } finally {
     clearInterval(ping)
@@ -336,7 +320,7 @@ export function registerOfficeAiBridge() {
     try {
       const requestId = `office-chat:${Date.now()}`
       const { content } = await invokeAiChat(
-        toOpenAiMessages(system, [{ role: 'user', text: String(user ?? '') }]),
+        toOpenAiMessages(system, [{ role: 'user', text: String(user ?? '') }], { thinking: state.model?.thinking }),
         [],
         { actor: 'office-ai', requestId, threadId: requestId, stream: true },
       )

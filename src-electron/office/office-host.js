@@ -8,6 +8,7 @@ import { getDataDir } from '../config.js'
 import { normalizeOfficeDocumentSelection } from './document-selection.js'
 import { registerOfficeFileCommands } from './file-commands.js'
 import { showOfficeDockOverlay, updateOfficeDockBounds, hideOfficeDockOverlay, destroyOfficeDockOverlay } from './dock-overlay.js'
+import '../app-protocol-privileges.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const _require = createRequire(import.meta.url)

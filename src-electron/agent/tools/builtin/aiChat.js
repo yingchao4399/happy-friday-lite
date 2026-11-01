@@ -5,8 +5,34 @@
 import { z } from 'zod'
 import { registerTool } from '../registry.js'
 
+const contentPartSchema = z.object({
+  type: z.string(),
+}).passthrough()
+
+const toolCallSchema = z.object({
+  id: z.string().min(1),
+  type: z.string().optional(),
+  function: z.object({
+    name: z.string().min(1),
+    arguments: z.string(),
+  }).passthrough(),
+}).passthrough()
+
+// AI Core 是私有 provider 边界，不能使用 Zod 默认 strip 行为。
+// tool_calls/tool_call_id/reasoning_content 必须完整穿透 schema，未来 provider
+// 扩展字段也先保留，再由 adapter 的白名单序列化。
+const messageSchema = z.object({
+  role: z.enum(['system', 'user', 'assistant', 'tool']),
+  content: z.union([z.string(), z.array(contentPartSchema), z.null()]),
+  id: z.string().optional(),
+  name: z.string().optional(),
+  tool_calls: z.array(toolCallSchema).optional(),
+  tool_call_id: z.string().optional(),
+  reasoning_content: z.string().optional(),
+}).passthrough()
+
 const schema = z.object({
-  messages: z.array(z.object({ role: z.string(), content: z.any() })).min(1),
+  messages: z.array(messageSchema).min(1),
   tools: z.array(z.any()).optional(),
   stream: z.boolean().optional()
 })

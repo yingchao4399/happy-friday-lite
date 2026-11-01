@@ -157476,11 +157476,12 @@ var init_AiPanelSideButton = __esm({
 });
 
 // ../ui/src/AiHistoryButton.tsx
-var import_react4, import_jsx_runtime5;
+var import_react4, import_react_dom2, import_jsx_runtime5;
 var init_AiHistoryButton = __esm({
   "../ui/src/AiHistoryButton.tsx"() {
     "use strict";
     import_react4 = __toESM(require_react(), 1);
+    import_react_dom2 = __toESM(require_react_dom(), 1);
     import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
   }
 });

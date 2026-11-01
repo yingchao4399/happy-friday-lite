@@ -23,6 +23,9 @@
               </div>
               <div class="header-right">
                 <ScopedHistoryButton scope="knowledge-agent" :scope-key="historyScopeKey" :current-session-id="currentSessionId" @select="selectHistory" @create="startNewHistory" @removed="handleHistoryRemoved" />
+                <NewConversationButton class="header-btn" scope="knowledge-agent" :scope-key="historyScopeKey" mode="agent" @create="startNewHistory">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </NewConversationButton>
                 <button class="header-btn" @click="handleStop" v-if="isStreaming" title="停止生成">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="6" y="6" width="12" height="12" rx="2"></rect>
@@ -195,6 +198,7 @@ import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessa
 import ToolCallSection from '@/components/chat/ToolCallSection.vue';
 import ToolApprovalDialog from '@/components/chat/ToolApprovalDialog.vue';
 import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
+import NewConversationButton from '@/components/chat/NewConversationButton.vue';
 import { loadModelConfig } from '@/views/friday/composables/useModelCatalog';
 import AgentFileSelectDialog from './AgentFileSelectDialog.vue';
 
@@ -234,9 +238,13 @@ function stopForHistorySwitch() {
   pendingApproval.value = null
 }
 
-function startNewHistory() {
+function startNewHistory(payload = null) {
   stopForHistorySwitch()
   resetState()
+  if (payload?.session?.id) {
+    currentSessionId.value = payload.session.id
+    historyModelId.value = payload.session.modelId || ''
+  }
   nextTick(() => textareaRef.value?.focus())
 }
 

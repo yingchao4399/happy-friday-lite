@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "scale": 1.25,
+  "checkedAt": "2026-10-31T15:46:38.820Z",
+  "samples": [
+    {
+      "kind": "docs",
+      "drags": 50,
+      "expands": 50,
+      "dragP95Ms": 68,
+      "expandP95Ms": 54,
+      "moveIpc": 35,
+      "editorReloads": 0,
+      "windowWidths": [
+        1024,
+        1366,
+        1920
+      ]
+    },
+    {
+      "kind": "sheets",
+      "drags": 50,
+      "expands": 50,
+      "dragP95Ms": 17,
+      "expandP95Ms": 36,
+      "moveIpc": 35,
+      "editorReloads": 0,
+      "windowWidths": [
+        1024,
+        1366,
+        1920
+      ]
+    },
+    {
+      "kind": "slides",
+      "drags": 50,
+      "expands": 50,
+      "dragP95Ms": 16,
+      "expandP95Ms": 48,
+      "moveIpc": 35,
+      "editorReloads": 0,
+      "windowWidths": [
+        1024,
+        1366,
+        1920
+      ]
+    },
+    {
+      "kind": "pdf",
+      "drags": 50,
+      "expands": 50,
+      "dragP95Ms": 17,
+      "expandP95Ms": 54,
+      "moveIpc": 35,
+      "editorReloads": 0,
+      "windowWidths": [
+        1024,
+        1366,
+        1920
+      ]
+    }
+  ]
+}

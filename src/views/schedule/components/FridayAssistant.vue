@@ -40,21 +40,29 @@
               </svg>
               <span>Friday 日程助理</span>
             </div>
-            <ScopedHistoryButton
-              scope="schedule-agent"
-              :current-session-id="sessionId"
-              label="历史"
-              title="日程对话历史"
-              @select="selectHistory"
-              @create="startNewHistory"
-              @removed="handleHistoryRemoved"
-            />
-            <button class="close-btn" @click="close">
+            <div class="panel-header-actions">
+              <ScopedHistoryButton
+                scope="schedule-agent"
+                :current-session-id="sessionId"
+                label="历史"
+                title="日程对话历史"
+                @select="selectHistory"
+                @create="startNewHistory"
+                @removed="handleHistoryRemoved"
+              />
+              <NewConversationButton class="new-chat-btn" scope="schedule-agent" mode="agent" @create="startNewHistory">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </NewConversationButton>
+              <button class="close-btn" type="button" title="关闭" aria-label="关闭" @click="close">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
-            </button>
+              </button>
+            </div>
           </div>
 
           <div v-if="historyMessages.length" class="schedule-history-transcript" aria-label="日程对话历史">
@@ -113,6 +121,7 @@ import { marked } from 'marked';
 import { electronService } from '@/services/electron';
 import { useScheduleStore } from '@/store/modules/schedule';
 import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
+import NewConversationButton from '@/components/chat/NewConversationButton.vue';
 
 marked.setOptions({ breaks: true, gfm: true });
 
@@ -166,10 +175,10 @@ function stopForHistorySwitch() {
   bubbleContent.value = '';
 }
 
-function startNewHistory() {
+function startNewHistory(payload = null) {
   stopForHistorySwitch();
-  sessionId.value = '';
-  historyModelId.value = '';
+  sessionId.value = payload?.session?.id || '';
+  historyModelId.value = payload?.session?.modelId || '';
   historyMessages.value = [];
   setInputText('');
   nextTick(() => inputRef.value?.focus());
@@ -660,6 +669,40 @@ watch(() => props.visible, (val) => {
   gap: 6px;
   font-size: 14px;
   font-weight: 600;
+}
+
+.panel-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.panel-header-actions :deep(.scoped-history-toggle) {
+  min-width: 42px;
+  height: 28px;
+  padding: 4px 7px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.panel-header-actions :deep(.scoped-history-toggle:hover),
+.new-chat-btn:hover,
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
 .close-btn {

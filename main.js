@@ -23,44 +23,10 @@ import { installEditContextMenu } from './src-electron/edit-context-menu.js'
 import { captureInternalClipboard } from './src-electron/clipboard.js'
 import { showStartupError } from './src-electron/startup-error.js'
 import { NOTE_ASSET_SCHEME, resolveNoteAssetPath } from './src-electron/note-resources.js'
+import './src-electron/app-protocol-privileges.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-// Renderer markdown runs from http://localhost in development and from
-// file:// in packaged builds. Register all app-owned schemes in one call before
-// app.ready. Electron only honors the first registerSchemesAsPrivileged call;
-// keeping the Office renderer scheme in this list preserves its secure context
-// (including Web Crypto randomUUID) while still serving managed note assets.
-protocol.registerSchemesAsPrivileged([{
-  scheme: NOTE_ASSET_SCHEME,
-  privileges: {
-    standard: true,
-    secure: true,
-    supportFetchAPI: true,
-    corsEnabled: true,
-    stream: true,
-  },
-}, {
-  scheme: 'genoffice-app',
-  privileges: {
-    standard: true,
-    secure: true,
-    supportFetchAPI: true,
-    corsEnabled: true,
-    stream: true,
-    codeCache: true,
-  },
-}, {
-  scheme: 'genoffice-docx-media',
-  privileges: {
-    standard: true,
-    secure: true,
-    supportFetchAPI: true,
-    corsEnabled: true,
-    stream: true,
-  },
-}])
 
 const isDev = !app.isPackaged
 
@@ -292,6 +258,13 @@ function createWindow() {
     scheduleBackgroundSchedulers(mainWindow)
   })
   mainWindow.webContents.on('did-finish-load', () => console.log('[Main] 主窗口页面加载完成'))
+  mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    const levels = ['info', 'warning', 'error']
+    const label = levels[level] || String(level)
+    if (label === 'error' || label === 'warning') {
+      console.error(`[Renderer:${label}] ${message} (${sourceId}:${line})`)
+    }
+  })
   mainWindow.webContents.on('did-fail-load', (_event, code, description, _url, isMainFrame) => {
     if (isMainFrame) console.error('[Main] 主窗口页面加载失败:', code, description)
   })

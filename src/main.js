@@ -5,6 +5,7 @@ import { i18n } from './i18n'
 import { renderScan } from './utils/render-scan'
 import './assets/styles/main.css'
 import App from './App.vue'
+import GlobalAgentDock from './components/ai-core/GlobalAgentDock.vue'
 
 // The desktop app does not use Tab-based focus navigation.
 window.addEventListener('keydown', (event) => {
@@ -21,17 +22,30 @@ window.addEventListener('keydown', (event) => {
 }, true)
 
 async function mountApp() {
+  // 所有 body-level 浮层的共同挂载点；组件仍可通过 Teleport 管理焦点和层级。
+  if (!document.getElementById('friday-overlay-root')) {
+    const overlay = document.createElement('div')
+    overlay.id = 'friday-overlay-root'
+    overlay.setAttribute('data-overlay-root', 'true')
+    document.body.appendChild(overlay)
+  }
 const pinnedWindow = window.location.hash.startsWith('#/clipboard-pin/')
 const quickWindow = window.location.hash.startsWith('#/clipboard-quick')
 const officeDockWindow = window.location.hash.includes('__officeDock=1')
 if (officeDockWindow) {
   document.documentElement.style.background = 'transparent'
+  document.documentElement.style.width = '100%'
+  document.documentElement.style.height = '100%'
   document.body.style.background = 'transparent'
+  document.body.style.width = '100%'
+  document.body.style.height = '100%'
   document.body.style.overflow = 'hidden'
   document.getElementById('app').style.background = 'transparent'
+  document.getElementById('app').style.width = '100%'
+  document.getElementById('app').style.height = '100%'
 }
 const root = officeDockWindow
-  ? (await import('./components/ai-core/GlobalAgentDock.vue')).default
+  ? GlobalAgentDock
   : quickWindow
     ? (await import('./views/clipboard/ClipboardQuick.vue')).default
     : pinnedWindow

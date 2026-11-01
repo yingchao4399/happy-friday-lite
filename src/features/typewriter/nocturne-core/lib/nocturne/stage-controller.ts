@@ -135,6 +135,7 @@ export class StageController {
   private machineKey = '';
   private rebuildTimer: ReturnType<typeof setTimeout> | undefined;
   private machineBuildTimer: ReturnType<typeof setTimeout> | undefined;
+  private layoutTransitioning = false;
 
   constructor(
     private elements: StageElements,
@@ -167,18 +168,30 @@ export class StageController {
     });
   }
 
-  update(settings: NocturneSettings, layout: StageLayout, mode: RenderMode) {
+  update(settings: NocturneSettings, layout: StageLayout, mode: RenderMode, layoutTransitioning = false) {
     const previous = this.settings;
+    const wasTransitioning = this.layoutTransitioning;
     this.settings = settings;
     this.layout = layout;
     this.mode = mode;
+    this.layoutTransitioning = layoutTransitioning;
     if (previous.typewriter !== settings.typewriter) {
       this.sounds.configure(settings.typewriter);
     }
     this.elements.stage.dataset.render = this.renderLabel();
     this.measureOrigin();
     this.refreshGrid();
-    this.rebuild(false);
+    if (layoutTransitioning) {
+      // CSS is animating the stage width. Keep the existing WebGL scene alive
+      // while intermediate measurements arrive; rebuilding here disposes the
+      // entire Three.js scene and is the source of the visible head stutter.
+      clearTimeout(this.rebuildTimer);
+      this.rebuildTimer = undefined;
+    } else {
+      // A transition settles at one final geometry. Force exactly one rebuild
+      // then; ordinary settings changes retain the existing debounce path.
+      this.rebuild(wasTransitioning);
+    }
     this.invalidate();
   }
 

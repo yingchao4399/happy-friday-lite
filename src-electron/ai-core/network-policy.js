@@ -72,13 +72,15 @@ export function shouldRetryNetworkError({ classification, attempt = 0, maxAttemp
   return !hasOutput && !hasSideEffect && attempt < maxAttempts - 1 && isRetryableClassification(classification)
 }
 
-export function createNetworkDiagnostic({ provider = '', requestId = '', phase = 'request', status = null, classification = NETWORK_ERROR_CLASSIFICATIONS.UNKNOWN, elapsedMs = null, retryAfterMs = null } = {}) {
+export function createNetworkDiagnostic({ provider = '', requestId = '', phase = 'request', status = null, classification = NETWORK_ERROR_CLASSIFICATIONS.UNKNOWN, elapsedMs = null, retryAfterMs = null, providerCode = '', providerParam = '' } = {}) {
   const safePhase = String(phase || 'request')
   return {
     provider: String(provider || 'unknown').slice(0, 40),
     requestId: String(requestId || '').slice(0, 80),
     phase: KNOWN_PHASES.has(safePhase) ? safePhase : 'request',
     status: numberOrNull(status),
+    providerCode: String(providerCode || '').slice(0, 80) || null,
+    providerParam: String(providerParam || '').slice(0, 160) || null,
     classification: KNOWN_CLASSIFICATIONS.has(classification) ? classification : NETWORK_ERROR_CLASSIFICATIONS.UNKNOWN,
     elapsedMs: numberOrNull(elapsedMs),
     retryAfterMs: numberOrNull(retryAfterMs),
@@ -100,6 +102,8 @@ export function sanitizeNetworkDiagnostic(diagnostic, fallback = {}) {
     classification: KNOWN_CLASSIFICATIONS.has(classification) ? classification : NETWORK_ERROR_CLASSIFICATIONS.UNKNOWN,
     elapsedMs: source.elapsedMs,
     retryAfterMs: source.retryAfterMs
+    ,providerCode: source.providerCode ?? fallback.providerCode
+    ,providerParam: source.providerParam ?? fallback.providerParam
   })
 }
 
@@ -111,6 +115,15 @@ export function safeNetworkErrorSummary(error, fallback = '请求失败') {
     return error?.message || String(error || fallback)
   }
   const status = diagnostic.status == null ? '' : `，HTTP ${diagnostic.status}`
+  if (diagnostic.classification === NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST) {
+    const field = diagnostic.providerParam ? `，参数 ${diagnostic.providerParam}` : ''
+    return `模型请求参数无效${status}${field}，请新建会话或检查工具协议`
+  }
+  if (diagnostic.classification === NETWORK_ERROR_CLASSIFICATIONS.AUTH) return `模型认证失败${status}，请检查 API Key`
+  if (diagnostic.classification === NETWORK_ERROR_CLASSIFICATIONS.CONFIG) return '模型配置不完整，请在设置中检查 provider、模型和地址'
+  if ([NETWORK_ERROR_CLASSIFICATIONS.DNS_CONNECTION, NETWORK_ERROR_CLASSIFICATIONS.PROXY, NETWORK_ERROR_CLASSIFICATIONS.TLS, NETWORK_ERROR_CLASSIFICATIONS.TIMEOUT].includes(diagnostic.classification)) {
+    return `模型网络连接失败${status}，请检查网络或代理设置`
+  }
   return `模型请求失败（${diagnostic.classification}${status}）`
 }
 

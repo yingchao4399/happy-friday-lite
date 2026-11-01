@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "error": "验收超时：document.querySelector(\".tn-sheet\").getBoundingClientRect().width===document.querySelector(\".tn-stage\").getBoundingClientRect().width",
+  "errors": []
+}

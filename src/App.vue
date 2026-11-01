@@ -16,7 +16,9 @@
         </div>
       </main>
     </div>
-    <GlobalAgentDock v-if="!isShareView && !startupOpening" />
+    <Teleport to="body">
+      <GlobalAgentDock v-if="!isShareView && !startupOpening" />
+    </Teleport>
     <!-- 启动时处理系统打开文件请求的遮罩：先完成跳转再露出界面，避免首页闪现 -->
     <div v-if="startupOpening" class="startup-open-overlay"></div>
   </div>

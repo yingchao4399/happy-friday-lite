@@ -11,6 +11,11 @@ const server = http.createServer((_request, response) => {
     response.end('{"private":"provider-secret-response"}')
     return
   }
+  if (route === 'parameter') {
+    response.writeHead(422, { 'Content-Type': 'application/json', 'x-request-id': 'provider-422-probe' })
+    response.end(JSON.stringify({ error: { type: 'invalid_request_error', code: 'invalid_parameter', param: 'tools[0].function.parameters', message: 'provider-private-422-detail' } }))
+    return
+  }
   response.writeHead(200, { 'Content-Type': 'text/event-stream' })
   response.write('data: {"choices":[{"delta":{"content":"Friday"}}]}\n\n')
   if (route === 'interrupted') { response.end(); return }
@@ -48,6 +53,20 @@ app.whenReady().then(async () => {
       },
     )
 
+    select('parameter')
+    await assert.rejects(
+      fridayStreamRequest([{ role: 'user', content: 'ping' }], [{ name: 'probe_tool', inputSchema: { type: 'object' } }], { requestId: 'office-probe-422' }),
+      error => {
+        assert.equal(error.classification, NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST)
+        assert.equal(error.diagnostic.status, 422)
+        assert.equal(error.diagnostic.providerParam, 'tools[0].function.parameters')
+        assert.equal(error.diagnostic.requestId, 'office-probe-422')
+        assert.match(error.message, /HTTP 422/)
+        assert.equal(error.message.includes('provider-private-422-detail'), false)
+        return true
+      },
+    )
+
     select('interrupted')
     const partial = []
     await assert.rejects(
@@ -60,7 +79,7 @@ app.whenReady().then(async () => {
         return true
       },
     )
-    console.log(JSON.stringify({ ok: true, checks: ['stream', 'auth', 'interrupted'] }))
+    console.log(JSON.stringify({ ok: true, checks: ['stream', 'auth', 'parameter-422', 'interrupted'] }))
     exitCode = 0
   } catch (error) {
     console.error(error.stack)

@@ -55,6 +55,13 @@ export function NocturneShell({header, children}: ShellProps) {
   const settings = useNocturneSettings();
   const theme = activeTheme(settings) ?? (settings.focusMode ? THEMES['paper-and-ink'] : null);
   const [studioOpen, setStudioOpen] = useState(false);
+  const studioOpenRef = useRef(studioOpen);
+  studioOpenRef.current = studioOpen;
+  // Opening Studio changes the stage width through CSS. Keep the renderer in a
+  // transition state until that width has settled so the 3D scene is rebuilt
+  // once at the final size instead of once per ResizeObserver tick.
+  const [studioTransitioning, setStudioTransitioning] = useState(false);
+  const studioTransitionTimer = useRef<number | undefined>(undefined);
   const [press, setPress] = useState<PressTab | null>(null);
   const [size, setSize] = useState<Size | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -64,6 +71,24 @@ export function NocturneShell({header, children}: ShellProps) {
   const selectionRef = useRef<HTMLCanvasElement>(null);
   const machineRef = useRef<HTMLCanvasElement>(null);
   const controller = useRef<StageController | null>(null);
+
+  const setStudioOpenWithTransition = (open: boolean) => {
+    setStudioTransitioning(true);
+    if (studioTransitionTimer.current !== undefined) {
+      window.clearTimeout(studioTransitionTimer.current);
+    }
+    setStudioOpen(open);
+    studioTransitionTimer.current = window.setTimeout(() => {
+      studioTransitionTimer.current = undefined;
+      setStudioTransitioning(false);
+    }, 260);
+  };
+
+  useEffect(() => () => {
+    if (studioTransitionTimer.current !== undefined) {
+      window.clearTimeout(studioTransitionTimer.current);
+    }
+  }, []);
 
   // Without a usable GPU the `auto` quality draws no WebGL layers (see lighting/gpu.ts).
   const gpu = detectGpu();
@@ -79,15 +104,42 @@ export function NocturneShell({header, children}: ShellProps) {
     if (!stage) {
       return;
     }
+    let frame = 0;
+    let pending: Size | null = null;
+    let measured: Size | null = null;
     const measure = () => {
       const width = stage.clientWidth;
       const height = stage.clientHeight;
-      setSize((previous) => (previous?.width === width && previous.height === height ? previous : {width, height}));
+      if (measured?.width === width && measured.height === height) {
+        return;
+      }
+      pending = {width, height};
+      if (frame) {
+        return;
+      }
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (!pending) {
+          return;
+        }
+        const next = pending;
+        pending = null;
+        if (measured?.width === next.width && measured.height === next.height) {
+          return;
+        }
+        measured = next;
+        setSize((previous) => (previous?.width === next.width && previous.height === next.height ? previous : next));
+      });
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(stage);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -112,9 +164,9 @@ export function NocturneShell({header, children}: ShellProps) {
 
   useEffect(() => {
     if (layout) {
-      controller.current?.update(settings, layout, mode);
+      controller.current?.update(settings, layout, mode, studioTransitioning);
     }
-  }, [settings, layout, mode]);
+  }, [settings, layout, mode, studioTransitioning]);
 
   // Commands from the View menu and keyboard shortcuts (see app/commands.ts).
   useEffect(() => {
@@ -128,7 +180,7 @@ export function NocturneShell({header, children}: ShellProps) {
       } else if (name === 'sound') {
         updateSettings({typewriter: {sound: !current.typewriter.sound}});
       } else if (name === 'studio') {
-        setStudioOpen((open) => !open);
+        setStudioOpenWithTransition(!studioOpenRef.current);
       } else if (name === 'print' || name === 'archive') {
         setPress((open) => (open ? null : name));
       }
@@ -228,7 +280,7 @@ export function NocturneShell({header, children}: ShellProps) {
             settings={settings}
             studioOpen={studioOpen}
             pressOpen={press !== null}
-            onStudio={() => setStudioOpen(!studioOpen)}
+            onStudio={() => setStudioOpenWithTransition(!studioOpen)}
             onPress={() => (press ? closePress() : setPress('print'))}
           />
         ) : null}
@@ -237,7 +289,7 @@ export function NocturneShell({header, children}: ShellProps) {
         <Studio
           settings={settings}
           drawing={drawing}
-          onClose={() => setStudioOpen(false)}
+          onClose={() => setStudioOpenWithTransition(false)}
           onPress={() => setPress('print')}
         />
       ) : null}

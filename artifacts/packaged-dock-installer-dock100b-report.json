@@ -1,0 +1,8 @@
+{
+  "batch": "installer-dock100b",
+  "scale": 1,
+  "ok": false,
+  "checks": [],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-dock-installer-dock100b-nHOgJu",
+  "error": "AssertionError [ERR_ASSERTION]: packaged renderer did not start\n    at file:///C:/%E9%A1%B9%E7%9B%AE%E7%BB%83%E4%B9%A0/doc/Happy%20Friday%20Lite%20%E8%84%91%E6%B4%9E/Friday-3.0.6-preview.1-source/scripts/probe-packaged-dock.mjs:57:10"
+}

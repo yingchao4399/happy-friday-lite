@@ -1,11 +1,12 @@
 <template>
   <div class="scoped-history" @keydown.esc="open = false">
-    <button ref="triggerRef" class="scoped-history-toggle" type="button" :title="title || t('friday.historyTitle')" :aria-expanded="open" @click="toggle">
+    <button ref="triggerRef" class="scoped-history-toggle" type="button" :title="title || t('friday.historyTitle')" :aria-label="title || t('friday.historyTitle')" aria-haspopup="dialog" :aria-expanded="open" @click="toggle">
       <History :size="16" :stroke-width="2" />
       <span v-if="label">{{ label }}</span>
     </button>
-    <Teleport to="body">
-    <div v-if="open" ref="panelRef" class="scoped-history-panel" :style="panelStyle" :aria-label="panelTitle" @keydown.esc.stop="open = false">
+    <!-- body-level teleport escapes Office/Word/Excel editor clipping contexts -->
+    <Teleport to="#friday-overlay-root">
+    <div v-if="open" ref="panelRef" class="scoped-history-panel" role="dialog" :class="{ 'scoped-history-panel--side': placement === 'side' }" :style="panelStyle" :aria-label="panelTitle" :aria-busy="loading || !!selectingId" @keydown="handlePanelKeydown">
       <div class="scoped-history-heading">
         <strong>{{ panelTitle }}</strong>
         <div class="scoped-history-heading-actions">
@@ -55,14 +56,16 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Archive, Check, History, MoreHorizontal, Pencil, Pin, Plus, RotateCcw, Search, Trash2, X } from 'lucide-vue-next'
-import { electronService } from '@/services/electron'
+import { conversationStore } from '@/services/conversationStore'
+import { calculateHistoryPanelPosition } from './history-position'
 
 const props = defineProps({
   scope: { type: String, default: 'friday' },
   scopeKey: { type: String, default: '' },
   currentSessionId: { type: String, default: '' },
   label: { type: String, default: '' },
-  title: { type: String, default: '' }
+  title: { type: String, default: '' },
+  placement: { type: String, default: 'anchor' }
 })
 const emit = defineEmits(['select', 'create', 'removed'])
 const { t } = useI18n()
@@ -80,7 +83,19 @@ const error = ref('')
 const menuId = ref('')
 const editingId = ref('')
 const editingTitle = ref('')
+const selectingId = ref('')
 let loadRevision = 0
+let selectionRevision = 0
+let positionFrame = 0
+
+function ensureOverlayRoot() {
+  if (typeof document === 'undefined') return
+  if (document.getElementById('friday-overlay-root')) return
+  const root = document.createElement('div')
+  root.id = 'friday-overlay-root'
+  document.body.appendChild(root)
+}
+ensureOverlayRoot()
 
 const filteredSessions = computed(() => {
   const keyword = query.value.trim().toLocaleLowerCase()
@@ -92,9 +107,17 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const result = await electronService.invoke('get_sessions', { scope: props.scope, scopeKey: props.scopeKey || null, view: view.value })
-    if (!Array.isArray(result)) throw new Error(t('friday.scopedHistory.loadFailed'))
-    if (revision === loadRevision) sessions.value = result
+    const result = await conversationStore.list({ scope: props.scope, scopeKey: props.scopeKey || null }, { view: view.value })
+    // Main-process builds before Preview.22 returned the list directly while
+    // a few Office overlay runtimes exposed the same payload as
+    // `{ sessions, hasMore }`. Accept both shapes at this boundary so the
+    // history control cannot degrade into an empty/error state merely because
+    // the overlay and main renderer are on different build generations.
+    const nextSessions = Array.isArray(result) ? result : (Array.isArray(result?.sessions) ? result.sessions : null)
+    if (!nextSessions) throw new Error(t('friday.scopedHistory.loadFailed'))
+    if (revision === loadRevision) sessions.value = nextSessions
+    await nextTick()
+    positionPanel()
   } catch (err) {
     if (revision === loadRevision) error.value = err?.message || t('friday.scopedHistory.loadFailed')
   } finally {
@@ -105,16 +128,38 @@ function positionPanel() {
   if (!open.value) return
   const rect = triggerRef.value?.getBoundingClientRect()
   if (!rect) return
-  const width = Math.min(330, window.innerWidth - 24)
-  const height = Math.min(440, window.innerHeight - 24)
-  const left = Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12))
-  const below = window.innerHeight - rect.bottom >= Math.min(260, height)
-  const top = below ? rect.bottom + 6 : Math.max(12, rect.top - height - 6)
-  panelStyle.value = { left: `${left}px`, top: `${top}px`, maxHeight: `${Math.max(80, window.innerHeight - top - 12)}px` }
+  const maxHeight = Math.min(440, window.innerHeight - 24)
+  if (props.placement === 'side') {
+    const sideWidth = Math.min(380, window.innerWidth - 32)
+    const margin = 16
+    panelStyle.value = { left: `${Math.max(16, window.innerWidth - sideWidth - margin)}px`, top: `${margin}px`, maxHeight: `${Math.max(120, window.innerHeight - margin * 2)}px` }
+    return
+  }
+  const measuredHeight = panelRef.value?.getBoundingClientRect?.().height || maxHeight
+  const placement = calculateHistoryPanelPosition({ viewportWidth: window.innerWidth, viewportHeight: window.innerHeight, triggerRect: rect, panelHeight: measuredHeight })
+  const panelWidth = Math.min(330, Math.max(80, window.innerWidth - 24))
+  const safeLeft = Math.max(12, Math.min(rect.left, Math.max(12, window.innerWidth - panelWidth - 12)))
+  const belowTop = rect.bottom + 6
+  const aboveTop = rect.top - measuredHeight - 6
+  const safeTop = belowTop + measuredHeight <= window.innerHeight - 12
+    ? Math.max(12, belowTop)
+    : Math.max(12, Math.min(aboveTop, window.innerHeight - measuredHeight - 12))
+  panelStyle.value = { left: `${safeLeft}px`, top: `${safeTop}px`, maxHeight: `${Math.max(80, window.innerHeight - safeTop - 12)}px` }
+  // The first pass may use the fallback height before the list has painted.
+  // Re-measure once after paint so a tall fallback cannot push the panel away
+  // from its trigger at high DPI or after a WebContentsView resize.
+  if (positionFrame === 0 && panelRef.value) {
+    positionFrame = 1
+    positionFrame = window.requestAnimationFrame(() => {
+      positionFrame = -1
+      if (open.value) positionPanel()
+    })
+  }
 }
 async function toggle() {
   open.value = !open.value
   if (open.value) {
+    positionFrame = 0
     await nextTick()
     positionPanel()
     load()
@@ -125,22 +170,53 @@ function changeView(nextView) {
   menuId.value = ''
   load()
 }
-function create() {
-  open.value = false
-  emit('create')
-}
-async function select(session) {
-  if (view.value !== 'active' || loading.value) return
+async function create() {
+  if (loading.value) return
   loading.value = true
   error.value = ''
   try {
-    const messages = await electronService.invoke('get_session_messages', { sessionId: session.id, scope: props.scope, scopeKey: props.scopeKey || null })
-    if (!Array.isArray(messages)) throw new Error(t('friday.scopedHistory.loadFailed'))
-    emit('select', { session, messages })
+    const session = await conversationStore.create({ scope: props.scope, scopeKey: props.scopeKey || null, title: t('friday.newConversation'), mode: 'chat' })
+    if (!session?.id) throw new Error(t('friday.scopedHistory.actionFailed'))
+    open.value = false
+    emit('create', { session, messages: [] })
+  } catch (err) {
+    error.value = err?.message || t('friday.scopedHistory.actionFailed')
+  } finally {
+    loading.value = false
+  }
+}
+async function select(session) {
+  if (view.value !== 'active' || loading.value) return
+  const revision = ++selectionRevision
+  selectingId.value = session.id
+  error.value = ''
+  try {
+    const loaded = await conversationStore.load(session.id, { scope: props.scope, scopeKey: props.scopeKey || null })
+    if (loaded.stale || revision !== selectionRevision || !open.value) return
+    if (!Array.isArray(loaded.messages)) throw new Error(t('friday.scopedHistory.loadFailed'))
+    emit('select', { session: loaded.session || session, messages: loaded.messages })
     open.value = false
   } catch (err) {
-    error.value = err?.message || t('friday.scopedHistory.loadFailed')
-  } finally { loading.value = false }
+    if (revision === selectionRevision) error.value = err?.message || t('friday.scopedHistory.loadFailed')
+  } finally { if (revision === selectionRevision) selectingId.value = '' }
+}
+function invalidateSelection() {
+  selectionRevision += 1
+  selectingId.value = ''
+  conversationStore.invalidateSelection({ scope: props.scope, scopeKey: props.scopeKey || null })
+}
+function handlePanelKeydown(event) {
+  if (event.key === 'Escape') {
+    event.stopPropagation()
+    open.value = false
+    return
+  }
+  if (event.key !== 'Tab') return
+  const controls = [...panelRef.value.querySelectorAll('button:not(:disabled), input:not(:disabled), [tabindex="0"]')].filter(element => element.getClientRects().length)
+  const first = controls[0]
+  const last = controls.at(-1)
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
 }
 function beginRename(session) {
   editingId.value = session.id
@@ -150,7 +226,8 @@ function beginRename(session) {
 async function mutate(channel, session, extra = {}) {
   error.value = ''
   try {
-    const ok = await electronService.invoke(channel, { sessionId: session.id, scope: props.scope, scopeKey: props.scopeKey || null, ...extra })
+    const methods = { update_session_title: () => conversationStore.rename(session.id, extra.title, { scope: props.scope, scopeKey: props.scopeKey || null }), set_session_pinned: () => conversationStore.pin(session.id, extra.pinned, { scope: props.scope, scopeKey: props.scopeKey || null }), set_session_archived: () => conversationStore.archive(session.id, extra.archived, { scope: props.scope, scopeKey: props.scopeKey || null }), trash_session: () => conversationStore.delete(session.id, { scope: props.scope, scopeKey: props.scopeKey || null }), restore_session: () => conversationStore.restore(session.id, { scope: props.scope, scopeKey: props.scopeKey || null }) }
+    const ok = await (methods[channel] ? methods[channel]() : Promise.resolve(false))
     if (!ok) throw new Error(t('friday.scopedHistory.actionFailed'))
     menuId.value = ''
     await load()
@@ -179,17 +256,37 @@ function format(value) {
 function closeOnOutside(event) {
   if (open.value && !triggerRef.value?.contains(event.target) && !panelRef.value?.contains(event.target)) open.value = false
 }
-watch(() => [props.scope, props.scopeKey], () => {
+watch(() => [props.scope, props.scopeKey, props.placement], () => {
+  invalidateSelection()
   query.value = ''
   view.value = 'active'
   if (open.value) load()
 })
+watch(open, async visible => {
+  if (visible) {
+    await nextTick()
+    panelRef.value?.querySelector('input[type="search"]')?.focus()
+  } else {
+    const restoreFocus = panelRef.value?.contains(document.activeElement)
+    invalidateSelection()
+    loadRevision += 1
+    loading.value = false
+    if (restoreFocus) { await nextTick(); triggerRef.value?.focus() }
+  }
+})
+watch([query, sessions], async () => {
+  if (!open.value) return
+  await nextTick()
+  positionPanel()
+})
 onMounted(() => {
+  ensureOverlayRoot()
   document.addEventListener('pointerdown', closeOnOutside)
   window.addEventListener('resize', positionPanel)
   window.addEventListener('scroll', positionPanel, true)
 })
 onUnmounted(() => {
+  invalidateSelection()
   document.removeEventListener('pointerdown', closeOnOutside)
   window.removeEventListener('resize', positionPanel)
   window.removeEventListener('scroll', positionPanel, true)
@@ -200,7 +297,8 @@ onUnmounted(() => {
 .scoped-history { position: relative; display: inline-flex; }
 .scoped-history-toggle { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; padding: 6px 8px; border-radius: 8px; }
 .scoped-history-toggle:hover { background: var(--bg-hover); color: var(--text-primary); }
-.scoped-history-panel { position: fixed; z-index: 10020; width: min(330px, calc(100vw - 24px)); overflow: auto; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+.scoped-history-panel { position: fixed; z-index: 2147482500; width: min(330px, calc(100vw - 24px)); overflow: auto; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+.scoped-history-panel--side { width: min(380px, calc(100vw - 32px)); max-height: calc(100vh - 32px); border-radius: 14px; box-shadow: 0 18px 48px rgba(0,0,0,.22); }
 .scoped-history-heading, .scoped-history-heading-actions { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .scoped-history-heading { padding: 4px 4px 8px; color: var(--text-primary); font-size: 13px; }
 .scoped-history-heading button, .scoped-history-action { display: grid; place-items: center; width: 25px; height: 25px; flex: none; border: 0; border-radius: 5px; background: transparent; color: var(--text-secondary); cursor: pointer; }

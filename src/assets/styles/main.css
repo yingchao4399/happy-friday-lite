@@ -51,3 +51,13 @@ button:focus-visible,
   -webkit-app-region: no-drag;
   app-region: no-drag;
 }
+#friday-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  isolation: isolate;
+}
+#friday-overlay-root > * { pointer-events: auto; }

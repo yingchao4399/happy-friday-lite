@@ -718,13 +718,18 @@
             </div>
             <span class="sidebar-title">{{ t('note.aiSidebar.assistant') }}</span>
           </div>
-          <ScopedHistoryButton scope="note-agent" :scope-key="noteHistoryScopeKey" :current-session-id="currentSessionId" @select="selectNoteHistory" @create="startNewNoteChat" @removed="handleNoteHistoryRemoved" />
-          <button class="sidebar-close-btn" @click="closeAISidebar">
+          <div class="sidebar-header-actions">
+            <ScopedHistoryButton scope="note-agent" :scope-key="noteHistoryScopeKey" :current-session-id="currentSessionId" @select="selectNoteHistory" @create="startNewNoteChat" @removed="handleNoteHistoryRemoved" />
+            <NewConversationButton class="sidebar-new-chat-btn" scope="note-agent" :scope-key="noteHistoryScopeKey" @create="startNewNoteChat">
+              <Plus :size="16" stroke-width="2" />
+            </NewConversationButton>
+            <button class="sidebar-close-btn" type="button" :title="t('common.agentDock.close')" :aria-label="t('common.agentDock.close')" @click="closeAISidebar">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
 
         <div class="sidebar-messages" ref="sidebarMessagesRef" @scroll="checkSidebarScrollPosition">
@@ -872,7 +877,7 @@ import {
   AlignCenter, AlignLeft, AlignRight, Bold, Code2, Eraser, Heading,
   Highlighter, Image as ToolbarImage, Italic, Link2, List, ListChecks, ListOrdered,
   Columns3, Combine, Minus, Palette, PanelLeft, PanelTop, Quote, Redo2, Rows3, Sigma, Split,
-  PaintRoller, Search, X,
+  PaintRoller, Plus, Search, X,
   Repeat, Strikethrough, Table2, Trash2, Underline as ToolbarUnderline, Undo2,
 } from 'lucide-vue-next';
 import UserMessage from '@/components/chat/UserMessage.vue';
@@ -881,6 +886,7 @@ import StreamingAssistantMessage from '@/components/chat/StreamingAssistantMessa
 import AgentMessageBlock from '@/views/friday/components/AgentMessageBlock.vue';
 import ChatInputBox from '@/components/chat/ChatInputBox.vue';
 import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue';
+import NewConversationButton from '@/components/chat/NewConversationButton.vue';
 import FridayConfirmDialog from '@/components/ui/FridayConfirmDialog.vue';
 import { electronService } from '@/services/electron';
 import { getChatSession, setChatSession } from '@/utils/chatSessionCache';
@@ -1031,10 +1037,10 @@ function stopNoteStreamForHistory() {
   agentSegments.value = [];
 }
 
-function startNewNoteChat() {
+function startNewNoteChat(payload = null) {
   stopNoteStreamForHistory();
-  currentSessionId.value = '';
-  historyModelId.value = '';
+  currentSessionId.value = payload?.session?.id || '';
+  historyModelId.value = payload?.session?.modelId || '';
   chatMessages.value = [];
   noteReferences.value = [];
   chatInputText.value = '';
@@ -6428,6 +6434,39 @@ const fixEmptyTableCells = (html) => {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.sidebar-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.sidebar-header-actions :deep(.scoped-history-toggle) {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  justify-content: center;
+}
+
+.sidebar-new-chat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.sidebar-new-chat-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .sidebar-avatar {

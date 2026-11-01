@@ -6,11 +6,9 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { setDataDir } from '../src-electron/config.js'
 import { NOTE_ASSET_SCHEME, importNoteResource, resolveNoteAssetPath } from '../src-electron/note-resources.js'
-
-protocol.registerSchemesAsPrivileged([{
-  scheme: NOTE_ASSET_SCHEME,
-  privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true },
-}])
+// 与实际主进程/Office 宿主采用同一注册入口，验证导入顺序不会遗漏正文图片协议。
+import '../src-electron/app-protocol-privileges.js'
+import '../src-electron/office/office-host.js'
 
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-asset-probe-'))
 app.setPath('userData', path.join(temp, 'profile'))

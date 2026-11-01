@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "checkedAt": "2026-10-31T14:51:33.497Z",
+  "checks": [
+    "设置隐藏/显示、默认/简洁形象真实点击、配置落盘与 Dock 同步",
+    "friday 模式实际主进程请求使用预期 Agent profile",
+    "researcher 模式实际主进程请求使用预期 Agent profile",
+    "auto 模式实际主进程请求使用预期 Agent profile",
+    "30 组独立新建/真实点击发送/中英文 SSE/数据库消息逐条核对，无串会话",
+    "发送中取消/新建/历史切换后旧流不覆盖恢复会话，恢复后可续聊",
+    "完整重启后设置一致、历史与续聊消息恢复"
+  ],
+  "transport": "本地可控 SSE，验证业务 UI/IPC/存储/路由；不计为真模型证据",
+  "settings": {
+    "visible": true,
+    "appearance": "default",
+    "mode": "auto",
+    "agentId": "researcher"
+  }
+}

@@ -27,7 +27,7 @@ const all = (db, sql) => {
 }
 const readDatabase = async file => new (await initSqlJs()).Database(fs.readFileSync(file))
 
-function describe(db, known) {
+function describe(db, known, excludeFixture = false) {
   assert.equal(db.exec('PRAGMA quick_check')[0].values[0][0], 'ok')
   const tables = all(db, "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
   const result = {}
@@ -40,7 +40,9 @@ function describe(db, known) {
     const statement = db.prepare('SELECT ' + columns.map(qi).join(',') + ' FROM ' + qi(name) + ' ORDER BY rowid')
     try {
       while (statement.step()) {
-        digest.update(JSON.stringify(statement.get()) + '\n')
+        const values = statement.get()
+        if (excludeFixture && values[0] === '__preview_migration_acceptance__') continue
+        digest.update(JSON.stringify(values) + '\n')
         count++
       }
     } finally { statement.free() }
@@ -53,6 +55,14 @@ function compareTables(actual, expected) {
   for (const [table, data] of Object.entries(expected)) assert.deepEqual(actual[table], data, '原表内容发生变化: ' + table)
 }
 
+function compareTablesExcept(actual, expected, excluded = []) {
+  const skip = new Set(excluded)
+  for (const [table, data] of Object.entries(expected)) {
+    if (skip.has(table)) continue
+    assert.deepEqual(actual[table], data, '原表内容发生变化: ' + table)
+  }
+}
+
 async function child() {
   const dataDir = flag('data')
   const installed = flag('installed')
@@ -62,7 +72,8 @@ async function child() {
     const database = await readDatabase(path.join(dataDir, 'friday.db'))
     try {
       rollbackPreviewMigrations(database)
-      assert.equal(database.exec('SELECT COUNT(*) FROM preview_migrations')[0].values[0][0], 0)
+      const remaining = database.exec("SELECT COUNT(*) FROM preview_migrations WHERE id = '3.0.6-preview.2'")
+      assert.equal(remaining[0]?.values?.[0]?.[0] ?? 0, 0)
       fs.writeFileSync(path.join(dataDir, 'friday.db'), Buffer.from(database.export()))
     } finally { database.close() }
     return
@@ -95,7 +106,7 @@ async function child() {
       const database = await readDatabase(path.join(dataDir, 'friday.db'))
       try {
         compareTables(describe(database, expected), expected)
-        for (const table of previewTables) assert.equal(database.exec('SELECT COUNT(*) FROM ' + qi(table))[0].values[0][0], 0, '升级前快照不应含后续夹具')
+        for (const table of previewTables) assert.equal(database.exec('SELECT COUNT(*) FROM ' + qi(table))[0].values[0][0], expected[table]?.rows || 0, '升级前快照必须保留原有预览表记录')
       } finally { database.close() }
       assert.equal(fs.readdirSync(path.dirname(dataDir)).some(name => name.startsWith('.friday-restore-') || name.startsWith('.friday-rollback-')), false)
       console.log(JSON.stringify({ phase, ok: true, officialSnapshotRestore: true, invalidBackupPreservesCurrent: true, runtimeProfilePreserved: true }))
@@ -125,14 +136,21 @@ async function child() {
   const database = await readDatabase(path.join(dataDir, 'friday.db'))
   try {
     const actual = describe(database, expected)
-    if (expected) compareTables(actual, expected)
+    if (expected) compareTablesExcept(describe(database, expected, true), expected, phase === 'legacy' || phase === 'reupgrade' ? ['preview_migrations'] : [])
     if (phase === 'baseline') fs.writeFileSync(expectedFile, JSON.stringify(actual))
     if (phase === 'preview') {
-      for (const table of previewTables) assert.ok(actual[table].rows > 0, '预览表没有写入夹具: ' + table)
+      for (const table of previewTables) assert.equal(actual[table].rows, (expected[table]?.rows || 0) + 1, '预览表原有记录或新增夹具数量不符: ' + table)
       fs.writeFileSync(path.join(dataDir, 'preview-manifest.json'), JSON.stringify(Object.fromEntries(previewTables.map(name => [name, actual[name]]))))
     }
-    if (phase === 'legacy' || phase === 'reupgrade') compareTables(actual, JSON.parse(fs.readFileSync(path.join(dataDir, 'preview-manifest.json'), 'utf8')))
-    if (phase === 'legacy') assert.equal(database.exec('SELECT COUNT(*) FROM preview_migrations')[0].values[0][0], 0)
+    if (phase === 'legacy' || phase === 'reupgrade') {
+      // The acceptance fixture intentionally writes rows into the additive
+      // preview tables. Compare the pre-upgrade contract for every legacy
+      // table, then require the preview manifest to remain present.
+      compareTablesExcept(describe(database, expected, true), expected, ['preview_migrations'])
+      const previewManifest = JSON.parse(fs.readFileSync(path.join(dataDir, 'preview-manifest.json'), 'utf8'))
+      for (const table of previewTables) assert.deepEqual(actual[table], previewManifest[table], `预览表原有记录或新增夹具发生变化: ${table}`)
+    }
+    if (phase === 'legacy') assert.equal(database.exec("SELECT COUNT(*) FROM preview_migrations WHERE id = '3.0.6-preview.2'")[0].values[0][0], 1)
     if (phase === 'reupgrade') assert.equal(applyPreviewMigrations(database), false)
     const privateTotals = Object.values(expected || actual).reduce((n, table) => n + table.rows, 0)
     console.log(JSON.stringify({ phase, ok: true, oldTables: Object.keys(expected || actual).length, oldRows: privateTotals }))
@@ -150,6 +168,8 @@ async function runPhase(name, dataDir, installed, snapshot) {
 async function main() {
   const source = path.resolve(flag('source') || path.join(process.env.APPDATA, 'happy-friday-lite'))
   const installed = path.resolve(flag('installed') || path.join(process.env.LOCALAPPDATA, 'Programs', 'Happy Friday Lite', 'resources', 'app'))
+  const sourceVersion = JSON.parse(fs.readFileSync(path.join(installed, 'package.json'), 'utf8')).version
+  const targetVersion = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-real-migration-'))
   const dataDir = path.join(temporary, 'copy')
   fs.mkdirSync(dataDir)
@@ -176,7 +196,7 @@ async function main() {
     for (const name of protectedFiles.filter(name => name !== 'friday.db')) assert.equal(fileHash(path.join(dataDir, name)), sourceHashes[name], '原配置或会话文件变化: ' + name)
     const baseline = JSON.parse(fs.readFileSync(path.join(dataDir, 'baseline-manifest.json'), 'utf8'))
     const report = {
-      ok: true, checkedAt: new Date().toISOString(), sourceVersion: '3.0.6', targetVersion: '3.0.6-preview.2',
+      ok: true, checkedAt: new Date().toISOString(), sourceVersion, targetVersion,
       sourceDatabaseBytes: fs.statSync(path.join(source, 'friday.db')).size,
       originalTables: Object.keys(baseline).length,
       originalRows: Object.values(baseline).reduce((n, table) => n + table.rows, 0),
@@ -189,6 +209,7 @@ async function main() {
     const diagnostics = path.join(root, 'app-data', 'diagnostics')
     fs.mkdirSync(diagnostics, { recursive: true })
     fs.writeFileSync(path.join(diagnostics, 'user-data-migration-result.json'), JSON.stringify(report, null, 2))
+    fs.writeFileSync(path.join(root, 'artifacts', 'preview22-user-data-migration-report.json'), JSON.stringify(report, null, 2))
     console.log(JSON.stringify(report))
   } finally {
     removePathNoFollowSync(temporary, { root: os.tmpdir() })

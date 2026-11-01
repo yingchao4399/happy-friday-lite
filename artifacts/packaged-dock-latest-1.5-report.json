@@ -1,0 +1,35 @@
+{
+  "batch": "latest-1.5",
+  "scale": 1.5,
+  "ok": true,
+  "checks": [
+    "安装版 Dock 展开、历史、新建、输入框和边界",
+    "安装版历史弹窗加载、可见且锚定在历史按钮附近",
+    "安装版 Dock 中文输入后发送按钮启用",
+    "30 次中英文 Chromium 输入无丢字、IME 组合提交、Esc 焦点恢复"
+  ],
+  "profile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-packaged-dock-latest-1.5-0jqflE",
+  "viewport": {
+    "width": 1204,
+    "height": 802
+  },
+  "historyBounds": {
+    "viewport": {
+      "width": 1204,
+      "height": 802
+    },
+    "trigger": {
+      "left": 1048.3333740234375,
+      "right": 1125.3333740234375,
+      "top": 511.41668701171875,
+      "bottom": 535.4166870117188
+    },
+    "panel": {
+      "left": 862,
+      "right": 1192,
+      "top": 541.4166870117188,
+      "bottom": 710.0833587646484
+    },
+    "text": "会话历史最近已归档回收站新建会话10/31 22:47 · friday"
+  }
+}

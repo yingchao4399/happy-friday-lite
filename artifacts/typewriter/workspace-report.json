@@ -1,137 +1,152 @@
 {
   "checks": [
     {
-      "name": "受管图片在编辑页与预览页加载，并保存到原笔记"
-    },
-    {
-      "name": "新建真实笔记、正文输入、自动保存、击键声与光标联动",
-      "feedback": {
-        "keys": 5,
-        "audio": 5,
-        "energy": 0.7434656023979187,
-        "state": "running",
-        "cols": [
-          0,
-          0,
-          1,
-          2,
-          2,
-          3,
-          3,
-          4,
-          4,
-          33,
-          33,
-          0,
-          0,
-          0,
-          0,
-          0
+      "name": "图片位于纸张光照合成层下且灯束实际覆盖图片",
+      "illumination": {
+        "center": 0.6885072063024605,
+        "corners": [
+          0.5641905926690494,
+          0.6977256716433871
         ],
-        "motion": "moving"
+        "source": "desk-lamp"
       }
     },
     {
-      "name": "原版回形针：长笔记显示、真实指针拖动滚动、四种金属材质"
-    },
-    {
-      "name": "选取原有笔记、更新同一 ID、保留图表、无多余副本",
-      "id": "a8771668-15fd-445a-9c46-6c87e1e3ef9c"
-    },
-    {
-      "name": "原版二级菜单、中英切换、字体/纸张/羽毛笔设置、外壳保持同实例"
-    },
-    {
-      "name": "三款新增本地字体真实加载切换、中文离线字形、墨色及深浅纸张、舞台与编辑器保持实例"
-    },
-    {
-      "name": "原版 Press 打印动画、六种丝带、真实 Archive 保存/重命名/删除、PNG 文件签名"
-    },
-    {
-      "name": "独立 PowerShell 插件、真实命令计算回显、切换不重建外壳"
-    },
-    {
-      "name": "终端回形针拖动、终端退出后重新启动"
-    },
-    {
-      "name": "切换笔记后受管图片仍显示"
-    },
-    {
-      "name": "从终端切回笔记、内容恢复、PTY 释放"
-    },
-    {
-      "name": "完整机身实际绘制",
-      "render": {
-        "render": "low",
-        "machine": "drawn",
-        "motion": "still",
-        "keys": "7"
-      }
-    },
-    {
-      "name": "中文空格路径 Markdown 直接导入笔记、不发送 Shell、不产生 PTY"
-    },
-    {
-      "name": "真实 RouterView/KeepAlive 路由切换、返回后重新读取同 ID 笔记"
-    },
-    {
-      "name": "Focus/Effects 切换保持编辑器实例和内容"
-    },
-    {
-      "name": "数据库写入失败保留输入、Ctrl+S 重试保存同一笔记"
-    },
-    {
-      "name": "十万字长文输入与页面返回 P95 达标",
-      "performance": {
-        "firstOpenMs": 910,
-        "inputP50Ms": 11.200000017881393,
-        "inputP95Ms": 58.5,
-        "inputEventP50Ms": 4.4000000059604645,
-        "inputEventP95Ms": 5.5,
-        "inputSamples": 80,
-        "returnP95Ms": 193,
-        "returnSamples": 20
+      "name": "用户实图在正文锚点解码、纸面融合、预览一致且元数据持久化",
+      "image": {
+        "naturalWidth": 1,
+        "naturalHeight": 1,
+        "renderedWidth": 320,
+        "renderedHeight": 320,
+        "insidePaper": true,
+        "blend": "normal",
+        "alt": "森林实图验收",
+        "anchor": "image_0_27"
       }
     }
   ],
   "platform": "win32",
   "electron": "42.2.0",
   "performance": {
-    "firstOpenMs": 910,
-    "inputP50Ms": 11.200000017881393,
-    "inputP95Ms": 58.5,
-    "inputEventP50Ms": 4.4000000059604645,
-    "inputEventP95Ms": 5.5,
-    "inputSamples": 80,
-    "returnP95Ms": 193,
-    "returnSamples": 20
+    "firstOpenMs": 783.0999999642372,
+    "longTasks": [],
+    "milestones": {
+      "workspace": 632.3000000119209
+    },
+    "createNoteMs": 18.599999964237213,
+    "resources": [],
+    "focusToggleFeedbackMs": 12.899999976158142
   },
-  "feedback": {
-    "keys": 5,
-    "audio": 5,
-    "energy": 0.7434656023979187,
-    "state": "running",
-    "cols": [
-      0,
-      0,
-      1,
-      2,
-      2,
-      3,
-      3,
-      4,
-      4,
-      33,
-      33,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    "motion": "moving"
-  },
-  "ok": true,
+  "ok": false,
+  "phase": "bootstrap",
+  "error": "Error: 验收超时：Math.abs(parseFloat(document.querySelectorAll('.tn-inline-image-node img')[0].style.width)-384)<1\n    at until (file:///C:/%E9%A1%B9%E7%9B%AE%E7%BB%83%E4%B9%A0/doc/Happy%20Friday%20Lite%20%E8%84%91%E6%B4%9E/Friday-3.0.6-preview.1-source/scripts/probe-typewriter-workspace.mjs:45:9)\n    at async dragImageResize (file:///C:/%E9%A1%B9%E7%9B%AE%E7%BB%83%E4%B9%A0/doc/Happy%20Friday%20Lite%20%E8%84%91%E6%B4%9E/Friday-3.0.6-preview.1-source/scripts/probe-typewriter-workspace.mjs:205:7)\n    at async file:///C:/%E9%A1%B9%E7%9B%AE%E7%BB%83%E4%B9%A0/doc/Happy%20Friday%20Lite%20%E8%84%91%E6%B4%9E/Friday-3.0.6-preview.1-source/scripts/probe-typewriter-workspace.mjs:208:24",
+  "dom": [
+    {
+      "class": "tn-stage",
+      "rect": {
+        "x": 0,
+        "y": 34.79999923706055,
+        "width": 1150.4000244140625,
+        "height": 814.7999877929688,
+        "top": 34.79999923706055,
+        "right": 1150.4000244140625,
+        "bottom": 849.5999870300293,
+        "left": 0
+      },
+      "hidden": false,
+      "style": null,
+      "font": "16px \"EB Garamond\", \"Iowan Old Style\", \"Palatino Linotype\", Palatino, Georgia, serif",
+      "color": "rgb(244, 236, 219)",
+      "display": "block",
+      "dataset": {
+        "render": "low",
+        "motion": "still",
+        "machine": "drawn",
+        "keys": "5"
+      }
+    },
+    {
+      "class": "tn-text",
+      "rect": {
+        "x": 98,
+        "y": 34.79999923706055,
+        "width": 955,
+        "height": 574,
+        "top": 34.79999923706055,
+        "right": 1053,
+        "bottom": 608.7999992370605,
+        "left": 98
+      },
+      "hidden": false,
+      "style": "left: 0px; top: 12px; width: 955px; height: 574px;",
+      "font": "16px \"EB Garamond\", \"Iowan Old Style\", \"Palatino Linotype\", Palatino, Georgia, serif",
+      "color": "rgb(244, 236, 219)",
+      "display": "block",
+      "dataset": {}
+    },
+    {
+      "class": "tn-note-plugin tn-note-ink tn-note-drawn-cursor",
+      "rect": {
+        "x": 98,
+        "y": 34.79999923706055,
+        "width": 955,
+        "height": 574,
+        "top": 34.79999923706055,
+        "right": 1053,
+        "bottom": 608.7999992370605,
+        "left": 98
+      },
+      "hidden": false,
+      "style": "font-family: \"Courier Prime\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace; font-size: 15px; font-weight: 400; line-height: 21px; letter-spacing: 0px; color: rgb(42, 32, 25); tab-size: 4; --tn-cursor-color: #2a2019;",
+      "font": "15px / 21px \"Courier Prime\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace",
+      "color": "rgb(42, 32, 25)",
+      "display": "block",
+      "dataset": {
+        "plugin": "note"
+      }
+    },
+    {
+      "class": "tn-note-input",
+      "rect": {
+        "x": 98,
+        "y": 34.79999923706055,
+        "width": 955,
+        "height": 574,
+        "top": 34.79999923706055,
+        "right": 1053,
+        "bottom": 608.7999992370605,
+        "left": 98
+      },
+      "hidden": false,
+      "style": "font-family: \"Courier Prime\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace; font-size: 15px; font-weight: 400; line-height: 21px; letter-spacing: 0px; color: rgb(42, 32, 25); tab-size: 4;",
+      "font": "15px / 21px \"Courier Prime\", \"Symbols Nerd Font Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Sarasa Mono SC\", \"PingFang SC\", \"Hiragino Sans\", \"Noto Sans Mono CJK SC\", \"Noto Sans CJK SC\", \"Microsoft YaHei\", \"Yu Gothic\", monospace",
+      "color": "rgb(42, 32, 25)",
+      "display": "block",
+      "dataset": {},
+      "value": "type\n中文输入和 Markdown **正文**\n![森林实图验收](friday-asset://note-assets/5dc39a70-3925-4d7f-8a81-7209411064eb/89f384fee16c2998ec3527e0-%E5%9B%BE%E7%89%87%E9%AA%8C%E6%94%B6.png \"width=320;align=center;fit=conta"
+    },
+    {
+      "class": "tn-machine",
+      "rect": {
+        "x": 0,
+        "y": 34.79999923706055,
+        "width": 1150.4000244140625,
+        "height": 814.7999877929688,
+        "top": 34.79999923706055,
+        "right": 1150.4000244140625,
+        "bottom": 849.5999870300293,
+        "left": 0
+      },
+      "hidden": false,
+      "style": null,
+      "font": "16px \"EB Garamond\", \"Iowan Old Style\", \"Palatino Linotype\", Palatino, Georgia, serif",
+      "color": "rgb(244, 236, 219)",
+      "display": "block",
+      "dataset": {
+        "engine": "three.js r160"
+      }
+    }
+  ],
   "errors": [],
-  "generatedAt": "2026-10-29T20:47:48.011Z"
+  "generatedAt": "2026-10-31T22:07:58.081Z"
 }
