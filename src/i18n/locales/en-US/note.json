@@ -365,6 +365,13 @@
     "cancel": "Cancel",
     "captureFailed": "Screenshot failed. Check screen recording permission and try again"
   },
+  "screenshot": {
+    "hint": "Drag to select the screen area to insert. Press Enter to insert, Esc to cancel",
+    "size": "Selected {width} × {height} px",
+    "confirm": "Insert screenshot",
+    "cancel": "Cancel",
+    "captureFailed": "Screenshot failed. Check screen recording permission and try again"
+  },
   "formulaDialog": {
     "insertTitle": "Insert formula",
     "editTitle": "Edit formula",

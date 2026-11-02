@@ -1418,20 +1418,6 @@ let marpUnlisteners = [];
 const noteStore = useNoteStore();
 const backlinks = ref([]);
 
-const loadBacklinks = async () => {
-  if (!props.noteId || !window.electronAPI) { backlinks.value = []; return; }
-  try {
-    const result = await window.electronAPI.invoke('note-links-index', { noteId: props.noteId });
-    const entries = [...new Map((result?.incoming || []).map(link => [link.sourceNoteId, {id:link.sourceNoteId,title:link.title}])).values()];
-    backlinks.value = entries;
-  } catch (error) {
-    console.warn('加载双向链接失败:', error);
-    backlinks.value = [];
-  }
-};
-
-const openBacklink = (link) => emit('open-note', link.id);
-
 const togglePresentation = async () => {
   if (showPresentation.value) {
     showPresentation.value = false;
@@ -5769,42 +5755,6 @@ const fixEmptyTableCells = (html) => {
   border-right-width: 2px;
   border-bottom-right-radius: 3px;
   cursor: nwse-resize;
-}
-
-:deep(.prose-editor video[data-note-video]),
-:deep(.prose-editor audio[data-note-audio]) {
-  display: block;
-  max-width: 100%;
-  width: min(720px, 100%);
-  margin: 0.8em 0;
-  border-radius: 8px;
-  background: #111827;
-}
-
-:deep(.prose-editor .note-attachment),
-:deep(.prose-editor .note-reference-block) {
-  display: block;
-  width: fit-content;
-  max-width: 100%;
-  margin: 0.7em 0;
-  padding: 10px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-secondary);
-}
-
-:deep(.prose-editor .note-attachment a) {
-  color: var(--text-primary);
-  text-decoration: none;
-}
-
-:deep(.prose-editor .note-attachment a::before) {
-  content: '📎 ';
-}
-
-:deep(.prose-editor .note-reference-block) {
-  color: var(--text-secondary);
-  border-left: 3px solid var(--accent-color, #3b82f6);
 }
 :deep(.prose-editor .note-reference-block[data-kind='note']),:deep(.prose-editor .friday-wiki-link){cursor:pointer}
 :deep(.prose-editor .friday-wiki-link){color:var(--accent-color);text-decoration:underline}

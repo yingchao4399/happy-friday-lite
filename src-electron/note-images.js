@@ -2,7 +2,6 @@ import { protocol } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import { getNoteImageDirectory, getNoteImagePath, IMAGE_RELATIVE_PREFIX, setNoteImageDirectory } from './note-image-paths.js'
 
 // 笔记图片文件化存储：
 // 正文只保存相对路径 note-images/<文件名>，图片本体落在数据目录的 note-images/ 下。
@@ -11,6 +10,7 @@ import { getNoteImageDirectory, getNoteImagePath, IMAGE_RELATIVE_PREFIX, setNote
 
 const SCHEME = 'friday-asset'
 const HOST = 'note-image'
+const RELATIVE_PREFIX = 'note-images/'
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024
 // 文件名只允许安全字符，防止通过 URL 穿越目录
 const SAFE_FILE_NAME = /^[A-Za-z0-9._-]+$/
@@ -37,6 +37,8 @@ const EXT_BY_MIME = {
   'image/avif': '.avif'
 }
 
+let imageDir = null
+
 // 必须在 app ready 之前调用：注册特权协议
 export function registerNoteImageScheme() {
   protocol.registerSchemesAsPrivileged([
@@ -55,8 +57,7 @@ export function registerNoteImageScheme() {
 
 // app ready 之后调用：建立图片目录并注册协议处理器
 export function initNoteImages(dataDir) {
-  const imageDir = path.join(dataDir, 'note-images')
-  setNoteImageDirectory(dataDir)
+  imageDir = path.join(dataDir, 'note-images')
   try {
     fs.mkdirSync(imageDir, { recursive: true })
   } catch (e) {
@@ -73,8 +74,7 @@ export function initNoteImages(dataDir) {
       if (!SAFE_FILE_NAME.test(fileName)) {
         return new Response('Forbidden', { status: 403 })
       }
-      const filePath = getNoteImagePath(fileName)
-      if (!filePath) return new Response('Forbidden', { status: 403 })
+      const filePath = path.join(imageDir, fileName)
       if (!fs.existsSync(filePath)) {
         return new Response('Not Found', { status: 404 })
       }
@@ -92,6 +92,12 @@ export function initNoteImages(dataDir) {
   })
 }
 
+// 返回图片文件绝对路径；文件名非法或目录未初始化时返回 null
+export function getNoteImagePath(fileName) {
+  if (!imageDir || !fileName || !SAFE_FILE_NAME.test(fileName)) return null
+  return path.join(imageDir, fileName)
+}
+
 function toBuffer(bytes) {
   if (Buffer.isBuffer(bytes)) return bytes
   if (ArrayBuffer.isView(bytes)) {
@@ -103,7 +109,6 @@ function toBuffer(bytes) {
 
 // 把二进制图片写入图片目录，返回正文使用的相对路径 note-images/<文件名>
 export async function saveNoteImage(bytes, mimeType) {
-  const imageDir = getNoteImageDirectory()
   if (!imageDir) {
     throw new Error('图片目录未初始化')
   }
@@ -124,5 +129,7 @@ export async function saveNoteImage(bytes, mimeType) {
   const ext = EXT_BY_MIME[mime] || '.png'
   const fileName = `${crypto.randomUUID()}${ext}`
   await fs.promises.writeFile(path.join(imageDir, fileName), buffer)
-  return `${IMAGE_RELATIVE_PREFIX}${fileName}`
+  return `${RELATIVE_PREFIX}${fileName}`
 }
+
+export { RELATIVE_PREFIX as IMAGE_RELATIVE_PREFIX }

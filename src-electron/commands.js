@@ -7,8 +7,7 @@ import TurndownService from 'turndown'
 import { CancellationTokens } from './cancellation.js'
 import { loadConfig, saveConfig, getDataDir } from './config.js'
 import * as db from './db.js'
-import { saveNoteImage } from './note-images.js'
-import { getNoteImagePath, IMAGE_RELATIVE_PREFIX } from './note-image-paths.js'
+import { saveNoteImage, getNoteImagePath, IMAGE_RELATIVE_PREFIX } from './note-images.js'
 import { streamChat, streamChatWithRagAgent, generateTitle, streamNoteAI, fimCompletion } from './llm.js'
 import { exportHtmlToPdf, exportMarkdown } from './pdf.js'
 import { runPython, runPythonStreaming, checkPython, getPythonPath } from './python.js'
@@ -824,29 +823,6 @@ export function registerCommands(mainWindow) {
     return db.getNote(args.noteId)
   })
 
-  // 预览版双链面板依赖的关系索引接口，和官方笔记图片接口并存。
-  ipcMain.handle('note-links-index', (_event, args) => db.getNoteLinks(String(args?.noteId || ''), args || {}))
-  ipcMain.handle('note-links-rebuild', () => db.rebuildNoteLinks())
-
-  ipcMain.handle('note-link-upsert', (_event, args) => {
-    const fromNoteId = String(args?.fromNoteId || '')
-    const toNoteId = String(args?.toNoteId || '')
-    if (!fromNoteId || !toNoteId || fromNoteId === toNoteId) throw new Error('笔记链接目标无效')
-    const fromUri = `friday://notes/${encodeURIComponent(fromNoteId)}`
-    const toUri = `friday://notes/${encodeURIComponent(toNoteId)}`
-    const relation = args?.relation || 'note-bidirectional'
-    const first = db.linkResources(fromUri, toUri, relation, args?.evidence || '', 'note-editor')
-    const second = db.linkResources(toUri, fromUri, relation, args?.evidence || '', 'note-editor')
-    return { ok: true, links: [first, second] }
-  })
-
-  ipcMain.handle('note-links-list', (_event, args) => {
-    const noteId = String(args?.noteId || '')
-    if (!noteId) return []
-    const uri = `friday://notes/${encodeURIComponent(noteId)}`
-    return db.getResourceLinks(uri).filter(link => link.relation === 'note-bidirectional')
-  })
-
   // 笔记图片落盘：把粘贴图片的二进制写入 note-images/，正文只保存相对路径
   ipcMain.handle('save_note_image', async (_event, args) => {
     try {
@@ -925,6 +901,153 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('search_notes', (_event, args) => {
     return db.searchNoteSummaries(args.query)
+  })
+
+  // 笔记截图：隐藏本应用窗口，弹出全屏框选层，框选后按原始像素裁剪并插入
+  ipcMain.handle('screenshot-capture', async (event, args) => {
+    if (screenshotSession) {
+      return { success: false, error: 'screenshot already in progress' }
+    }
+
+    const sourceWindow = mainWindow && !mainWindow.isDestroyed()
+      ? mainWindow
+      : BrowserWindow.fromWebContents(event.sender)
+
+    try {
+      if (sourceWindow && !sourceWindow.isDestroyed()) {
+        sourceWindow.hide()
+        // 等系统把窗口从画面移除后再抓屏，避免截到本应用
+        await screenshotSleep(250)
+      }
+
+      const captures = await captureScreenImages()
+      if (!captures.length) {
+        if (sourceWindow && !sourceWindow.isDestroyed()) {
+          sourceWindow.show()
+          sourceWindow.focus()
+        }
+        return { success: false, error: 'screen capture unavailable' }
+      }
+
+      const overlays = []
+      const overlayMap = new Map()
+      const resultPromise = new Promise((resolve) => {
+        screenshotSession = {
+          resolve,
+          overlays,
+          overlayMap,
+          sourceWindow,
+          labels: args?.labels || {},
+        }
+      })
+
+      const cursorDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+
+      for (const capture of captures) {
+        const overlay = new BrowserWindow({
+          x: capture.displayBounds.x,
+          y: capture.displayBounds.y,
+          width: capture.displayBounds.width,
+          height: capture.displayBounds.height,
+          frame: false,
+          backgroundColor: '#000000',
+          resizable: false,
+          movable: false,
+          minimizable: false,
+          maximizable: false,
+          fullscreenable: false,
+          skipTaskbar: true,
+          roundedCorners: false,
+          show: false,
+          alwaysOnTop: true,
+          webPreferences: {
+            preload: screenshotOverlayPreload,
+            contextIsolation: true,
+            nodeIntegration: false,
+          },
+        })
+        overlay.setAlwaysOnTop(true, 'screen-saver')
+        overlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+
+        overlayMap.set(overlay.id, {
+          image: capture.image,
+          previewUrl: capture.previewUrl,
+          previewPath: capture.previewPath,
+          displayId: capture.displayId,
+        })
+        overlays.push(overlay)
+
+        overlay.once('closed', () => {
+          // 框选层被意外关闭时按取消处理
+          if (screenshotSession && screenshotSession.overlays.includes(overlay)) {
+            finishScreenshotSession({ success: false, cancelled: true })
+          }
+        })
+
+        await overlay.loadURL(screenshotOverlayUrl)
+        overlay.showInactive()
+      }
+
+      const cursorOverlay = overlays.find(overlay => overlayMap.get(overlay.id)?.displayId === cursorDisplay.id)
+      const focusOverlay = cursorOverlay || overlays[0]
+      focusOverlay?.focus()
+
+      return await resultPromise
+    } catch (error) {
+      console.error('[Screenshot] capture failed:', error)
+      finishScreenshotSession({ success: false, error: error?.message || String(error) })
+      if (sourceWindow && !sourceWindow.isDestroyed()) {
+        sourceWindow.show()
+        sourceWindow.focus()
+      }
+      return { success: false, error: error?.message || String(error) }
+    }
+  })
+
+  // 框选层初始化：返回该显示器对应的截图预览和文案
+  ipcMain.handle('screenshot-overlay-init', (event) => {
+    const overlayWindow = BrowserWindow.fromWebContents(event.sender)
+    const entry = overlayWindow ? screenshotSession?.overlayMap.get(overlayWindow.id) : null
+    if (!entry) return null
+    return {
+      previewUrl: entry.previewUrl,
+      labels: screenshotSession.labels,
+    }
+  })
+
+  // 框选完成：在主进程用原始像素图裁剪，再把结果回传给发起截图的渲染进程
+  ipcMain.handle('screenshot-overlay-confirm', async (event, args) => {
+    const overlayWindow = BrowserWindow.fromWebContents(event.sender)
+    const entry = overlayWindow ? screenshotSession?.overlayMap.get(overlayWindow.id) : null
+    if (!entry || !args?.rect) return { success: false }
+
+    const cropped = cropScreenshot(entry.image, args.rect)
+    if (!cropped) return { success: false }
+
+    // 截图直接落盘，正文只保存相对路径，避免 base64 撑大数据库
+    try {
+      const imagePath = await saveNoteImage(cropped.buffer, 'image/png')
+      finishScreenshotSession({
+        success: true,
+        path: imagePath,
+        width: cropped.width,
+        height: cropped.height,
+      })
+    } catch (error) {
+      console.error('[Screenshot] 保存截图失败:', error)
+      finishScreenshotSession({ success: false, error: error?.message || String(error) })
+    }
+    return { success: true }
+  })
+
+  // 取消截图
+  ipcMain.handle('screenshot-overlay-cancel', (event) => {
+    const overlayWindow = BrowserWindow.fromWebContents(event.sender)
+    if (!screenshotSession || !overlayWindow || !screenshotSession.overlayMap.has(overlayWindow.id)) {
+      return { success: false }
+    }
+    finishScreenshotSession({ success: false, cancelled: true })
+    return { success: true }
   })
 
   // 笔记截图：隐藏本应用窗口，弹出全屏框选层，框选后按原始像素裁剪并插入
