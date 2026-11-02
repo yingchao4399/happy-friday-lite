@@ -138,6 +138,7 @@ import { loadModelConfig } from '@/views/friday/composables/useModelCatalog'
 import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue'
 import NewConversationButton from '@/components/chat/NewConversationButton.vue'
 import { conversationStore } from '@/services/conversationStore'
+import { clampDockPosition } from './dock-position.js'
 
 const { t } = useI18n()
 const props = defineProps({ officeOverlay: { type: Boolean, default: false } })
@@ -184,6 +185,13 @@ const dockStyle = computed(() => {
   if (props.officeOverlay || !dockPosition.value) return undefined
   return { left: `${dockPosition.value.x}px`, top: `${dockPosition.value.y}px`, right: 'auto', bottom: 'auto' }
 })
+
+function handleDockViewportResize() {
+  if (!dockPosition.value) return
+  dockPosition.value = clampDockPosition(dockPosition.value, { width: window.innerWidth, height: window.innerHeight })
+  localStorage.setItem('happy-friday-dock-position', JSON.stringify(dockPosition.value))
+}
+
 const routePath = computed(() => route.path || '/')
 const routeLabel = computed(() => {
   const path = routePath.value
@@ -573,8 +581,11 @@ onMounted(() => {
   unlistenAssistantConfig = electronService.listen('config-changed', ({ payload }) => applyAssistantSettings(payload))
   try {
     const saved = JSON.parse(localStorage.getItem('happy-friday-dock-position') || 'null')
-    if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) dockPosition.value = saved
+    if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) {
+      dockPosition.value = clampDockPosition(saved, { width: window.innerWidth, height: window.innerHeight })
+    }
   } catch { /* ignore corrupt position */ }
+  window.addEventListener('resize', handleDockViewportResize)
   // 先挂载助手入口，任务列表等非首屏数据在空闲时读取，避免启动/切换模块时竞争主线程。
   // 保存句柄并在卸载时取消，防止快速切换路由后旧组件继续发 IPC。
   if (typeof window.requestIdleCallback === 'function') {
@@ -624,6 +635,7 @@ onUnmounted(() => {
   unlistenDockChunk?.(); unlistenDockSessionCreated?.(); unlistenDockDone?.(); unlistenDockError?.()
   unlistenAssistantConfig?.()
   window.removeEventListener('pointermove', moveDrag)
+  window.removeEventListener('resize', handleDockViewportResize)
   resizeObserver?.disconnect()
   window.clearTimeout(officeOverlaySyncTimer)
   if (props.officeOverlay) electronService.request('office-dock-set-expanded', { expanded: false }).catch(() => {})

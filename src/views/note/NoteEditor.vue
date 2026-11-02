@@ -338,6 +338,13 @@
         </div>
 
         <div class="tooltip-wrapper">
+          <button class="toolbar-btn" @click="captureScreenshot" :disabled="isCapturingScreenshot">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+          </button>
+          <span class="tooltip">{{ t('note.toolbar.screenshot') }}</span>
+        </div>
+
+        <div class="tooltip-wrapper">
           <button class="toolbar-btn" @click="handleAddContent">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
           </button>
@@ -890,6 +897,7 @@ import NewConversationButton from '@/components/chat/NewConversationButton.vue';
 import FridayConfirmDialog from '@/components/ui/FridayConfirmDialog.vue';
 import { electronService } from '@/services/electron';
 import { getChatSession, setChatSession } from '@/utils/chatSessionCache';
+import { toDisplayContent, toDisplayImageSrc, toStoredContent } from '@/utils/noteImagePaths';
 import StarterKit from '@tiptap/starter-kit';
 import Paragraph from '@tiptap/extension-paragraph';
 import Code from '@tiptap/extension-code';
@@ -1347,7 +1355,8 @@ const NoteImage = Image.extend({
 
 const prepareEditorContent = (content) => {
   const container = document.createElement('div');
-  container.innerHTML = content || '';
+  // 正文里图片是相对路径，进入编辑器前解析为可加载的协议地址
+  container.innerHTML = toDisplayContent(content || '');
 
   if (container.querySelector('[data-note-title]')) {
     return container.innerHTML;
@@ -1423,13 +1432,17 @@ const loadBacklinks = async () => {
 
 const openBacklink = (link) => emit('open-note', link.id);
 
-const togglePresentation = () => {
+const togglePresentation = async () => {
   if (showPresentation.value) {
     showPresentation.value = false;
     return;
   }
   if (!editor.value) return;
-  const note = noteStore.notes.find(n => n.id === props.noteId);
+  let note = noteStore.notes.find(n => n.id === props.noteId);
+  // 列表项只有摘要，缺 marpContent 时先取回完整笔记再判断
+  if (note && note.marpContent === undefined) {
+    note = (await noteStore.fetchNote(props.noteId)) || note;
+  }
   if (!note?.marpContent || !note.marpContent.trim()) {
     // marpContent 为空：提示用户生成演示文档
     showMarpGenerateConfirm.value = true;
@@ -2316,6 +2329,42 @@ const confirmImage = () => {
     .run();
 
   closeImageDialog();
+};
+
+// 截图：主进程隐藏本应用窗口后弹出全屏框选层，框选结果按原始像素裁剪后插入
+const isCapturingScreenshot = ref(false);
+
+const captureScreenshot = async () => {
+  if (isCapturingScreenshot.value) return;
+  isCapturingScreenshot.value = true;
+  closeDropdownMenus();
+  closeToolbarOverflow();
+  try {
+    const result = await electronService.invoke('screenshot-capture', {
+      labels: {
+        hint: t('note.screenshot.hint'),
+        confirm: t('note.screenshot.confirm'),
+        cancel: t('note.screenshot.cancel'),
+        size: t('note.screenshot.size', { width: '{width}', height: '{height}' }),
+      },
+    });
+    if (result?.cancelled) return;
+    if (!result?.success || !result.path) {
+      alert(t('note.screenshot.captureFailed'));
+      return;
+    }
+    // 默认按 720px 宽插入，避免整屏截图铺满正文，插入后仍可拖拽缩放
+    const imageAttrs = { src: toDisplayImageSrc(result.path), alt: '' };
+    if (result.width) {
+      imageAttrs.width = Math.min(result.width, 720);
+    }
+    editor.value?.chain().focus().setImage(imageAttrs).run();
+  } catch (error) {
+    console.error('截图失败:', error);
+    alert(t('note.screenshot.captureFailed'));
+  } finally {
+    isCapturingScreenshot.value = false;
+  }
 };
 
 // 公式对话框相关
@@ -3685,6 +3734,14 @@ const editor = useEditor({
       HTMLAttributes: {
         class: 'editor-image',
       },
+      // 图片四角可拖拽缩放，尺寸写入 width/height 属性随笔记保存
+      resize: {
+        enabled: true,
+        directions: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+        minWidth: 48,
+        minHeight: 48,
+        alwaysPreserveAspectRatio: true,
+      },
     }),
     NoteVideo.configure({ onPreview: openMediaPreview, onOpen: target => performMediaAction(target), onReveal: target => performMediaAction(target, true) }),
     NoteAudio.configure({ onPreview: openMediaPreview, onOpen: target => performMediaAction(target), onReveal: target => performMediaAction(target, true) }),
@@ -3908,8 +3965,6 @@ const editor = useEditor({
       const text = event.clipboardData.getData('text/plain');
       const html = event.clipboardData.getData('text/html');
 
-      if (!text) return false;
-
       // 编辑器内部复制的内容（ProseMirror 剪贴板自带 data-pm-slice 标记）
       // 交给默认粘贴处理：按原始 slice 内联插入到光标处。
       // 不能走下方 markdown 路径，否则会被 marked.parse 转成 <p> 块级内容，
@@ -3917,6 +3972,18 @@ const editor = useEditor({
       if (html && html.includes('data-pm-slice')) {
         return false;
       }
+
+      // 粘贴复制的图片（截图、复制的图片文件）：读取为 data URL 后直接插入编辑器。
+      // 仅处理纯图片剪贴板，图文混合内容仍交给默认粘贴流程。
+      const imageFiles = getClipboardImageFiles(event.clipboardData);
+      if (imageFiles.length > 0 && !text.trim()) {
+        event.preventDefault();
+        event.stopPropagation();
+        insertPastedImages(imageFiles);
+        return true;
+      }
+
+      if (!text) return false;
 
       if (html && isRichHtml(html)) {
         return false;
@@ -3947,8 +4014,10 @@ const editor = useEditor({
     syncToolbarState(editor);
     const html = editor.getHTML();
     lastSyncedHtml = html;
-    emit('update:modelValue', html);
-    emit('change', html);
+    // 编辑器内是协议地址，对外保存时还原为相对路径
+    const storedHtml = toStoredContent(html);
+    emit('update:modelValue', storedHtml);
+    emit('change', storedHtml);
     syncSearchState();
 
     clearFimDebounce();
@@ -4467,6 +4536,89 @@ const handleClickOutside = (event) => {
   if (!target.closest('.table-context-toolbar')) {
     hideTableContextMenu();
   }
+};
+
+// 粘贴图片：最长边超过 1920px 或原始体积超过 2MB 时等比缩放并重新编码，
+// 图片以二进制写入文件，正文只保留相对路径，不使用 base64。
+const PASTED_IMAGE_MAX_SIDE = 1920;
+const PASTED_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+
+const readFileBytes = async (blob) => new Uint8Array(await blob.arrayBuffer());
+
+const normalizePastedImage = async (file) => {
+  try {
+    const original = { bytes: await readFileBytes(file), mimeType: file.type || 'image/png' };
+    const bitmap = await createImageBitmap(file);
+    const maxSide = Math.max(bitmap.width, bitmap.height);
+    const needShrink = maxSide > PASTED_IMAGE_MAX_SIDE;
+    const needReencode = file.size > PASTED_IMAGE_MAX_BYTES;
+    if (!needShrink && !needReencode) {
+      bitmap.close?.();
+      return original;
+    }
+
+    const scale = Math.min(1, PASTED_IMAGE_MAX_SIDE / maxSide);
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      bitmap.close?.();
+      return original;
+    }
+
+    // 透明区域合成白底，避免重新编码后出现黑底
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close?.();
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.9));
+    if (!blob) return original;
+    return { bytes: await readFileBytes(blob), mimeType: 'image/webp' };
+  } catch (error) {
+    console.warn('图片处理失败，使用原始图片:', error);
+    try {
+      return { bytes: await readFileBytes(file), mimeType: file.type || 'image/png' };
+    } catch (_error) {
+      return null;
+    }
+  }
+};
+
+const getClipboardImageFiles = (clipboardData) => {
+  if (!clipboardData) return [];
+
+  const files = Array.from(clipboardData.files || []).filter(file => file.type.startsWith('image/'));
+  if (files.length > 0) return files;
+
+  return Array.from(clipboardData.items || [])
+    .filter(item => item.kind === 'file' && item.type.startsWith('image/'))
+    .map(item => item.getAsFile())
+    .filter(Boolean);
+};
+
+const insertPastedImages = async (files) => {
+  // 读取图片是异步的，固定粘贴时的编辑器实例，避免读取期间切换笔记导致插入到错误位置
+  const targetEditor = editor.value;
+  const sources = [];
+  for (const file of files) {
+    const image = await normalizePastedImage(file);
+    if (!image) continue;
+    // 图片以二进制落盘，正文只保存相对路径；保存失败则跳过该图片
+    const saved = await electronService
+      .invoke('save_note_image', { bytes: image.bytes, mimeType: image.mimeType })
+      .catch(() => null);
+    if (!saved?.success || !saved.path) continue;
+    sources.push(toDisplayImageSrc(saved.path));
+  }
+  if (!sources.length || !targetEditor || targetEditor.isDestroyed) return;
+
+  const chain = targetEditor.chain().focus();
+  sources.forEach((src) => chain.setImage({ src, alt: '' }));
+  chain.run();
 };
 
 const isRichHtml = (html) => {
@@ -5537,11 +5689,86 @@ const fixEmptyTableCells = (html) => {
   color: #2563eb;
 }
 
-:deep(.prose-editor img.editor-image) {
+/* 普通渲染的图片；可缩放节点视图里的 img 不会带上 editor-image 类，需要单独匹配 */
+:deep(.prose-editor img.editor-image),
+:deep(.prose-editor [data-resize-wrapper] img) {
+  display: block;
   max-width: 100%;
-  height: auto;
+  /* 缩放后属性会写入固定高度，这里用 auto 保证窄窗口下仍按比例缩放 */
+  height: auto !important;
   border-radius: 8px;
+}
+
+/* 外边距放到缩放容器上，避免图片边缘与选框/控制点之间出现空隙 */
+:deep(.prose-editor [data-resize-container]) {
   margin: 0.8em 0;
+  /* 缩放容器作为 flex 项会随图片内容撑开，这里限制最大宽度不超过编辑区 */
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* 内层包裹元素同样限制宽度，保证图片与四角控制点都不超出编辑区 */
+:deep(.prose-editor [data-resize-wrapper]) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* 图片选中时给内容加一圈细描边，让大图的边界更清楚 */
+:deep(.prose-editor [data-resize-container].ProseMirror-selectednode [data-resize-wrapper]) {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+}
+
+/* 图片缩放控制点：直角框，默认隐藏，悬停或选中图片时淡入 */
+:deep(.prose-editor [data-resize-handle]) {
+  width: 13px;
+  height: 13px;
+  border: 0 solid #3b82f6;
+  border-radius: 0;
+  background: transparent;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.16s ease, transform 0.16s ease, filter 0.16s ease;
+  z-index: 10;
+}
+
+:deep(.prose-editor [data-resize-container]:hover [data-resize-handle]),
+:deep(.prose-editor [data-resize-container].ProseMirror-selectednode [data-resize-handle]) {
+  opacity: 1;
+  transform: scale(1);
+}
+
+:deep(.prose-editor [data-resize-handle]:hover) {
+  border-color: #1d4ed8;
+  filter: drop-shadow(0 0 2px rgba(37, 99, 235, 0.5));
+}
+
+:deep(.prose-editor [data-resize-handle='top-left']) {
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-top-left-radius: 3px;
+  cursor: nwse-resize;
+}
+
+:deep(.prose-editor [data-resize-handle='top-right']) {
+  border-top-width: 2px;
+  border-right-width: 2px;
+  border-top-right-radius: 3px;
+  cursor: nesw-resize;
+}
+
+:deep(.prose-editor [data-resize-handle='bottom-left']) {
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+  border-bottom-left-radius: 3px;
+  cursor: nesw-resize;
+}
+
+:deep(.prose-editor [data-resize-handle='bottom-right']) {
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-bottom-right-radius: 3px;
+  cursor: nwse-resize;
 }
 
 :deep(.prose-editor video[data-note-video]),

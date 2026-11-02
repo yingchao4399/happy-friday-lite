@@ -176,7 +176,7 @@
               {{ t('note.contextMenu.newNotebook') }}
             </div>
             <div class="submenu-divider"></div>
-            <div v-if="notebookStore.loading" class="submenu-item loading">
+            <div v-if="notebookStore.loading && !notebookStore.notebooks.length" class="submenu-item loading">
               <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
               {{ t('note.contextMenu.loading') }}
             </div>
@@ -344,14 +344,14 @@
               type="text"
               :placeholder="t('note.folder.namePlaceholder')"
               class="notebook-name-input"
-              @keydown.enter="confirmCreateNotebook"
+              @keydown.enter="onNotebookNameEnter"
             />
           </div>
 
           <div class="create-notebook-footer">
             <button
               class="create-notebook-btn"
-              :disabled="!newNotebookName.trim()"
+              :disabled="!newNotebookName.trim() || isCreatingNotebook"
               @click="confirmCreateNotebook"
             >
               {{ t('note.confirm') }}
@@ -463,6 +463,8 @@ let suppressClickId = null;
 const notebookSubmenuRef = ref(null);
 const createNotebookDialogVisible = ref(false);
 const newNotebookName = ref('');
+// 创建笔记本请求进行中标记：防止主进程繁忙（IPC 变慢）时连点确定重复创建
+const isCreatingNotebook = ref(false);
 const notebookNameInputRef = ref(null);
 const createNotebookTargetNoteId = ref(null);
 const folderItemMenuVisible = ref(false);
@@ -1141,6 +1143,7 @@ const hideNotebookSubmenu = () => {
 
 const openCreateNotebookDialog = () => {
   createNotebookTargetNoteId.value = contextMenu.targetNoteId;
+  isCreatingNotebook.value = false;
   hideContextMenu();
   createNotebookDialogVisible.value = true;
   newNotebookName.value = '';
@@ -1156,23 +1159,33 @@ const closeCreateNotebookDialog = () => {
   newNotebookName.value = '';
 };
 
+// 输入法组词确认的 Enter（isComposing/229）不触发创建，避免用户确认拼音时误建笔记本
+const onNotebookNameEnter = (e) => {
+  if (e.isComposing || e.keyCode === 229) return;
+  confirmCreateNotebook();
+};
+
 const confirmCreateNotebook = async () => {
+  if (isCreatingNotebook.value) return;
   const name = newNotebookName.value.trim();
+  const targetNoteId = createNotebookTargetNoteId.value;
   if (!name) return;
+
+  isCreatingNotebook.value = true;
+  // 立即关闭对话框给用户反馈：创建期间（IPC 往返）不再暴露可点击的确定按钮
+  closeCreateNotebookDialog();
 
   try {
     const notebook = await notebookStore.createNotebook(name);
 
-    if (notebook) {
-      if (createNotebookTargetNoteId.value) {
-        await moveNoteToNotebook(createNotebookTargetNoteId.value, notebook.id);
-      }
+    if (notebook && targetNoteId) {
+      await moveNoteToNotebook(targetNoteId, notebook.id);
     }
   } catch (error) {
     console.error('[NoteList] Error in confirmCreateNotebook:', error);
+  } finally {
+    isCreatingNotebook.value = false;
   }
-
-  closeCreateNotebookDialog();
 };
 
 const moveToNotebook = async (notebookId) => {
@@ -1185,10 +1198,16 @@ const moveToNotebook = async (notebookId) => {
 const moveNoteToNotebook = async (noteId, notebookId) => {
   const note = noteStore.notes.find(n => n.id === noteId);
   if (note) {
+    // 列表项只有摘要，缺正文时先按需取回，避免把 undefined 当作正文写库
+    let content = note.content;
+    if (content === undefined) {
+      const full = await electronService.invoke('get_note', { noteId });
+      content = full?.content ?? '';
+    }
     await electronService.invoke('update_note', {
       noteId: note.id,
       title: note.title,
-      content: note.content,
+      content,
       contentText: note.contentText,
       notebookId
     });
@@ -1212,6 +1231,13 @@ const duplicateNote = async () => {
   const originalNote = noteStore.notes.find(n => n.id === contextMenu.targetNoteId);
   if (!originalNote) return;
 
+  // 列表项只有摘要，复制前取回完整正文
+  const fullNote = originalNote.content === undefined
+    ? await electronService.invoke('get_note', { noteId: originalNote.id })
+    : originalNote;
+  const sourceContent = fullNote?.content ?? '';
+  const sourceContentText = fullNote?.contentText ?? '';
+
   const newNote = await electronService.invoke('create_note', {
     knowledgeBaseId: originalNote.knowledgeBaseId,
     notebookId: originalNote.notebookId,
@@ -1222,11 +1248,11 @@ const duplicateNote = async () => {
     await electronService.invoke('update_note', {
       noteId: newNote.id,
       title: newNote.title,
-      content: originalNote.content,
-      contentText: originalNote.contentText
+      content: sourceContent,
+      contentText: sourceContentText
     });
-    newNote.content = originalNote.content;
-    newNote.contentText = originalNote.contentText;
+    newNote.content = sourceContent;
+    newNote.contentText = sourceContentText;
     noteStore.notes.unshift(newNote);
   }
 };

@@ -1,5 +1,5 @@
-import { app, ipcMain, shell, dialog } from 'electron'
-import { DatabaseSync } from 'node:sqlite'
+import { app, ipcMain, shell, dialog, BrowserWindow, desktopCapturer, screen } from 'electron'
+import { fileURLToPath, pathToFileURL } from 'url'
 import fs from 'fs'
 import path from 'path'
 import { importNoteResource } from './note-resources.js'
@@ -7,6 +7,7 @@ import TurndownService from 'turndown'
 import { CancellationTokens } from './cancellation.js'
 import { loadConfig, saveConfig, getDataDir } from './config.js'
 import * as db from './db.js'
+import { saveNoteImage, getNoteImagePath, IMAGE_RELATIVE_PREFIX } from './note-images.js'
 import { streamChat, streamChatWithRagAgent, generateTitle, streamNoteAI, fimCompletion } from './llm.js'
 import { exportHtmlToPdf, exportMarkdown } from './pdf.js'
 import { runPython, runPythonStreaming, checkPython, getPythonPath } from './python.js'
@@ -97,6 +98,30 @@ function noteHtmlToMarkdown(html) {
   return turndown.turndown(html || '')
 }
 
+// 导出笔记时把正文引用的笔记图片复制到导出目录 images/ 下，
+// 并把链接改写为相对路径，导出的 Markdown 才能脱离本应用查看
+async function exportNoteImages(html, imagesDir, copiedImages) {
+  if (!html || typeof html !== 'string' || !html.includes(IMAGE_RELATIVE_PREFIX)) return html
+
+  // 只匹配 img 的 src 属性，避免正文里的同名文本被改写
+  const pattern = new RegExp(`src=(["'])${IMAGE_RELATIVE_PREFIX}([^"']+)\\1`, 'g')
+  const matches = [...html.matchAll(pattern)]
+
+  for (const match of matches) {
+    const fileName = match[2]
+    const sourcePath = getNoteImagePath(fileName)
+    if (!sourcePath || !fs.existsSync(sourcePath) || copiedImages.has(fileName)) continue
+    await fs.promises.mkdir(imagesDir, { recursive: true })
+    await fs.promises.copyFile(sourcePath, path.join(imagesDir, fileName))
+    copiedImages.add(fileName)
+  }
+
+  return html.replace(
+    pattern,
+    (_, quote, fileName) => `src=${quote}images/${fileName}${quote}`
+  )
+}
+
 /**
  * 校验模型配置：确保用户已配置自己的大模型
  * 若未配置或配置不完整，抛出错误提示用户前往设置
@@ -180,6 +205,120 @@ function syncNoteRefOnDelete(noteId) {
     } catch (e) {
       console.error('[Commands] syncNoteRefOnDelete error:', e)
     }
+  }
+}
+
+// ===== 笔记截图：隐藏主窗口 → 每个显示器弹出全屏框选层 → 按原始像素裁剪 =====
+let screenshotSession = null
+
+const screenshotSleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+const screenshotOverlayUrl = new URL('./screenshot-overlay.html', import.meta.url).href
+const screenshotOverlayPreload = fileURLToPath(new URL('./screenshot-overlay-preload.cjs', import.meta.url))
+
+// 结束本次截图：关闭所有框选层、恢复主窗口，并把结果交还给发起请求的渲染进程
+const finishScreenshotSession = (result) => {
+  const session = screenshotSession
+  if (!session) return
+  screenshotSession = null
+
+  session.overlays.forEach((overlay) => {
+    if (!overlay.isDestroyed()) overlay.destroy()
+  })
+
+  // 清理本次截图的临时预览文件
+  if (session.overlayMap) {
+    const previewPaths = new Set(
+      [...session.overlayMap.values()].map(entry => entry.previewPath).filter(Boolean)
+    )
+    previewPaths.forEach((filePath) => {
+      fs.promises.unlink(filePath).catch(() => {})
+    })
+  }
+
+  const sourceWindow = session.sourceWindow
+  if (sourceWindow && !sourceWindow.isDestroyed()) {
+    sourceWindow.show()
+    sourceWindow.focus()
+  }
+
+  session.resolve(result)
+}
+
+// 抓取所有显示器的原始像素画面；预览图限制最长边以减小传输量，最终裁剪仍基于原图
+const captureScreenImages = async () => {
+  const displays = screen.getAllDisplays()
+  const captures = []
+
+  for (const display of displays) {
+    const scaleFactor = display.scaleFactor || 1
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: {
+        width: Math.max(1, Math.round(display.size.width * scaleFactor)),
+        height: Math.max(1, Math.round(display.size.height * scaleFactor)),
+      },
+      fetchWindowIcons: false,
+    })
+    const source = sources.find(item => String(item.display_id) === String(display.id)) || sources[0]
+    if (!source || source.thumbnail.isEmpty()) continue
+
+    const image = source.thumbnail
+    const imageSize = image.getSize()
+    let preview = image
+    const maxSide = Math.max(imageSize.width, imageSize.height)
+    if (maxSide > 1920) {
+      const scale = 1920 / maxSide
+      preview = image.resize({
+        width: Math.round(imageSize.width * scale),
+        height: Math.round(imageSize.height * scale),
+        quality: 'best',
+      })
+    }
+
+    // 预览图写入临时文件，避免通过 IPC 传递 base64 大字符串
+    const previewPath = path.join(
+      app.getPath('temp'),
+      `hf-screenshot-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+    )
+    await fs.promises.writeFile(previewPath, preview.toJPEG(92))
+
+    captures.push({
+      displayId: display.id,
+      displayBounds: display.bounds,
+      image,
+      previewPath,
+      previewUrl: pathToFileURL(previewPath).href,
+    })
+  }
+
+  return captures
+}
+
+// 按归一化框选矩形（0~1）在原始像素图上裁剪，输出最长边不超过 1920 的 PNG
+const cropScreenshot = (image, rect) => {
+  const imageSize = image.getSize()
+  const x = Math.min(Math.max(0, Math.round(rect.x * imageSize.width)), imageSize.width - 1)
+  const y = Math.min(Math.max(0, Math.round(rect.y * imageSize.height)), imageSize.height - 1)
+  const width = Math.min(Math.round(rect.width * imageSize.width), imageSize.width - x)
+  const height = Math.min(Math.round(rect.height * imageSize.height), imageSize.height - y)
+  if (width <= 0 || height <= 0) return null
+
+  let result = image.crop({ x, y, width, height })
+  const maxSide = Math.max(width, height)
+  if (maxSide > 1920) {
+    const scale = 1920 / maxSide
+    result = result.resize({
+      width: Math.round(width * scale),
+      height: Math.round(height * scale),
+      quality: 'best',
+    })
+  }
+
+  return {
+    buffer: result.toPNG(),
+    width: result.getSize().width,
+    height: result.getSize().height,
   }
 }
 
@@ -675,14 +814,16 @@ export function registerCommands(mainWindow) {
     return true
   })
 
+  // 列表只返回摘要（不含正文），正文由 get_note 按需加载
   ipcMain.handle('get_notes', (_event, args) => {
-    return db.getNotes(args?.knowledgeBaseId, args?.notebookId)
+    return db.getNoteSummaries(args?.knowledgeBaseId, args?.notebookId)
   })
 
   ipcMain.handle('get_note', (_event, args) => {
     return db.getNote(args.noteId)
   })
 
+  // 预览版双链面板依赖的关系索引接口，和官方笔记图片接口并存。
   ipcMain.handle('note-links-index', (_event, args) => db.getNoteLinks(String(args?.noteId || ''), args || {}))
   ipcMain.handle('note-links-rebuild', () => db.rebuildNoteLinks())
 
@@ -705,9 +846,15 @@ export function registerCommands(mainWindow) {
     return db.getResourceLinks(uri).filter(link => link.relation === 'note-bidirectional')
   })
 
-  ipcMain.handle('toggle_note_pinned', (_event, args) => {
-    if (typeof args?.isPinned !== 'boolean') throw new Error('置顶参数无效')
-    return db.setNotePinned(args.noteId, args.isPinned)
+  // 笔记图片落盘：把粘贴图片的二进制写入 note-images/，正文只保存相对路径
+  ipcMain.handle('save_note_image', async (_event, args) => {
+    try {
+      const imagePath = await saveNoteImage(args?.bytes, args?.mimeType)
+      return { success: true, path: imagePath }
+    } catch (error) {
+      console.error('[NoteImage] 保存图片失败:', error)
+      return { success: false, error: error?.message || String(error) }
+    }
   })
 
   ipcMain.handle('create_note', (_event, args) => {
@@ -776,7 +923,154 @@ export function registerCommands(mainWindow) {
   })
 
   ipcMain.handle('search_notes', (_event, args) => {
-    return db.searchNotes(args.query)
+    return db.searchNoteSummaries(args.query)
+  })
+
+  // 笔记截图：隐藏本应用窗口，弹出全屏框选层，框选后按原始像素裁剪并插入
+  ipcMain.handle('screenshot-capture', async (event, args) => {
+    if (screenshotSession) {
+      return { success: false, error: 'screenshot already in progress' }
+    }
+
+    const sourceWindow = mainWindow && !mainWindow.isDestroyed()
+      ? mainWindow
+      : BrowserWindow.fromWebContents(event.sender)
+
+    try {
+      if (sourceWindow && !sourceWindow.isDestroyed()) {
+        sourceWindow.hide()
+        // 等系统把窗口从画面移除后再抓屏，避免截到本应用
+        await screenshotSleep(250)
+      }
+
+      const captures = await captureScreenImages()
+      if (!captures.length) {
+        if (sourceWindow && !sourceWindow.isDestroyed()) {
+          sourceWindow.show()
+          sourceWindow.focus()
+        }
+        return { success: false, error: 'screen capture unavailable' }
+      }
+
+      const overlays = []
+      const overlayMap = new Map()
+      const resultPromise = new Promise((resolve) => {
+        screenshotSession = {
+          resolve,
+          overlays,
+          overlayMap,
+          sourceWindow,
+          labels: args?.labels || {},
+        }
+      })
+
+      const cursorDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+
+      for (const capture of captures) {
+        const overlay = new BrowserWindow({
+          x: capture.displayBounds.x,
+          y: capture.displayBounds.y,
+          width: capture.displayBounds.width,
+          height: capture.displayBounds.height,
+          frame: false,
+          backgroundColor: '#000000',
+          resizable: false,
+          movable: false,
+          minimizable: false,
+          maximizable: false,
+          fullscreenable: false,
+          skipTaskbar: true,
+          roundedCorners: false,
+          show: false,
+          alwaysOnTop: true,
+          webPreferences: {
+            preload: screenshotOverlayPreload,
+            contextIsolation: true,
+            nodeIntegration: false,
+          },
+        })
+        overlay.setAlwaysOnTop(true, 'screen-saver')
+        overlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+
+        overlayMap.set(overlay.id, {
+          image: capture.image,
+          previewUrl: capture.previewUrl,
+          previewPath: capture.previewPath,
+          displayId: capture.displayId,
+        })
+        overlays.push(overlay)
+
+        overlay.once('closed', () => {
+          // 框选层被意外关闭时按取消处理
+          if (screenshotSession && screenshotSession.overlays.includes(overlay)) {
+            finishScreenshotSession({ success: false, cancelled: true })
+          }
+        })
+
+        await overlay.loadURL(screenshotOverlayUrl)
+        overlay.showInactive()
+      }
+
+      const cursorOverlay = overlays.find(overlay => overlayMap.get(overlay.id)?.displayId === cursorDisplay.id)
+      const focusOverlay = cursorOverlay || overlays[0]
+      focusOverlay?.focus()
+
+      return await resultPromise
+    } catch (error) {
+      console.error('[Screenshot] capture failed:', error)
+      finishScreenshotSession({ success: false, error: error?.message || String(error) })
+      if (sourceWindow && !sourceWindow.isDestroyed()) {
+        sourceWindow.show()
+        sourceWindow.focus()
+      }
+      return { success: false, error: error?.message || String(error) }
+    }
+  })
+
+  // 框选层初始化：返回该显示器对应的截图预览和文案
+  ipcMain.handle('screenshot-overlay-init', (event) => {
+    const overlayWindow = BrowserWindow.fromWebContents(event.sender)
+    const entry = overlayWindow ? screenshotSession?.overlayMap.get(overlayWindow.id) : null
+    if (!entry) return null
+    return {
+      previewUrl: entry.previewUrl,
+      labels: screenshotSession.labels,
+    }
+  })
+
+  // 框选完成：在主进程用原始像素图裁剪，再把结果回传给发起截图的渲染进程
+  ipcMain.handle('screenshot-overlay-confirm', async (event, args) => {
+    const overlayWindow = BrowserWindow.fromWebContents(event.sender)
+    const entry = overlayWindow ? screenshotSession?.overlayMap.get(overlayWindow.id) : null
+    if (!entry || !args?.rect) return { success: false }
+
+    const cropped = cropScreenshot(entry.image, args.rect)
+    if (!cropped) return { success: false }
+
+    // 截图直接落盘，正文只保存相对路径，避免 base64 撑大数据库
+    try {
+      const imagePath = await saveNoteImage(cropped.buffer, 'image/png')
+      finishScreenshotSession({
+        success: true,
+        path: imagePath,
+        width: cropped.width,
+        height: cropped.height,
+      })
+    } catch (error) {
+      console.error('[Screenshot] 保存截图失败:', error)
+      finishScreenshotSession({ success: false, error: error?.message || String(error) })
+    }
+    return { success: true }
+  })
+
+  // 取消截图
+  ipcMain.handle('screenshot-overlay-cancel', (event) => {
+    const overlayWindow = BrowserWindow.fromWebContents(event.sender)
+    if (!screenshotSession || !overlayWindow || !screenshotSession.overlayMap.has(overlayWindow.id)) {
+      return { success: false }
+    }
+    finishScreenshotSession({ success: false, cancelled: true })
+    return { success: true }
   })
 
   registerRecitationCommands(ipcMain)
@@ -879,11 +1173,15 @@ export function registerCommands(mainWindow) {
     const usedNames = new Set()
     const errors = []
     let exported = 0
+    // 图片文件化后正文里是 friday-asset:// 地址，导出时统一复制并改写为相对链接
+    const imagesDir = path.join(exportDir, 'images')
+    const copiedImages = new Set()
 
     for (const note of notes) {
       try {
         const fileName = noteFileName(note.title, usedNames, exportDir)
-        fs.writeFileSync(path.join(exportDir, fileName), noteHtmlToMarkdown(note.content), 'utf-8')
+        const content = await exportNoteImages(note.content, imagesDir, copiedImages)
+        fs.writeFileSync(path.join(exportDir, fileName), noteHtmlToMarkdown(content), 'utf-8')
         exported += 1
       } catch (error) {
         errors.push({ title: note.title || '未命名笔记', error: error.message })

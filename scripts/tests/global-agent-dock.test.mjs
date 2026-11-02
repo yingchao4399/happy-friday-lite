@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { clampDockPosition } from '../../src/components/ai-core/dock-position.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -18,6 +19,8 @@ test('Global Agent Dock exposes route context without fabricating agents or task
   assert.match(source, /office-dock-open-friday/)
   assert.match(source, /queueOfficeMove/)
   assert.match(source, /officeMoveInFlight/)
+  assert.match(source, /addEventListener\('resize', handleDockViewportResize\)/)
+  assert.match(source, /removeEventListener\('resize', handleDockViewportResize\)/)
   assert.match(source, /request\('chat_with_memory'/)
   assert.match(source, /normalizeDockModel/)
   assert.doesNotMatch(source, /agent-dock-history-search/)
@@ -27,6 +30,21 @@ test('Global Agent Dock exposes route context without fabricating agents or task
   // The selected profile is forwarded to the backend route and persisted with the session.
   assert.match(source, /assistantSettings[\s\S]*agentId/)
   assert.match(source, /agentRoutingActive/)
+})
+
+test('Global Agent Dock restores saved positions inside the current viewport', () => {
+  assert.deepEqual(
+    clampDockPosition({ x: 1920, y: 1080 }, { width: 1280, height: 720 }),
+    { x: 1224, y: 664 }
+  )
+  assert.deepEqual(
+    clampDockPosition({ x: -200, y: -100 }, { width: 1280, height: 720 }),
+    { x: 8, y: 8 }
+  )
+  assert.deepEqual(
+    clampDockPosition({ x: 700, y: 500 }, { width: 320, height: 240 }),
+    { x: 264, y: 184 }
+  )
 })
 
 test('Global Agent Dock context copy is present in both locales', async () => {

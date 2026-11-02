@@ -1,5 +1,11 @@
 # Happy Friday Lite
 
+## 3.0.7.01-preview.28
+
+- Merged official 3.0.7 note improvements: image files, screenshot capture, paste compression, and notebook interaction fixes.
+- Preserved preview AI Core, Typewriter, clipboard sharing, and note-link features.
+- Fixed the Global Agent Dock disappearing after restoring a saved position or resizing the window.
+
 ## 3.0.6.02-preview.21 AI Core, scoped history and global assistant experience
 
 - Technical version: `3.0.6-preview.21`; release label: `3.0.6.02-preview.21`.
@@ -144,7 +150,10 @@ An Electron + Vue 3 desktop personal knowledge assistant that combines an AI age
 ### 📝 Notes
 
 - [TipTap](https://tiptap.dev/) rich-text editor
-- Syntax-highlighted code blocks, tables, task lists, images, links, and more
+- Syntax-highlighted code blocks, tables, task lists, images, screenshots, links, and more
+- Paste images from the clipboard directly into the editor
+- One-click screenshot with full-screen region selection: the app hides itself, you drag to select an area, then it is cropped and inserted
+- Pasted and captured images are saved as files under the data directory (`note-images/`) with only relative paths in note content — no base64 in the database
 - AI Fill-in-the-Middle (FIM) completion
 - Version history and diff comparison
 

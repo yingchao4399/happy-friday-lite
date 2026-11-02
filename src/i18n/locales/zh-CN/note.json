@@ -95,13 +95,7 @@
     "table": "表格",
     "chart": "图表",
     "image": "图片",
-    "video": "视频",
-    "audio": "音频",
-    "attachment": "文件附件",
-    "note": "笔记",
-    "noteReference": "笔记引用",
-    "knowledge": "知识库内容",
-    "knowledgeReference": "知识库引用",
+    "screenshot": "截图",
     "formula": "公式",
     "codeBlock": "代码块",
     "horizontalRule": "分割线",
@@ -363,6 +357,13 @@
     "unsaved": "有未保存修改",
     "save": "保存修改",
     "resize": "调整图片大小"
+  },
+  "screenshot": {
+    "hint": "拖动鼠标框选要插入的屏幕区域，Enter 插入，Esc 取消",
+    "size": "已选 {width} × {height} 像素",
+    "confirm": "插入截图",
+    "cancel": "取消",
+    "captureFailed": "截图失败，请检查系统屏幕录制权限后重试"
   },
   "formulaDialog": {
     "insertTitle": "插入公式",
