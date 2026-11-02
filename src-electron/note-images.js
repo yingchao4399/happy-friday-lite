@@ -2,6 +2,7 @@ import { protocol } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
+import { resolveNoteAssetPath } from './note-resources.js'
 
 // 笔记图片文件化存储：
 // 正文只保存相对路径 note-images/<文件名>，图片本体落在数据目录的 note-images/ 下。
@@ -67,6 +68,21 @@ export function initNoteImages(dataDir) {
   protocol.handle(SCHEME, async (request) => {
     try {
       const url = new URL(request.url)
+      // Managed note resources and legacy pasted images share the same
+      // friday-asset scheme. Register one handler for the scheme; Electron
+      // rejects a second protocol.handle() call and that used to abort all
+      // IPC registration during startup.
+      if (url.hostname === 'note-assets') {
+        const filePath = resolveNoteAssetPath(request.url)
+        if (!filePath) return new Response('Not Found', { status: 404 })
+        const data = await fs.promises.readFile(filePath)
+        return new Response(data, {
+          headers: {
+            'Content-Type': MIME_BY_EXT[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
+            'Cache-Control': 'no-cache'
+          }
+        })
+      }
       if (url.hostname !== HOST) {
         return new Response('Not Found', { status: 404 })
       }

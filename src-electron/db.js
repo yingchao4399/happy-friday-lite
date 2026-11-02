@@ -391,6 +391,22 @@ async function initDatabase() {
   db.run('CREATE INDEX IF NOT EXISTS idx_note_links_target ON note_link_occurrences(targetNoteId)')
   db.run('CREATE TABLE IF NOT EXISTS note_link_state (noteId TEXT PRIMARY KEY, revision INTEGER NOT NULL)')
 
+  // 背诵模块：会话正文和逐段时间戳独立保存，避免把长音频转写结果塞回配置文件。
+  // recitation.js 使用位置参数写入这三列，旧版没有这些表时由 IF NOT EXISTS 补齐。
+  db.run(`CREATE TABLE IF NOT EXISTS recitation_sessions (
+    id TEXT PRIMARY KEY,
+    payload TEXT NOT NULL,
+    updatedAt TEXT NOT NULL
+  )`)
+  db.run(`CREATE TABLE IF NOT EXISTS recitation_segments (
+    sessionId TEXT NOT NULL,
+    segmentIndex INTEGER NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY (sessionId, segmentIndex),
+    FOREIGN KEY (sessionId) REFERENCES recitation_sessions(id) ON DELETE CASCADE
+  )`)
+  db.run('CREATE INDEX IF NOT EXISTS idx_recitation_segments_session ON recitation_segments(sessionId, segmentIndex)')
+
   // automation_tasks: 本地 DeepAgent 定时任务。cronExpression 使用本机时区的五字段 Cron。
   db.run(`
     CREATE TABLE IF NOT EXISTS automation_tasks (

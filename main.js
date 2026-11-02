@@ -1,12 +1,12 @@
-import { app, BrowserWindow, ipcMain, Menu, net, protocol } from 'electron'
-import { fileURLToPath, pathToFileURL } from 'url'
+import { app, BrowserWindow, ipcMain, Menu } from 'electron'
+import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs'
 import { setDataDir as setConfigDataDir } from './src-electron/config.js'
 import { setDataDir as setDbDataDir, initDb, closeDb } from './src-electron/db.js'
 import { registerCommands } from './src-electron/commands.js'
-import { registerNoteImageScheme, initNoteImages } from './src-electron/note-images.js'
-import { checkAutoBackup } from './src-electron/backup.js'
+import { initNoteImages } from './src-electron/note-images.js'
+import { checkAutoBackup, createUpgradeSnapshot, setRestoreLifecycle } from './src-electron/backup.js'
 import { checkAutoCleanHistory } from './src-electron/historyClean.js'
 import { initPythonEnv } from './src-electron/python-env.js'
 import { startKnowledgeWatcher } from './src-electron/fileWatcher.js'
@@ -23,16 +23,12 @@ import { installIpcCapabilityGateway } from './src-electron/agent/ipcGateway.js'
 import { installEditContextMenu } from './src-electron/edit-context-menu.js'
 import { captureInternalClipboard } from './src-electron/clipboard.js'
 import { showStartupError } from './src-electron/startup-error.js'
-import { NOTE_ASSET_SCHEME, resolveNoteAssetPath } from './src-electron/note-resources.js'
 import './src-electron/app-protocol-privileges.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const isDev = !app.isPackaged
-
-// 笔记图片协议必须在 app ready 之前注册，渲染进程才能直接加载 friday-asset:// 图片
-registerNoteImageScheme()
 
 // Windows 系统通知需与 appId 一致（electron-builder build.appId），否则通知不显示
 app.setAppUserModelId('com.happyfriday.lite')
@@ -82,14 +78,6 @@ let shutdownStarted = false
 let localMcpStarted = false
 let backgroundSchedulers = null
 let backgroundSchedulersTimer = null
-
-function registerNoteAssetProtocol() {
-  protocol.handle(NOTE_ASSET_SCHEME, request => {
-    const filePath = resolveNoteAssetPath(request.url)
-    if (!filePath) return new Response(null, { status: 404 })
-    return net.fetch(pathToFileURL(filePath).href).catch(() => new Response(null, { status: 404 }))
-  })
-}
 
 /**
  * These services are useful after the shell is usable, but none of them is
@@ -239,7 +227,7 @@ async function ensureDataDir() {
   return dataDir
 }
 
-function createWindow() {
+function createWindow({ load = true } = {}) {
   const isMac = process.platform === 'darwin'
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -291,6 +279,11 @@ function createWindow() {
     }
   })
 
+  if (load) loadMainWindow()
+}
+
+function loadMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) return
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173').catch(error => console.error('[Main] 开发页面加载失败:', error.message))
     if (process.env.FRIDAY_DEVTOOLS === '1') mainWindow.webContents.openDevTools()
@@ -313,13 +306,9 @@ app.whenReady().then(async () => {
     return
   }
 
-  // 1. 先创建窗口，让 splash 立即显示（窗口加载 index.html 与主进程初始化并行）
-  createWindow()
-
-  // 不再全程阻止系统节能；后台页面采用 Chromium 自带的限流策略。
-
-  // 2. 初始化数据目录与按页读写的 SQLite，期间 splash 持续显示
-  //    渲染进程加载 JS bundle + Vue mount 通常比此处更慢，IPC 注册会先于首次 invoke 完成
+  // 1. 先完成数据目录和数据库初始化。渲染进程会在挂载时立即调用多组 IPC，
+  //    如果窗口先加载而主进程仍在初始化，所有首屏请求都会收到 No handler registered，
+  //    且各 store 会把空结果缓存成“没有数据”。
   let dataDir
   try { dataDir = await ensureDataDir() }
   catch (error) {
@@ -328,7 +317,12 @@ app.whenReady().then(async () => {
     app.quit()
     return
   }
-  registerNoteAssetProtocol()
+
+  // 2. 数据库已就绪后再创建窗口；下面的 IPC 注册会在 renderer 首次执行前完成。
+  // 先创建隐藏的 BrowserWindow 以便把发送事件的宿主传给 IPC，暂不加载 renderer。
+  createWindow({ load: false })
+
+  // 不再全程阻止系统节能；后台页面采用 Chromium 自带的限流策略。
   // 读取持久化配置后应用日志开关，兼容升级前已存在的配置文件。
   try {
     const configPath = path.join(dataDir, 'config.json')
@@ -369,6 +363,9 @@ app.whenReady().then(async () => {
   } catch (error) {
     console.error('[Main] ❌ Failed to initialize Office host:', error)
   }
+
+  // 所有首屏会调用的 IPC 已注册完成后才加载 renderer，消除启动竞态。
+  loadMainWindow()
 
   // 3. 启动知识库目录监听（用于外部文件变更时自动刷新前端视图）
   try {

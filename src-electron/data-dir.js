@@ -28,11 +28,34 @@ const pointerFilePath = isDev
   ? path.join(projectRoot, 'app-data', 'data-dir.json')
   : path.join(app.getPath('userData'), 'data-dir.json')
 
-/** 迁移白名单：仅复制应用自身数据，跳过日志与 Chromium 缓存 */
+/**
+ * 迁移白名单：复制应用业务数据和用户生成的资源，跳过日志与 Chromium 缓存。
+ *
+ * 这些目录之前没有纳入迁移，用户切换数据目录后数据库虽然存在，笔记图片、
+ * 文件附件、剪贴板媒体和 Office 自动保存文件却仍留在旧目录，表现为“笔记/文件
+ * 消失”或打开后内容为空。列表只在首次迁移（指针 migrated=false）执行一次。
+ */
 const MIGRATE_ENTRIES = [
   'config.json',
   'friday.db',
   'knowledge',
+  'note-assets',
+  'note-images',
+  'clipboard-media',
+  'clipboard-recordings',
+  'recitation',
+  'backups',
+  'docs-autosave',
+  'sheets-autosave',
+  'slides-autosave',
+  'typewriter',
+  'projects',
+  'originals',
+  'plugins',
+  'fonts',
+  'resource-file-index.json',
+  'recent.json',
+  'session.json',
   'app-settings.json',
   'office-ai-panel-prefs.json',
   'happyOffice'

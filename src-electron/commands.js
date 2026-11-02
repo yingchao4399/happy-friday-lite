@@ -823,6 +823,36 @@ export function registerCommands(mainWindow) {
     return db.getNote(args.noteId)
   })
 
+  // 预览版双链面板依赖的关系索引接口，和官方笔记图片/资源接口并存。
+  // 这些通道在官方 3.0.7 合并时被删除，但现有前端与旧数据仍然使用它们。
+  ipcMain.handle('note-links-index', (_event, args) => {
+    const noteId = String(args?.noteId || '')
+    if (!noteId) return { outgoing: [], incoming: [], unresolved: [], related: [], hasMore: {} }
+    return db.getNoteLinks(noteId, args || {})
+  })
+  ipcMain.handle('note-links-rebuild', () => db.rebuildNoteLinks())
+
+  ipcMain.handle('note-link-upsert', (_event, args) => {
+    const fromNoteId = String(args?.fromNoteId || '')
+    const toNoteId = String(args?.toNoteId || '')
+    if (!fromNoteId || !toNoteId || fromNoteId === toNoteId) throw new Error('笔记链接目标无效')
+    if (!db.getNote(fromNoteId) || !db.getNote(toNoteId)) throw new Error('笔记链接目标不存在')
+    const fromUri = `friday://notes/${encodeURIComponent(fromNoteId)}`
+    const toUri = `friday://notes/${encodeURIComponent(toNoteId)}`
+    const relation = args?.relation || 'note-bidirectional'
+    const evidence = typeof args?.evidence === 'string' ? args.evidence : ''
+    const first = db.linkResources(fromUri, toUri, relation, evidence, 'note-editor')
+    const second = db.linkResources(toUri, fromUri, relation, evidence, 'note-editor')
+    return { ok: true, links: [first, second] }
+  })
+
+  ipcMain.handle('note-links-list', (_event, args) => {
+    const noteId = String(args?.noteId || '')
+    if (!noteId) return []
+    const uri = `friday://notes/${encodeURIComponent(noteId)}`
+    return db.getResourceLinks(uri).filter(link => link.relation === 'note-bidirectional')
+  })
+
   // 笔记图片落盘：把粘贴图片的二进制写入 note-images/，正文只保存相对路径
   ipcMain.handle('save_note_image', async (_event, args) => {
     try {
