@@ -759,6 +759,20 @@ export function registerClipboardCommands(win) {
     getImage: id => getClipboardImage({ id, thumbnail: false }), ocr: ocrClipboardImage,
     notify: progress => { emit('clipboard-ai-progress', progress); if (progress.noteId) emit('resource-changed', { kind: 'note', id: progress.noteId }) }
   })
+  // 这些对象以前只被创建却从未启动，导致快捷键、系统托盘、队列和录屏
+  // 即使代码完整也一直处于不可用状态。启动顺序放在 IPC 注册前，确保首个
+  // renderer 请求拿到的是实时状态；单项能力失败只降级该能力，不阻断剪贴板历史。
+  try {
+    desktop.start()
+  } catch (error) {
+    emit('capability-error', { code: error?.code || 'CLIPBOARD_DESKTOP_UNAVAILABLE', message: error?.message, stage: 'clipboard-desktop-start', recoverable: true, nextStep: 'retry' })
+  }
+  try {
+    applyShortcut(preferences)
+  } catch (error) {
+    emit('capability-error', { code: error?.code || 'CLIPBOARD_SHORTCUT_UNAVAILABLE', message: error?.message, stage: 'clipboard-shortcut', recoverable: true, nextStep: 'check-shortcut' })
+  }
+  startRecordingCapture()
   removeExpiredSensitiveItems()
   enforceHistoryRetention()
   if (!expiryTimer) expiryTimer = setInterval(() => {
@@ -767,18 +781,17 @@ export function registerClipboardCommands(win) {
     }
   }, EXPIRY_CLEANUP_MS)
   ipcMain.handle('clipboard-note-open', (_event, args) => { if (!getNote(args?.noteId)) throw clipboardAiError('CLIPBOARD_AI_UNAVAILABLE'); return { ok: true, noteId: args.noteId } })
-  const externalUnavailable = () => { throw Object.assign(new Error('CLIPBOARD_EXTERNAL_DEFERRED'), { code: 'CLIPBOARD_EXTERNAL_DEFERRED' }) }
-  ipcMain.handle('clipboard-quick-open', externalUnavailable)
-  ipcMain.handle('clipboard-quick-hide', externalUnavailable)
-  ipcMain.handle('clipboard-quick-full', externalUnavailable)
-  ipcMain.handle('clipboard-desktop-state', () => ({ target: { available: false, label: '' }, queue: { active: false, paused: false, armed: false, shortcut: '' }, supported: false, trayAvailable: false, capabilities: { ...clipboardCapabilities } }))
+  ipcMain.handle('clipboard-quick-open', () => desktop.show().catch(() => desktop.full()))
+  ipcMain.handle('clipboard-quick-hide', () => desktop.hide())
+  ipcMain.handle('clipboard-quick-full', (_event, args) => desktop.full(args?.noteId))
+  ipcMain.handle('clipboard-desktop-state', () => desktop.state())
   ipcMain.handle('clipboard-paste', (_event, args) => useClipboardItem(args?.id, { confirmSensitive: args?.confirmSensitive === true, mode: args?.mode || 'content', index: args?.index }))
-  ipcMain.handle('clipboard-queue-start', externalUnavailable)
-  ipcMain.handle('clipboard-queue-next', externalUnavailable)
-  ipcMain.handle('clipboard-queue-pause', externalUnavailable)
-  ipcMain.handle('clipboard-queue-skip', externalUnavailable)
-  ipcMain.handle('clipboard-queue-cancel', externalUnavailable)
-  ipcMain.handle('clipboard-queue-arm', externalUnavailable)
+  ipcMain.handle('clipboard-queue-start', (_event, args) => desktop.startQueue(args?.ids))
+  ipcMain.handle('clipboard-queue-next', () => desktop.next())
+  ipcMain.handle('clipboard-queue-pause', (_event, args) => desktop.pause(args?.paused === true))
+  ipcMain.handle('clipboard-queue-skip', () => desktop.skip())
+  ipcMain.handle('clipboard-queue-cancel', () => desktop.cancel())
+  ipcMain.handle('clipboard-queue-arm', (_event, args) => desktop.arm(args?.enabled === true))
   ipcMain.handle('clipboard-capture-internal', () => captureInternalClipboard())
   ipcMain.handle('clipboard-list', (_event, args) => listClipboardItems(args || {}))
   ipcMain.handle('clipboard-get', (_event, args) => {
@@ -811,13 +824,13 @@ export function registerClipboardCommands(win) {
   ipcMain.handle('clipboard-image', (_event, args) => getClipboardImage(args || {}))
   ipcMain.handle('clipboard-image-save', (_event, args) => saveClipboardImage(args || {}))
   ipcMain.handle('clipboard-asset', (_event, args) => getClipboardAsset(args?.id, args?.index ?? 0))
-  ipcMain.handle('clipboard-pin-open', externalUnavailable)
+  ipcMain.handle('clipboard-pin-open', (_event, args) => pins.open(args?.id, args?.expanded === true))
   ipcMain.handle('clipboard-pin-state', event => pins.state(event.sender))
-  ipcMain.handle('clipboard-pin-mode', externalUnavailable)
-  ipcMain.handle('clipboard-pin-close', externalUnavailable)
+  ipcMain.handle('clipboard-pin-mode', (event, args) => pins.mode(event.sender, args?.expanded === true))
+  ipcMain.handle('clipboard-pin-close', event => pins.close(event.sender))
   ipcMain.handle('clipboard-reorder', (_event, args) => reorderClipboardItem(args?.id, args?.beforeId, args?.after === true))
-  ipcMain.handle('clipboard-share-create', externalUnavailable)
-  ipcMain.handle('clipboard-share-revoke', externalUnavailable)
+  ipcMain.handle('clipboard-share-create', (_event, args) => createClipboardShareForItem(args?.id))
+  ipcMain.handle('clipboard-share-revoke', (_event, args) => ({ ok: revokeClipboardShare(String(args?.token || '')) }))
   ipcMain.handle('clipboard-secret-reveal', (_event, args) => revealClipboardSecret(args?.id))
   ipcMain.handle('clipboard-settings-get', () => getClipboardSettings())
   ipcMain.handle('clipboard-settings-save', (_event, args) => saveClipboardSettings(args))

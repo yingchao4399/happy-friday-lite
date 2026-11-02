@@ -11,14 +11,15 @@ export const clipboardDefaults = Object.freeze({
 
 export const clipboardShortcuts = ['CommandOrControl+Shift+V', 'CommandOrControl+Alt+V', 'Alt+Shift+V']
 
-// 系统剪贴板采集与历史复制是基础能力；其余桌面扩展继续单独控制。
+// 桌面扩展由对应模块在启动时初始化。能力表只描述当前平台提供的真实实现，
+// 不能把已经实现的浮窗、队列、置顶和分享标成不可用，否则前端会主动禁用入口。
 export const clipboardCapabilities = Object.freeze({
   externalCapture: true,
-  tray: false,
-  globalShortcut: false,
-  recordingCapture: false,
-  screenPin: false,
-  networkShare: false,
+  tray: process.platform !== 'linux',
+  globalShortcut: process.platform !== 'linux',
+  recordingCapture: process.platform === 'win32',
+  screenPin: process.platform !== 'linux',
+  networkShare: true,
 })
 
 export function normalizeClipboardSettings(value = {}) {
