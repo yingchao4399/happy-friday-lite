@@ -1,6 +1,6 @@
 {
   "name": "happy-friday-lite",
-  "version": "3.0.7-preview.28",
+  "version": "3.0.7-preview.30",
   "description": "Happy Friday Lite - Electron + Vue3",
   "author": "Chen Jie <chenjie.plus@qq.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "electron:dev": "node scripts/fix-dsh-directory-picker-electron.mjs && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "node scripts/prebuild-install.mjs x64 && node scripts/prebuild-clean.mjs x64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --linux --x64 --config.npmRebuild=false && node scripts/verify-packaged-native-modules.mjs x64 && node scripts/prebuild-install.mjs",
-    "electron:build:win": "npm run verify:dsh && node scripts/build-typewriter-host.mjs && node scripts/build-plugin-host.mjs && vite build --configLoader runner && electron-builder --win --x64 --config.npmRebuild=false --publish=never",
+    "electron:build:win": "npm run verify:dsh && node scripts/verify-electron-main-imports.mjs && node scripts/build-typewriter-host.mjs && node scripts/build-plugin-host.mjs && vite build --configLoader runner && electron-builder --win --x64 --config.npmRebuild=false --publish=never && node scripts/smoke-electron-startup.mjs",
     "electron:build:arm64": "node scripts/prebuild-install.mjs arm64 && node scripts/prebuild-clean.mjs arm64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --linux --arm64 --config.npmRebuild=false && node scripts/verify-packaged-native-modules.mjs arm64 && node scripts/prebuild-install.mjs",
     "electron:build:all": "npm run electron:build && npm run electron:build:arm64",
     "electron:build:mac": "node scripts/prebuild-install.mjs darwin arm64 && node scripts/fix-langgraph-sdk.mjs && node scripts/fix-dsh-directory-picker-electron.mjs && vite build && electron-builder --mac --arm64 --config.npmRebuild=false --publish=never",
@@ -424,12 +424,12 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.28-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.30-win-${arch}-setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.28-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.30-win-${arch}-setup.${ext}"
     },
     "linux": {
       "icon": "build/icons/icon.png",
@@ -441,5 +441,5 @@
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     }
   },
-  "releaseVersion": "3.0.7.01-preview.28"
+  "releaseVersion": "3.0.7.01-preview.30"
 }
