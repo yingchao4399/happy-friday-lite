@@ -1647,7 +1647,7 @@ const showAboutModal = ref(false);
 const showFeaturesModal = ref(false);
 const showAuthorModal = ref(false);
 
-const appVersion = packageJson.version;
+const appVersion = packageJson.releaseVersion || packageJson.version;
 
 const aboutLogo = computed(() => fridayLogo);
 

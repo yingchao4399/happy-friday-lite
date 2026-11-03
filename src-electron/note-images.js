@@ -1,4 +1,7 @@
-import { protocol } from 'electron'
+// Use the default Electron namespace so the module remains importable by the
+// Node-based contract tests as well as by Electron's ESM loader.
+import electron from 'electron'
+const { protocol } = electron
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'

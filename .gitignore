@@ -51,6 +51,7 @@ python/__pycache__/
 *.temp
 node_modules
 release/
+release-acceptance*/
 *.md
 !README.md
 !README.zh-CN.md

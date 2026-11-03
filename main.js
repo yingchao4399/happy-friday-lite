@@ -340,6 +340,10 @@ app.whenReady().then(async () => {
     console.log('[Main] ✅ IPC commands registered successfully')
   } catch (error) {
     console.error('[Main] ❌ Failed to register IPC commands:', error)
+    // 注册失败时禁止加载只有部分能力的页面，避免把读取失败显示成“数据为空”。
+    await showStartupError(error, dataDir, mainWindow)
+    app.quit()
+    return
   }
 
   // Office 工作区（happyoffice 编辑器以 WebContentsView 挂载到主窗口）

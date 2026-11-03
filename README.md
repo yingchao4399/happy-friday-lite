@@ -1,5 +1,11 @@
 # Happy Friday Lite
 
+## 3.0.7.01-preview.32
+
+- Removed duplicate screenshot IPC registrations introduced by the merge, restoring clipboard, recitation, Python settings and knowledge-index commands. Startup now stops with an explicit error if command registration fails.
+- Settings show the full preview version. Windows package validation checks the renderer entry and critical IPC commands.
+- Verified inclusion of official 3.0.7 and preview.27, retaining Typewriter, plugins, Office, recitation and clipboard extensions.
+
 ## 3.0.7.01-preview.28
 
 - Merged official 3.0.7 note improvements: image files, screenshot capture, paste compression, and notebook interaction fixes.

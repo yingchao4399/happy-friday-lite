@@ -1,9 +1,13 @@
 import http from 'http'
 import fs from 'fs'
 import path from 'path'
+import crypto from 'crypto'
 import { fileURLToPath } from 'url'
 import * as db from './db.js'
 import { getNoteImagePath, IMAGE_RELATIVE_PREFIX } from './note-images.js'
+import { shareNetworkAddresses } from './share-network.js'
+import { prepareClipboardShareFiles, removeClipboardShareDirectory } from './clipboard-share-files.js'
+import { clipboardAssetMime } from './clipboard-content.js'
 
 // 内网分享服务：在主进程启动一个 HTTP 服务，局域网内可通过浏览器访问
 // 复用前端构建产物（dist/），直接加载已有的对话界面（隐藏输入框）。
