@@ -1,5 +1,6 @@
 import https from 'https'
 import http from 'http'
+import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { loadConfig, getDataDir } from '../config.js'
@@ -43,6 +44,11 @@ function getEmbeddingModelConfig() {
   }
 
   if (!selectedModel.embeddingModelName) {
+    // DeepSeek 当前只提供聊天模型。使用本地确定性词法向量可以让知识库
+    // 在没有远端 Embedding 配置时仍能建立和检索，已配置的远端模型仍优先。
+    if (selectedModel.provider === 'deepseek') {
+      return { modelId: `${selectedModel.id}:local-keyword`, embeddingModelName: 'local-keyword-v1', local: true, baseUrl: 'local://keyword' }
+    }
     throw new Error('RAG: 当前首选模型未配置 Embedding 模型名称，请在模型设置中为模型添加 Embedding 模型')
   }
 
@@ -240,6 +246,27 @@ class HttpApiEmbeddings {
   }
 }
 
+const LOCAL_DIMENSION = 256
+function localTokens(text) {
+  return String(text || '').toLocaleLowerCase().match(/[\p{L}\p{N}]+|[\u3400-\u9fff]/gu) || []
+}
+
+function localVector(text) {
+  const vector = new Array(LOCAL_DIMENSION).fill(0)
+  for (const token of localTokens(text)) {
+    const digest = crypto.createHash('sha256').update(token).digest()
+    const index = digest.readUInt32BE(0) % LOCAL_DIMENSION
+    const sign = (digest[4] & 1) ? 1 : -1
+    vector[index] += sign
+  }
+  return normalizeVector(vector)
+}
+
+class LocalKeywordEmbeddings {
+  async embedDocuments(texts) { return texts.map(localVector) }
+  async embedQuery(text) { return localVector(text) }
+}
+
 /**
  * 检测 Embedding 模型是否变更，如果变更则删除所有旧的向量索引
  * 因为不同模型的向量维度不同，旧索引无法兼容
@@ -332,6 +359,13 @@ export async function getEmbeddings() {
 
   // 如果已缓存且模型未变，直接返回
   if (cachedEmbeddings && cachedModelId === modelConfig.modelId) {
+    return cachedEmbeddings
+  }
+
+  if (modelConfig.local) {
+    await checkModelChangeAndCleanIndex(modelConfig)
+    cachedEmbeddings = new LocalKeywordEmbeddings()
+    cachedModelId = modelConfig.modelId
     return cachedEmbeddings
   }
 

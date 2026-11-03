@@ -30,10 +30,24 @@ try {
   const source = path.join(folder, 'synthetic-rag.md')
   const content = '# Recovery probe\n\nThe recovery marker is RAG_RECOVERY_42. This synthetic note validates document loading, chunking, persistence and retrieval.\n'
   fs.writeFileSync(source, content)
-  saveConfig({ customModels: [{ id: 'probe', provider: 'deepseek', baseUrl: 'http://127.0.0.1', apiKey: 'fixture-only' }], selectedModelId: 'probe' })
+  saveConfig({ customModels: [{ id: 'probe', provider: 'other', baseUrl: 'http://127.0.0.1', apiKey: 'fixture-only' }], selectedModelId: 'probe' })
   const failed = await rebuildKbStore('personal')
   assert.equal(failed.failed, 1)
   assert.match(db.getFileStatus('personal', source).error_message, /未配置 Embedding/)
+
+  saveConfig({ customModels: [{ id: 'probe', provider: 'deepseek', baseUrl: 'https://api.deepseek.com', apiKey: 'fixture-only' }], selectedModelId: 'probe' })
+  clearEmbeddingsCache()
+  const local = await rebuildKbStore('personal')
+  assert.deepEqual(local, { total: 1, changed: 1, unchanged: 0, failed: 0 })
+  const localSummary = await getKbIndexSummary('personal')
+  assert.equal(localSummary.failed, 0)
+  assert.ok(localSummary.vectorCount > 0)
+  clearStoreCache()
+  db.closeDb()
+  await db.initDb()
+  const localHits = await searchKnowledgeBase('RAG_RECOVERY_42', 'probe', 'personal', 3, 0.5)
+  assert.ok(localHits.some(hit => hit.content.includes('RAG_RECOVERY_42')))
+  fs.writeFileSync(source, content + '\nExternal embedding protocol follows.\n')
 
   server = http.createServer(async (req, res) => {
     assert.equal(req.url, '/v1/embeddings')
