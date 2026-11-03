@@ -20,7 +20,7 @@ A read-only SQLite audit of the existing profile found 61 notes, 4 notebooks, 25
 - Vite production build completed and produced `dist/index.html`.
 - Packaged startup smoke passed. It checked the real renderer, preload, clipboard list/settings, recitation list, Python status, and knowledge-base summary IPC.
 - Packaged native-module verifier passed for x64 and verified Harness imports, the Node addon binding and three Windows PE helpers.
-- `node --test scripts/tests/*.test.mjs` passed 309 of 310 tests in the broad run. The only failure was a Windows Electron junction probe timing out while the machine was under packaging load. The same probe and the new local-embedding test pass in a focused run, for 11/11 focused tests.
+- `node --test scripts/tests/*.test.mjs` passed all 310 tests. The Windows Electron junction probe and the new local-embedding test also pass in the focused run.
 - `node scripts/probe-rag-recovery.mjs` passed isolated missing-embedding recovery, HTTP embedding protocol, indexing, vector retrieval, database/vector-store reopen, unchanged skipping and deletion cleanup.
 - The existing personal knowledge base was rebuilt in place with `changed: 4, failed: 0` and summary `success: 4, failed: 0, vectorCount: 34`.
 - The Windows x64 installer is `Happy-Friday-Lite-3.0.7.01-preview.32-win-x64-setup.exe`, 268869232 bytes, SHA256 `8b63a6e8359f36c39a94ca5dd631b3ca6c7246e928b4dfd2b108e0a1f9b54603`.
