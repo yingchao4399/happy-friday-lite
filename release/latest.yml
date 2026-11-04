@@ -1,8 +1,8 @@
 version: 3.0.7
 files:
-  - url: Happy-Friday-Lite-3.0.7.01-preview.32-win-x64-setup.exe
-    sha512: 0SsdkERYmOAFJUu2hUmYgVPwaXmSFub9fH8EntoXFeQ+Dxh5wzLeW2kxzy/yz56I0eKtMJMXka3MKGtBOLcRsw==
-    size: 268869696
-path: Happy-Friday-Lite-3.0.7.01-preview.32-win-x64-setup.exe
-sha512: 0SsdkERYmOAFJUu2hUmYgVPwaXmSFub9fH8EntoXFeQ+Dxh5wzLeW2kxzy/yz56I0eKtMJMXka3MKGtBOLcRsw==
-releaseDate: '2026-11-03T17:46:55.053Z'
+  - url: Happy-Friday-Lite-3.0.7.01-preview.33-win-x64-setup.exe
+    sha512: 4hynp4LsTB6JHb3fMlm713+4mN7HwkwCEcHsuO4PUumEfJwMhv9/KO7smILmGic9V6fUGjyk9je0+SIOx/NHqQ==
+    size: 268869142
+path: Happy-Friday-Lite-3.0.7.01-preview.33-win-x64-setup.exe
+sha512: 4hynp4LsTB6JHb3fMlm713+4mN7HwkwCEcHsuO4PUumEfJwMhv9/KO7smILmGic9V6fUGjyk9je0+SIOx/NHqQ==
+releaseDate: '2026-11-04T10:38:58.845Z'

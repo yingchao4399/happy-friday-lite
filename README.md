@@ -1,5 +1,10 @@
 # Happy Friday Lite
 
+## 3.0.7.01-preview.33
+
+- Fixed missing Simplified Chinese labels in the Notes toolbar Insert menu, including video, audio, attachment, note, note reference, knowledge base and knowledge reference.
+- Windows x64 installer: [3.0.7.01-preview.33](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.7.01-preview.33/Happy-Friday-Lite-3.0.7.01-preview.33-win-x64-setup.exe); SHA256: `21ED6928F383CCAA6FDEC5013331F5AFB9474BDC6047DE282EB8B322E7524426`. Unsigned.
+
 ## 3.0.7.01-preview.32
 
 - Removed duplicate screenshot IPC registrations introduced by the merge, restoring clipboard, recitation, Python settings and knowledge-index commands. Startup now stops with an explicit error if command registration fails.

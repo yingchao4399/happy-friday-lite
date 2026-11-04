@@ -1,5 +1,10 @@
 # Happy Friday Lite
 
+## 3.0.7.01-preview.33
+
+- 修复笔记工具栏“插入”菜单缺少简体中文文案的问题，补齐视频、音频、附件、笔记、笔记引用、知识库和知识库引用。
+- Windows x64 安装包：[3.0.7.01-preview.33](https://github.com/yingchao4399/happy-friday-lite/releases/download/3.0.7.01-preview.33/Happy-Friday-Lite-3.0.7.01-preview.33-win-x64-setup.exe)；SHA256：`21ED6928F383CCAA6FDEC5013331F5AFB9474BDC6047DE282EB8B322E7524426`；未签名。
+
 ## 3.0.7.01-preview.32
 
 - 移除合并后重复注册的截图 IPC，恢复被中断的剪贴板、背诵、Python 环境与知识库索引接口；启动注册失败时明确报错，避免显示成数据消失。
