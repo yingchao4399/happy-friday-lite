@@ -59,6 +59,12 @@ release-acceptance*/
 !docs/clipboard-creation-acceptance-2026-10-23.md
 !docs/Friday-3.0.6-preview.1-UI-UX-parity-audit.md
 !docs/Friday-preview-delivery-status.md
+!docs/GenOffice-v0.12.600-升级分析报告.md
+!docs/GenOffice-v0.12.600-融合升级方案.md
+!docs/GenOffice-v0.12.600-融合升级PRD.md
+!docs/PDF转Word-故障研究报告.md
+!docs/PDF转Word-修复方案.md
+!docs/PDF转Word-修复PRD.md
 !docs/Data-trash-module-order-acceptance-2026-10-24.md
 !docs/*-acceptance-2026-10-24.md
 !docs/DSH-runtime-root-cause-2026-10-24.md

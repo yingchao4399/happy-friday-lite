@@ -1,0 +1,215 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>PDF 转 Word 修复方案</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.65;max-width:980px;margin:36px auto;padding:0 24px;color:#202124}h1{font-size:28px;border-bottom:2px solid #ddd;padding-bottom:8px}h2{font-size:22px;margin-top:30px}h3{font-size:18px;margin-top:24px}code{background:#f3f4f6;padding:2px 4px;border-radius:3px}pre{background:#f6f8fa;padding:14px;overflow:auto}table{border-collapse:collapse;width:100%;margin:16px 0}th,td{border:1px solid #d0d7de;padding:7px 10px;vertical-align:top}th{background:#f6f8fa}blockquote{border-left:4px solid #bbb;padding-left:16px;color:#555}a{color:#0969da}</style><body><h1 id="pdf-word">PDF 转 Word 修复方案</h1>
+<p>日期：2026-11-05</p>
+<p>关联文档：<a href="./PDF转Word-故障研究报告.md">故障研究报告</a>、<a href="./PDF转Word-修复PRD.md">修复 PRD</a>、<a href="./GenOffice-v0.12.600-融合升级方案.md">GenOffice 总体升级方案</a></p>
+<h2 id="1">1. 目标和交付边界</h2>
+<p>本方案针对 Friday 当前 PDF 文件无法转换为 Word 的单一故障，目标是在当前 Friday Office 基线上补齐一条稳定的本地 PDF→DOCX 链路。用户从 PDF 编辑器或文件菜单选择 Word 后，应能选择目标路径，完成转换，打开生成的 DOCX，并看到转换质量或退化页提示。</p>
+<p>修复只覆盖 PDF→DOCX。PDF→XLSX、PDF→PPTX、系统打印、GenOffice 全量升级和新的 AI 编辑器不进入本次发布门槛。总体升级文档继续保留并负责后续版本规划，本方案作为其中一个可独立交付的 P0 补丁。</p>
+<h2 id="2">2. 推荐技术路线</h2>
+<p>采用现有上游本地实现的最小移植路线。Friday host 增加与 <code>PDF_CHANNELS.convertOffice</code> 对应的 <code>ipcMain.handle</code>，校验调用者是当前 PDF tab，再调用 <code>convertPdfFileToDocxLocalWithPrompt</code>。converter、PDFium WASM、OCR helper 通过现有 Office bundle 进入开发目录和安装资源目录。转换输出先写同盘临时文件，校验非空后原子替换目标，已有目标和源文件受到保护。</p>
+<p>流程如下。</p>
+<pre><code class="language-text">PDF renderer
+  -&gt; pdfApi.convertOffice('docx')
+  -&gt; preload ipcRenderer.invoke('pdf:convert-office')
+  -&gt; Friday main handler 校验 sender 与活动 PDF
+  -&gt; flush 当前 PDF 修改并等待可持久化
+  -&gt; 目标选择与目标占用检查
+  -&gt; pdf2docx-local / PDFium / 可选 OCR
+  -&gt; 临时 DOCX + 非空/ZIP 结构检查
+  -&gt; 同盘原子替换
+  -&gt; Friday Docs 打开目标并展示退化提示
+</code></pre>
+<p>不把转换放入 renderer。PDFium 和 OCR 可能执行同步或长时间工作，主进程应通过既有 worker 或独立转换任务隔离，避免 renderer 失去响应。当前 <code>pdf2docx-local</code> 入口的内部阻塞行为需要先测量，若主进程事件循环在长扫描件上冻结，必须把 converter 放入 worker，再验收取消和清理。</p>
+<h2 id="3">3. 实施任务</h2>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>内容</th>
+<th>主要文件</th>
+<th>完成条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F01 基线与失败复现</td>
+<td>固定根 SHA、vendor SHA、安装包版本，保存一个最小可失败 PDF 和脱敏日志</td>
+<td>根 Git、<code>vendor/happyoffice</code>、<code>docs</code></td>
+<td>能稳定记录入口、错误和无产物现象</td>
+</tr>
+<tr>
+<td>F02 IPC 接线</td>
+<td>注册 <code>pdf:convert-office</code>，只接受当前 PDF tab 的 <code>docx</code>，拒绝未知格式和过期 sender</td>
+<td>Friday office host、主进程 IPC</td>
+<td>renderer 调用进入唯一 handler，未知格式有稳定错误</td>
+</tr>
+<tr>
+<td>F03 保存刷新</td>
+<td>转换前请求 PDF renderer 保存 dirty 修改，等待持久化。销毁的 WebContents、超时和用户取消都中止转换</td>
+<td>PDF host adapter、<code>flushPdfSave</code> 调用处</td>
+<td>转换输入与已确认保存快照一致，不读旧源</td>
+</tr>
+<tr>
+<td>F04 converter 接入</td>
+<td>接入 <code>convertPdfFileToDocxLocalWithPrompt</code>，保留密码重试、空格密码和取消语义</td>
+<td><code>pdf2docx-local</code> 及 Friday bundle</td>
+<td>普通、密码、错误密码和取消路径可区分</td>
+</tr>
+<tr>
+<td>F05 输出保护</td>
+<td>目标路径不得等于源路径。目标已有文件先取得明确覆盖确认，临时文件与目标同盘，失败时保留旧目标</td>
+<td>Friday host / 文件服务</td>
+<td>失败、取消和覆盖拒绝都不截断源或旧目标</td>
+</tr>
+<tr>
+<td>F06 结果反馈</td>
+<td>按 <code>pageResults</code>、<code>scannedDocument</code> 分类说明可编辑文本、OCR 和整页图片退化</td>
+<td>i18n、host dialog/notice</td>
+<td>用户能知道成功、退化、密码失败、资源缺失和取消</td>
+</tr>
+<tr>
+<td>F07 资源 staging</td>
+<td>检查 PDFium WASM、OCR helper、相关 native 依赖进入 <code>resources/office</code> 或明确的 resources/ocr 目录</td>
+<td><code>scripts/build-office.mjs</code>、electron-builder 配置</td>
+<td>开发目录、打包目录和移动后的安装目录均能定位资源</td>
+</tr>
+<tr>
+<td>F08 任务生命周期</td>
+<td>防止重复点击、tab 切换、关闭窗口和迟到回调写入错误目标。转换任务结束后清理 worker、临时文件和子进程</td>
+<td>host 状态管理、worker/cleanup</td>
+<td>20 次成功/取消循环无残留和串文档</td>
+</tr>
+<tr>
+<td>F09 回归验证</td>
+<td>运行单测、宿主 probe、安装包样本和中文空格目录样本，保存产物与日志</td>
+<td><code>vendor/happyoffice/apps/shell/tests</code>、Friday scripts</td>
+<td>PRD 中全部 P0 用例有证据</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4">4. 接口与状态合同</h2>
+<h3 id="41">4.1 请求</h3>
+<p><code>format</code> 只允许 <code>docx</code>。handler 从活动 PDF tab 读取源路径，不接受 renderer 自行传入任意源路径。请求必须包含 sender、tabId、源路径和任务标识。源路径在异步等待前后都要复核，源文件变更或 tab 已关闭时中止并提示重试。</p>
+<h3 id="42">4.2 保存状态</h3>
+<p>状态顺序为 <code>idle → flushing → choosing-target → converting → validating-output → opening-docx → complete</code>。任何阶段都可以进入 <code>cancelled</code> 或 <code>failed</code>。保存刷新失败不能继续转换。目标选择取消不会改变源文件状态。转换开始后关闭 tab 或窗口应取消任务并清理资源。</p>
+<p>当前上游 <code>flushPdfSave(contents)</code> 只有一个参数，表示请求 renderer 将已知 dirty 编辑写入源文件。目标 <code>v0.12.600</code> 研究中出现过更强的 <code>flushAll</code> 语义，本小版本不能直接假设当前 Friday 已支持。若 PDF 表单或注释存在“编辑后尚未 Done”的内存状态，应先通过专项探针确定是否需要增加显式 <code>flushAll</code> 参数，再把结论写入代码和测试。</p>
+<h3 id="43">4.3 结果</h3>
+<p>converter 返回 <code>docx</code>、<code>pageResults</code> 和 <code>scannedDocument</code>。成功条件包含 DOCX 文件存在、大小大于零、ZIP 可读取、<code>word/document.xml</code> 存在和正文至少有一个有效段落或明确的图片退化页。<code>scannedDocument</code> 和页面退化状态只影响提示，不应伪造为完全可编辑。</p>
+<h2 id="5">5. 资源和打包方案</h2>
+<p><code>resources/office/wasm/pdfium.wasm</code>、PDF converter bundle、OCR helper 和它们的许可证必须在 staging 时列入 manifest。Windows helper 的实际目录需与 <code>pdf2docx-local.ts</code> 的 <code>process.resourcesPath/ocr/win-ocr.exe</code> 查找规则一致。构建脚本必须在文件缺失时失败或输出阻断，而不是继续生成看似完整的包。</p>
+<p>候选包验证需要先把安装目录移动到含中文和空格的路径，再在无 vendor、无源代码和断网条件下执行。记录 Friday SHA、vendor SHA、目标 tag、构建时间、资源哈希、系统版本、Node/Electron 版本和输出 DOCX SHA256。</p>
+<h2 id="6">6. 取消、并发和文件保护</h2>
+<p>同一活动 PDF 只允许一个 DOCX 转换任务。重复点击返回 busy 提示。任务固定源 <code>entryId</code> 与源路径，等待 converter 返回后复核 tab、源路径和目标路径。目标与源同路径直接拒绝。目标已存在时采用确认后原子替换，拒绝覆盖不会删除旧文件。转换失败、密码取消、保存框取消和输出验证失败都删除临时文件。</p>
+<p>若 converter 使用外部 OCR 进程，取消必须先通知 converter，再清理属于该任务的进程。不能通过杀掉所有同名进程实现清理。窗口关闭时等待有界时间后记录未能清理的任务，并阻止其继续写盘。</p>
+<h2 id="7">7. 验证顺序与闸门</h2>
+<p>G0 固定失败样本、版本和资源快照。G1 证明 IPC handler、保存刷新和普通文字 PDF 可生成 DOCX。G2 覆盖密码、扫描、中文路径、目标保护、取消、重复点击和关闭窗口。G3 在移目录的 Windows 安装包中重复关键用例，所有 P0 通过后才可交付。</p>
+<p>验证不得只检查文件头。DOCX 需要解压检查 XML，使用文档库读取段落、表格和图片数量，并在 Friday Docs 中打开后截图或读取结构。复杂分栏、公式和 OCR 误差应记录限制，不能把“文件可打开”单独当作保真通过。</p>
+<h2 id="8">8. 工作量与交付物</h2>
+<p>在已有 converter 和 build 脚本可复用的前提下，窄范围预计 5–10 人日，其中复现与接线 1–2、宿主与保存合同 1–2、资源和输出保护 1–2、回归与安装包验证 2–4。若发现 converter 必须改为独立 worker、或当前 vendor 缺少可用依赖，应重新估算，不把风险隐藏在原区间内。</p>
+<p>交付物包括代码补丁、必要测试、资源 manifest、失败与通过日志、至少四类 DOCX 样本、安装包验证记录和回滚说明。当前阶段只交付本方案及配套研究报告、PRD，代码修复和验证仍待实施。</p>
+<h2 id="9">9. 建议修改面和责任边界</h2>
+<table>
+<thead>
+<tr>
+<th>区域</th>
+<th>预计修改</th>
+<th>责任</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Friday 主进程</td>
+<td>注册转换 handler、sender 校验、活动 entry 固定、目标保护、进度和错误映射</td>
+<td>Office 宿主</td>
+</tr>
+<tr>
+<td>Friday preload 或 adapter</td>
+<td>仅在当前 bridge 缺少转换调用时补充受限转发，不暴露任意路径执行</td>
+<td>Office bridge</td>
+</tr>
+<tr>
+<td>vendor shell converter</td>
+<td>优先复用现有 <code>pdf2docx-local.ts</code>，只有编译或接口差异时做最小补丁</td>
+<td>vendor 集成</td>
+</tr>
+<tr>
+<td>构建脚本</td>
+<td>staging PDFium、OCR helper、converter 依赖和 manifest</td>
+<td>构建维护</td>
+</tr>
+<tr>
+<td>i18n</td>
+<td>新增错误、退化、密码、busy、取消和资源缺失文案</td>
+<td>产品前端</td>
+</tr>
+<tr>
+<td>测试</td>
+<td>单元状态机、IPC sender、资源清单、真实宿主和安装包样本</td>
+<td>测试与集成</td>
+</tr>
+</tbody>
+</table>
+<p>禁止把转换器复制到 <code>resources/office</code> 后直接手改生成物。源码改变应落到 vendor 或 Friday 源码，再由 <code>npm run office:build</code> 生成资源。<code>resources/office</code> 只用于验证 staging 结果。</p>
+<h2 id="10">10. 错误码和可观测性</h2>
+<p>建议使用稳定错误码，用户看到 i18n 文案，日志看到脱敏 detail。</p>
+<table>
+<thead>
+<tr>
+<th>错误码</th>
+<th>触发</th>
+<th>用户动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PDF_DOCX_BUSY</code></td>
+<td>当前 PDF 已有转换任务</td>
+<td>等待当前任务结束</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_SAVE_REQUIRED</code></td>
+<td>dirty 保存未完成</td>
+<td>保存后重试</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_SOURCE_CHANGED</code></td>
+<td>等待期间源 entry 变化</td>
+<td>回到原 PDF 重试</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_RESOURCE_MISSING</code></td>
+<td>WASM/OCR/bundle 不存在</td>
+<td>修复安装或重试普通 PDF</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_PASSWORD_REQUIRED</code></td>
+<td>需要密码</td>
+<td>输入密码</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_PASSWORD_REJECTED</code></td>
+<td>密码不正确</td>
+<td>重试或取消</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_OUTPUT_INVALID</code></td>
+<td>临时 DOCX 结构无效</td>
+<td>保留旧目标并重试</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_CANCELLED</code></td>
+<td>用户取消或窗口关闭</td>
+<td>无需恢复源文件</td>
+</tr>
+<tr>
+<td><code>PDF_DOCX_FAILED</code></td>
+<td>未分类转换失败</td>
+<td>查看脱敏日志</td>
+</tr>
+</tbody>
+</table>
+<p>日志阶段使用 <code>request</code>, <code>flush</code>, <code>target</code>, <code>convert</code>, <code>validate</code>, <code>commit</code>, <code>cleanup</code>。每条记录携带 runId、entryId 和阶段耗时，不能携带密码和完整路径中的敏感片段。进度条在成功、失败和取消的 finally 路径中都恢复为无进度状态。</p>
+<h2 id="11">11. 回滚与兼容策略</h2>
+<p>修复补丁只新增 PDF→DOCX 行为，不修改旧 PDF 保存、另存、打印和其他转换的已有合同。若新 handler 在候选包中失败，回滚对象必须同时包含 Friday 主应用、vendor bundle 和 <code>resources/office</code>，不能只回退一个 JS 文件。</p>
+<p>发布前保存用户数据目录和当前 PDF 文件副本。转换本身不写回源 PDF，只有用户确认的 dirty 保存会改变源文件。目标写入失败时保留旧目标和临时诊断信息的摘要，不将临时文件留在用户目录。回滚验证至少重新打开原 PDF、读取原 PDF SHA、打开既有 DOCX 和执行一次取消流程。</p>
+<h2 id="12">12. 实施顺序</h2>
+<p>先建立 AC-01 的红灯复现和 handler 诊断日志，再接线并验证普通文字 PDF。随后加入目标保护和保存刷新，接着验证密码与 OCR。资源 staging 和安装包验证必须在开发版通过后进行，不能把开发版成功直接发布。最后执行 20 次生命周期循环和回滚演练。每个阶段记录实际修改文件和未决问题，完成条件未满足时不进入下一阶段。</p></body></html>

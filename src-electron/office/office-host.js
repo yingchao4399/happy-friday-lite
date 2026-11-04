@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
-import { app, dialog, ipcMain, nativeTheme, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell } from 'electron'
 import { registerOfficeAiBridge } from './office-ai-bridge.js'
 import { getDataDir } from '../config.js'
 import { normalizeOfficeDocumentSelection } from './document-selection.js'
@@ -194,6 +194,12 @@ function registerEditorIpc(editor) {
     slides.registerProjectIpc?.()
   } else if (editor === 'pdf') {
     pdf.registerPdfProjectIpc?.()
+    ipcMain.handle('pdf:convert-office', async (event, format) => {
+      if (format !== 'docx') throw Object.assign(new Error('PDF_DOCX_FORMAT_UNSUPPORTED'), { code: 'PDF_DOCX_FORMAT_UNSUPPORTED' })
+      const entry = entryByWebContents(event.sender)
+      if (!entry || entry.type !== 'pdf') throw Object.assign(new Error('PDF_DOCX_SENDER_INVALID'), { code: 'PDF_DOCX_SENDER_INVALID' })
+      return exportPdfToDocx(entry)
+    })
   }
   // Friday 接管编辑器 ai:* 通道（须在编辑器注册之后，后注册者覆盖）。
   // force 允许 Host 初始化阶段的早期注册在 vendor bundle 注册后再次覆盖同名通道。
@@ -644,6 +650,141 @@ function entryByWebContents(arg) {
     if (wc === arg || wc.id === arg) return entry
   }
   return null
+}
+
+let activePdfDocxExport = null
+
+function pdfPasswordPrompt(parent, retry = false) {
+  const preload = path.join(__dirname, 'pdf-password-preload.cjs')
+  const message = retry ? '密码不正确，请重试。' : '此 PDF 受密码保护，请输入打开密码。'
+  const html = `<!doctype html><meta charset="utf-8"><title>PDF 密码</title><style>body{font:14px sans-serif;margin:24px;background:#fff;color:#222}h3{margin:0 0 12px}p{color:#666}input{box-sizing:border-box;width:100%;padding:9px;margin:8px 0 16px}button{padding:7px 16px;margin-left:8px}footer{text-align:right}</style><h3>输入 PDF 密码</h3><p>${message}</p><input id="password" type="password" autofocus><footer><button id="cancel">取消</button><button id="submit">确定</button></footer><script>const p=document.getElementById('password');document.getElementById('submit').onclick=()=>window.pdfPassword.submit(p.value);document.getElementById('cancel').onclick=()=>window.pdfPassword.cancel();p.addEventListener('keydown',e=>{if(e.key==='Enter')window.pdfPassword.submit(p.value);if(e.key==='Escape')window.pdfPassword.cancel()})</script>`
+  const win = new BrowserWindow({
+    width: 420,
+    height: 250,
+    parent: parent && !parent.isDestroyed() ? parent : undefined,
+    modal: Boolean(parent && !parent.isDestroyed()),
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    autoHideMenuBar: true,
+    webPreferences: { preload, contextIsolation: true, nodeIntegration: false },
+  })
+  return new Promise(resolve => {
+    let settled = false
+    const finish = value => {
+      if (settled) return
+      settled = true
+      ipcMain.removeListener('office-pdf-password-submit', onSubmit)
+      ipcMain.removeListener('office-pdf-password-cancel', onCancel)
+      if (!win.isDestroyed()) win.close()
+      resolve(value)
+    }
+    const onSubmit = (event, value) => {
+      if (event.sender === win.webContents && typeof value === 'string') finish(value)
+    }
+    const onCancel = event => { if (event.sender === win.webContents) finish(null) }
+    ipcMain.on('office-pdf-password-submit', onSubmit)
+    ipcMain.on('office-pdf-password-cancel', onCancel)
+    win.once('closed', () => finish(null))
+    void win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`)
+  })
+}
+
+async function waitForPdfFile(filePath, timeoutMs = 120000) {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    try {
+      const stat = await fs.promises.stat(filePath)
+      if (stat.isFile() && stat.size > 0) return true
+    } catch { /* renderer has not flushed yet */ }
+    await new Promise(resolve => setTimeout(resolve, 50))
+  }
+  return false
+}
+
+async function exportPdfToDocx(entry) {
+  if (activePdfDocxExport) {
+    await dialog.showMessageBox(state.mainWindow, { type: 'info', message: 'PDF 正在转换为 Word，请等待当前任务完成。' })
+    return { ok: false, error: { code: 'PDF_DOCX_BUSY', recoverable: true } }
+  }
+  const pdf = state.bundles?.pdf
+  const wc = entry?.view?.webContents
+  if (!pdf || !wc || wc.isDestroyed() || !entry.filePath) return { ok: false, error: { code: 'PDF_DOCX_SOURCE_INVALID', recoverable: true } }
+  if (typeof pdf.convertPdfFileToDocxLocalWithPrompt !== 'function') {
+    return { ok: false, error: { code: 'PDF_DOCX_HANDLER_UNAVAILABLE', recoverable: false } }
+  }
+  const sourcePath = entry.filePath
+  activePdfDocxExport = { viewId: entry.viewId, sourcePath }
+  let temporary = null
+  let backup = null
+  try {
+    const flushed = await pdf.flushPdfSave(wc)
+    if (flushed === false || !(await waitForPdfFile(sourcePath))) return { ok: false, error: { code: 'PDF_DOCX_SAVE_REQUIRED', recoverable: true } }
+    const selected = await dialog.showSaveDialog(state.mainWindow, {
+      defaultPath: sourcePath.replace(/\.pdf$/i, '.docx'),
+      filters: [{ name: 'Word 文档', extensions: ['docx'] }],
+    })
+    if (selected.canceled || !selected.filePath) return { ok: false, cancelled: true }
+    const targetPath = selected.filePath
+    if (path.resolve(targetPath).toLocaleLowerCase() === path.resolve(sourcePath).toLocaleLowerCase()) {
+      return { ok: false, error: { code: 'PDF_DOCX_SOURCE_OVERWRITE', recoverable: true } }
+    }
+    if (fs.existsSync(targetPath)) {
+      const overwrite = await dialog.showMessageBox(state.mainWindow, {
+        type: 'warning', buttons: ['取消', '覆盖'], defaultId: 0, cancelId: 0,
+        message: '目标 Word 文件已存在，是否覆盖？', detail: targetPath,
+      })
+      if (overwrite.response !== 1) return { ok: false, cancelled: true }
+    }
+    const runViewId = entry.viewId
+    const result = await pdf.convertPdfFileToDocxLocalWithPrompt(
+      sourcePath,
+      retry => pdfPasswordPrompt(state.mainWindow, retry),
+      (page, total) => {
+        if (state.mainWindow && !state.mainWindow.isDestroyed() && total > 0) state.mainWindow.setProgressBar(page / total)
+      },
+    )
+    if (result === null) return { ok: false, cancelled: true }
+    if (state.views.get(runViewId)?.view?.webContents !== wc || path.resolve(entry.filePath) !== path.resolve(sourcePath)) {
+      return { ok: false, error: { code: 'PDF_DOCX_SOURCE_CHANGED', recoverable: true } }
+    }
+    const AdmZip = _require('adm-zip')
+    const buffer = Buffer.from(result.docx)
+    const zip = new AdmZip(buffer)
+    if (!buffer.length || !zip.getEntry('[Content_Types].xml') || !zip.getEntry('word/document.xml')) {
+      return { ok: false, error: { code: 'PDF_DOCX_OUTPUT_INVALID', recoverable: true } }
+    }
+    temporary = path.join(path.dirname(targetPath), `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.tmp`)
+    await fs.promises.writeFile(temporary, buffer, { flag: 'wx' })
+    if (fs.existsSync(targetPath)) {
+      backup = path.join(path.dirname(targetPath), `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.bak`)
+      await fs.promises.rename(targetPath, backup)
+    }
+    try {
+      await fs.promises.rename(temporary, targetPath)
+    } catch (error) {
+      if (backup) await fs.promises.rename(backup, targetPath).catch(() => {})
+      throw error
+    }
+    if (backup) await fs.promises.unlink(backup).catch(() => {})
+    temporary = null
+    backup = null
+    await openOfficeFile(targetPath, { notifyOpened: true })
+    const degraded = result.pageResults?.filter(page => page.status !== 'ok')?.map(page => page.page) || []
+    if (degraded.length) await dialog.showMessageBox(state.mainWindow, { type: 'info', message: `Word 已生成。第 ${degraded.join(', ')} 页包含 OCR 或图片退化内容，请校对。` })
+    return { ok: true, data: { path: targetPath, pages: result.pages, degradedPages: degraded } }
+  } catch (error) {
+    console.warn('[Office] PDF→Word failed:', error?.code || error?.message || error)
+    return { ok: false, error: { code: error?.code || error?.message || 'PDF_DOCX_FAILED', recoverable: true } }
+  } finally {
+    if (temporary) await fs.promises.unlink(temporary).catch(() => {})
+    if (backup) {
+      await fs.promises.unlink(targetPath).catch(() => {})
+      await fs.promises.rename(backup, targetPath).catch(() => {})
+    }
+    activePdfDocxExport = null
+    if (state.mainWindow && !state.mainWindow.isDestroyed()) state.mainWindow.setProgressBar(-1)
+  }
 }
 
 // ---- 对外 API ---------------------------------------------------------------

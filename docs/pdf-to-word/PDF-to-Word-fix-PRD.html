@@ -1,0 +1,323 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>PDF 转 Word 修复 PRD</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.65;max-width:980px;margin:36px auto;padding:0 24px;color:#202124}h1{font-size:28px;border-bottom:2px solid #ddd;padding-bottom:8px}h2{font-size:22px;margin-top:30px}h3{font-size:18px;margin-top:24px}code{background:#f3f4f6;padding:2px 4px;border-radius:3px}pre{background:#f6f8fa;padding:14px;overflow:auto}table{border-collapse:collapse;width:100%;margin:16px 0}th,td{border:1px solid #d0d7de;padding:7px 10px;vertical-align:top}th{background:#f6f8fa}blockquote{border-left:4px solid #bbb;padding-left:16px;color:#555}a{color:#0969da}</style><body><h1 id="pdf-word-prd">PDF 转 Word 修复 PRD</h1>
+<p>日期：2026-11-05</p>
+<p>关联文档：<a href="./PDF转Word-故障研究报告.md">故障研究报告</a>、<a href="./PDF转Word-修复方案.md">修复方案</a></p>
+<h2 id="1">1. 文档状态</h2>
+<p>本文定义 PDF→DOCX 小版本的产品需求和验收标准。当前状态为待修复。原有 GenOffice 总体分析、总体方案和总体 PRD 继续保留，负责后续版本的范围和决策。本 PRD 不改写总体文档，也不把总体升级作为本次修复的前置条件。</p>
+<h2 id="2">2. 用户问题与成功定义</h2>
+<p>用户在 Friday 中打开一个 PDF，选择“转换为 Word”，当前可能没有 DOCX、转换失败无清晰原因，或生成内容不是当前已保存版本。修复后，用户可以完成目标选择、看到转换进度和结果，生成的 DOCX 能被 Friday Docs 或 Microsoft Word 打开。扫描页和 OCR 不可用时必须明确提示退化内容。</p>
+<p>本版本的成功定义是 PDF→DOCX 端到端可用。文件可打开、源 PDF 不被覆盖、取消可恢复、密码和资源错误可理解、安装版无需 vendor 目录即可运行。</p>
+<h2 id="3">3. 范围和优先级</h2>
+<table>
+<thead>
+<tr>
+<th>范围</th>
+<th>优先级</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDF renderer 到 Friday main 的 <code>pdf:convert-office</code> 链路</td>
+<td>P0</td>
+<td>必须真实调用并返回稳定结果</td>
+</tr>
+<tr>
+<td>普通文字 PDF 转 DOCX</td>
+<td>P0</td>
+<td>关键段落、表格、图片可读取</td>
+</tr>
+<tr>
+<td>dirty PDF 保存后转换</td>
+<td>P0</td>
+<td>转换内容来自已确认快照</td>
+</tr>
+<tr>
+<td>加密 PDF 密码重试和取消</td>
+<td>P0</td>
+<td>保留空格，不记录密码</td>
+</tr>
+<tr>
+<td>扫描 PDF、OCR 和图片退化提示</td>
+<td>P0</td>
+<td>明确逐页状态</td>
+</tr>
+<tr>
+<td>目标文件保护、取消、重复点击、关闭窗口</td>
+<td>P0</td>
+<td>不损坏源或已有目标</td>
+</tr>
+<tr>
+<td>PDFium、OCR 和 converter 的安装包资源</td>
+<td>P0</td>
+<td>移目录和断网条件可运行</td>
+</tr>
+<tr>
+<td>PDF→XLSX、PDF→PPTX、打印和全量 Office 升级</td>
+<td>本版本不纳入</td>
+<td>另行规划</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4">4. 功能需求</h2>
+<h3 id="fr-pdf-01">FR-PDF-01 入口与权限</h3>
+<p>PDF editor 的转换菜单和 ribbon 入口都调用 <code>pdfApi.convertOffice('docx')</code>。主进程只接受当前活动 PDF tab 的 sender，旧 tab、非 PDF sender、未知 format 和缺少源路径都返回稳定错误。renderer 不得自行指定另一个文件作为源。</p>
+<h3 id="fr-pdf-02">FR-PDF-02 保存快照</h3>
+<p>转换开始前检查 dirty 状态。存在未保存编辑时请求保存并等待持久化。保存超时、renderer 销毁、用户取消和源路径变化都停止转换。目标 <code>flushAll</code> 是否需要由专项测试决定，不能在没有证据时把未 Done 的表单值标记为已支持。</p>
+<h3 id="fr-pdf-03">FR-PDF-03 目标选择</h3>
+<p>默认目标为源文件同目录的同名 <code>.docx</code>。目标路径支持中文、空格和长路径。取消目标选择不创建文件。目标不能与源 PDF 解析到同一规范化路径。</p>
+<h3 id="fr-pdf-04">FR-PDF-04 转换执行</h3>
+<p>主进程调用本地 <code>convertPdfFileToDocxLocalWithPrompt</code> 或等价适配器。转换器使用 PDFium WASM，存在可用 helper 时使用平台 OCR。转换过程提供开始、页进度、验证和完成状态。长文档转换不能无限阻塞窗口。</p>
+<h3 id="fr-pdf-05">FR-PDF-05 密码</h3>
+<p>普通 PDF 先尝试无密码读取。收到 <code>password-required</code> 后显示密码框。错误密码允许重试，密码中的前后空格必须保留，取消密码立即停止且不生成半成品。密码不得写日志、IPC 事件或错误详情。</p>
+<h3 id="fr-pdf-06">FR-PDF-06 输出验证</h3>
+<p>写入目标前先写同盘临时文件。验证目标为非空 DOCX ZIP，包含 <code>[Content_Types].xml</code> 和 <code>word/document.xml</code>。验证失败时删除临时文件并保留已有目标。验证通过后原子替换，之后再打开 Friday Docs。</p>
+<h3 id="fr-pdf-07">FR-PDF-07 质量提示</h3>
+<p>转换完成后检查 <code>pageResults</code> 和 <code>scannedDocument</code>。纯文字页提示可编辑文本。OCR 页提示机器识别结果需要校对。整页图片页说明该页保留为图片，不能显示为完全可编辑。提示中应包含页码，使用现有中英文 i18n。</p>
+<h3 id="fr-pdf-08">FR-PDF-08 生命周期</h3>
+<p>同一 PDF 同时只能有一个转换任务。重复点击显示进行中。切换文件、关闭 tab、关闭主窗口或替换活动 tab 时，任务取消或进入有界清理流程。异步返回后必须确认原始 entry、sender 和目标仍然有效，迟到结果不能写入另一个文档。</p>
+<h3 id="fr-pdf-09">FR-PDF-09 资源</h3>
+<p>正式包必须包含 PDFium WASM、converter 需要的 Node bundle、Windows OCR helper（若构建该平台）和许可证。运行时优先从 <code>process.resourcesPath</code> 定位。移除 vendor 和源码后仍能完成普通 PDF 转换。</p>
+<h3 id="fr-pdf-10">FR-PDF-10 错误反馈</h3>
+<p>错误至少区分入口未接线、资源缺失、密码错误、PDF 损坏、格式不支持、保存失败、目标被占用、用户取消、超时和未知异常。用户界面显示可理解的文案，日志保留稳定错误码和脱敏上下文。</p>
+<h2 id="5">5. 验收矩阵</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>样本与操作</th>
+<th>通过条件</th>
+<th>证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AC-01</td>
+<td>单页可提取文字 PDF，菜单转 Word</td>
+<td>生成非空 DOCX，段落可读，Friday Docs 可打开</td>
+<td>入口日志、DOCX XML、截图</td>
+</tr>
+<tr>
+<td>AC-02</td>
+<td>多页中文英文混排 PDF</td>
+<td>页序和关键句正确，中文路径无异常</td>
+<td>输出 SHA、XML、路径日志</td>
+</tr>
+<tr>
+<td>AC-03</td>
+<td>含表格、图片、分栏的 PDF</td>
+<td>表格和图片可读，复杂布局限制有记录</td>
+<td>解压结构、截图、限制记录</td>
+</tr>
+<tr>
+<td>AC-04</td>
+<td>修改文本或旋转页面后不保存</td>
+<td>先出现保存流程，取消保存不产生 DOCX</td>
+<td>dirty 状态、目录前后对照</td>
+</tr>
+<tr>
+<td>AC-05</td>
+<td>修改后确认保存再转换</td>
+<td>DOCX 反映最新已保存内容，源 PDF 可重开</td>
+<td>源快照 SHA、DOCX 内容</td>
+</tr>
+<tr>
+<td>AC-06</td>
+<td>表单或注释存在未 Done 内存状态</td>
+<td>按产品最终确定的 flush 合同执行，结果与合同一致</td>
+<td>flush 请求、快照、字段对照</td>
+</tr>
+<tr>
+<td>AC-07</td>
+<td>正确密码、错误后重试、四个空格密码</td>
+<td>正确生成，错误可重试，空格不 trim，密码不落日志</td>
+<td>脱敏日志、产物</td>
+</tr>
+<tr>
+<td>AC-08</td>
+<td>密码框取消</td>
+<td>无输出、无临时文件、busy 状态清理</td>
+<td>目录清单、状态日志</td>
+</tr>
+<tr>
+<td>AC-09</td>
+<td>扫描 PDF 且 OCR helper 可用</td>
+<td>OCR 页有可编辑文本，提示需要校对</td>
+<td>pageResults、DOCX 文本</td>
+</tr>
+<tr>
+<td>AC-10</td>
+<td>扫描 PDF 且 OCR 不可用</td>
+<td>生成图片退化或明确失败，不能假报完全可编辑</td>
+<td>资源清单、页码提示</td>
+</tr>
+<tr>
+<td>AC-11</td>
+<td>损坏 PDF、证书加密 PDF</td>
+<td>明确错误，无半成品，下次普通转换可运行</td>
+<td>错误码、重试日志</td>
+</tr>
+<tr>
+<td>AC-12</td>
+<td>目标已有 DOCX</td>
+<td>拒绝覆盖时旧目标不变，确认覆盖后完整替换</td>
+<td>前后 SHA、打开结果</td>
+</tr>
+<tr>
+<td>AC-13</td>
+<td>目标与源同路径、目标目录无权限</td>
+<td>操作被拒绝，源文件不变</td>
+<td>错误文案、源 SHA</td>
+</tr>
+<tr>
+<td>AC-14</td>
+<td>重复点击转换</td>
+<td>只创建一个任务和一个输出</td>
+<td>任务 ID、输出数量</td>
+</tr>
+<tr>
+<td>AC-15</td>
+<td>转换中切换 PDF、关闭 tab、关闭窗口</td>
+<td>任务安全取消或有界清理，不能写错文件</td>
+<td>lifecycle 日志、进程列表</td>
+</tr>
+<tr>
+<td>AC-16</td>
+<td>中文空格安装目录、无 vendor、断网</td>
+<td>普通 PDF 可完成本地转换</td>
+<td>安装包 SHA、资源定位、输出</td>
+</tr>
+<tr>
+<td>AC-17</td>
+<td>连续 20 次成功和取消交替</td>
+<td>无持续 worker、OCR 或临时目录残留</td>
+<td>进程、目录和内存记录</td>
+</tr>
+<tr>
+<td>AC-18</td>
+<td>安装包打开生成 DOCX</td>
+<td>Friday Docs 正确打开，保存重开内容存在</td>
+<td>安装版截图和文件检查</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6">6. 非功能约束</h2>
+<p>转换过程不得把 API Key、PDF 密码或完整 PDF 内容写入普通日志。输出失败不能截断已有目标。Windows 中文和空格目录必须可用。界面文案通过 zh-CN 和 en-US i18n 提供。主进程和 renderer 之间只传递必要的状态、错误码和进度。</p>
+<h2 id="7">7. 验收门槛</h2>
+<p>开发环境通过 AC-01、AC-02、AC-05、AC-07、AC-12、AC-14 后才可进入安装包验证。安装包必须通过 AC-01、AC-02、AC-08、AC-10、AC-11、AC-15、AC-16、AC-18。任一 P0 用例失败都不能把该版本标记为 PDF 转 Word 修复完成。</p>
+<h2 id="8">8. 当前完成度</h2>
+<p>需求、故障链和验收样本已经定义。当前代码尚未按本 PRD 修复，真实安装包转换和 DOCX 产物尚未产生。本轮文档完成不代表功能完成。</p>
+<h2 id="9">9. 用户交互细节</h2>
+<p>转换按钮在任务开始后进入忙碌状态，重复点击不会启动第二个任务。保存 dirty PDF 时先显示保存阶段，用户取消保存即可结束，不弹出无意义的目标选择框。目标选择取消返回 PDF 页面，不改变其 dirty 状态。转换过程中显示页进度，无法计算总页数时显示不确定进度。</p>
+<p>成功后显示目标文件名和打开 Word 文档动作。若目标已存在，覆盖确认必须在开始写目标前完成。转换过程中不自动关闭源 PDF。成功打开 DOCX 后，源 PDF 仍可单独关闭或继续编辑。</p>
+<h2 id="10">10. 格式保真口径</h2>
+<p>PDF→DOCX 是版面和内容转换，不承诺恢复原始 PDF 生成软件的编辑对象。验收关注阅读顺序、关键文字、页数近似、表格内容、图片内容和 DOCX 可编辑性。复杂分栏、嵌套字体、公式、批注、签名、动态内容和扫描识别误差需要在样本记录中单独说明。</p>
+<p>扫描页面有三种可见结果。文字层成功时输出可编辑段落。OCR 成功时输出机器识别文字并提示校对。OCR 不可用或失败时可保留整页图片，提示具体页码。产品不能把图片页计为可编辑文本，也不能因存在图片就把整个转换标记为失败。</p>
+<h2 id="11">11. 测试数据集</h2>
+<p>实施前固定并记录以下样本的 SHA256。样本不得包含真实个人信息。</p>
+<table>
+<thead>
+<tr>
+<th>样本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text-single.pdf</code></td>
+<td>单页入口和最小红灯</td>
+</tr>
+<tr>
+<td><code>cjk-mixed.pdf</code></td>
+<td>中文、英文、空格路径和段落顺序</td>
+</tr>
+<tr>
+<td><code>table-image.pdf</code></td>
+<td>表格、图片和非文字对象</td>
+</tr>
+<tr>
+<td><code>scan-ocr.pdf</code></td>
+<td>OCR 可用时的可编辑文本</td>
+</tr>
+<tr>
+<td><code>scan-no-ocr.pdf</code></td>
+<td>图片退化和资源缺失提示</td>
+</tr>
+<tr>
+<td><code>encrypted.pdf</code></td>
+<td>密码、错误重试和取消</td>
+</tr>
+<tr>
+<td><code>testPassword4Spaces.pdf</code></td>
+<td>四个空格密码不 trim</td>
+</tr>
+<tr>
+<td><code>corruptExample.pdf</code></td>
+<td>损坏页和稳定错误</td>
+</tr>
+<tr>
+<td><code>certEncrypted.pdf</code></td>
+<td>不支持的证书加密</td>
+</tr>
+<tr>
+<td><code>long-multipage.pdf</code></td>
+<td>进度、取消和事件循环响应</td>
+</tr>
+</tbody>
+</table>
+<h2 id="12">12. 证据格式</h2>
+<p>每个 AC 用例需要保存候选版本、命令、退出码、脱敏日志、源 SHA256、目标 SHA256、DOCX 解压检查结果和必要截图。测试结果使用 <code>pass</code>、<code>fail</code>、<code>blocked</code> 三态。<code>blocked</code> 必须说明是环境依赖缺失、样本缺失还是产品问题，不能折算为通过。</p>
+<h2 id="13">13. 发布和回退条件</h2>
+<p>只有 AC-01 至 AC-18 中所有 P0 条件通过，且安装包能在无 vendor 的中文空格目录运行，才可标记“PDF 转 Word 修复版”。如果仅开发目录通过，版本状态写为“开发候选”。如果普通文字 PDF 通过但 OCR 或资源验证失败，必须在发布说明中列出退化范围并继续阻断本 P0 修复。</p>
+<p>回退时恢复与资源目录匹配的上一候选包。用户原 PDF 不需要迁移，因为转换不会改写源文件。对已生成的 DOCX 保留用户文件，不由回退脚本删除或覆盖。</p>
+<h2 id="14">14. 需求追踪</h2>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>方案任务</th>
+<th>验收</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR-PDF-01</td>
+<td>F02</td>
+<td>AC-01、AC-14</td>
+</tr>
+<tr>
+<td>FR-PDF-02</td>
+<td>F03</td>
+<td>AC-04、AC-05、AC-06</td>
+</tr>
+<tr>
+<td>FR-PDF-03、06</td>
+<td>F05</td>
+<td>AC-12、AC-13</td>
+</tr>
+<tr>
+<td>FR-PDF-04、05</td>
+<td>F04、F08</td>
+<td>AC-07、AC-08、AC-15</td>
+</tr>
+<tr>
+<td>FR-PDF-07</td>
+<td>F06</td>
+<td>AC-09、AC-10</td>
+</tr>
+<tr>
+<td>FR-PDF-08</td>
+<td>F08</td>
+<td>AC-14、AC-15、AC-17</td>
+</tr>
+<tr>
+<td>FR-PDF-09</td>
+<td>F07</td>
+<td>AC-16、AC-18</td>
+</tr>
+<tr>
+<td>FR-PDF-10</td>
+<td>F06、F09</td>
+<td>AC-11、AC-13</td>
+</tr>
+</tbody>
+</table></body></html>
