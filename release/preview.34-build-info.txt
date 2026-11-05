@@ -1,0 +1,11 @@
+Happy Friday Lite 3.0.7.01-preview.34 Office AI tool-call repair candidate
+Built: 2026-11-05 Asia/Shanghai
+Target: Windows x64
+Installer: Happy-Friday-Lite-3.0.7.01-preview.34-win-x64-setup.exe
+Size: 270163425 bytes
+SHA256: 19FB7CE1067866003AAB45B260A49B17CD968263A591C30F9743D289E3BB248D
+SHA512: lITiCak9M4xcfh+18TWnsMvP7baKuUs0qpx3PC1KLuLUEHiuKll4islnFTdAy8p+R3VSkQ9vlFFBDTa0uLMyXg==
+Build checks: Office stream unit tests 2/2; Vite build; Electron Windows x64 package; packaged startup IPC smoke; local SSE/auth/422/interruption probe 4/4
+Change: Office OpenAI-compatible bridge now sends a bounded max_tokens budget, merges fragmented or cumulative tool arguments, identifies max-token truncation, and logs only redacted metadata.
+Known limitation: same 22-page PDF with the user's live model/API configuration has not yet been replayed. Candidate is not a confirmed end-to-end fix.
+Installer: unsigned

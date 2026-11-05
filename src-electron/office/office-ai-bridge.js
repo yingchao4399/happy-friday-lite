@@ -6,6 +6,13 @@ import { NETWORK_ERROR_CLASSIFICATIONS, annotateNetworkError, classifyNetworkErr
 import { executeCapability } from '../agent/tools/registry.js'
 import { createAiChatCapabilityInvoker } from './ai-inference-adapter.js'
 import { toOpenAiMessages } from './canonical-transcript.js'
+import {
+  OFFICE_DEFAULT_MAX_OUTPUT_TOKENS,
+  finalizeOfficeToolCalls,
+  mergeOfficeToolDelta,
+  mergeToolName,
+  normalizeOfficeStopReason,
+} from './office-ai-stream.js'
 
 /**
  * Office 编辑器 AI 桥接：用 Friday 的模型层覆写编辑器注册的 ai:* IPC。
@@ -92,6 +99,12 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
   const body = {
     model: model.modelName,
     messages: chatMessages,
+    // The renderer advertises an 8192-token Office budget, but the old bridge
+    // silently dropped it. On long PDF reads the provider could spend the
+    // default completion budget and cut a tool JSON object in half.
+    max_tokens: Number.isFinite(Number(model.maxOutputTokens))
+      ? Math.max(256, Math.min(32768, Number(model.maxOutputTokens)))
+      : OFFICE_DEFAULT_MAX_OUTPUT_TOKENS,
     stream: true,
     stream_options: { include_usage: true },
     thinking: { type: model.thinking === 'enabled' ? 'enabled' : 'disabled' },
@@ -175,12 +188,12 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
           const index = Number.isInteger(tc.index) ? tc.index : 0
           const current = pendingCalls.get(index) || { id: '', name: '', args: '' }
           if (tc.id) current.id = tc.id
-          if (tc.function?.name) current.name = tc.function.name
-          if (tc.function?.arguments) current.args += tc.function.arguments
+          if (tc.function?.name) current.name = mergeToolName(current.name, tc.function.name)
+          if (tc.function?.arguments) current.args = mergeOfficeToolDelta(current.args, tc.function.arguments)
           pendingCalls.set(index, current)
         }
       }
-      if (choice?.finish_reason) stopReason = NORMALIZE_STOP[choice.finish_reason] || choice.finish_reason
+      if (choice?.finish_reason) stopReason = normalizeOfficeStopReason(NORMALIZE_STOP[choice.finish_reason] || choice.finish_reason)
     }
 
     while (true) {
@@ -203,12 +216,18 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
         classification: NETWORK_ERROR_CLASSIFICATIONS.STREAM_INTERRUPTED,
       })
     }
-    const toolCalls = [...pendingCalls.values()].map(call => {
-      let input
-      let inputError
-      try { input = call.args ? JSON.parse(call.args) : {} } catch (error) { input = {}; inputError = `invalid tool input JSON: ${error.message}` }
-      return { id: call.id || `call_${call.name}`, name: call.name, input, ...(inputError ? { inputError } : {}) }
-    })
+    const toolCalls = finalizeOfficeToolCalls(pendingCalls, stopReason)
+    const argumentLengths = new Map([...pendingCalls.values()].map((pending) => [pending.id, pending.args.length]))
+    for (const call of toolCalls) {
+      if (call.inputError || call.truncated) {
+        console.warn('[Office AI] tool call arguments unusable', {
+          name: call.name,
+          argumentLength: argumentLengths.get(call.id) || 0,
+          truncated: Boolean(call.truncated),
+          stopReason: stopReason || null,
+        })
+      }
+    }
     return { content, toolCalls, stopReason }
   } catch (error) {
     if (signal?.aborted) throw error
