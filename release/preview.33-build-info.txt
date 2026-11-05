@@ -1,0 +1,9 @@
+Happy Friday Lite 3.0.7.01-preview.33 PDF→Word 修复包
+Built: 2026-11-05 Asia/Shanghai
+Target: Windows x64
+Installer: Happy-Friday-Lite-3.0.7.01-preview.33-win-x64-setup.exe
+Size: 270162030 bytes
+SHA256: 1FFFFE51FDB9314070244DDCE9E027CB440E4E014872E4171422E948C6D509B7
+Build checks: frontend Vite, packaged Electron startup IPC smoke, Windows native module verification, PDF→DOCX unit tests 13/13
+Change: repaired PDF→Word export by wiring the local PDFium/pdf2docx pipeline into Friday's PDF host, adding OCR/password handling, DOCX validation, atomic overwrite backup/restore, and packaged WASM/OCR assets.
+Installer: unsigned
