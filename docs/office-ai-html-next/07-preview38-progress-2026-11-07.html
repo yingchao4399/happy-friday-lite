@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>preview.38 进度与下一版门槛</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:#f4f6f7;color:#222e36;font:16px/1.85 'Microsoft YaHei','PingFang SC',system-ui,sans-serif}
+a{color:#145f78;text-underline-offset:3px}a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #ba7517;outline-offset:3px}
+header{background:#fff;border-bottom:1px solid #d7e0e2}.bar{max-width:1420px;margin:auto;padding:15px 25px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-weight:700;margin-right:auto}.nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}.nav [aria-current=page]{font-weight:700;color:#173f4a}
+.layout{max-width:1420px;margin:25px auto 60px;padding:0 22px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:22px;align-items:start}
+.toc{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:16px;font-size:13px}
+.toc summary{font-size:15px;font-weight:700;cursor:pointer}.toc a{display:block;padding:5px 0;text-decoration:none;line-height:1.5}.toc a.sub{padding-left:12px}
+main{min-width:0;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:34px 40px}.landing{max-width:1100px;margin:28px auto 60px}
+.note{background:#fff7e5;border-left:4px solid #c58b28;padding:12px 16px;margin-bottom:24px;font-size:14px}
+h1{font-size:29px;line-height:1.5;margin:0 0 20px}h2{font-size:22px;line-height:1.5;margin:40px 0 16px;padding-top:14px;border-top:1px solid #d7e0e2}h3{font-size:18px;margin:25px 0 10px}
+p,li,td,th{overflow-wrap:anywhere}p{margin:12px 0}li{margin:6px 0}.table-scroll{overflow-x:auto;border:1px solid #d7e0e2;border-radius:4px;margin:18px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;line-height:1.75}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-right:1px solid #d7e0e2;border-bottom:1px solid #d7e0e2}th{background:#eaf2f1}tr:last-child td{border-bottom:0}
+pre{background:#f1f4f4;border:1px solid #d7e0e2;padding:16px;overflow:auto;font:13px/1.7 Consolas,monospace}code{font-family:Consolas,monospace;background:#eff3f3;padding:1px 3px;overflow-wrap:anywhere}pre code{padding:0;background:none}
+footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#586870;font-size:13px}.docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.item{border:1px solid #d7e0e2;border-radius:6px;padding:20px}.item h2{border:0;margin:0 0 10px;padding:0;font-size:19px}.item p{font-size:14px}
+@media(max-width:800px){.layout{display:block;padding:0 12px;margin-top:14px}.toc{position:static;max-height:270px;margin-bottom:14px}main,.landing{padding:22px 18px}.landing{margin:14px 12px}.docs{grid-template-columns:1fr}.bar{padding:13px 16px}h1{font-size:24px}h2{font-size:20px}}
+@media print{body{background:white;font-size:10pt}header,.toc{display:none}.layout{display:block;margin:0;padding:0}main,.landing{border:0;padding:0;margin:0}table{min-width:0;font-size:8pt}th,td{padding:5pt;border:1px solid #aaa}.table-scroll{overflow:visible;border:0}pre{white-space:pre-wrap}h2,h3{break-after:avoid}@page{size:A4;margin:16mm}}
+</style></head><body><header><div class="bar"><span class="brand">Friday Office · AI HTML 规划</span><nav class="nav" aria-label="文档导航"><a href="index.html">文档导航</a><a href="01-integration-plan.html">融合研究与实施方案</a><a href="02-prd.html">产品需求 PRD</a><a href="03-technical-integration.html">技术对接与拆解</a><a href="04-implementation-and-validation.html">实施与验收记录</a><a href="05-ai-service-contract-audit.html">AI 服务合同审计</a><a href="06-preview37-progress-2026-11-07.html">preview.37 进度与交付结果</a><a href="07-preview38-progress-2026-11-07.html" aria-current="page">preview.38 进度与下一版门槛</a></nav></div></header><div class="layout"><aside class="toc"><details open><summary>本篇目录</summary><a class="" href="#section-2">1. 本轮目标</a><a class="" href="#section-3">2. 已完成的源码改动</a><a class="sub" href="#section-4">2.1 Preview 启动策略</a><a class="sub" href="#section-5">2.2 注册表和构建准入</a><a class="sub" href="#section-6">2.3 宿主能力结果</a><a class="sub" href="#section-7">2.4 用户操作边界</a><a class="" href="#section-8">3. 当前验证结果</a><a class="" href="#section-9">4. 构建门槛</a><a class="" href="#section-10">5. 尚未完成的功能和风险</a><a class="" href="#section-11">6. 下一版执行顺序</a><a class="" href="#section-12">7. 相关文档</a></details></aside><main><div class="note"><strong>阅读提示：</strong>前三篇为下一版规划；第 04 篇记录实际实施与验收。源代码接入、编译、运行、完整对等和发布分别核验，不以局部通过代替整体完成。</div><h1 id="section-1">AI HTML preview.38 进度与下一版门槛</h1>
+<p>记录日期：2026-11-07。本文是 preview.38 的新增进度记录，不覆盖或改写前三份总体方案、PRD、技术拆解，也不替代 preview.37 交付记录。它回答三个问题：本轮到底改了什么、当前源码启动和打包启动如何判定 HTML 可用、下一版安装包在构建和发布前还必须补齐什么。</p>
+<h2 id="section-2">1. 本轮目标</h2>
+<p>preview.38 的直接目标是让已经接入的 AI HTML 在 preview 构建中具有一致的可见能力：从源码启动和打包启动都能通过同一个宿主能力查询看到 HTML，并允许用户显式新建、打开 <code>.html</code>/<code>.htm</code> 文件。这个目标只涉及预览版入口策略和能力状态的一致性，不等同于宣称 HTML 已经完成 GenOffice 全功能对等，也不等同于宣称四类既有 Office 编辑器已经升级到 GenOffice 最新版。</p>
+<p>本轮的版本识别依据是仓库当前 <code>package.json</code>：应用版本为 <code>3.0.10-preview.38</code>，Windows 安装包命名和 <code>releaseVersion</code> 同步到 <code>preview.38</code>。HTML 上游来源、独立构建和 Friday 宿主适配沿用前一轮已经固定的来源锁；本轮没有把上游版本号改写成“最新”，也没有以版本号替代来源 commit、依赖锁和资源 digest 的验证。</p>
+<h2 id="section-3">2. 已完成的源码改动</h2>
+<h3 id="section-4">2.1 Preview 启动策略</h3>
+<p><code>enablePackagedPreviewHtml</code> 现在根据 <code>-preview.N</code> 版本标记自动开启 HTML 实验环境变量。该判断同时覆盖源码启动和打包启动，因此 preview.38 在两条启动路径上使用同一策略。稳定版本没有 preview 标记时不会自动开启；显式设置 <code>FRIDAY_OFFICE_EXPERIMENTAL_HTML=0</code> 可以关闭，便于诊断、回归和稳定版行为验证。</p>
+<h3 id="section-5">2.2 注册表和构建准入</h3>
+<p>HTML 注册表仍保留 <code>enabled: false</code>，避免把 HTML 误计入稳定版四类编辑器；新增 <code>previewEnabled: true</code> 作为 preview 构建准入标记。只有显式 HTML 构建参数、实验属性和 preview 标记同时满足时，HTML 才会加入构建编辑器集合。<code>.html</code>/<code>.htm</code> 扩展名和原有路由合同没有改成稳定版默认文件关联。</p>
+<h3 id="section-6">2.3 宿主能力结果</h3>
+<p>当 preview 环境、HTML bundle 资源、模块导出和宿主合同均通过时，能力查询返回：</p>
+<pre><code class="language-json">{&quot;id&quot;:&quot;html&quot;,&quot;enabled&quot;:true,&quot;available&quot;:true,&quot;reasonCode&quot;:null}
+</code></pre>
+<p>当开关关闭、资源缺失、资源 digest 不匹配或必需 hook 缺失时，<code>enabled</code>/<code>available</code> 不会伪造为可用，宿主仍返回明确的 <code>reasonCode</code>，并拒绝新建或打开。这样前端按钮状态、IPC 能力和实际模块加载使用同一结果来源。</p>
+<h3 id="section-7">2.4 用户操作边界</h3>
+<p>显式打开 HTML 支持大小写扩展名，已打开的同一路径继续复用现有编辑视图。保存、关闭确认、关闭取消、演示视图登记、文档身份和顶层导航隔离逻辑沿用已有 HTML 宿主合同。preview.38 只改变“preview 是否自动开放”的入口判定，没有绕过资源校验、调用者校验或文档身份校验。</p>
+<h2 id="section-8">3. 当前验证结果</h2>
+<p>截至本文记录时，已完成以下定向验证：</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>验证项</th>
+<th>当前结果</th>
+<th>证据范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTML host 定向测试</td>
+<td>10/10 通过</td>
+<td>覆盖 preview.38 源码/打包启动策略、稳定版关闭、显式 opt-out、能力查询、资源和 hook 失败关闭、保存关闭生命周期、导航隔离、大小写扩展名及文档身份</td>
+</tr>
+<tr>
+<td>HTML frontend 合同测试</td>
+<td>8/8 通过</td>
+<td>覆盖路由、能力刷新、显式打开、关闭确认、会话恢复、IPC 调用者以及中英文文案解析</td>
+</tr>
+<tr>
+<td>HTML adapter / AI services 专项</td>
+<td>17/17 通过</td>
+<td>adapter 12 项、ai-services 5 项，覆盖真实参数、owner、取消与错误合同；远程请求成功仍需真实 API 验收</td>
+</tr>
+<tr>
+<td>HTML 文档、资源和搜索专项</td>
+<td>19/19 通过</td>
+<td>media-analysis 6 项、local-search 5 项、project-boundary 2 项、document-bridge 4 项、artifact 2 项</td>
+</tr>
+<tr>
+<td>HTML upstream 来源专项</td>
+<td>24/24 通过</td>
+<td>覆盖固定来源、同步、dirty 拒绝及来源身份，不证明编辑器运行</td>
+</tr>
+<tr>
+<td>bundle 合同测试</td>
+<td>20/20 通过</td>
+<td>覆盖实验准入、来源身份、manifest、缺资源/缺 hook、dirty/cached build 和失败回滚</td>
+</tr>
+<tr>
+<td>integration gate 测试</td>
+<td>7/7 通过</td>
+<td>覆盖 Office 集成门禁和构建/来源合同</td>
+</tr>
+<tr>
+<td>前端/Office 实际构建</td>
+<td>待构建后填入</td>
+<td>需要重新生成 HTML 资源、执行 <code>vite build</code> 和打包前 Office 门禁，不能用单元测试代替</td>
+</tr>
+<tr>
+<td>Windows 安装包</td>
+<td>待构建后填入</td>
+<td>需要 <code>npm run electron:build:win</code> 完整执行并记录安装包路径、大小、SHA-256 和打包资源报告</td>
+</tr>
+</tbody></table></div>
+<p>定向测试证明的是 preview.38 入口策略和合同层行为；它不证明远程模型、搜索、图片/视频 provider、复杂外部资源、真实安装升级或所有 GenOffice 功能已完成。测试进程若因 Electron 子进程或资源句柄迟迟不退出，应单独记录为测试基础设施问题，不能直接把“有输出”当作完整通过。</p>
+<h2 id="section-9">4. 构建门槛</h2>
+<p>下一步生成 preview.38 安装包前，必须依次完成以下门槛，并保存可复核日志：</p>
+<ol>
+<li><strong>来源门槛</strong>：<code>office-upstream.lock.json</code>、<code>office-html-upstream.lock.json</code>、子仓库 commit、依赖 lock hash 和工作树状态一致；不能使用 dirty 或未记录的本地 HTML 源码。</li>
+<li><strong>资源门槛</strong>：重新执行 HTML 独立构建，校验 manifest、entry、required exports、hook、来源身份和 resource digest；默认稳定构建仍不能意外加载 HTML。</li>
+<li><strong>应用门槛</strong>：完成 <code>npm run build</code>，并通过主进程 import、DSH runtime、Office integration gate、打包 native modules 和 packaged office resource 校验。</li>
+<li><strong>运行门槛</strong>：启动打包的 <code>win-unpacked</code>，验证 preview.38 能力查询、HTML 新建/打开/保存/关闭、HTML/HTM 路由、四类既有编辑器回归及启动 smoke。</li>
+<li><strong>产物门槛</strong>：记录安装包和 unpacked 目录的路径、字节数、SHA-256、构建时间、版本、资源清单和失败时的候选目录；不能只报告“electron-builder 成功”。</li>
+<li><strong>发布门槛</strong>：只有上述证据齐全后才创建 GitHub tag/release。若真实模型或用户验收未完成，发布说明必须标成 preview，并明确未关闭范围。</li>
+</ol>
+<p>首次 preview.38 构建在来源锁阶段退出，错误为 <code>OFFICE_VENDOR_HEAD_MISMATCH</code> 与 <code>OFFICE_PACKAGE_LOCK_DIGEST_MISMATCH</code>，尚未进入前端打包。原因是上一版提交修复后 vendor 已为 <code>e4160be053612108bfa041efd75402dc985f133a</code>，但来源锁仍记录旧 HEAD；本次升级版本号又改变主仓库 package-lock 摘要。已核对子仓库干净且已推送，同步来源锁 HEAD、describe 和主 package-lock 摘要后，门禁返回 <code>ok: true</code>。vendor package-lock 摘要经重算未变化，因此保留原值。该修正只记录实际来源，不把候选上游状态改为已批准或全量融合。</p>
+<p>以下实际构建数据在构建完成前保持空缺：</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>preview.38 Windows 安装包</td>
+<td>待构建后填入</td>
+</tr>
+<tr>
+<td>安装包大小</td>
+<td>待构建后填入</td>
+</tr>
+<tr>
+<td>安装包 SHA-256</td>
+<td>待构建后填入</td>
+</tr>
+<tr>
+<td><code>win-unpacked</code> HTML 资源报告</td>
+<td>待构建后填入</td>
+</tr>
+<tr>
+<td>完整 Office 集成门禁</td>
+<td>待构建后填入</td>
+</tr>
+<tr>
+<td>Electron 启动 smoke</td>
+<td>待构建后填入</td>
+</tr>
+<tr>
+<td>GitHub tag/release URL</td>
+<td>待发布后填入</td>
+</tr>
+</tbody></table></div>
+<h2 id="section-10">5. 尚未完成的功能和风险</h2>
+<ol>
+<li>HTML 的真实自然语言 AI 流程、流式 writer、版本冲突、Stop/并发和错误恢复仍需在最终候选包上验证。</li>
+<li>搜索、生图、图片分析、视频分析和附件能力沿用 Friday 设置中的统一 AI 工具配置，并在用户填写 API 后验证真实请求、取消、限流、失败和零结果；本轮没有用 mock 成功替代远程验收。视频分析与固定 GenOffice 目录对齐，不代表已经提供视频生成。</li>
+<li>编辑模式的主动脚本隔离、演示模式脚本交互、复杂外部资源、字体、图片和大文件性能仍需要真实 Chromium/Electron 样本验收。</li>
+<li>AI Markdown 和 Docs/Sheets/Slides/PDF 的整体 GenOffice 版本融合尚未由本轮入口策略关闭；后续必须基于现有总体文档维护功能矩阵、来源锁和可重建证据。</li>
+<li>安装、升级、卸载、回滚、数据保留、未签名提示和不同用户目录迁移尚未完成正式验收。</li>
+</ol>
+<h2 id="section-11">6. 下一版执行顺序</h2>
+<p>专项测试已取得完整结果。接下来执行 preview.38 的 Office 资源构建和前端构建；构建成功后运行打包版启动与 HTML 生命周期探针，随后做既有四类编辑器回归。只有在安装包 hash、资源报告、smoke 和 GitHub 发布元数据齐全后，才把 preview.38 写成“已交付”。任何一项失败都保留失败日志和候选产物，回到对应门槛修复，不通过删测试或降低能力合同。</p>
+<h2 id="section-12">7. 相关文档</h2>
+<ul>
+<li><a href="01-integration-plan.html">总体融合研究与实施方案</a></li>
+<li><a href="02-prd.html">产品需求 PRD</a></li>
+<li><a href="03-technical-integration.html">技术对接与拆解</a></li>
+<li><a href="04-implementation-and-validation.html">实施与验收记录</a></li>
+<li><a href="05-ai-service-contract-audit.html">AI 服务合同审计</a></li>
+<li><a href="06-preview37-progress-2026-11-07.html">preview.37 进度与交付结果</a></li>
+</ul>
+<footer>本页面为离线阅读版。<a href="07-preview38-progress-2026-11-07.md">Markdown 源稿</a> · <a href="index.html">返回文档导航</a></footer></main></div></body></html>

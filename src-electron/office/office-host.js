@@ -507,7 +507,8 @@ export async function getOfficeEditorCapabilities() {
   const editors = []
   for (const definition of OFFICE_EDITOR_REGISTRY) {
     const id = definition.id
-    const row = { id, enabled: definition.enabled === true, available: false, reasonCode: null }
+    const previewEnabled = id === 'html' && definition.previewEnabled === true && isExperimentalHtmlEnabled()
+    const row = { id, enabled: definition.enabled === true || previewEnabled, available: false, reasonCode: null }
     if (!runtimeEditors().includes(id)) row.reasonCode = definition.experimental ? 'OFFICE_EXPERIMENTAL_DISABLED' : definition.candidateReason || 'OFFICE_EDITOR_NOT_INTEGRATED'
     else if (!state.initialized) row.reasonCode = 'OFFICE_HOST_UNAVAILABLE'
     else {

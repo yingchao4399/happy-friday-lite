@@ -117,7 +117,7 @@ async function fixture(t, { experimental = true, bundleFailure = null, moduleFai
   return { host, runtime, win, removed, root }
 }
 
-test('默认文件关联不会被实验开关或 HTML 扩展名自动开放', () => {
+test('预览版本在源码和打包启动路径均开放 HTML，稳定版本仍关闭', () => {
   assert.equal(isExperimentalHtmlEnabled({}), false)
   assert.equal(isExperimentalHtmlEnabled({ FRIDAY_OFFICE_EXPERIMENTAL_HTML: 'true' }), false)
   assert.equal(isExperimentalHtmlEnabled({ FRIDAY_OFFICE_EXPERIMENTAL_HTML: '1' }), true)
@@ -126,13 +126,16 @@ test('默认文件关联不会被实验开关或 HTML 扩展名自动开放', ()
   assert.equal(resolveEditorType('C:/file.pdf', { experimentalHtml: true }), 'pdf')
 
   const packagedPreview = {}
-  assert.equal(enablePackagedPreviewHtml({ isPackaged: true, appVersion: '3.0.9-preview.37', environment: packagedPreview }), true)
+  assert.equal(enablePackagedPreviewHtml({ isPackaged: true, appVersion: '3.0.10-preview.38', environment: packagedPreview }), true)
   assert.equal(packagedPreview.FRIDAY_OFFICE_EXPERIMENTAL_HTML, '1')
   const packagedStable = {}
   assert.equal(enablePackagedPreviewHtml({ isPackaged: true, appVersion: '3.0.9', environment: packagedStable }), false)
   assert.equal(packagedStable.FRIDAY_OFFICE_EXPERIMENTAL_HTML, undefined)
   const unpackagedPreview = {}
-  assert.equal(enablePackagedPreviewHtml({ isPackaged: false, appVersion: '3.0.9-preview.37', environment: unpackagedPreview }), false)
+  assert.equal(enablePackagedPreviewHtml({ isPackaged: false, appVersion: '3.0.10-preview.38', environment: unpackagedPreview }), true)
+  assert.equal(unpackagedPreview.FRIDAY_OFFICE_EXPERIMENTAL_HTML, '1')
+  const explicitOptOut = { FRIDAY_OFFICE_EXPERIMENTAL_HTML: '0' }
+  assert.equal(enablePackagedPreviewHtml({ isPackaged: false, appVersion: '3.0.10-preview.38', environment: explicitOptOut }), false)
 })
 
 test('关闭实验开关时宿主拒绝 HTML 新建/打开且不加载模块', async t => {
@@ -148,7 +151,7 @@ test('关闭实验开关时宿主拒绝 HTML 新建/打开且不加载模块', a
 test('HTML 入口只有合同与实际模块配置成功后可用，能力 IPC 验证调用者', async t => {
   const { host, runtime, win } = await fixture(t)
   const reply = await runtime.handlers.get('office-get-editor-capabilities')({ sender: win.webContents })
-  assert.deepEqual(reply.editors.find(editor => editor.id === 'html'), { id: 'html', enabled: false, available: true, reasonCode: null })
+  assert.deepEqual(reply.editors.find(editor => editor.id === 'html'), { id: 'html', enabled: true, available: true, reasonCode: null })
   assert.deepEqual(host.getOfficeLoadedEditors(), ['html'])
   assert.equal(runtime.createCount, 0)
   assert.equal(runtime.lang, 'en')

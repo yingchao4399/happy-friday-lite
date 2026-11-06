@@ -76,9 +76,9 @@ if (!process.versions.electron) {
       assert.equal((await host.getOfficeEditorCapabilities()).editors.find(editor => editor.id === 'html').available, false)
       process.env.FRIDAY_OFFICE_EXPERIMENTAL_HTML = '1'
       const capability = (await host.getOfficeEditorCapabilities()).editors.find(editor => editor.id === 'html')
-      record({ name: '真实 HTML bundle 通过准入，默认公开状态仍关闭', capability })
+      record({ name: '真实 HTML bundle 通过准入，预览版 HTML 入口已启用', capability })
       assert.equal(capability.available, true, capability.reasonCode)
-      assert.equal(capability.enabled, false)
+      assert.equal(capability.enabled, true)
 
       const source = path.join(temp, '中文 HTML runtime.html')
       const imageBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jU1EAAAAASUVORK5CYII=', 'base64')

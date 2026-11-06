@@ -8,7 +8,8 @@ export const OFFICE_EDITOR_REGISTRY = Object.freeze([
   { id: 'slides', enabled: true, extensions: ['.pptx'], requiredExports: ['configureSlidesRuntime', 'createSlidesView', 'registerSlidesIpc'] },
   { id: 'pdf', enabled: true, extensions: ['.pdf'], requiredExports: ['configurePdfRuntime', 'createPdfView', 'exportPdfSnapshot'] },
   { id: 'markdown', enabled: false, extensions: ['.md', '.markdown'], candidateReason: 'FULL_APP_PARITY_PENDING', requiredExports: [] },
-  { id: 'html', enabled: false, experimental: true, extensions: ['.html', '.htm'], candidateReason: 'FULL_APP_PARITY_PENDING', requiredExports: [
+  // HTML 在 -preview 版本公开试用；完整上游对等门槛批准前，不纳入稳定版编辑器集合。
+  { id: 'html', enabled: false, experimental: true, previewEnabled: true, extensions: ['.html', '.htm'], candidateReason: 'FULL_APP_PARITY_PENDING', requiredExports: [
     'configureHtmlRuntime', 'registerPrivilegedSchemes', 'createHtmlView', 'setHtmlUiLang', 'setHtmlHeadlessMode',
     'requestHtmlSave', 'requestHtmlClose', 'htmlIsDirty', 'htmlFilePath', 'htmlFileRenamed', 'htmlReadText',
     'setHtmlFileSavedHook', 'setHtmlProvisionalTitleHook', 'setHtmlPresentHooks',
@@ -21,7 +22,7 @@ export const OFFICE_EDITOR_REGISTRY = Object.freeze([
 export const getEnabledOfficeEditors = () => OFFICE_EDITOR_REGISTRY.filter(editor => editor.enabled)
 // 构建请求只增加已登记的实验应用，不修改公开启用状态或默认文件关联。
 export const getBuildOfficeEditors = ({ experimentalHtml = false } = {}) => OFFICE_EDITOR_REGISTRY.filter(editor =>
-  editor.enabled || (experimentalHtml === true && editor.id === 'html' && editor.experimental === true),
+  editor.enabled || (experimentalHtml === true && editor.id === 'html' && editor.experimental === true && editor.previewEnabled === true),
 )
 export const OFFICE_EDITORS = Object.freeze(getEnabledOfficeEditors().map(editor => editor.id))
 export const OFFICE_EXT_TO_TYPE = Object.freeze(Object.fromEntries(

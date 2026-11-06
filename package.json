@@ -1,6 +1,6 @@
 {
   "name": "happy-friday-lite",
-  "version": "3.0.9-preview.37",
+  "version": "3.0.10-preview.38",
   "description": "Happy Friday Lite - Electron + Vue3",
   "author": "Chen Jie <chenjie.plus@qq.com>",
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -443,12 +443,12 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.37-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.38-win-${arch}-setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.37-win-${arch}-setup.${ext}"
+      "artifactName": "Happy-Friday-Lite-3.0.7.01-preview.38-win-${arch}-setup.${ext}"
     },
     "linux": {
       "icon": "build/icons/icon.png",
@@ -460,5 +460,5 @@
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     }
   },
-  "releaseVersion": "3.0.7.01-preview.37"
+  "releaseVersion": "3.0.7.01-preview.38"
 }

@@ -4,13 +4,14 @@ import path from 'path'
  * Office 文件类型路由（happyoffice-integration-plan.md）。
  * docs  = DOCX，sheets = XLSX/XLSM/CSV，slides = PPTX，pdf = PDF
  */
-export const OFFICE_EDITOR_TYPES = ['docs', 'sheets', 'slides', 'pdf']
+export const OFFICE_EDITOR_TYPES = ['docs', 'sheets', 'slides', 'pdf', 'html']
 
-// 仅内部实验运行显式接受 HTML，系统默认关联仍沿用四类已发布编辑器。
+// 预览版公开 HTML bundle，稳定版仍需宿主通过环境变量显式开启。
 export const isExperimentalHtmlEnabled = (environment = process.env) => environment.FRIDAY_OFFICE_EXPERIMENTAL_HTML === '1'
 
 export function enablePackagedPreviewHtml({ isPackaged, appVersion, environment = process.env } = {}) {
-  if (isPackaged === true && typeof appVersion === 'string' && /-preview\.\d+(?:$|[-+])/.test(appVersion)) {
+  // 预览版的源码启动和打包启动保持相同策略，保留显式关闭供诊断使用。
+  if (typeof appVersion === 'string' && /-preview\.\d+(?:$|[-+])/.test(appVersion) && environment.FRIDAY_OFFICE_EXPERIMENTAL_HTML !== '0') {
     environment.FRIDAY_OFFICE_EXPERIMENTAL_HTML = '1'
   }
   return isExperimentalHtmlEnabled(environment)

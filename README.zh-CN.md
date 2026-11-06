@@ -10,7 +10,7 @@
 - preview.36 修复 Windows 更新元数据流水线：从最终安装器和 blockmap 实测生成校验和、build-info 与 `latest.yml`，原子写入后回读；技术版本 `3.0.8-preview.36` 高于旧预览技术版本 `3.0.7`，展示版本为 `3.0.7.01-preview.36`。新增从包内实际模块和资源运行三入口及 Core 验收的模式；确定性驱动与真实模型/人工交互分别验收。
 - preview.35 候选安装器及历史证据保留。preview.36 的构建、质量、安装/升级/回滚和 GitHub 状态以[实施与验收账本](docs/office-ai-capability-2026-11-05/05-implementation-and-validation.md)为准；持续更新规则见[上游集成合同](docs/office-ai-capability-2026-11-05/04-upstream-integration-contract.md)。
 
-AI HTML 已开始接入，采用单独固定的官方源码树与依赖，避免替换现有四类编辑器的共享包。开发构建先执行 `node scripts/sync-office-html-upstream.mjs`，再执行 `npm run office:build -- --experimental-html`；清单单独记录 HTML 来源身份，宿主加载还需显式设置 `FRIDAY_OFFICE_EXPERIMENTAL_HTML=1`。默认文件关联和普通用户入口继续按验收状态控制；AI、资源隔离、导出及安装对等仍在实施。详见 [AI HTML 三份实施文档](docs/office-ai-html-next/index.html)。
+AI HTML 已在预览版开放，采用单独固定到 GenOffice `v0.12.852` 的官方源码树与依赖，避免替换现有四类编辑器的共享包。先执行 `node scripts/sync-office-html-upstream.mjs`，再执行 `npm run office:build:preview-html` 构建资源。源码和打包的 `-preview.N` 版本在资源与宿主合同验证后开放 HTML；显式设置 `FRIDAY_OFFICE_EXPERIMENTAL_HTML=0` 可关闭。稳定版继续保留原有门控和默认文件关联。HTML/HTM 到 PDF/DOCX 导出由打包探针覆盖；真实远端 provider 和安装升级仍分别验收。详见 [AI HTML 实施文档](docs/office-ai-html-next/index.html)。
 
 ## 3.0.7.01-preview.33
 

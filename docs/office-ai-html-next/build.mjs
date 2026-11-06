@@ -11,6 +11,7 @@ const docs = [
   { file: '04-implementation-and-validation', title: '实施与验收记录', summary: '实际固定来源、独立构建决定、T00–T10 状态、验证证据与未关闭问题。' },
   { file: '05-ai-service-contract-audit', title: 'AI 服务合同审计', summary: '固定目标的 AI/偏好/会话/文件通道、真实参数与缺口、通用服务接入拆解。' },
   { file: '06-preview37-progress-2026-11-07', title: 'preview.37 进度与交付结果', summary: '本轮实际构建、打包版转换验收、GitHub 发布结果和仍需用户验收的边界。' },
+  { file: '07-preview38-progress-2026-11-07', title: 'preview.38 进度与下一版门槛', summary: 'preview.38 的 HTML 开放策略、当前验证证据、构建发布门槛和下一步未完成事项。' },
 ]
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 const css = `

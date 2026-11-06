@@ -13,8 +13,8 @@
   "integrationState": "current-vendor-not-latest-claim",
   "vendorRepository": "https://github.com/cheney-plus/happyoffice.git",
   "vendorPath": "vendor/happyoffice",
-  "vendorHeadSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
-  "vendorDescribe": "v0.10.639-27-g8ed0c8d0",
+  "vendorHeadSha": "e4160be053612108bfa041efd75402dc985f133a",
+  "vendorDescribe": "v0.10.639-28-ge4160be0",
   "vendorBaseSha": null,
   "integrationCommit": null,
   "integrationMethod": "pending-three-way-audit",
@@ -22,13 +22,13 @@
   "patchManifestSha256": "c372aa5e5b7a3772655e3897c7063e856eaae5e2d1b9a6de980fd4e2c25a62bc",
   "hostProtocolVersion": "1.0",
   "adapterVersion": "1.0",
-  "packageLockSha256": "5897d035f5b9c44a9f8c59dae383e11dad64a6797a333383cc31f327ddb4d34a",
+  "packageLockSha256": "33b481d2d2363a44dabb0703f6288e7696cdce84b53098236fb5b475479b183b",
   "requiredEditors": [
     "docs",
     "sheets",
     "slides",
     "pdf"
   ],
-  "notes": "Current vendor is a Friday fork with uncommitted runtime edits. Source diff identities remain in integration-manifest.json. The official base and all historical private changes require a three-way audit before an integrated upstream release is claimed.",
+  "notes": "Current vendor is a Friday fork pinned to the committed PDF Word and Office AI repairs at e4160be053612108bfa041efd75402dc985f133a. Source diff identities remain in integration-manifest.json. The official base and all historical private changes require a three-way audit before an integrated upstream release is claimed.",
   "vendorPackageLockSha256": "33d48aa506479731a731a33005587842677cb2746e4be744dec5dd765787383c"
 }
