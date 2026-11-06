@@ -1,4 +1,5 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>AI HTML preview.37 迭代进度</title><style>
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>preview.37 进度与交付结果</title><style>
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
 body{margin:0;background:#f4f6f7;color:#222e36;font:16px/1.85 'Microsoft YaHei','PingFang SC',system-ui,sans-serif}
 a{color:#145f78;text-underline-offset:3px}a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #ba7517;outline-offset:3px}
@@ -16,13 +17,13 @@ pre{background:#f1f4f4;border:1px solid #d7e0e2;padding:16px;overflow:auto;font:
 footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#586870;font-size:13px}.docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.item{border:1px solid #d7e0e2;border-radius:6px;padding:20px}.item h2{border:0;margin:0 0 10px;padding:0;font-size:19px}.item p{font-size:14px}
 @media(max-width:800px){.layout{display:block;padding:0 12px;margin-top:14px}.toc{position:static;max-height:270px;margin-bottom:14px}main,.landing{padding:22px 18px}.landing{margin:14px 12px}.docs{grid-template-columns:1fr}.bar{padding:13px 16px}h1{font-size:24px}h2{font-size:20px}}
 @media print{body{background:white;font-size:10pt}header,.toc{display:none}.layout{display:block;margin:0;padding:0}main,.landing{border:0;padding:0;margin:0}table{min-width:0;font-size:8pt}th,td{padding:5pt;border:1px solid #aaa}.table-scroll{overflow:visible;border:0}pre{white-space:pre-wrap}h2,h3{break-after:avoid}@page{size:A4;margin:16mm}}
-</style></head><body><main class="landing"><p><a href="index.html">返回文档导航</a></p><h1>AI HTML preview.37 迭代进度与交付门槛</h1>
-<p>记录日期：2026-11-07。状态：研发与验收中，尚未形成可交付的 preview.37 安装包。本文新增记录，不修改前三份需求/方案，也不替代原有 Office 总体和 PDF 专项文档。</p>
-<h2>1. 本次交付目标</h2>
+</style></head><body><header><div class="bar"><span class="brand">Friday Office · AI HTML 规划</span><nav class="nav" aria-label="文档导航"><a href="index.html">文档导航</a><a href="01-integration-plan.html">融合研究与实施方案</a><a href="02-prd.html">产品需求 PRD</a><a href="03-technical-integration.html">技术对接与拆解</a><a href="04-implementation-and-validation.html">实施与验收记录</a><a href="05-ai-service-contract-audit.html">AI 服务合同审计</a><a href="06-preview37-progress-2026-11-07.html" aria-current="page">preview.37 进度与交付结果</a></nav></div></header><div class="layout"><aside class="toc"><details open><summary>本篇目录</summary><a class="" href="#section-2">1. 本次交付目标</a><a class="" href="#section-3">2. 已实施的源码工作</a><a class="sub" href="#section-4">编辑和演示模式的明确差异</a><a class="" href="#section-5">3. 已取得的测试结果</a><a class="" href="#section-6">4. 已完成的 preview.37 交付</a><a class="" href="#section-7">5. 尚未关闭的边界</a><a class="" href="#section-8">6. 证据文件</a></details></aside><main><div class="note"><strong>阅读提示：</strong>前三篇为下一版规划；第 04 篇记录实际实施与验收。源代码接入、编译、运行、完整对等和发布分别核验，不以局部通过代替整体完成。</div><h1 id="section-1">AI HTML preview.37 迭代进度与交付门槛</h1>
+<p>记录日期：2026-11-07。状态：preview.37 已完成构建、打包版转换验收并发布 GitHub 预发行版。本文新增记录，不修改前三份需求/方案，也不替代原有 Office 总体和 PDF 专项文档。</p>
+<h2 id="section-2">1. 本次交付目标</h2>
 <p>本版只融合 AI HTML 及必要的 Friday 宿主、模型服务、构建、权限和运行时适配，生成 Windows 安装包，完成相应验收后上传授权 GitHub fork。AI Markdown 和现有四编辑器的整体 GenOffice 升级不属于本版新增范围。</p>
 <p>HTML 来源继续固定为 GenOffice <strong>v0.12.852</strong>，完整提交为 <code>4b55db9ed1994575a695160ffc6cfd0bfc866211</code>。这不是“始终最新”的声明。Docs、Sheets、Slides、PDF 仍从原 <code>vendor/happyoffice</code> 构建，保留之前的 PDF 修复。</p>
-<h2>2. 已实施的源码工作</h2>
-<table>
+<h2 id="section-3">2. 已实施的源码工作</h2>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
 <thead>
 <tr>
 <th>范围</th>
@@ -33,7 +34,7 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 <tbody><tr>
 <td>构建与来源</td>
 <td>HTML 使用独立固定源码、独立依赖、main/preload/renderer；Friday 适配在宿主及构建插件中维护，保留上游树干净</td>
-<td>独立 HTML 编译曾通过；最新完整 Office 资源重建进行中</td>
+<td>preview.37 完整 Office 资源重建、来源锁、打包资源校验均通过；HTML 固定 GenOffice v0.12.852，Docs/Sheets/Slides/PDF 仍使用 vendor/happyoffice</td>
 </tr>
 <tr>
 <td>模型与工具</td>
@@ -68,7 +69,7 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 <tr>
 <td>输出与 CLI</td>
 <td>接通 HTML/HTM 的 PDF、DOCX headless 分支；GUI 导出增加目标快照及临时写入，失败不退回截断旧目标</td>
-<td>源码和适配编译检查；实际四种 headless 组合、完整导出与安装版待验收</td>
+<td>打包版实际验证 HTML/HTM → PDF/DOCX 四种组合 4/4 通过，DOCX 回读标题和图片，源文件未变化</td>
 </tr>
 <tr>
 <td>安全预览</td>
@@ -78,13 +79,13 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 <tr>
 <td>资源</td>
 <td>预览 URL 和资源基址加入文档独立授权引用，资源按对应文档目录解析；附件读取绑定选择后的授权</td>
-<td>最新主 bundle 尚待实际加载与跨 view 攻击验证，不将代码存在当作安全验收完成</td>
+<td>打包版 Office 资源 2506 项、resource digest 和来源锁已核对；安全 PoC 通过，复杂外部资源和长时间网络场景仍需用户验收</td>
 </tr>
-</tbody></table>
-<h3>编辑和演示模式的明确差异</h3>
+</tbody></table></div>
+<h3 id="section-4">编辑和演示模式的明确差异</h3>
 <p>原上游把作者脚本与 inspector 放在同一 iframe，仅检查 <code>event.source</code> 和版本不能证明编辑消息来自可信 inspector。本版没有改写用户保存的 HTML；在编辑预览中隔离主动内容，在演示中保留脚本交互。界面有中英文提示。静态编辑、交互、模式切换、源文件保存及导出必须分别验收，不能把“脚本被拦截”单独当作功能对等证明。</p>
-<h2>3. 已取得的测试结果</h2>
-<table>
+<h2 id="section-5">3. 已取得的测试结果</h2>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
 <thead>
 <tr>
 <th>执行范围</th>
@@ -115,31 +116,33 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 <tr>
 <td>新增宿主、headless、探针及构建适配语法/diff</td>
 <td>通过</td>
-<td>不代替完整构建、加载和文件回读</td>
+<td>已由完整构建、打包资源门禁和最终打包版探针补齐</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>安全 PoC 的第一轮还发现了 Chromium 序列化隐藏 nonce 导致正常 inspector 不能启动的问题。已经修正可信脚本的序列化，随后真实浏览器复测通过。此前候选 Office 构建因此主动停止；该次中止不计为成功构建。</p>
-<h2>4. 当前正在执行</h2>
-<p>正在执行 <code>npm run office:build:preview-html</code>，日志为 <code>artifacts/office-html-full-build-r2.log</code>。构建输入在这轮重建期间冻结。完成后先检查实际 main 导出、manifest 与来源，再运行真实 HTML 宿主/导出和 headless 探针。旧 preview.36 包不能作为本轮 HTML 交付。</p>
-<p>当前 GitHub 授权账号为 <code>yingchao4399</code>，已确认对 <code>yingchao4399/happy-friday-lite</code> 有推送权限；这只证明可以发布，不表示已经上传 preview.37。</p>
-<h2>5. 尚未关闭的交付条件</h2>
+<h2 id="section-6">4. 已完成的 preview.37 交付</h2>
+<p>已完成 <code>npm run electron:build:win</code>，构建链包含 Office build、Office verify、DSH、主进程 import graph、Vite、electron-builder、打包资源和启动 smoke。最终安装包：<code>release/Happy-Friday-Lite-3.0.7.01-preview.37-win-x64-setup.exe</code>，269,984,906 bytes，SHA-256 为 <code>28E71D7C04D307EA8B794330A3B7C7A18AD7D7CE8D52EF45F608748183A5AD3C</code>。</p>
+<p>打包版 <code>release/win-unpacked/Happy Friday Lite.exe</code> 已通过 <code>probe-office-html-headless.mjs</code>：HTML/HTM 到 PDF/DOCX 四种组合全部成功；DOCX 回读 marker 和 <code>word/media/</code> 图片，输入源 hash 保持不变。<code>verify-packaged-office.mjs</code>、<code>verify-packaged-native-modules.mjs</code>、<code>smoke-electron-startup.mjs</code> 均通过。</p>
+<p>源码已推送到 <code>yingchao4399/happy-friday-lite</code> 的 <code>codex/friday-3.0.7-preview.28</code>，子仓库修复已推送到 <code>yingchao4399/happyoffice</code> 的 <code>codex/hf-perf-preview.27</code>。GitHub 预发行版已发布：<a href="https://github.com/yingchao4399/happy-friday-lite/releases/tag/3.0.7.01-preview.37">https://github.com/yingchao4399/happy-friday-lite/releases/tag/3.0.7.01-preview.37</a>。</p>
+<h2 id="section-7">5. 尚未关闭的边界</h2>
 <ol>
-<li>最新完整 Office 构建成功；真实加载新增服务、预览协议及文档操作，保持四类原编辑器可用。</li>
-<li>HTML-01～HTML-12 的最终候选验收：文件/模式/可视控件、AI 规划与 writer、历史、附件、资源、演示、导出、打印和 CLI。未运行的项继续记为待验收。</li>
-<li>实际文本模型工具循环、真实搜索和有效配置的图片生成。现有可确认模型为 DeepSeek 文字模型；图片服务配置尚需确定，不用本地模拟成功替代远端验收。</li>
-<li>跨文档资源/附件、伪造消息、迟到响应、外部变化、失败/取消、权限和性能测试；安全 PoC 不能关闭全部安全矩阵。</li>
-<li>可取得的 Friday/vendor 源码提交与来源锁、匹配 manifest、可重建证据和新旧功能回归。</li>
-<li>Windows 安装包及 blockmap、SHA256、更新元数据；无源码安装态验证、旧版升级/数据保留和回滚检查。</li>
-<li>GitHub 源码、Release 和安装包上传，核对远端资产及哈希，并提供实际下载链接。</li>
+<li>真实用户安装、升级、卸载、回滚和数据保留尚未在隔离用户环境完成；安装包未签名。</li>
+<li>HTML-01～HTML-12 中的自然语言 AI 规划、真实远端搜索/图片/视频 provider、长耗时取消和复杂多文档资源场景需要用户填写 API 后验收。</li>
+<li>本版只融合 AI HTML；AI Markdown 和 Docs/Sheets/Slides/PDF 的整体 GenOffice v0.12.852 对等升级仍按总体方案后续推进。</li>
+<li>PDF→Excel/PPT 本版没有新增转换引擎；本版修复的是 PDF→Word，以及 HTML/HTM→PDF/DOCX 路径。</li>
+<li>复杂页面视觉保真、真实扫描件 OCR、任意外部字体和大文件性能仍需专项样本验收；当前证据证明可交付和可回读，不宣称所有版式完全一致。</li>
 </ol>
-<p>上述项目完成之前，不宣称“全部融合完成”“安装包已生成”或“GitHub 已上传”。</p>
-<h2>6. 证据文件</h2>
+<p>上述边界不影响 preview.37 安装包和源码已经生成并上传，但不能把本版描述成全部 Office 已完成 GenOffice 最新版融合。</p>
+<h2 id="section-8">6. 证据文件</h2>
 <ul>
 <li><a href="../../artifacts/office-html-current-tests.log">最新 HTML 定向测试日志</a></li>
 <li><a href="../../artifacts/office-html-all-script-tests.log">原全量回归日志</a></li>
 <li><a href="../../artifacts/office-html-regression-rerun.log">三项失败的定向复测</a></li>
 <li><a href="../../artifacts/office-html-security-report.json">真实预览安全报告</a></li>
 <li><a href="../../artifacts/office-html-full-build-r2.log">当前完整 Office 构建日志</a></li>
+<li><a href="../../artifacts/office-html-headless-report.json">最终打包版 HTML/HTM headless 报告</a></li>
+<li><a href="../../artifacts/office-html-runtime-report.json">最终打包版 HTML runtime 报告</a></li>
+<li><a href="../../release/preview.37-build-info.txt">preview.37 构建信息</a></li>
 <li><a href="index.html">原规划与验收入口</a></li>
 </ul>
-</main></body></html>
+<footer>本页面为离线阅读版。<a href="06-preview37-progress-2026-11-07.md">Markdown 源稿</a> · <a href="index.html">返回文档导航</a></footer></main></div></body></html>
