@@ -45,8 +45,11 @@ HTML 注册表仍保留 `enabled: false`，避免把 HTML 误计入稳定版四�
 | HTML upstream 来源专项 | 24/24 通过 | 覆盖固定来源、同步、dirty 拒绝及来源身份，不证明编辑器运行 |
 | bundle 合同测试 | 20/20 通过 | 覆盖实验准入、来源身份、manifest、缺资源/缺 hook、dirty/cached build 和失败回滚 |
 | integration gate 测试 | 7/7 通过 | 覆盖 Office 集成门禁和构建/来源合同 |
-| 前端/Office 实际构建 | 待构建后填入 | 需要重新生成 HTML 资源、执行 `vite build` 和打包前 Office 门禁，不能用单元测试代替 |
-| Windows 安装包 | 待构建后填入 | 需要 `npm run electron:build:win` 完整执行并记录安装包路径、大小、SHA-256 和打包资源报告 |
+| 前端/Office 实际构建 | 通过 | `npm run electron:build:win` 完整执行；Office 资源 2506 个，`resourcesDigest=16ee03808fe93bd1a4139b87d6a39c52955cca8c37a42bcd206ba9753f2950bb`，打包资源和原生模块校验通过 |
+| Windows 安装包 | 已生成 | `release/Happy-Friday-Lite-3.0.7.01-preview.38-win-x64-setup.exe`，269,985,368 bytes，SHA-256 为 `0F51D33F599E5BAB0871ADAA6241482F6769377CFA203E93B508AE4EE8941AB2`；blockmap 为 245,717 bytes，SHA-256 为 `85C15ECBF3E8A4837A167F55048A7A4070FF8DBCAFA90BE115DD196839A3042C` |
+| 打包版 HTML runtime | 通过 | `artifacts/office-html-runtime-packaged-preview38-audit.json`，能力 `enabled=true/available=true`，新建、源码回读、保存、图片内联、PDF/DOCX 导出回读、关闭生命周期和 PDF 引擎回归通过 |
+| 打包版 PDF→Word | 通过 | `artifacts/office-pdf-ai-delivery-preview38.json`，create_document、convert_document/worker、PDF 菜单共享服务均生成有效 DOCX，并完成 zip/XML、hash、打开和源 PDF 完整性校验 |
+| Electron 启动 smoke | 通过 | 主窗口、preload、剪贴板/背诵/Python/知识库 IPC 验证通过 |
 
 定向测试证明的是 preview.38 入口策略和合同层行为；它不证明远程模型、搜索、图片/视频 provider、复杂外部资源、真实安装升级或所有 GenOffice 功能已完成。测试进程若因 Electron 子进程或资源句柄迟迟不退出，应单独记录为测试基础设施问题，不能直接把“有输出”当作完整通过。
 
@@ -63,16 +66,18 @@ HTML 注册表仍保留 `enabled: false`，避免把 HTML 误计入稳定版四�
 
 首次 preview.38 构建在来源锁阶段退出，错误为 `OFFICE_VENDOR_HEAD_MISMATCH` 与 `OFFICE_PACKAGE_LOCK_DIGEST_MISMATCH`，尚未进入前端打包。原因是上一版提交修复后 vendor 已为 `e4160be053612108bfa041efd75402dc985f133a`，但来源锁仍记录旧 HEAD；本次升级版本号又改变主仓库 package-lock 摘要。已核对子仓库干净且已推送，同步来源锁 HEAD、describe 和主 package-lock 摘要后，门禁返回 `ok: true`。vendor package-lock 摘要经重算未变化，因此保留原值。该修正只记录实际来源，不把候选上游状态改为已批准或全量融合。
 
+本次安装包由源码提交 `103cbb1e238d70ea946ec2498557614cd93900ef` 构建，Office vendor 为 `e4160be053612108bfa041efd75402dc985f133a`（`v0.10.639-28-ge4160be0`），HTML 固定来源仍为 GenOffice tag `v0.12.852` / commit `4b55db9ed1994575a695160ffc6cfd0bfc866211`。构建后生成的报告和 `integration-manifest.json` 记录了可重建的 source identity；由于交付证据文件在构建后加入工作树，构建时的 `repositoryDirty` 字段保持为事实记录，不能解释为发布前工作树完全干净。
+
 以下实际构建数据在构建完成前保持空缺：
 
 | 字段 | 值 |
 | --- | --- |
-| preview.38 Windows 安装包 | 待构建后填入 |
-| 安装包大小 | 待构建后填入 |
-| 安装包 SHA-256 | 待构建后填入 |
-| `win-unpacked` HTML 资源报告 | 待构建后填入 |
-| 完整 Office 集成门禁 | 待构建后填入 |
-| Electron 启动 smoke | 待构建后填入 |
+| preview.38 Windows 安装包 | `release/Happy-Friday-Lite-3.0.7.01-preview.38-win-x64-setup.exe` |
+| 安装包大小 | `269985368` bytes |
+| 安装包 SHA-256 | `0F51D33F599E5BAB0871ADAA6241482F6769377CFA203E93B508AE4EE8941AB2` |
+| `win-unpacked` HTML 资源报告 | `ok:true`；`identityDigest=e8bcaf151ebc96bebd9a7afe2ba1334f5b0731d758860c4e709760467daf1e5a` |
+| 完整 Office 集成门禁 | 通过；资源 2506 个，原生模块和 packaged Office 校验通过 |
+| Electron 启动 smoke | 通过 |
 | GitHub tag/release URL | 待发布后填入 |
 
 ## 5. 尚未完成的功能和风险
@@ -85,7 +90,7 @@ HTML 注册表仍保留 `enabled: false`，避免把 HTML 误计入稳定版四�
 
 ## 6. 下一版执行顺序
 
-专项测试已取得完整结果。接下来执行 preview.38 的 Office 资源构建和前端构建；构建成功后运行打包版启动与 HTML 生命周期探针，随后做既有四类编辑器回归。只有在安装包 hash、资源报告、smoke 和 GitHub 发布元数据齐全后，才把 preview.38 写成“已交付”。任何一项失败都保留失败日志和候选产物，回到对应门槛修复，不通过删测试或降低能力合同。
+专项测试、Office 资源构建、Windows 安装包、启动 smoke、HTML runtime 探针和 PDF→Word 打包探针均已取得结果。发布前仍需把本次提交和证据推送到 fork，并创建 GitHub prerelease；用户安装后还需自行填写 API 设置验收真实模型、搜索、生图和媒体请求。全量测试展开执行为 576 项，其中 574 项通过；旧版本号断言已修复并单独通过 18/18，Electron junction 清理测试在资源空闲后单独通过 1/1。首次全量并行执行的 junction 超时已作为环境压力现象记录，不作为功能失败。
 
 ## 7. 相关文档
 

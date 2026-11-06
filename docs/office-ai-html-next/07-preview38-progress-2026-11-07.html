@@ -81,13 +81,28 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 </tr>
 <tr>
 <td>前端/Office 实际构建</td>
-<td>待构建后填入</td>
-<td>需要重新生成 HTML 资源、执行 <code>vite build</code> 和打包前 Office 门禁，不能用单元测试代替</td>
+<td>通过</td>
+<td><code>npm run electron:build:win</code> 完整执行；Office 资源 2506 个，<code>resourcesDigest=16ee03808fe93bd1a4139b87d6a39c52955cca8c37a42bcd206ba9753f2950bb</code>，打包资源和原生模块校验通过</td>
 </tr>
 <tr>
 <td>Windows 安装包</td>
-<td>待构建后填入</td>
-<td>需要 <code>npm run electron:build:win</code> 完整执行并记录安装包路径、大小、SHA-256 和打包资源报告</td>
+<td>已生成</td>
+<td><code>release/Happy-Friday-Lite-3.0.7.01-preview.38-win-x64-setup.exe</code>，269,985,368 bytes，SHA-256 为 <code>0F51D33F599E5BAB0871ADAA6241482F6769377CFA203E93B508AE4EE8941AB2</code>；blockmap 为 245,717 bytes，SHA-256 为 <code>85C15ECBF3E8A4837A167F55048A7A4070FF8DBCAFA90BE115DD196839A3042C</code></td>
+</tr>
+<tr>
+<td>打包版 HTML runtime</td>
+<td>通过</td>
+<td><code>artifacts/office-html-runtime-packaged-preview38-audit.json</code>，能力 <code>enabled=true/available=true</code>，新建、源码回读、保存、图片内联、PDF/DOCX 导出回读、关闭生命周期和 PDF 引擎回归通过</td>
+</tr>
+<tr>
+<td>打包版 PDF→Word</td>
+<td>通过</td>
+<td><code>artifacts/office-pdf-ai-delivery-preview38.json</code>，create_document、convert_document/worker、PDF 菜单共享服务均生成有效 DOCX，并完成 zip/XML、hash、打开和源 PDF 完整性校验</td>
+</tr>
+<tr>
+<td>Electron 启动 smoke</td>
+<td>通过</td>
+<td>主窗口、preload、剪贴板/背诵/Python/知识库 IPC 验证通过</td>
 </tr>
 </tbody></table></div>
 <p>定向测试证明的是 preview.38 入口策略和合同层行为；它不证明远程模型、搜索、图片/视频 provider、复杂外部资源、真实安装升级或所有 GenOffice 功能已完成。测试进程若因 Electron 子进程或资源句柄迟迟不退出，应单独记录为测试基础设施问题，不能直接把“有输出”当作完整通过。</p>
@@ -102,6 +117,7 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 <li><strong>发布门槛</strong>：只有上述证据齐全后才创建 GitHub tag/release。若真实模型或用户验收未完成，发布说明必须标成 preview，并明确未关闭范围。</li>
 </ol>
 <p>首次 preview.38 构建在来源锁阶段退出，错误为 <code>OFFICE_VENDOR_HEAD_MISMATCH</code> 与 <code>OFFICE_PACKAGE_LOCK_DIGEST_MISMATCH</code>，尚未进入前端打包。原因是上一版提交修复后 vendor 已为 <code>e4160be053612108bfa041efd75402dc985f133a</code>，但来源锁仍记录旧 HEAD；本次升级版本号又改变主仓库 package-lock 摘要。已核对子仓库干净且已推送，同步来源锁 HEAD、describe 和主 package-lock 摘要后，门禁返回 <code>ok: true</code>。vendor package-lock 摘要经重算未变化，因此保留原值。该修正只记录实际来源，不把候选上游状态改为已批准或全量融合。</p>
+<p>本次安装包由源码提交 <code>103cbb1e238d70ea946ec2498557614cd93900ef</code> 构建，Office vendor 为 <code>e4160be053612108bfa041efd75402dc985f133a</code>（<code>v0.10.639-28-ge4160be0</code>），HTML 固定来源仍为 GenOffice tag <code>v0.12.852</code> / commit <code>4b55db9ed1994575a695160ffc6cfd0bfc866211</code>。构建后生成的报告和 <code>integration-manifest.json</code> 记录了可重建的 source identity；由于交付证据文件在构建后加入工作树，构建时的 <code>repositoryDirty</code> 字段保持为事实记录，不能解释为发布前工作树完全干净。</p>
 <p>以下实际构建数据在构建完成前保持空缺：</p>
 <div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
 <thead>
@@ -112,27 +128,27 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 </thead>
 <tbody><tr>
 <td>preview.38 Windows 安装包</td>
-<td>待构建后填入</td>
+<td><code>release/Happy-Friday-Lite-3.0.7.01-preview.38-win-x64-setup.exe</code></td>
 </tr>
 <tr>
 <td>安装包大小</td>
-<td>待构建后填入</td>
+<td><code>269985368</code> bytes</td>
 </tr>
 <tr>
 <td>安装包 SHA-256</td>
-<td>待构建后填入</td>
+<td><code>0F51D33F599E5BAB0871ADAA6241482F6769377CFA203E93B508AE4EE8941AB2</code></td>
 </tr>
 <tr>
 <td><code>win-unpacked</code> HTML 资源报告</td>
-<td>待构建后填入</td>
+<td><code>ok:true</code>；<code>identityDigest=e8bcaf151ebc96bebd9a7afe2ba1334f5b0731d758860c4e709760467daf1e5a</code></td>
 </tr>
 <tr>
 <td>完整 Office 集成门禁</td>
-<td>待构建后填入</td>
+<td>通过；资源 2506 个，原生模块和 packaged Office 校验通过</td>
 </tr>
 <tr>
 <td>Electron 启动 smoke</td>
-<td>待构建后填入</td>
+<td>通过</td>
 </tr>
 <tr>
 <td>GitHub tag/release URL</td>
@@ -148,7 +164,7 @@ footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#5868
 <li>安装、升级、卸载、回滚、数据保留、未签名提示和不同用户目录迁移尚未完成正式验收。</li>
 </ol>
 <h2 id="section-11">6. 下一版执行顺序</h2>
-<p>专项测试已取得完整结果。接下来执行 preview.38 的 Office 资源构建和前端构建；构建成功后运行打包版启动与 HTML 生命周期探针，随后做既有四类编辑器回归。只有在安装包 hash、资源报告、smoke 和 GitHub 发布元数据齐全后，才把 preview.38 写成“已交付”。任何一项失败都保留失败日志和候选产物，回到对应门槛修复，不通过删测试或降低能力合同。</p>
+<p>专项测试、Office 资源构建、Windows 安装包、启动 smoke、HTML runtime 探针和 PDF→Word 打包探针均已取得结果。发布前仍需把本次提交和证据推送到 fork，并创建 GitHub prerelease；用户安装后还需自行填写 API 设置验收真实模型、搜索、生图和媒体请求。全量测试展开执行为 576 项，其中 574 项通过；旧版本号断言已修复并单独通过 18/18，Electron junction 清理测试在资源空闲后单独通过 1/1。首次全量并行执行的 junction 超时已作为环境压力现象记录，不作为功能失败。</p>
 <h2 id="section-12">7. 相关文档</h2>
 <ul>
 <li><a href="01-integration-plan.html">总体融合研究与实施方案</a></li>

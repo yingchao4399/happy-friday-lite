@@ -2,30 +2,30 @@
   "schemaVersion": 1,
   "hostProtocolVersion": "1.0",
   "adapterVersion": "1.0",
-  "builtAt": "2026-11-06T21:10:16.417Z",
-  "releaseVersion": "3.0.7.01-preview.37",
+  "builtAt": "2026-11-06T22:44:36.310Z",
+  "releaseVersion": "3.0.7.01-preview.38",
   "sources": {
     "main": {
-      "sha": "631f535d53c0812bed29bfcf5c679a4485123e9d",
-      "describe": "3.0.7.01-preview.34",
+      "sha": "103cbb1e238d70ea946ec2498557614cd93900ef",
+      "describe": "3.0.7.01-preview.37-1-g103cbb1",
       "scope": "friday-runtime-and-build-v1",
-      "dirty": true,
+      "dirty": false,
       "repositoryDirty": true,
-      "diffDigest": "2e33e3c1d660ba7cc32b48e522167a0eeca0323351c0f695c07143b1506033df",
-      "untrackedSourceDigest": "915af90e4f033456191d9081fc5a12420c833557cb4cf9ccadea75e03ad8df9c",
+      "diffDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untrackedSourceDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "remotes": {
         "fork": "https://github.com/yingchao4399/happy-friday-lite.git",
         "origin": "https://github.com/cheney-plus/happy-friday-lite.git"
       }
     },
     "vendor": {
-      "sha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
-      "describe": "v0.10.639-27-g8ed0c8d0",
+      "sha": "e4160be053612108bfa041efd75402dc985f133a",
+      "describe": "v0.10.639-28-ge4160be0",
       "scope": "vendor-source-v1",
-      "dirty": true,
-      "repositoryDirty": true,
-      "diffDigest": "3617790768032b57711d4aab381fe6284a353c9ebffe3b79a3a836311d98b7b9",
-      "untrackedSourceDigest": "084d77cdbd8faaed5a36c1d70de60a059d1641d58188e3c034bbf4efcaaa9c54",
+      "dirty": false,
+      "repositoryDirty": false,
+      "diffDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untrackedSourceDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "remotes": {
         "fork": "https://github.com/yingchao4399/happyoffice.git",
         "origin": "https://github.com/cheney-plus/happyoffice.git"
@@ -50,7 +50,7 @@
       "purpose": "html-only",
       "lockSha256": "29cc8e8716097761f5f729d4af7b47dc4a71e742aa049939ab4501ef0538c538"
     },
-    "identityDigest": "7224832842e468a745fb49b17d8f6464ff73eea89ea528204cd7d61dcd968bef"
+    "identityDigest": "e8bcaf151ebc96bebd9a7afe2ba1334f5b0731d758860c4e709760467daf1e5a"
   },
   "build": {
     "renderer": "fresh",
@@ -64,10 +64,10 @@
     "targetTag": null,
     "targetSha": null,
     "integrationState": "current-vendor-not-latest-claim",
-    "lockSha256": "4cec93309355fa90513d806580f07ccea2c1e0fa55bfc4bcb4ca36ddae44394b",
+    "lockSha256": "93b06baf9f2e6adeefcf9a8c591c9b85e107bb9aa185348681ee7fa402f640f0",
     "patchSetId": "friday-office-host-v1-20261106",
     "patchManifestSha256": "c372aa5e5b7a3772655e3897c7063e856eaae5e2d1b9a6de980fd4e2c25a62bc",
-    "vendorHeadSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+    "vendorHeadSha": "e4160be053612108bfa041efd75402dc985f133a",
     "observedCandidate": {
       "tag": "v0.12.852",
       "tagObjectSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
