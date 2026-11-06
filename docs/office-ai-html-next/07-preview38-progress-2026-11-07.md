@@ -78,7 +78,7 @@ HTML 注册表仍保留 `enabled: false`，避免把 HTML 误计入稳定版四�
 | `win-unpacked` HTML 资源报告 | `ok:true`；`identityDigest=e8bcaf151ebc96bebd9a7afe2ba1334f5b0731d758860c4e709760467daf1e5a` |
 | 完整 Office 集成门禁 | 通过；资源 2506 个，原生模块和 packaged Office 校验通过 |
 | Electron 启动 smoke | 通过 |
-| GitHub tag/release URL | 待发布后填入 |
+| GitHub tag/release URL | [3.0.7.01-preview.38 prerelease](https://github.com/yingchao4399/happy-friday-lite/releases/tag/3.0.7.01-preview.38) |
 
 ## 5. 尚未完成的功能和风险
 
