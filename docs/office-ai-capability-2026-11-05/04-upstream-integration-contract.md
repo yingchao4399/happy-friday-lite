@@ -1,0 +1,353 @@
+# Friday Office 持续跟随 GenOffice 的集成合同、扩展模板与升级门禁
+
+日期：2026 年 11 月 5 日。版本：1.0。定位：本轮研究报告、PRD、技术拆解的实施补充，不替换原总体升级文档，也不覆盖旧 PDF 专项文档。
+
+本文把“修复 PDF 转 Word”放在后续持续融合 GenOffice 的约束下讨论。当前专项代码正在实施，本文列出的基础合同和专项测试已有本地结果；完整 Office 重建、真实 Electron 三入口、安装包、复杂样本质量、GitHub 发布仍须使用各自证据判定，不能从本文或单元测试推断完成。
+
+## 1 决策目标与边界
+
+本轮有两个同时成立的目标：第一，PDF 菜单、PDF 内 AI、Friday 主助手使用同一个业务操作和交付机制；第二，修复不得把上游算法复制成一份 Friday 私有实现，使每次升级都重新追补 PDF、Docs 和 AI 工具逻辑。
+
+采用“固定上游源码 + 少量通用编辑器 hooks + Friday 宿主适配器 + 生成资源合同”的边界。模型负责理解意图、选择已登记的业务操作和解释真实结果，宿主负责权限、源文档身份、任务、执行隔离、文件交付；上游继续负责格式引擎和编辑器功能。
+
+这里的“通用”有可检查的含义：快照、序列化、能力查询和业务操作调用是可复用合同；PDF→DOCX 的具体算法仍在 `vendor/happyoffice/packages/pdf2docx`。新增另一转换 route 时不复制权限、任务与写文件代码。新增一个完整应用时仍需补齐该应用的生命周期和适配，不能把填一条 registry 宣称为完整接入。
+
+## 2 来源事实必须分层记录
+
+### 2.1 本次固定事实
+
+| 来源层 | 本次核对结果 | 能据此得出的结论 |
+|---|---|---|
+| 主仓库研究基线 | `631f535d53c0812bed29bfcf5c679a4485123e9d` | 研究报告对应的固定 Friday 源码 |
+| 当前 vendor HEAD | `8ed0c8d099c3c3d87b1a998d9189da3d120ff820` | 本次适配和测试的实际 GenOffice 定制基线 |
+| 当前 vendor describe | `v0.10.639-27-g8ed0c8d0` | 不是未修改的 `v0.10.639`，也不是 `v0.12.600` |
+| 原总体融合目标 | `v0.12.600` | 历史总体项目的固定目标，原文继续保留 |
+| 前阶段补充核验候选 | `v0.12.852`；tag 引用 SHA `4b55db9ed1994575a695160ffc6cfd0bfc866211` | 后续完整升级的评估候选，本次未因此宣称已经融合 |
+| 主仓库 remotes | `origin=cheney-plus/happy-friday-lite`，`fork=yingchao4399/happy-friday-lite` | 代码来源与可交付 fork 的区别 |
+| vendor remotes | `origin=cheney-plus/happyoffice`，`fork=yingchao4399/happyoffice` | 均不等同于官方 `genspark-ai/genoffice` |
+| 官方比较仓库 | `https://github.com/genspark-ai/genoffice.git` | 后续查询发行、标签和源码的权威来源 |
+
+候选 Latest 的查询过程与时间说明保存在 `01-research-report.md` 第 2 节。本文不重新定义一个永久的“最新版”。真正启动下一次升级时必须重新核验官方发行，再固定目标；不能对着漂移的 `latest` 或远端分支直接出包。
+
+标签引用 SHA 和 commit SHA 也要区分。若是 annotated tag，应同时记录 tag object 与 `^{}` 解引用 commit；只有解析到具体 commit 后，才能进行差异、构建和回滚。目录名、工作区包的 `0.1.0`、Friday 的展示版本号，都不能替代上游身份。
+
+### 2.2 推荐的升级记录
+
+每次升级新建一份记录，至少包含：官方仓库、查询时间、发行页面、选择理由、目标 tag、tag object SHA、目标 commit SHA、原 vendor SHA、合并后 vendor SHA、Friday SHA、工作区 dirty、锁文件摘要、适配器协议版本、操作覆盖矩阵、测试报告、安装包摘要和回滚组合。
+
+目标候选与实际构建身份分别保存。当前 manifest 的 `upstream.targetTag`、`targetSha` 为 `null`，`integrationState=current-vendor-not-latest-claim`，表示构建当前实际 vendor；不能把尚未并入的候选标签填进去给人“已升级”的印象。后续完成候选冻结与合并后，再扩展目标配置并同步校验实际来源。
+
+### 2.3 自动化现状：构建已自动化，升级尚未自动化
+
+必须把“可重复构建当前源码”与“可自动跟随官方 GenOffice 新版”分开描述。当前 `office:build` / `office:verify` 能重新生成 Office 资源，记录 Friday/vendor 的实际 SHA、dirty 状态、源码摘要和完整资源 hash，并拒绝源码和 bundle 不匹配、构建期间源码漂移或资源缺失；`--require-clean` 进一步拒绝 dirty/cached 输入。它能证明“资源与这次实际源码相符”，不能证明“vendor 是从某个批准的官方 GenOffice tag 合并而来”。
+
+目前尚未自动完成：检查官方新版本、固定 tag object 与 peeled commit、计算官方基线与当前 vendor 的完整差异、判断旧 Friday patch 是否仍然需要、合并上游冲突、验证 lockfile/依赖变更、证明导出的 hooks 在目标运行时实际可加载，以及对安装后的 Office 组合做事务级回滚。`office:verify --require-clean` 只证明输入清洁且产物匹配，不代表完成上述升级审查。U0–U5 是本轮定义的人工升级流程与门禁模板，不应称作“一键升级器”。
+
+### 2.4 后续机器可读来源锁与差异账本
+
+下一阶段建议增加 `office-upstream.lock.json` 和逐项 `office-vendor-patches.json`。锁文件是候选升级和 release manifest 的唯一来源；不能在 `integration-manifest.json` 中手填“最新”。示例仅展示字段，不是当前批准的目标：
+
+~~~json
+{
+  "schemaVersion": 1,
+  "officialRepository": "https://github.com/genspark-ai/genoffice.git",
+  "observedAt": "<UTC timestamp>",
+  "approvedTarget": {
+    "tag": "<reviewed-tag>",
+    "tagObjectSha": "<annotated-tag-object-or-null>",
+    "commitSha": "<peeled-commit-sha>"
+  },
+  "vendorBaseSha": "<previous-integrated-vendor-sha>",
+  "integrationCommit": "<new-vendor-integration-sha>",
+  "integrationMethod": "merge | rebase | cherry-pick | reviewed-snapshot",
+  "patchSetId": "<review-id>",
+  "hostProtocolVersion": "<version>",
+  "packageLockSha256": "<sha256>",
+  "requiredEditors": ["docs", "sheets", "slides", "pdf"]
+}
+~~~
+
+`office-vendor-patches.json` 中每条 Friday 差异至少登记稳定 ID、文件/提交范围、目的、依赖 hook、适配器/协议影响、所负责维护人、测试命令与结果、上游等价功能链接（如有）、保留理由及删除条件。提交拆分优于长期 dirty working tree；无法拆分的历史差异仍可暂存，但必须生成文件级 diff 并逐条认领，不能用一个总 diff digest 代替解释。
+
+在正式实现锁文件和校验器前，当前目标字段保持 `null` 是正确行为。增加字段后，`integration-manifest.json` 应从锁文件复制并引用其 digest，而不是独立维护第二份版本事实。`verify-office-integration.mjs` 的 release 模式需要校验：锁文件 schema、tag 解引用、目标 SHA 格式和实际 vendor integration 元数据、patch 清单 digest、protocol 与 required editors、lockfile 摘要、bundle 的同源摘要。若采用 cherry-pick 或 snapshot，不能只要求目标 commit 是当前 vendor 的 git ancestor；必须由升级记录列明映射的提交/文件和审查结果。祖先关系只能证明图谱，不足以证明语义兼容。
+
+### 2.5 逐步实现的升级工具链
+
+把重复人工步骤自动化成可中断、可复核的流水线，而不是让机器人自动合并并发布：
+
+1. **observe / lock**：从官方 release 和 Git tag 读取候选；保存查询时间、tag object SHA、peeled commit SHA；生成锁文件变更建议。目标未审查前不改批准锁，也不生成“当前 latest”字段。
+2. **diff / inventory**：在临时 checkout 或独立 worktree 比较旧 vendor 基线、新官方目标、当前 Friday vendor 三方树；附上 merge-base、commit 图、文件 diff、依赖/lockfile、构建入口、导出接口、资源与许可证变化。每个旧 patch 自动分类为疑似上游已覆盖、仍未覆盖、冲突或无关，再由工程师确认。
+3. **integrate / adapt**：只在独立集成分支更新 submodule。把仍需要的 Friday 改动以可追踪 commit 或 patch manifest 迁移；修订 adapter 与协议；新能力默认 disabled，直到 registry 与权限/质量合同齐全。
+4. **build / verify**：干净可拉取 checkout 执行锁定依赖安装（例如 `npm ci`，并验证 Node/Electron/Rust 工具链）；fresh build 所有 enabled editor、CLI、worker、WASM/helper；校验 manifest 和实际加载的 main/preload/renderer hooks；运行 converter、service、交付恢复和三入口测试。
+5. **accept / rollback**：按 U4 功能矩阵运行 DOCX、XLSX、PPTX、PDF 和既有 AI 操作回归；候选新应用另做逐项对等测试。U5 分开验证本地 `resources/office` 整组合换、无源码安装、从前一组合升级和整套回滚。每个回滚键包含 Friday commit、vendor commit、lock digest、Office bundle digest、数据兼容范围和安装包 hash。
+
+自动化可以收集证据、阻断来源或能力不匹配并创建差异报告；目标版本选择、语义冲突结论、私有 patch 删除、公开能力启用和对外 Release 仍由评审责任人确认。当前目录 staging rename 的回滚不是安装器事务；断电、旧进程占用和用户数据迁移要在真实安装器中单独测量与设计。
+
+### 2.6 preview.36 的实际实现增量（2026-11-06）
+
+第 2.3–2.5 节保留设计起点。本轮已把其中部分步骤实现为可执行工具，以下状态优先于前文“尚未实现”的历史描述，但仍不构成全量升级完成：
+
+| 可执行项 | 真实输入与输出 | 当前证明范围 | 未证明的内容 |
+|---|---|---|---|
+| `office-upstream.lock.json` | 官方仓库、候选 tag object/peeled commit、vendor HEAD、宿主及 vendor 两份 package-lock SHA-256、patch digest、协议/adapter、enabled editors | 当前实际构建身份与候选身份分别锁定 | 候选得到批准、历史 fork 官方基线已经认定 |
+| `office-vendor-patches.json` | 八类已知集成面及新增的一项页眉内容保留修复；用途、文件、hooks、协议影响、验证、保留原因、删除条件 | 私有差异有可持续维护的账本入口，未审计项明确 `inventory-pending` | 九条覆盖历史所有差异、已通过目标上游对等验收 |
+| `npm run office:verify:upstream` | 校验锁、两份依赖锁、vendor HEAD、patch digest、协议、编辑器集合 | 离线来源一致性，任一漂移失败 | 不联网时不证明官方 tag 仍与观察值一致 |
+| `node scripts/verify-office-upstream-lock.mjs --verify-remote` | 对官方执行只读 `git ls-remote`，同时校验 tag ref 与 peeled commit | 本次查询时官方引用匹配 | 版本选择合理性、Git 签名或上游源码语义 |
+| `npm run office:verify:release` | 清洁构建输入、批准且 integrated 的固定目标、在线官方引用、patch 审计/验证与匹配 bundle | 正式上游升级声明的失败关闭门禁 | 当前候选通过此门禁；它应拒绝当前尚未融合的状态 |
+| `npm run office:audit:upstream -- --old <ref> --official <bare-repo>` | 旧基线、新官方树、当前 vendor 树及工作区差异；另列依赖、构建和许可证变化；JSON 写 stdout，归档时使用 `node scripts/audit-office-upstream.mjs ... > <绝对报告路径>` | 可重复的文件/依赖审计输入，输出完整 SHA 与摘要 | 自动判定语义冲突或自动删除私有 patch |
+| 安装目录 probe 模式 | `--packaged-app=<absolute resources/app>`，模块和资源均从指定包加载，报告有 manifest SHA/source/resource digest | 打包后的宿主→编辑器→worker→真实文件交付 | 安装器事务、真实主窗口交互、远端模型自由规划 |
+| Windows 更新元数据生成 | 最终 exe/blockmap 实测大小、SHA-256/SHA-512，原子生成并回读 `latest.yml`、校验和、build-info | 摆脱手工修正历史 metadata，拒绝文件/版本不匹配 | 自动更新服务端可达、签名、安装升级/回滚 |
+
+当前锁仍 `approvedTarget=null`、`vendorBaseSha=null`、`integrationCommit=null`，候选 `v0.12.852` 仅为 observedCandidate。`merge/rebase/submodule-fast-forward` 的 integrated 声明会核验目标祖先关系；`cherry-pick/three-way-audited` 在缺少逐提交/逐文件映射与报告摘要机制时明确返回 `OFFICE_UPSTREAM_METHOD_REQUIRES_MAPPING`。本轮选择拒绝无法证明的声明，后续须实现映射合同后再使用相应集成方式。
+
+patch 中的 `verification.result/evidence` 当前是可审查的人工登记，校验器检查字段和状态，尚未验证所填报告是否真实存在、摘要是否匹配或是否对应批准目标。正式目标审批仍必须逐条人工核实；下一阶段强证据门禁需增加实际报告文件摘要、执行命令、平台、目标/vendor/source 身份及 CI 运行来源，不能把本轮 schema 校验称为“自动证明所有测试执行通过”。本轮候选和待审计状态会被正式门禁明确拒绝。锁与 metadata 校验均补充了验证期间输入漂移检测，报告摘要与实际解析字节绑定，避免网络等待期间混用旧内容和新摘要。
+
+已获取官方 `v0.12.852` 的独立 shallow bare 研究仓库，既不切换当前 vendor，也不修改批准锁。真实三方报告以 vendor 中的 `v0.10.639` 为比较起点，该 tag 尚未获认可为完整 fork 的官方基线。浅历史足够比较完整树，无法据空 merge-base 断言仓库无关联。报告的路径重叠只表示需要审查的交集，不能写作“已发现同等数量的冲突”。正式 U1 仍需完整历史、逐项认领和保留/替代/删除结论。
+
+新应用对等仍是独立退出条件。当前 bridge 的 web/image search、图片获取及媒体 provider 存在空实现或不可用返回；Markdown/HTML 原应用的图片、附件、预览、澄清卡与工具链不能被这些占位返回冒充。后续以应用能力描述登记通道、provider、权限和结果合同，在实际 provider 接通及全链路验收前保持准确不可用。对 Markdown/HTML 的 main exports 要尊重目标上游真实 API：私有 `register*Ipc` 由 `create*View` 内部调用时，应验证创建后的真实注册与重复创建行为，不强迫添加并不存在的公开 API。
+
+## 3 哪些代码放在哪一层
+
+| 层 | 应有内容 | 不应承担的内容 | 升级时主要检查 |
+|---|---|---|---|
+| 官方 / vendor 格式引擎 | PDF 提取、布局分析、OCR 接口、DOCX 重建、编辑器解析与序列化 | Friday 数据库、全局审批、私有目录策略 | 引擎 API、返回质量、依赖和资源变化 |
+| vendor 通用 hooks | 当前 PDF 快照、Docs AI 内容序列化、能力查询、操作请求与 ack | 为 Friday 复制一套业务任务或落盘框架 | 签名、sender 绑定、timeout、晚到结果 |
+| Friday adapter | 把 vendor hook 接到领域操作、明确资源路径、错误映射 | 复制上游转换算法或硬编码 UI DOM | required exports、协议、资源和生命周期 |
+| Friday Office service | operation/route、能力状态、任务、锁、交付、artifact | 文档语义解析的私有分叉 | 多入口同源、提交语义和恢复 |
+| AI Core / Agent | 发现能力、授权、工具调用、任务展示、真实回复 | 猜测宿主能力或绕过任务提交 | 工具 schema 与返回合同 |
+| build / manifest | 一致生成 main、preload、renderer、worker、WASM 和 helper | 从上次目录拼出一个假 fresh 包 | 源码身份、资源完整性和匹配组合 |
+
+`resources/office` 是输出，不是修复点。所有编辑器改动回 vendor，宿主行为回 `src-electron/office`，打包改动回 `scripts/office` / `scripts/build-office.mjs`。上游修复同一问题后，优先删除等价私有差异，不能在两处长期执行同一算法。
+
+## 4 共享编辑器 registry 与完整应用接入模板
+
+### 4.1 已建立的共用输入
+
+`src-electron/office/editor-registry.js` 同时供构建和宿主导入：
+
+| id | 当前 enabled | 扩展名 | 必需 hooks 的关键增量 |
+|---|---|---|---|
+| docs | true | `.docx` | `serializeDocsAiContent` |
+| sheets | true | `.xlsx`、`.xlsm`、`.csv` | 原 configure/create/register 合同 |
+| slides | true | `.pptx` | 原 configure/create/register 合同 |
+| pdf | true | `.pdf` | `exportPdfSnapshot` |
+| markdown | false | `.md`、`.markdown` | `FULL_APP_PARITY_PENDING` |
+| html | false | `.html`、`.htm` | `FULL_APP_PARITY_PENDING` |
+
+enabled 只表示这四类编辑器进入既有构建和宿主合同，不代表其中每个按钮或全部业务 route 已统一迁移。操作覆盖要另有清单，尤其 PDF→Excel/PPT 不能因为上游有菜单就自动标 supported。
+
+Markdown、HTML 已在 vendor `apps/markdown`、`apps/html` 源码树中存在，但当前 disabled。按照用户“功能要跟 GenOffice 一致”的要求，后续必须按完整应用接入，不能只加 MIME 或以富文本临时页代替。
+
+### 4.2 新应用接入时逐项填写的模板
+
+| 检查维度 | 上游实际行为 / 代码依据 | Friday 接入位置 | 验收证据 | 允许启用条件 |
+|---|---|---|---|---|
+| 文件类型与路由 | 扩展名、MIME、导入类型 | registry、打开路由 | 冷打开、文件关联 | 无错误 editor 或重复占用 |
+| main entry | exports、runtime config、IPC 注册 | `entries/<id>.ts`、host adapter | 实际 require + hook 检查 | 不能只在 manifest 自报 |
+| preload / renderer | 构建入口、scheme、资源基路径 | build、renderer protocol | 开发与安装版截图/日志 | 不依赖开发服务器 |
+| 创建 / 打开 / 关闭 | 空文档、最近文件、多标签 | 领域 service 与 editor 生命周期 | 冷启动、切换、未保存关闭 | 源身份正确 |
+| 编辑 / undo / redo | 原应用编辑模型和命令 | 保持上游原实现 | 对等操作回放 | 不丢历史或格式 |
+| 保存 / 另存为 | dirty、revision、文件对话框 | 宿主安全交付 adapter | 占用、只读、覆盖、取消 | 真实落盘后成功 |
+| 导入 / 导出 | 每个目标格式及限制 | operation route | 内容回读与格式校验 | 格式真实支持 |
+| AI Markdown / AI HTML | 工具、提示词、上下文、编辑应用、结果展示 | 同源能力投影与原应用 | 实际模型 smoke + 确定性回放 | 原应用功能对等 |
+| AI 流式 / 取消 | delta、partial、abort、重试 | AI Core 桥接 | 迟到结果、切页、关闭 | 无错误回写 |
+| 图片 / 附件 / 链接 | 本地资源、网络与协议 | 资源服务、安全策略 | 相对路径、中文名、离线 | 不绕过文件权限 |
+| 搜索 / 预览 / 主题 | 原应用可见功能 | renderer 与宿主主题同步 | 双主题、缩放、快捷键 | 无明显缺项 |
+| i18n / 错误 | 上游与 Friday 文案 | zh-CN / en-US | 两语言回放 | 无裸 key 或空错误 |
+| 生命周期 / 安装 | 崩溃、恢复、资源、原生依赖 | task、packaging | 无源码安装机测试 | 通过 U4/U5 |
+
+每格初始为“待核对”，不能预填通过；上游也不存在的项目标“不适用 + 依据”。必须先审查相应固定目标的源码与行为，才能判定功能对等。一个应用的已通过项不能代表另一个应用。
+
+## 5 通用 hooks 差异账本
+
+以下是本轮明确引入或修改的集成面，不是对历史 fork 全部差异的审计结果。历史差异仍需在下一次完整升级的 U1 阶段逐文件核对。
+
+| 差异 ID | 接口与位置 | 最小目的 | 关键约束与测试 | 删除 / 收敛条件 |
+|---|---|---|---|---|
+| HF-H01 | PDF main `exportPdfSnapshot(contents,{signal?,timeoutMs?})` | 导出当前编辑器的私有 PDF 快照 | 返回 `{bytes,revision,sourcePath}`；不能静默覆盖用户源文件；取消/超时/关闭必须清 waiter | 上游提供等价当前态快照 API 且完成迁移 |
+| HF-H02 | Docs main `serializeDocsAiContent(contents,{title,html},{signal?,timeoutMs?})` | 复用真实 Docs 解析和序列化 | 返回 `{bytes,nodeCount}`；通用 job ack；空内容/解析失败不能称成功 | 上游提供等价可靠 headless/renderer 序列化 |
+| HF-H03 | PDF runtime `getCapabilities` / `convertDocument` | 菜单与 PDF AI 查询并执行同一宿主能力 | 按 sender 提供源上下文；支持状态来自真实 adapter；入口 alias 只转发 | 上游形成稳定嵌入操作协议后适配 |
+| HF-H04 | PDF `createDocument` 兼容 hook | 旧工具调用进入共用创建 service | 保留工具兼容；“创建内容”与“转换 PDF”语义不同 | 兼容窗口与历史调用观测允许退出 |
+| HF-H05 | Docs preload / renderer job result | 让序列化等待真正结果 | 按 jobId 对应；结果晚到不能完成另一任务；standalone 行为保留 | 上游 job 合同覆盖同等要求 |
+| HF-H06 | PDF renderer 工具 / 菜单能力投影 | 能力声明与可调用状态一致 | 不因 prompt 写了“能做”就开启；错误保留结构化 code | 上游工具与宿主合同能直接复用 |
+
+账本每项后续都要补：引入的 vendor commit、关联 Friday commit、上游等价接口、受影响场景、专项测试、维护责任、删除条件。本轮工作区仍有未提交修改时，manifest 必须标 dirty；不能只保留父仓库 gitlink 却遗漏子模块提交。
+
+## 6 纯 PDF 转换 worker 的升级边界
+
+`scripts/office/entries/pdf-converter.ts` 是薄包装：输入私有快照字节与显式资源路径，调用 vendor `convertPdfToDocx`，返回原始 `ConvertResult`。它不导入上游 shell，不负责文件对话框、不落用户文件、不导入 Electron。
+
+~~~ts
+convertSnapshot(
+  { bytes, password?, wasmPath, ocrHelperDir? },
+  onProgress?,
+) -> Promise<{
+  docx: Uint8Array,
+  pages: number,
+  warnings: string[],
+  pageResults: PageResult[],
+  scannedDocument: boolean,
+}>
+~~~
+
+打包输出固定为 `resources/office/main/pdf-converter.cjs`。Friday worker_threads wrapper 持有任务与取消，worker 内加载上述模块。PDFium WASM 由宿主传绝对路径，OCR helper 目录也只能是绝对路径；代码不从 cwd、源码目录或默认 app shell 路径猜资源。
+
+PDFium 初始化保留上游 `_PDFiumExt_Init()` 与固定 ASCII `thisProgram`，避免中文文件关联 argv 触发 Emscripten 断言。OCR 继续调用 vendor 的 Windows / macOS 工厂。缺失可选 OCR 时允许上游已有降级，但返回的逐页质量和警告必须继续送达宿主，不能把整页图片降级称为完整可编辑转换。
+
+worker 不是格式质量的保证。它解决 CPU 同步任务阻塞主线程、取消和生命周期隔离；PDF 密码、损坏、超大、扫描页、表格、字体和多栏质量仍要分别验收。worker 终止时不能误报已交付，也不能终止另一任务共用的转换进程。
+
+下一次上游 `ConvertResult`、PDFium 初始化或 OCR API 变化时，薄包装的编译和真实转换测试应首先失败，促使适配；不能 catch 全部异常后继续返回 `ok=true`。
+
+## 7 构建 manifest 与匹配组合
+
+### 7.1 当前 schema
+
+生成位置：`resources/office/integration-manifest.json`；schemaVersion 1；hostProtocolVersion 1.0；adapterVersion 1.0。
+
+| 字段 | 记录内容 | 作用 |
+|---|---|---|
+| releaseVersion | 构建时读取 Friday `package.json.releaseVersion` | 宿主检查展示版本是否匹配 |
+| sources.main / vendor | SHA、describe、scope、dirty、repositoryDirty、diffDigest、untrackedSourceDigest、脱敏 remotes | 区分源码基线、私有改动和审计状态 |
+| sources.identityDigest | 真实运行时 / 构建输入的组合摘要 | 构建前后源码变化立即失败 |
+| build | renderer、cli、native 的 fresh/cache 状态，platform、arch | 防止缓存伪装与跨平台混包 |
+| editors | enabled id、扩展名、main/preload/renderer、requiredExports | 与宿主共享 registry 核对 |
+| services | `pdf-converter` 固定路径与 `convertSnapshot` | 无可见编辑器的共享服务合同 |
+| requiredResources | PDFium WASM、office-utils、attachment-parser、Office CLI | 关键引擎和共享 runtime 不能只出现在开发依赖 |
+| optionalResources | OCR / Sheets native 文件是否确实存在 | 记录可选资源的实际存在性 |
+| resources | 全部生成文件的相对路径、字节数、SHA-256 | 发现缺失、篡改、旧资源混入 |
+| resourcesDigest | 排序资源清单的 SHA-256 | 清单自身一致性 |
+| upstream | 官方来源与实际集成状态 | 不把候选目标冒充已融合 |
+
+### 7.2 源码身份计算范围
+
+主仓库输入包括 `src-electron`、`scripts`、`src`、`main.js`、`preload.cjs`、`package.json`、`package-lock.json`；vendor 包括源码与配置，但排除 out/dist/target，以及本次构建生成的 system-print.exe、win-ocr.exe、vision-ocr。构建脚本和原生 helper 的源文件仍在身份计算中。
+
+tracked 修改按原始 binary diff 摘要，untracked 源文件按路径与内容摘要。NUL 分隔文件列表不做 trim，避免尾空白文件名被错误处理。全仓库状态另记 `repositoryDirty`。生成 resources、隔离 staging、改写后的 public skill 不改变源码输入身份；它们的实际字节由资源 manifest 记录。
+
+这不是“忽略 dirty 才能构建”：真实运行时或构建脚本改动仍会改变 `identityDigest`，构建前后不一致即 `OFFICE_SOURCES_CHANGED_DURING_BUILD`。正式清洁门禁检查输入范围 dirty=false；审计时还必须审阅 repositoryDirty 的剩余来源。
+
+### 7.3 验证层次与限制
+
+启动校验目标编辑器三入口、共享转换服务、PDFium 资源的实际 SHA 和大小；安装 / CI 以 `verifyAll=true` 读取全部资源并拒绝磁盘上未声明的旧文件。入口路径必须与 registry 固定约定一致，不能在 manifest 中把 PDF main 偷换为 Docs main。
+
+加载后再次检查实际导出的函数。`requiredExports` 写在 JSON 中不等于函数真的存在。宿主调用 `expectedReleaseVersion` 比较当前 package 展示版本，防止“新宿主 + 旧 Office bundle”；平台和架构必须匹配。
+
+另外增加源码仓库中的只读门禁 `scripts/verify-office-integration.mjs`。它在打包前读取当前 Friday 与 vendor 的真实输入身份，与 manifest 的 `sources.identityDigest` 比较，并执行 `verifyAll` 和 releaseVersion 检查。版本号相同不代表源码相同；旧 bundle 自己的 hashes 全部正确，也不能证明它与刚修改的宿主匹配。此时返回 `OFFICE_BUNDLE_SOURCE_STALE`，必须重新生成 Office 组合。检查前后再次捕获输入，检查过程中源码漂移也会阻断。
+
+默认门禁允许可追踪的 dirty 预览组合，但仍拒绝源码不匹配；`--require-clean` 同时拒绝当前 dirty 源码、缓存或不完整 native 状态。`--bundle <path>` 可以核对已复制的安装目录资源。它依赖开发仓库的 Git，不能作为安装机启动检查；安装机仍执行 manifest、release、协议、平台、入口与资源校验。这个自动门禁已提供可执行脚本；package/CI 的接入状态必须在主集成验证时另行记录，不能只因脚本存在就称所有打包入口已受控。
+
+协议当前采用 major 兼容，minor 只允许向后兼容的添加。修改字段含义、ack 成功语义、源身份或提交语义属于 breaking change，必须升 major，并至少测试旧宿主 / 新 bundle、新宿主 / 旧 bundle、匹配新组合三种情况。版本字符串通过不能代替功能矩阵和真实测试。
+
+SHA 用来证明资源一致性，不是发布者签名，也不能防御能同时改写资源与 manifest 的攻击者。安装包签名和发布渠道校验仍由正式发布流程承担。当前 manifest 不宣称能验证完整软件供应链。
+
+## 8 构建发布动作与失败恢复
+
+构建不直接清空正在使用的 `resources/office`。所有阶段写 `resources/.office-stage-<pid>`；构建前后输入身份相同、manifest 完成且完整验证通过后，才用同父目录 rename 发布组合。
+
+~~~text
+旧 office 保持可用
+  → 候选 staging 全量生成
+  → 校验来源 / 入口 / hashes / 完整 inventory
+  → old office rename 为 .office-previous-<pid>
+  → staging rename 为 office
+  → 成功后清本次 backup
+~~~
+
+首次 rename 因文件占用失败，不动旧目录。候选 rename 失败，尝试把 backup 恢复到 office；恢复也失败时返回 `OFFICE_PUBLISH_RECOVERY_REQUIRED`，保留精确恢复路径，禁止继续删除旧组合。成功后 backup 暂时无法清除属于清理警告，不能把已发布的新组合再误称为未生成。
+
+这提供正常运行时异常下的整体切换和回退，不是跨进程、断电、文件系统崩溃的数据库事务。正式发布还需关闭占用、验证重启后的目录状态；若要在线热替换，另需持久发布 journal 和重启恢复，不能把当前 rename 包装当作已完成在线更新系统。
+
+`--skip-renderer`、`--skip-cli`、`--skip-native` 只用于开发，状态记 `cached-unverified`；不能标 fresh。`--require-clean` 拒绝 skip flag 和 dirty 输入。缺少 cargo 时 native 标 unavailable，不能给出“native fresh”的假证明。
+
+## 9 U0–U5 持续升级流程
+
+| 门禁 | 必须做的事情 | 输出 | 阻断条件 |
+|---|---|---|---|
+| U0 目标冻结 | 查官方发行，固定 tag/commit；记录旧 Friday/vendor；保存用户数据测试快照 | 升级记录、匹配组合索引 | latest 漂移、目标 commit 无法解析 |
+| U1 差异与依赖 | 比较旧 vendor 与官方目标；区分官方新增、Friday hooks、私有改动；审查锁文件与 Electron/Node | 差异账本、冲突分类、协议影响表 | 不知道哪些差异需保留；新依赖安装不确定 |
+| U2 适配与能力 | 合并到独立候选；优先保持上游算法；适配 hooks；更新 registry 与 operation routes | 可编译源码、合同矩阵、明确 disabled 项 | 有工具声明但无 handler；能力靠猜测 |
+| U3 构建与合同 | 从锁定 SHA 干净 checkout 安装依赖；fresh 构建；来源冻结；manifest 完整检查；实际加载 enabled editor 的 main/preload/renderer required exports；纯 worker、共享 service、真实导出检查 | 生成资源、hash、模块加载 smoke、专项测试 | 旧 preload / 新 main 混包；缺 helper/WASM；只靠 manifest 自报 export 存在 |
+| U4 端到端与质量 | 真实菜单/PDF AI/Friday 助手；未保存状态、取消、失败恢复；原始样本回读 | 三入口报告、质量分型、故障注入 | 假成功、改源、覆盖丢失、错误编辑文档 |
+| U5 安装与回滚 | 无源码目录安装；升级旧用户数据；版本/资源匹配；回滚整套组合 | 安装包摘要、安装/回滚报告、限制 | 开发可用安装失败；只回滚一个 bundle |
+
+U0/U1 是下一次完整融合的前提，不要求本次 PDF 修复同时全量升级。反之，本次建立合同后也不能跳过完整升级的 U1/U4。官方新增菜单可以先进入“发现/待适配”清单，只有通过目标 route 的能力与质量验收才启用。
+
+## 10 可执行检查命令与证据要求
+
+下列从仓库根目录运行；前两条专项测试在本文编写时已有本地通过结果，其余是发布流程要求，不表示本轮已完成。
+
+~~~powershell
+# 共享 registry、manifest、资源篡改、缓存门禁、匹配发布回退
+node --test scripts/tests/office-bundle-contract.test.mjs
+
+# 真实 PDFium→DOCX，独立 bundle、无关中文 cwd、解包正文回读
+node --test scripts/tests/office-pdf-converter.test.mjs
+
+# 打包前比较实际源码与已有Office资源；同版本旧bundle也必须失败
+node --test scripts/tests/office-integration-gate.test.mjs
+node scripts/verify-office-integration.mjs
+
+# 受影响构建脚本和全量回归
+node --test scripts/tests/
+node --test scripts/*.test.cjs
+npm run office:build
+npm run build
+
+# 正式 clean 候选必须先提交 Friday 与 vendor 源码，再使用全量门禁
+npm run office:build -- --require-clean
+node scripts/verify-office-integration.mjs --require-clean
+
+# 真实 Electron、安装与原生模块核验
+npm run electron:dev
+npm run electron:build:win
+node scripts/verify-packaged-native-modules.mjs x64
+~~~
+
+可单独检查现有生成目录，不重建或改写资源：
+
+~~~powershell
+node --input-type=module -e "import {assertOfficeBundle} from './src-electron/office/bundle-contract.js'; const r=assertOfficeBundle('./resources/office',{verifyAll:true}); console.log(JSON.stringify({ok:r.ok,releaseVersion:r.manifest.releaseVersion,sources:r.manifest.sources.identityDigest}))"
+~~~
+
+每份报告都写“源码身份 + 资源 digest + 目标平台 + 测试命令 + 实际结果”。只写通过、只发截图、只给一个安装包文件名，均不足以证明它和这次修复对应。
+
+CI 应在 Office 构建完成后、electron-builder 打包前执行上述只读门禁，正式发布添加 `--require-clean`；本地各平台打包入口也要调用同一脚本，不能只在一个平台添加。当前门禁实现检查源码身份和资源组合，并不执行官方目标来源准入或 patch 语义审计。后续接入 `office-upstream.lock.json` 后，U0–U3 才能由 CI 自动验证已锁定的来源事实；人工 U1 语义审计和 U4/U5 验收仍需报告与责任人。候选升级时，U3 还需运行合同、真实模块加载与转换测试；校验器发现源码身份不匹配只说明必须重建，不能代替 U4/U5 的质量、安装和回退验收。
+
+## 11 匹配组合回滚模板
+
+每个可发布组合必须能定位以下六项：Friday commit、vendor commit、manifest、Office 资源目录、安装包 hash、兼容数据版本。vendor commit 应先推送到正确 fork，再由 Friday 更新 gitlink；用户和 CI 必须能从干净克隆取到该 SHA。
+
+回滚按以下顺序实施：停止新任务并冻结写入；检查未决 journal；保存已生成 artifact 与用户文件；安装上一匹配主程序与 Office 资源；启动校验 release/protocol/hash；回读用户数据与已有结果；恢复已验收的能力投影。不得删除已交付用户文件，不得重放一个已经提交但打开失败的转换任务。
+
+不兼容时同步停止相应 operation 的菜单和 AI 投影，提供结构化原因与恢复动作。不能只让按钮继续显示可用却让 AI 报“host unavailable”，也不能以回滚为由偷偷改写用户源 PDF。
+
+| 回滚检查 | 必填事实 |
+|---|---|
+| 触发条件 | 哪个 P0、影响哪些源类型和入口 |
+| 前一组合 | 六项身份与摘要 |
+| 当前任务 | converting / committing / delivered 等真实状态 |
+| 文件事实 | 原 PDF、temp、目标、backup、artifact 是否存在及 hash |
+| 数据兼容 | 新字段是否向后兼容，旧程序如何处理 |
+| 恢复后校验 | 编辑器打开、能力、原文件、已生成 DOCX 回读 |
+| 对外说明 | 受影响范围、已保留结果、何时可重试 |
+
+## 12 已取得的局部证据与仍需完成的事项
+
+本轮新增专项测试本地结果为：`office-bundle-contract` 15/15；`office-pdf-converter` 1/1；`office-integration-gate` 3/3；`office-operation-service` 10/10；`office-artifact-delivery` 4/4。合同测试覆盖缺失/畸形 manifest、协议与架构不匹配、来源摘要、固定入口、同长度字节篡改、路径穿越、重复/额外资源、dirty/cache release gate、实际导出函数、发布失败恢复、生成物与真实源改动的身份区别。服务与交付测试另外覆盖重复 pending、源锁、幂等重启、跨空间恢复、真实 DOCX 校验、目标身份变化、取消提交边界、备份恢复和提交后 journal 恢复。
+
+转换测试使用真实 esbuild 和 PDFium，生成一页可授权英文 fixture，从无关中文工作目录执行纯 CJS bundle，并解包 DOCX 回读正文；检查 pages、pageResults、progress 和 scannedDocument。它证明包装与显式资源路径可工作，不能代替复杂 PDF、扫描 OCR、密码、安装版或真实模型工具链验收。
+
+当前宿主已经接入 `expectedReleaseVersion`，新增 `scripts/verify-office-integration.mjs` 只读门禁，并由 `office:verify` / `office:verify:release` 暴露；各 electron-builder 入口在打包前先执行 Office 构建与门禁。仍需在主集成流程完成：完整源码冻结与 fresh Office 构建、实际编辑器 hook 验证、三入口闭环、异常注入、质量与性能、安装/回滚。完整上游 v0.12.852 融合和 Markdown/HTML 全应用接入仍是后续独立门禁工作，不因本次基础合同建立而自动完成。
+
+## 13 ADR 补充与复审条件
+
+| ADR | 当前决定 | 代价与风险 | 复审条件 |
+|---|---|---|---|
+| UP-01 | 官方 tag/commit 固定，fork 私有差异独立记账 | 升级前多一次审计 | 官方提供稳定嵌入发行与兼容声明 |
+| UP-02 | registry 在宿主源码中共用，candidate 默认禁用 | 完整新应用仍需适配和验收 | 编辑器数量/构建方式变化 |
+| UP-03 | bytes-in/bytes-out worker 复用上游 converter | 增加 worker 生命周期与资源协议 | 上游已有可直接复用的稳定隔离执行器 |
+| UP-04 | 源输入摘要 + 全资源 manifest + 实际 exports 检查 | 构建与启动需要额外 I/O | 性能测量要求优化；不得删除真实性检查 |
+| UP-05 | 同一 release/protocol 的匹配组合整体发布/回滚 | 不支持随意单文件热替换 | 引入经过验证的持久热更新事务 |
+| UP-06 | Markdown/HTML 按完整应用对等接入 | 工作量大于加两个入口 | 产品明确授权缩小范围；当前要求保持完整对等 |
+
+这些决定遵循“背景、选择、后果、复审条件”的记录方式。已有代码和局部测试只说明对应基础项已实施；整体 ADR 的 Accepted / Implemented 状态仍以主集成审查与发布门禁为准。

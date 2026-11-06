@@ -1,0 +1,62 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { Marked } from 'marked'
+
+const root = path.dirname(fileURLToPath(import.meta.url))
+const docs = [
+  { file: '01-integration-plan', title: '融合研究与实施方案', summary: '版本和现状研究、完整对等范围、架构决策、技术难点、阶段门槛及持续升级。' },
+  { file: '02-prd', title: '产品需求 PRD', summary: '用户流程、HTML-01 至 HTML-12 的产品需求、可测验收和发布条件。' },
+  { file: '03-technical-integration', title: '技术对接与拆解', summary: '宿主适配、模型和工具、文档与资产、隔离、构建、测试与升级合同。' },
+  { file: '04-implementation-and-validation', title: '实施与验收记录', summary: '实际固定来源、独立构建决定、T00–T10 状态、验证证据与未关闭问题。' },
+  { file: '05-ai-service-contract-audit', title: 'AI 服务合同审计', summary: '固定目标的 AI/偏好/会话/文件通道、真实参数与缺口、通用服务接入拆解。' },
+]
+const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+const css = `
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:#f4f6f7;color:#222e36;font:16px/1.85 'Microsoft YaHei','PingFang SC',system-ui,sans-serif}
+a{color:#145f78;text-underline-offset:3px}a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #ba7517;outline-offset:3px}
+header{background:#fff;border-bottom:1px solid #d7e0e2}.bar{max-width:1420px;margin:auto;padding:15px 25px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-weight:700;margin-right:auto}.nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}.nav [aria-current=page]{font-weight:700;color:#173f4a}
+.layout{max-width:1420px;margin:25px auto 60px;padding:0 22px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:22px;align-items:start}
+.toc{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:16px;font-size:13px}
+.toc summary{font-size:15px;font-weight:700;cursor:pointer}.toc a{display:block;padding:5px 0;text-decoration:none;line-height:1.5}.toc a.sub{padding-left:12px}
+main{min-width:0;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:34px 40px}.landing{max-width:1100px;margin:28px auto 60px}
+.note{background:#fff7e5;border-left:4px solid #c58b28;padding:12px 16px;margin-bottom:24px;font-size:14px}
+h1{font-size:29px;line-height:1.5;margin:0 0 20px}h2{font-size:22px;line-height:1.5;margin:40px 0 16px;padding-top:14px;border-top:1px solid #d7e0e2}h3{font-size:18px;margin:25px 0 10px}
+p,li,td,th{overflow-wrap:anywhere}p{margin:12px 0}li{margin:6px 0}.table-scroll{overflow-x:auto;border:1px solid #d7e0e2;border-radius:4px;margin:18px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;line-height:1.75}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-right:1px solid #d7e0e2;border-bottom:1px solid #d7e0e2}th{background:#eaf2f1}tr:last-child td{border-bottom:0}
+pre{background:#f1f4f4;border:1px solid #d7e0e2;padding:16px;overflow:auto;font:13px/1.7 Consolas,monospace}code{font-family:Consolas,monospace;background:#eff3f3;padding:1px 3px;overflow-wrap:anywhere}pre code{padding:0;background:none}
+footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#586870;font-size:13px}.docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.item{border:1px solid #d7e0e2;border-radius:6px;padding:20px}.item h2{border:0;margin:0 0 10px;padding:0;font-size:19px}.item p{font-size:14px}
+@media(max-width:800px){.layout{display:block;padding:0 12px;margin-top:14px}.toc{position:static;max-height:270px;margin-bottom:14px}main,.landing{padding:22px 18px}.landing{margin:14px 12px}.docs{grid-template-columns:1fr}.bar{padding:13px 16px}h1{font-size:24px}h2{font-size:20px}}
+@media print{body{background:white;font-size:10pt}header,.toc{display:none}.layout{display:block;margin:0;padding:0}main,.landing{border:0;padding:0;margin:0}table{min-width:0;font-size:8pt}th,td{padding:5pt;border:1px solid #aaa}.table-scroll{overflow:visible;border:0}pre{white-space:pre-wrap}h2,h3{break-after:avoid}@page{size:A4;margin:16mm}}
+`
+const nav = current => `<a href="index.html"${current === 'index' ? ' aria-current="page"' : ''}>文档导航</a>` + docs.map(d => `<a href="${d.file}.html"${current === d.file ? ' aria-current="page"' : ''}>${escape(d.title)}</a>`).join('')
+const frame = (title, current, content) => `<!doctype html>\n<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>${escape(title)}</title><style>${css}</style></head><body><header><div class="bar"><span class="brand">Friday Office · AI HTML 规划</span><nav class="nav" aria-label="文档导航">${nav(current)}</nav></div></header>${content}</body></html>\n`
+for (const d of docs) {
+  const source = await fs.readFile(path.join(root, `${d.file}.md`), 'utf8')
+  if (source.includes('\ufffd')) throw new Error(`${d.file}: invalid replacement character`)
+  let counter = 0
+  const headings = []
+  const marked = new Marked()
+  marked.use({ renderer: {
+    heading({ tokens, depth }) {
+      const label = this.parser.parseInline(tokens)
+      const id = `section-${++counter}`
+      if (depth === 2 || depth === 3) headings.push({ depth, label, id })
+      return `<h${depth} id="${id}">${label}</h${depth}>\n`
+    },
+    html({ text }) { return escape(text) },
+  } })
+  let content = marked.parse(source)
+  for (const target of docs) content = content.replaceAll(`href="${target.file}.md"`, `href="${target.file}.html"`)
+  content = content.replaceAll('<table>', '<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>').replaceAll('</table>', '</table></div>')
+  const toc = headings.map(h => `<a class="${h.depth === 3 ? 'sub' : ''}" href="#${h.id}">${h.label}</a>`).join('')
+  const notice = '<div class="note"><strong>阅读提示：</strong>前三篇为下一版规划；第 04 篇记录实际实施与验收。源代码接入、编译、运行、完整对等和发布分别核验，不以局部通过代替整体完成。</div>'
+  const footer = `<footer>本页面为离线阅读版。<a href="${d.file}.md">Markdown 源稿</a> · <a href="index.html">返回文档导航</a></footer>`
+  await fs.writeFile(path.join(root, `${d.file}.html`), frame(d.title, d.file, `<div class="layout"><aside class="toc"><details open><summary>本篇目录</summary>${toc}</details></aside><main>${notice}${content}${footer}</main></div>`), 'utf8')
+}
+const cards = docs.map(d => `<section class="item"><h2><a href="${d.file}.html">${escape(d.title)}</a></h2><p>${escape(d.summary)}</p><a href="${d.file}.html">打开阅读版</a> · <a href="${d.file}.md">Markdown 源稿</a></section>`).join('')
+const landing = `<main class="landing"><h1>Friday 下一版 AI HTML 融合规划与实施</h1><p>三份独立方案覆盖上游研究与融合方案、产品需求、技术对接，第 04 篇新增实际实施账本。原有 GenOffice 总体文档及 PDF 专项文档继续保留。</p><div class="note"><strong>状态：</strong>已开始实际接入。HTML 单独固定官方 v0.12.852 源码与依赖，现有四类编辑器保留当前 vendor 和 PDF 修复。构建合同、宿主和前端入口正在接入；完整功能对等、安全与安装验收尚未完成，最新证据见第 04 篇。</div><div class="docs">${cards}</div><h2>阅读说明</h2><p>可离线直接打开本页面与各篇阅读版；源稿同时保留。正文表格在窄窗口可横向滚动，浏览器打印可生成 PDF。正文引用的旧文档维持原位置。</p><footer>2026-11-06 · 实施进展与最终验收分别记录</footer></main>`
+await fs.writeFile(path.join(root, 'index.html'), frame('Friday AI HTML 融合规划', 'index', landing), 'utf8')
+console.log(`Generated ${docs.length} documents and index in ${root}`)

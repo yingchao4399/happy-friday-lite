@@ -47,7 +47,7 @@
       <div ref="tooltipEl" class="floating-tooltip" style="display: none"></div>
     </Teleport>
 
-    <AvatarDrawer v-model="showDrawer" />
+    <AvatarDrawer v-model="showDrawer" :initial-section="drawerInitialSection" />
   </aside>
 </template>
 
@@ -97,8 +97,15 @@ const hideTooltip = () => {
 
 // ========== Avatar drawer ==========
 const showDrawer = ref(false);
+const drawerInitialSection = ref('memory');
+const openManagement = event => {
+  if (event.detail?.section !== 'skills') return;
+  drawerInitialSection.value = 'skills';
+  showDrawer.value = true;
+};
 
 const toggleDrawer = () => {
+  drawerInitialSection.value = 'memory';
   hideTooltip();
   showDrawer.value = !showDrawer.value;
 };
@@ -110,12 +117,14 @@ const onRouteChange = () => {
 let removeRouteHook = null;
 
 onMounted(() => {
+  window.addEventListener('friday-open-management', openManagement);
   // afterEach returns an unregister function. Keep it so a remounted shell
   // does not accumulate route callbacks and stale drawer updates.
   removeRouteHook = router.afterEach(onRouteChange);
 });
 
 onUnmounted(() => {
+  window.removeEventListener('friday-open-management', openManagement);
   removeRouteHook?.();
   removeRouteHook = null;
   hideTooltip();

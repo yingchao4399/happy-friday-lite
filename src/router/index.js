@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { OFFICE_ROUTE_TYPES } from '../views/office/officeTypes.js'
 
 export const routes = [
   {path:'/settings/plugins',name:'settings-plugins',component:()=>import('@/views/settings/SettingsPlugins.vue')},
@@ -57,7 +58,7 @@ export const routes = [
   {
     // /office/:editor/:instId 为编辑器独立 Tab（每个文件/新建文档一个 Tab，
     // instId 与主进程 office-host 的 viewId <type>-<instId> 一一对应）
-    path: '/office/:editor(docs|sheets|slides|pdf)/:instId(\\d+)',
+    path: `/office/:editor(${OFFICE_ROUTE_TYPES})/:instId(\\d+)`,
     name: 'office-editor',
     component: () => import('@/views/office/OfficeWorkspace.vue')
   },
@@ -100,6 +101,11 @@ export const routes = [
     path: '/settings/model',
     name: 'settings-model',
     component: () => import('@/views/settings/SettingsModel.vue')
+  },
+  {
+    path: '/settings/ai-tools',
+    name: 'settings-ai-tools',
+    component: () => import('@/views/settings/SettingsAiTools.vue')
   },
   {
     path: '/settings/modules',

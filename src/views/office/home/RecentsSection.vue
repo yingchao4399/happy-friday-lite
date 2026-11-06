@@ -52,9 +52,10 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RecentRow from './RecentRow.vue';
 
-defineProps({
+const props = defineProps({
   entries: { type: Array, required: true },
   filter: { type: String, required: true },
+  editorTypes: { type: Array, default: () => ['docs', 'sheets', 'slides', 'pdf'] },
 });
 defineEmits(['update:filter', 'open', 'toggle-star', 'remove', 'delete', 'reveal', 'rename']);
 
@@ -66,7 +67,8 @@ const filters = computed(() => [
   { key: 'sheets', label: t('office.filterSheets') },
   { key: 'slides', label: t('office.filterSlides') },
   { key: 'pdf', label: t('office.filterPdf') },
-]);
+  { key: 'html', label: t('office.filterHtml') },
+].filter(filter => filter.key === 'all' || props.editorTypes.includes(filter.key)));
 </script>
 
 <style scoped lang="scss">

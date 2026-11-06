@@ -1,11 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
+import { realpathSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { createAiCoreFacade } from '../../src-electron/ai-core/facade.js'
-import { createAiCoreRuntime } from '../../src-electron/ai-core/task-runtime.js'
+import { createAiCoreRuntime, hasVerifiedOfficeArtifact } from '../../src-electron/ai-core/task-runtime.js'
 import { isAllowedAiCoreCapability, isWriteCapability } from '../../src-electron/ai-core/catalog-policy.js'
 import { createAiCoreHealthCheck, createRetryableAsyncGetter } from '../../src-electron/ai-core/runtime-lifecycle.js'
 import { createAiChatCapabilityInvoker } from '../../src-electron/office/ai-inference-adapter.js'
@@ -39,6 +40,107 @@ test('AI Core runtime 执行读能力并留下状态事件', async () => {
   assert.equal(result.output.verification.status, 'passed')
   assert.equal(calls.length, 1)
   assert.ok(result.events.some(event => event.type === 'task.status'))
+})
+
+function officeDelivery(overrides = {}) {
+  return { ok: true, status: 'succeeded', data: { artifact: { persisted: true, path: path.resolve('SANDBOX/result.docx'), bytes: 42,
+    sha256: 'a'.repeat(64), validation: { valid: true, checkedAt: new Date().toISOString() }, ...overrides } } }
+}
+
+test('Core only accepts strict host Office delivery evidence for internal readback', async () => {
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', officeDelivery()), true)
+  assert.equal(hasVerifiedOfficeArtifact('untrusted.write', officeDelivery()), false)
+  for (const invalid of [{ persisted: false }, { bytes: 0 }, { sha256: '' }, { validation: { valid: true } }, { path: 'relative.docx' }]) {
+    assert.equal(hasVerifiedOfficeArtifact('office_document_create', officeDelivery(invalid)), false)
+  }
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', officeDelivery(), { target: { out: path.resolve('SANDBOX/other.docx') } }), false)
+  const calls = []
+  const facade = createAiCoreFacade({ capabilities: [{ id: 'office_document_create', type: 'write', requiredScopes: ['write'] }] })
+  const runtime = createAiCoreRuntime({ facade, executeCapability: async (...args) => { calls.push(args); return officeDelivery() } })
+  const pending = await runtime.submit(request('office_document_create'))
+  await runtime.approve(pending.id, 'user:local')
+  const result = await waitForTerminal(runtime, pending.id)
+  assert.equal(result.status, 'completed')
+  assert.equal(result.output.verification.mode, 'office-artifact-readback')
+  assert.equal(calls[0][2].taskId, pending.id)
+  assert.equal(calls[0][2].stepId, result.plan.steps[0].id)
+})
+
+test('Core rejects Office success text, incomplete artifacts and domain interruption', async () => {
+  for (const output of ['file created', { ok: true, status: 'succeeded' }, officeDelivery({ bytes: 0 }), { ok: false, status: 'interrupted' }]) {
+    const facade = createAiCoreFacade({ capabilities: [{ id: 'office_document_create', type: 'write', requiredScopes: ['write'] }] })
+    const runtime = createAiCoreRuntime({ facade, executeCapability: async () => output })
+    const pending = await runtime.submit(request('office_document_create'))
+    await runtime.approve(pending.id, 'user:local')
+    const result = await waitForTerminal(runtime, pending.id)
+    assert.equal(result.status, 'failed')
+    assert.equal(result.error.code, 'AI_CORE_OUTPUT_NOT_VERIFIED')
+  }
+})
+
+test('Core resolves Office virtual and relative output paths with its trusted sandbox root', async () => {
+  const root = path.join(os.tmpdir(), 'friday-core-path-contract')
+  const artifactPath = path.join(root, 'SANDBOX', 'reports', 'result.docx')
+  const output = officeDelivery({ path: artifactPath })
+  const virtualArgs = { target: { out: '/SANDBOX/reports/result.docx' } }
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', output, virtualArgs), false)
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', output, virtualArgs, { agentRootDir: root }), true)
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', output, { target: { out: 'reports/result.docx' } }, { agentRootDir: root }), true)
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', output, { target: { out: '../result.docx' } }, { agentRootDir: root }), false)
+  const facade = createAiCoreFacade({ capabilities: [{ id: 'office_document_create', type: 'write', requiredScopes: ['write'] }] })
+  const runtime = createAiCoreRuntime({ facade, executionContext: { agentRootDir: root }, executeCapability: async () => output })
+  const pending = await runtime.submit({ ...request('office_document_create'), input: virtualArgs })
+  await runtime.approve(pending.id, 'user:local')
+  assert.equal((await waitForTerminal(runtime, pending.id)).status, 'completed')
+})
+
+test('Core compares an existing delivered file using native canonical paths', async t => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'friday-core-realpath-'))
+  t.after(() => fs.rm(directory, { recursive: true, force: true }))
+  const outputFile = path.join(directory, 'SANDBOX', 'reports', 'result.docx')
+  await fs.mkdir(path.dirname(outputFile), { recursive: true })
+  await fs.writeFile(outputFile, 'path identity fixture')
+  // Production delivery resolves its persisted target asynchronously. On Windows
+  // that commonly returns the long name while the trusted temp root retains an
+  // ADMINI~1-style 8.3 alias; exercise the same boundary here.
+  const actualPath = await fs.realpath(outputFile)
+  const expectedPath = path.resolve(directory, 'SANDBOX', 'reports', 'result.docx')
+  const expectedCanonicalPath = realpathSync.native(expectedPath)
+  if (process.platform === 'win32' && expectedPath.toLowerCase() !== expectedCanonicalPath.toLowerCase()) {
+    assert.notEqual(expectedPath.toLowerCase(), actualPath.toLowerCase(), 'fixture must retain distinct short and long spellings')
+  }
+  assert.equal(expectedCanonicalPath.toLowerCase(), actualPath.toLowerCase())
+  const output = officeDelivery({ path: actualPath })
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', output, { target: { out: '/SANDBOX/reports/result.docx' } }, { agentRootDir: directory }), true)
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', output, { target: { out: 'reports/result.docx' } }, { agentRootDir: directory }), true)
+  assert.equal(hasVerifiedOfficeArtifact('office_document_create', output, { target: { out: 'reports/other.docx' } }, { agentRootDir: directory }), false)
+})
+
+test('Core preserves a verified file delivered just before cancellation', async () => {
+  let started = false
+  let release
+  const gate = new Promise(resolve => { release = resolve })
+  const facade = createAiCoreFacade({ capabilities: [{ id: 'office_document_convert', type: 'write', requiredScopes: ['write'] }] })
+  const runtime = createAiCoreRuntime({ facade, executeCapability: async () => { started = true; await gate; return officeDelivery() } })
+  const pending = await runtime.submit(request('office_document_convert'))
+  await runtime.approve(pending.id, 'user:local')
+  for (let i = 0; i < 100 && !started; i++) await new Promise(resolve => setTimeout(resolve, 2))
+  runtime.cancel(pending.id, 'user:local')
+  release()
+  const result = await waitForTerminal(runtime, pending.id)
+  assert.equal(result.status, 'completed')
+  assert.equal(result.output.steps[0].output.data.artifact.persisted, true)
+  assert.ok(result.events.some(event => event.type === 'task.cancel_after_delivery'))
+})
+
+test('Core treats domain cancellation as cancellation without a false success', async () => {
+  const facade = createAiCoreFacade({ capabilities: [{ id: 'office_document_convert', type: 'write', requiredScopes: ['write'] }] })
+  const runtime = createAiCoreRuntime({ facade, executeCapability: async () => ({ ok: false, status: 'cancelled' }) })
+  const pending = await runtime.submit(request('office_document_convert'))
+  await runtime.approve(pending.id, 'user:local')
+  const result = await waitForTerminal(runtime, pending.id)
+  assert.equal(result.status, 'cancelled')
+  assert.equal(result.steps.length, 0)
 })
 
 test('AI Core 写能力先等待审批，审批后才执行', async () => {

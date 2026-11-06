@@ -421,6 +421,12 @@ const api = {
   consumePendingOpenDocx: () => electron.ipcRenderer.invoke("docs:consume-pending-open"),
   consumeNewBlankDoc: () => electron.ipcRenderer.invoke("docs:consume-new-blank"),
   consumeAiDocContent: () => electron.ipcRenderer.invoke("docs:consume-ai-doc-content"),
+  onAiDocContent: (handler) => {
+    const listener = (_event, content) => handler(content);
+    electron.ipcRenderer.on("docs:ai-doc-content", listener);
+    return () => electron.ipcRenderer.removeListener("docs:ai-doc-content", listener);
+  },
+  completeAiDocContent: (result) => electron.ipcRenderer.invoke("docs:complete-ai-doc-content", result),
   consumeHeadlessExport: () => electron.ipcRenderer.invoke("docs:consume-headless-export"),
   headlessExportDone: (result) => electron.ipcRenderer.send("docs:headless-export-done", result),
   createDocument: (request) => electron.ipcRenderer.invoke("docs:create-document", request),

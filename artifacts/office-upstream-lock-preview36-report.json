@@ -1,0 +1,135 @@
+{
+  "checkedAt": "2026-11-06T06:21:45.477Z",
+  "preview": {
+    "ok": true,
+    "code": null,
+    "issues": [],
+    "audit": {
+      "lockSha256": "d708ddec07a9dff09787c98275bedd48dd3fbf0ea96e86db89418ec4e29cbafc",
+      "patchManifestSha256": "44dc27285af1b37e60709cd2079d2730979b020662c531690e4e681b6b985e06",
+      "packageLockSha256": "c1cc94cc333f7b19cb25da3088a2f71fbaa2628f5646490548c2036e1aa7517c",
+      "vendorPackageLockSha256": "33d48aa506479731a731a33005587842677cb2746e4be744dec5dd765787383c",
+      "officialRepository": "https://github.com/genspark-ai/genoffice.git",
+      "targetStatus": "candidate-only",
+      "targetTag": "v0.12.852",
+      "targetCommitSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+      "vendorHeadSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+      "integrationState": "current-vendor-not-latest-claim",
+      "patchSetId": "friday-office-host-v1-20261106",
+      "patchReviewStatus": "inventory-pending",
+      "hostProtocolVersion": "1.0",
+      "adapterVersion": "1.0",
+      "requiredEditors": [
+        "docs",
+        "sheets",
+        "slides",
+        "pdf"
+      ],
+      "remoteVerified": false
+    }
+  },
+  "formal": {
+    "ok": false,
+    "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+    "issues": [
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-001"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-001"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-002"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-002"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-003"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-003"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-004"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-004"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-005"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-005"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-006"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-006"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-007"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-007"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-008"
+      },
+      {
+        "code": "OFFICE_PATCH_VERIFICATION_INCOMPLETE",
+        "detail": "FRIDAY-OFFICE-008"
+      },
+      {
+        "code": "OFFICE_APPROVED_UPSTREAM_REQUIRED"
+      },
+      {
+        "code": "OFFICE_INTEGRATED_UPSTREAM_REQUIRED"
+      },
+      {
+        "code": "OFFICE_PATCH_REVIEW_INCOMPLETE"
+      }
+    ],
+    "audit": {
+      "lockSha256": "d708ddec07a9dff09787c98275bedd48dd3fbf0ea96e86db89418ec4e29cbafc",
+      "patchManifestSha256": "44dc27285af1b37e60709cd2079d2730979b020662c531690e4e681b6b985e06",
+      "packageLockSha256": "c1cc94cc333f7b19cb25da3088a2f71fbaa2628f5646490548c2036e1aa7517c",
+      "vendorPackageLockSha256": "33d48aa506479731a731a33005587842677cb2746e4be744dec5dd765787383c",
+      "officialRepository": "https://github.com/genspark-ai/genoffice.git",
+      "targetStatus": "candidate-only",
+      "targetTag": "v0.12.852",
+      "targetCommitSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+      "vendorHeadSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+      "integrationState": "current-vendor-not-latest-claim",
+      "patchSetId": "friday-office-host-v1-20261106",
+      "patchReviewStatus": "inventory-pending",
+      "hostProtocolVersion": "1.0",
+      "adapterVersion": "1.0",
+      "requiredEditors": [
+        "docs",
+        "sheets",
+        "slides",
+        "pdf"
+      ],
+      "remoteVerified": true
+    }
+  },
+  "expectedFormalRejection": true,
+  "boundary": "Official candidate observed only. No GenOffice update integrated; patch inventory pending."
+}

@@ -1,0 +1,98 @@
+{
+  "ok": true,
+  "checkedAt": "2026-11-06T21:41:09.293Z",
+  "mode": "packaged-application-main-entry",
+  "executable": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\Happy Friday Lite.exe",
+  "executableSha256": "600a32f58374978c34b483c219f9eef8bc972ab791ba48f82d4c9e0d78049db8",
+  "manifestSha256": "80928685409663c44ce816efad6bfa8d09ccd2708db51838dca7210db161b699",
+  "isolatedDataDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV",
+  "steps": [
+    {
+      "extension": "html",
+      "format": "pdf",
+      "input": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.html",
+      "target": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\html-export.pdf",
+      "code": 0,
+      "signal": null,
+      "timedOut": false,
+      "envelope": {
+        "status": "ok",
+        "summary": "Exported C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.html to C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\html-export.pdf",
+        "output_path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\html-export.pdf"
+      },
+      "readback": {
+        "pageCount": 1,
+        "markerPresent": true
+      },
+      "bytes": 19694,
+      "sha256": "93fab5645416360629fa240faebed05338a86b25e6c8089cbc979095ae26cd72",
+      "sourceUnchanged": true
+    },
+    {
+      "extension": "html",
+      "format": "docx",
+      "input": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.html",
+      "target": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\html-export.docx",
+      "code": 0,
+      "signal": null,
+      "timedOut": false,
+      "envelope": {
+        "status": "ok",
+        "summary": "Exported C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.html to C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\html-export.docx",
+        "output_path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\html-export.docx"
+      },
+      "readback": {
+        "markerPresent": true,
+        "mediaCount": 1
+      },
+      "bytes": 10180,
+      "sha256": "1dab8501d49f6befebe6e2a3af56b4da81dac0d8b8621c1ea817384e532136aa",
+      "sourceUnchanged": true
+    },
+    {
+      "extension": "htm",
+      "format": "pdf",
+      "input": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.htm",
+      "target": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\htm-export.pdf",
+      "code": 0,
+      "signal": null,
+      "timedOut": false,
+      "envelope": {
+        "status": "ok",
+        "summary": "Exported C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.htm to C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\htm-export.pdf",
+        "output_path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\htm-export.pdf"
+      },
+      "readback": {
+        "pageCount": 1,
+        "markerPresent": true
+      },
+      "bytes": 19694,
+      "sha256": "5e73ea38837c070a0cd177947d2b63a675bcd06df1705118d9dceca1d5167bee",
+      "sourceUnchanged": true
+    },
+    {
+      "extension": "htm",
+      "format": "docx",
+      "input": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.htm",
+      "target": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\htm-export.docx",
+      "code": 0,
+      "signal": null,
+      "timedOut": false,
+      "envelope": {
+        "status": "ok",
+        "summary": "Exported C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\中文 headless.htm to C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\htm-export.docx",
+        "output_path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-headless-nCTuOV\\htm-export.docx"
+      },
+      "readback": {
+        "markerPresent": true,
+        "mediaCount": 1
+      },
+      "bytes": 10180,
+      "sha256": "c184deea0d4ebe72d7097b6b16afcdd113cf7d3e8249dcdbabd98a155c11d301",
+      "sourceUnchanged": true
+    }
+  ],
+  "limitations": [
+    "实际应用 --headless-export 入口与真实导出产物；不覆盖操作系统安装/升级、真实用户 GUI 打印或复杂页面排版保真。"
+  ]
+}

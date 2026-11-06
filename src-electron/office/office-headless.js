@@ -8,8 +8,7 @@
  * 本应用二进制并携带上述参数；本模块在 app ready 前解析 argv，ready 后
  * 跳过所有常规初始化，仅执行一次导出并退出（退出码 0/1/2/3）。
  *
- * 说明：上游还支持 md/html 输入，本产品未打包 markdown/html 编辑器，
- * 这两类输入返回 inputError。
+ * HTML/HTM 在实验预览版中使用独立固定来源的渲染器；Markdown 仍未开放。
  */
 
 import fs from 'node:fs'
@@ -17,6 +16,8 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 import { app, BrowserWindow, ipcMain } from 'electron'
+import { assertOfficeBundle } from './bundle-contract.js'
+import { isExperimentalHtmlEnabled, enablePackagedPreviewHtml } from './office-files.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const _require = createRequire(import.meta.url)
@@ -71,6 +72,29 @@ function registerEditorIpc(bundles) {
   try { slides?.registerSlidesIpc?.() } catch (e) { console.warn('[Office] registerSlidesIpc:', e.message) }
 }
 
+function registerHtmlHeadlessServices() {
+  // 单次 CLI 转换不读取用户凭证、创建聊天或写入应用数据库。
+  const values = {
+    'app:get-theme': 'light',
+    'app:get-language': app.getLocale().startsWith('zh') ? 'zh' : 'en',
+    'app:get-auto-save-default': { on: false, updatedAt: 0 },
+    'app:get-ai-panel-prefs': { side: 'right', fontSize: 'default', customFontSize: 14, spellcheck: true },
+    'ai:get-settings': { configured: false, provider: null, model: null, providers: {}, capabilities: {}, gskToolsEnabled: false, maxOutputTokens: 8192 },
+    'ai:gsk-status': { loggedIn: false },
+    'project:resolveChat': { projectId: 'headless', chatId: 'headless' },
+    'project:loadChat': [],
+    'project:appendChat': null,
+    'project:rebindChat': null,
+  }
+  for (const [channel, value] of Object.entries(values)) {
+    ipcMain.removeHandler(channel)
+    ipcMain.handle(channel, event => {
+      if (event.senderFrame !== event.sender.mainFrame) throw new Error('OFFICE_HTML_SENDER_INVALID')
+      return value
+    })
+  }
+}
+
 /**
  * 执行一次 headless 导出并 app.exit。正常路径不会 return（进程已退出）。
  */
@@ -116,7 +140,8 @@ export async function runHeadlessExportEntry() {
       message: `cannot export ${input} (supported inputs: .docx, .xlsx, .xlsm, .xls, .csv, .pptx)`,
     })
   }
-  if (module === 'markdown' || module === 'html') {
+  enablePackagedPreviewHtml({ isPackaged: app.isPackaged, appVersion: app.getVersion() })
+  if (module === 'markdown' || (module === 'html' && !isExperimentalHtmlEnabled())) {
     return finish({
       ok: false, code: HEADLESS_EXIT.inputError,
       message: `exporting ${module} is not available in this app`,
@@ -138,14 +163,14 @@ export async function runHeadlessExportEntry() {
     const root = officeRoot()
     // 特权协议安装（registerSchemesAsPrivileged 已在 office-host 模块加载时完成）
     const roots = {}
-    for (const editor of ['docs', 'sheets', 'slides', 'pdf']) {
+    for (const editor of ['docs', 'sheets', 'slides', 'pdf', ...(module === 'html' ? ['html'] : [])]) {
       const renderer = path.join(root, editor, 'renderer')
       if (fs.existsSync(path.join(renderer, 'index.html'))) roots[editor] = renderer
     }
     officeUtils.installRendererProtocol(roots)
 
     const bundles = {}
-    for (const editor of ['docs', 'sheets', 'slides']) {
+    for (const editor of module === 'html' ? [] : ['docs', 'sheets', 'slides']) {
       try { bundles[editor] = await loadBundle(editor) } catch (e) {
         console.warn('[Office] headless load', editor, e.message)
       }
@@ -154,6 +179,16 @@ export async function runHeadlessExportEntry() {
     const docs = bundles.docs
     const sheets = bundles.sheets
     const slides = bundles.slides
+    let html
+    if (module === 'html') {
+      const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8'))
+      assertOfficeBundle(root, { editor: 'html', expectedReleaseVersion: pkg.releaseVersion, allowExperimental: true })
+      html = await loadBundle('html')
+      // HTML 来自独立的上游依赖图，headless 状态与语言不能沿用旧 bundle 的单例。
+      html.setHtmlHeadlessMode(true)
+      html.setHtmlUiLang(app.getLocale().startsWith('zh') ? 'zh' : 'en')
+      html.configureHtmlRuntime({ preloadPath: path.join(root, 'html', 'preload', 'index.js'), rendererFile: path.join(root, 'html', 'renderer', 'index.html') })
+    }
     const sidecarPath = path.join(root, 'sheets', 'sidecar', process.platform === 'win32' ? 'xlsx-sidecar.exe' : 'xlsx-sidecar')
     if (docs) {
       docs.configureDocsRuntime({ preloadPath: path.join(root, 'docs', 'preload', 'index.js'), rendererFile: path.join(root, 'docs', 'renderer', 'index.html') })
@@ -172,6 +207,7 @@ export async function runHeadlessExportEntry() {
       })
     }
     registerEditorIpc(bundles)
+    if (module === 'html') registerHtmlHeadlessServices()
 
     if (module === 'docs') {
       if (!docs) throw new Error('docs editor unavailable')
@@ -182,6 +218,8 @@ export async function runHeadlessExportEntry() {
     } else if (module === 'slides') {
       if (!slides) throw new Error('slides editor unavailable')
       await slides.exportSlidesPdfHeadless(input, outPath)
+    } else if (module === 'html') {
+      await html.exportHtmlHeadless(input, outPath, request.targetFormat)
     }
 
     if (!fs.existsSync(outPath)) {

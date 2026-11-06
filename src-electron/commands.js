@@ -6,6 +6,7 @@ import { importNoteResource } from './note-resources.js'
 import TurndownService from 'turndown'
 import { CancellationTokens } from './cancellation.js'
 import { loadConfig, saveConfig, getDataDir } from './config.js'
+import { syncOfficeUiLanguage } from './office/office-host.js'
 import * as db from './db.js'
 import { saveNoteImage, getNoteImagePath, IMAGE_RELATIVE_PREFIX } from './note-images.js'
 import { streamChat, streamChatWithRagAgent, generateTitle, streamNoteAI, fimCompletion } from './llm.js'
@@ -350,6 +351,7 @@ export function registerCommands(mainWindow) {
   ipcMain.handle('save-config', (_event, config) => {
     const previousConfig = loadConfig()
     const result = saveConfig(config)
+    if (previousConfig.language !== config.language) syncOfficeUiLanguage(config.language)
     if (previousConfig.runtimeLogsEnabled !== config.runtimeLogsEnabled) {
       const enabled = setLoggingEnabled(config.runtimeLogsEnabled !== false)
       if (!enabled && config.runtimeLogsEnabled !== false) {

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { registerTool } from '../registry.js'
 import { pathToFileURL } from 'node:url'
 import { getResource } from '../../resources.js'
+import { restoreLocalFileRerankOrder } from '../../../office/ai-local-search.js'
 
 const schema = z.object({
   query: z.string().trim().min(2).describe('跨 Friday 内容搜索的关键词或问题'),
@@ -41,7 +42,7 @@ async function searchAllHandler({ query, limit = 10 }) {
     // RAG 子系统不是结构化内容搜索的硬依赖；结果会明确包含已成功搜索的资源。
   }
 
-  const ranked = results.sort((a, b) => (b.score || 2) - (a.score || 2)).slice(0, limit)
+  const ranked = restoreLocalFileRerankOrder(results.sort((a, b) => (b.score || 2) - (a.score || 2))).slice(0, limit)
   return JSON.stringify({ query, count: ranked.length, results: ranked }, null, 2)
 }
 

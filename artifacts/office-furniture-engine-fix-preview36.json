@@ -1,0 +1,98 @@
+{
+  "checkedAt": "2026-11-06T06:45:18.753Z",
+  "patch": "pdf2docx-furniture-content-preservation",
+  "layer": "vendor conversion engine; no host algorithm copy",
+  "status": "source regression and full vendor suite passed; rebuilt preview.36 bundle/package quality matrix still required",
+  "files": [
+    {
+      "path": "vendor/happyoffice/packages/pdf2docx/src/analyze/furniture.ts",
+      "sha256": "3f5ae96fa31e2e966b3883b8abec7bda845ae9c3eef98b4f4f603c556ecdf81f"
+    },
+    {
+      "path": "vendor/happyoffice/packages/pdf2docx/tests/furniture.test.ts",
+      "sha256": "d53b96c23d363babde83e81d8927a692b6817a9782394d7e561f05a2c6c78910"
+    },
+    {
+      "path": "vendor/happyoffice/packages/pdf2docx/tests/furniture-content-preservation.test.ts",
+      "sha256": "3ec99fd2dc13e1693bcfd4e80e2aa0ae5b8e84d7efa4b4d3c2ca0763c6938113"
+    },
+    {
+      "path": "vendor/happyoffice/packages/pdf2docx/tests/helpers/wasm.ts",
+      "sha256": "67dcad3229c5f2473d7b41d7488005fd7c1a3330bf434ef05ee39e1cf0a2d4db"
+    }
+  ],
+  "rootCause": [
+    "Digit-masked grouping treated any physically page-tracking number as proof for the whole line, freezing other per-page IDs.",
+    "Only first/middle/last probes were validated, allowing intervening mismatches.",
+    "Unlabelled case/form/step numbers could coincide with physical page numbers and be mistaken for running page fields."
+  ],
+  "algorithm": [
+    "Validate every slot member.",
+    "For mixed content, only explicitly labelled digit runs can be PAGE fields, and each must equal its physical page on every member.",
+    "Replace all proven counters from right to left. Require the remaining literal template to be exactly identical before dropping any mixed-content line.",
+    "When proof fails, keep original line content in the document body."
+  ],
+  "supportedMixedPageLabels": {
+    "latinAndCyrillic": [
+      "Page",
+      "Pg",
+      "P",
+      "стр"
+    ],
+    "prefixBoundary": "Must begin at a token boundary with no preceding Unicode letter or number. Case-insensitive; optional one of dot, colon or hash and whitespace before digits. GROUP/STEP trailing P is not the P label.",
+    "cjk": [
+      "第 N 页",
+      "第 N 頁",
+      "N ページ"
+    ],
+    "conservativeFallback": "Unrecognised or unlabelled mixed numbering remains in the body. This may repeat a header, but preserves its content."
+  },
+  "preservedContracts": [
+    "Verbatim repeated headers and footers.",
+    "Ordinary Page N of M fields and all explicitly labelled duplicate PAGE occurrences.",
+    "Constant revision/year/total numbers and fullwidth page digits.",
+    "Original bare/worded page-number offset and roman behavior; no new promise of offset-page reproduction.",
+    "keepUnemitted cell-data preservation behavior."
+  ],
+  "regressions": {
+    "redBeforeFix": "Original title sample and adjacent cases first failed; semantic hardening independently reproduced 7 failures, including two real PDF conversions.",
+    "focusedTests": {
+      "passed": 42,
+      "failed": 0
+    },
+    "fullSuite": {
+      "success": true,
+      "total": 782,
+      "passed": 775,
+      "pending": 7,
+      "failed": 0,
+      "report": "artifacts/office-pdf2docx-engine-tests-preview36-final.json",
+      "note": "7 pre-existing system-font-conditional CJK/RTL tests remain skipped; the separate preview.35 quality matrix has a real simhei.ttf Chinese text-layer case."
+    },
+    "typecheck": {
+      "command": "npm run typecheck -w @genoffice/pdf2docx",
+      "exitCode": 0
+    }
+  },
+  "testEnvironmentFix": {
+    "file": "vendor/happyoffice/packages/pdf2docx/tests/helpers/wasm.ts",
+    "change": "Explicit ASCII thisProgram in test-only PDFium bootstrap.",
+    "reason": "Chinese test-runner entry paths otherwise assert in Emscripten ASCII environment initialization. Production bundled converter already has its own ASCII thisProgram."
+  },
+  "baselineEvidence": [
+    "artifacts/office-conversion-quality-preview35.json",
+    "artifacts/office-conversion-quality-preview35-v2.json",
+    "artifacts/office-furniture-upstream-comparison-preview35-v012852.json"
+  ],
+  "upstreamPolicy": {
+    "officialV012852FixesThisCase": false,
+    "keepPatchUntil": "An adopted official engine proves equivalent all-member, labelled-counter and invariant-literal checks or a safer preservation strategy, and passes the unchanged three-page failure PDF, real form/case near-neighbours, full suite and rebuilt 10-case worker quality matrix.",
+    "deletePatchOnlyAfter": "Record official commit identity, remove private delta without copying it to the host, rerun the same regressions/matrix, and refresh the upstream patch manifest and source/resource lock.",
+    "vendorPackageLockChanged": false
+  },
+  "limitations": [
+    "This is semantic furniture classification, not a pixel-perfect-layout guarantee.",
+    "A P-labelled number still relies on the conventional P-as-page interpretation; unsupported mixed dialects conservatively remain body content.",
+    "The old preview.35 package and both failure reports remain unchanged; no preview.36 installation or package-validation claim is made here."
+  ]
+}

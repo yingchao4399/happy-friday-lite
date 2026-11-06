@@ -1,0 +1,1226 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><title>Friday Office AI 业务能力与 PDF 转 Word 产品需求 PRD</title><style>
+:root { color-scheme:light; --ink:#202b3d; --muted:#526078; --line:#dce3ec; --accent:#205e94; --pale:#edf4fa }
+* { box-sizing:border-box }
+html { scroll-behavior:smooth; scroll-padding-top:24px }
+body { margin:0; background:#f3f5f8; color:var(--ink); font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif; font-size:16px; line-height:1.85 }
+a { color:var(--accent); text-underline-offset:3px }
+a:focus-visible,summary:focus-visible,.table-scroll:focus-visible { outline:3px solid #d28b1b; outline-offset:4px }
+.top { background:#fff; border-bottom:1px solid var(--line) }
+.top-inner { max-width:1400px; margin:auto; padding:17px 30px; display:flex; gap:18px; align-items:center; flex-wrap:wrap }
+.brand { font-size:17px; font-weight:700; margin-right:auto }
+.top nav { display:flex; gap:18px; flex-wrap:wrap; font-size:14px }
+.top nav a[aria-current=page] { color:#172c48; font-weight:700; text-decoration:underline }
+.layout { max-width:1400px; margin:28px auto 60px; display:grid; grid-template-columns:260px minmax(0,1fr); gap:24px; padding:0 24px; align-items:start }
+.toc { position:sticky; top:20px; max-height:calc(100vh - 40px); overflow:auto; font-size:13px; padding:20px; background:white; border:1px solid var(--line); border-radius:10px }
+.toc summary { font-size:15px; font-weight:700; cursor:pointer; margin-bottom:12px }
+.toc a { display:block; padding:6px 0; color:#42546f; text-decoration:none; line-height:1.6 }
+.toc a:hover { color:var(--accent); text-decoration:underline }
+.toc .sub { padding-left:12px; font-size:12px; color:#68758a }
+main { min-width:0; background:white; border:1px solid var(--line); border-radius:10px; padding:36px 42px }
+.status { border-left:4px solid #bd851f; background:#fff7e7; padding:12px 16px; font-size:14px; margin:0 0 26px }
+h1 { font-size:30px; line-height:1.5; margin:0 0 20px; letter-spacing:.2px }
+h2 { font-size:23px; margin:44px 0 18px; padding-top:16px; border-top:1px solid var(--line); line-height:1.6; break-after:avoid }
+h3 { font-size:18px; margin:28px 0 12px; line-height:1.7; break-after:avoid }
+p { margin:12px 0; overflow-wrap:anywhere }
+ul,ol { padding-left:1.7em } li { margin:6px 0; overflow-wrap:anywhere }
+.table-scroll { width:100%; overflow-x:auto; margin:20px 0; border:1px solid var(--line); border-radius:6px }
+table { border-collapse:collapse; width:100%; font-size:14px; line-height:1.75; min-width:560px }
+th,td { padding:11px 13px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); border-right:1px solid var(--line); overflow-wrap:anywhere }
+th { background:var(--pale); color:#253c56; font-weight:700 }
+th:last-child,td:last-child { border-right:0 } tr:last-child td { border-bottom:0 }
+tbody tr:nth-child(even) { background:#fafbfd }
+pre { background:#f2f5f9; border:1px solid var(--line); border-radius:6px; padding:17px; overflow:auto; font:13px/1.75 Consolas,"Cascadia Mono","Microsoft YaHei",monospace; tab-size:2 }
+pre code { font:inherit; background:none; padding:0; border:0 }
+code { font:.88em/1.7 Consolas,"Microsoft YaHei",monospace; padding:2px 4px; background:#f0f4f8; border-radius:3px; overflow-wrap:anywhere }
+blockquote { margin:18px 0; border-left:3px solid #9ab5cf; padding:4px 16px; color:var(--muted); background:#f6f9fc }
+.bottom { margin-top:38px; border-top:1px solid var(--line); padding-top:20px; color:var(--muted); font-size:13px }
+.doc-nav { display:flex; gap:12px 24px; flex-wrap:wrap; margin-top:16px }
+.landing { max-width:1120px; margin:32px auto 60px; padding:36px 42px }
+.eyebrow { color:var(--accent); font-size:13px; font-weight:700; margin-bottom:12px; letter-spacing:1px }
+.cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin:28px 0 }
+.card { border:1px solid var(--line); border-radius:8px; padding:22px; background:#fafcfe }
+.card h2 { border:0; padding:0; margin:4px 0 12px; font-size:20px }
+.card p { font-size:14px; color:var(--muted) }
+.meta { font-size:13px; color:var(--muted) }
+.skip { position:absolute; top:-100px; left:20px; background:white; padding:10px; z-index:10 }
+.skip:focus { top:10px }
+@media(max-width:1000px) {
+ .layout { grid-template-columns:210px minmax(0,1fr); gap:16px; padding:0 14px }
+ main { padding:26px } .cards { grid-template-columns:1fr }
+}
+@media(max-width:760px) {
+ .layout { display:block; margin-top:16px }
+ .toc { position:static; max-height:300px; margin-bottom:18px }
+ main,.landing { padding:22px 18px } .landing { margin:16px 12px }
+ .top-inner { padding:14px 18px; gap:10px } h1 { font-size:24px } h2 { font-size:21px }
+}
+@media print {
+ body { background:white; font-size:10pt; line-height:1.65 }
+ .top,.toc,.skip,.doc-nav { display:none }
+ .layout { display:block; padding:0; margin:0 }
+ main,.landing { border:0; padding:0; margin:0; max-width:none }
+ h1 { font-size:20pt } h2 { font-size:16pt; margin-top:22pt } h3 { font-size:12pt }
+ .table-scroll { overflow:visible; border:0 }
+ table { min-width:0; font-size:8pt; line-height:1.5 }
+ th,td { padding:5pt; border:1px solid #bbb } thead { display:table-header-group }
+ pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:8pt }
+ .cards { display:block } .card { break-inside:avoid; margin-bottom:12pt }
+ @page { size:A4; margin:16mm }
+}</style></head><body><a class="skip" href="#main">跳到正文</a><header class="top"><div class="top-inner"><span class="brand">Friday Office · 研究、合同与实施</span><nav aria-label="文档导航"><a href="index.html">文档导航</a><a href="01-research-report.html">根因研究报告</a><a href="02-product-requirements.html" aria-current="page">产品需求 PRD</a><a href="03-architecture-and-work-breakdown.html">架构方案与技术拆解</a><a href="04-upstream-integration-contract.html">持续上游集成合同</a><a href="05-implementation-and-validation.html">实施与验收账本</a></nav></div></header><div class="layout"><aside class="toc"><details open><summary>本篇目录</summary><a class="" href="#heading-2">1 产品问题与用户价值</a><a class="" href="#heading-3">2 目标与不纳入本版的范围</a><a class="sub" href="#heading-4">2.1 必须交付</a><a class="sub" href="#heading-5">2.2 后续范围</a><a class="" href="#heading-6">3 产品对象与术语</a><a class="" href="#heading-7">4 用户与典型场景</a><a class="sub" href="#heading-8">4.1 主要用户</a><a class="sub" href="#heading-9">4.2 用户故事</a><a class="" href="#heading-10">5 端到端体验</a><a class="sub" href="#heading-11">5.1 转换标准流程</a><a class="sub" href="#heading-12">5.2 摘要创建流程</a><a class="sub" href="#heading-13">5.3 提交后的异常流程</a><a class="sub" href="#heading-14">5.4 不支持功能的流程</a><a class="" href="#heading-15">6 详细功能需求</a><a class="sub" href="#heading-16">6.1 能力发现与一致性</a><a class="sub" href="#heading-17">6.2 请求意图与资源绑定</a><a class="sub" href="#heading-18">6.3 转换与创建</a><a class="sub" href="#heading-19">6.4 文件交付与结果</a><a class="sub" href="#heading-20">6.5 任务与错误</a><a class="sub" href="#heading-21">6.6 质量与扫描件</a><a class="" href="#heading-22">7 交互状态与示例文案</a><a class="" href="#heading-23">8 权限与安全需求</a><a class="" href="#heading-24">9 数据与资源合同</a><a class="sub" href="#heading-25">9.1 用户可见任务记录</a><a class="sub" href="#heading-26">9.2 结果状态</a><a class="" href="#heading-27">10 性能与资源要求</a><a class="" href="#heading-28">11 样本体系与质量验收</a><a class="sub" href="#heading-29">11.1 样本分组</a><a class="sub" href="#heading-30">11.2 质量通过标准</a><a class="" href="#heading-31">12 发布验收矩阵</a><a class="" href="#heading-32">13 指标与发布口径</a><a class="" href="#heading-33">14 分阶段交付与退出条件</a><a class="" href="#heading-34">15 回滚与兼容</a><a class="" href="#heading-35">16 文档与总体项目关系</a><a class="" href="#heading-36">17 发布前必须回答的问题</a><a class="" href="#heading-37">18 持续融合 GenOffice 的产品与工程合同</a><a class="sub" href="#heading-38">18.1 维护目标</a><a class="sub" href="#heading-39">18.2 详细需求</a><a class="sub" href="#heading-40">18.3 后续升级应看到的结果</a></details></aside><main id="main"><div class="status"><strong>阅读提示：</strong>第 01–03 篇保存研究与 Proposed 设计，第 04 篇为持续升级合同，第 05 篇记录实施与验收。较早实现快照曾完成 Office 全量构建；后续源码有变化，当前候选是否与生成资源匹配，以第 05 篇最新门禁结果为准。真实 Electron 四路径 fixture、远端模型、Core 完整对话、安装与 GitHub 发布均按各自证据验收。</div><h1 id="heading-1">Friday Office AI 业务能力与 PDF 转 Word 产品需求 PRD</h1>
+<p>日期：2026 年 11 月 5 日。版本：1.0。状态：待实施与评审的产品合同。本文件中的“必须”表示发布条件，不表示当前软件已实现。</p>
+<p>本版目标是使用户在 Friday 中通过转换按钮、PDF AI 面板和主助手发起 PDF 转 Word 时，使用相同业务能力并获得真实可用的 DOCX。同时解决已公开的创建 Word 能力失败与结果假成功问题，建立后续功能按统一契约接入的基础。原 GenOffice 全面升级及 Markdown、HTML 功能对等需求继续保留，本版不以完成全部 Office 功能迁移为前提。</p>
+<p>本次方案还必须支持后续持续融合 GenOffice 新版本：Friday 的权限、任务与交付逻辑保留在宿主，vendor 差异收敛为可追溯的通用接口；上游新模块通过受控 adapter、构建 manifest 与对等验收进入产品。</p>
+<p>配套研究报告负责事实依据，技术拆解负责实现与工程任务。本文作为验收标准，研发不能只以工具返回 ok 或按钮可点击作为完成依据。</p>
+<h2 id="heading-2">1 产品问题与用户价值</h2>
+<p>用户已经在界面上看到 PDF 转 Word 功能，因此合理预期 AI 可以完成同一操作。实际却得到“当前环境不支持创建文档”。这种差异会使用户无法判断 AI 的能力边界，也无法区分请求失败、生成失败和文件打开失败。</p>
+<p>本版应让用户能够用自然语言完成既有转换操作，知道系统正在处理哪份文件、输出到哪里、是否可编辑，以及出现问题后应该如何继续。对于尚未接通的功能，要在执行前给出具体原因，不能先假装支持再让模型反复尝试。</p>
+<p>长期价值是降低新增能力的重复接入成本，而不是让 AI 对所有操作无限制执行。转换算法、编辑器支持和授权边界仍需真实实现。</p>
+<h2 id="heading-3">2 目标与不纳入本版的范围</h2>
+<h3 id="heading-4">2.1 必须交付</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>范围</th>
+<th>本版交付</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PDF→DOCX</td>
+<td>本地转换，按钮与 AI 共享领域执行器</td>
+</tr>
+<tr>
+<td>PDF 面板转换工具</td>
+<td>根据真实宿主能力提供转换操作，不用 create_document 冒充转换</td>
+</tr>
+<tr>
+<td>从内容创建 DOCX</td>
+<td>修复 PDF 面板已宣称支持的创建动作，等待保存和文件回读</td>
+</tr>
+<tr>
+<td>统一能力查询</td>
+<td>菜单、AI schema、执行校验和诊断使用同一版本化描述</td>
+</tr>
+<tr>
+<td>文件与任务闭环</td>
+<td>源保护、取消、幂等、错误、质量告知、打开状态</td>
+</tr>
+<tr>
+<td>主助手接入</td>
+<td>当前 PDF 的同一转换语义进入共用服务；离线源经授权适配</td>
+</tr>
+<tr>
+<td>发布验证</td>
+<td>开发与安装环境验证、构建清单和回归证据</td>
+</tr>
+</tbody></table></div>
+<h3 id="heading-5">2.2 后续范围</h3>
+<p>PDF→Excel、PDF→PPT 的完整产品接入与质量验收；六类编辑器全部操作迁移；Markdown 与 HTML 完整应用功能对等；任意 Office 格式互转；全新 OCR 引擎；云端转换服务；系统级鼠标自动点击。</p>
+<p>本版必须识别这些能力的真实可用状态，并消除错误宣传。它们在原总体规划中的需求不被本文件取消。PDF 转换算法若暴露 P0 数据损失或完全不可用缺陷，仍属于本版修复阻塞项，不能以“算法不在范围”推迟。</p>
+<h2 id="heading-6">3 产品对象与术语</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>产品含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>转换</td>
+<td>从指定源文档快照产生目标格式，保留其内容，不由模型自由重写</td>
+</tr>
+<tr>
+<td>创建</td>
+<td>把用户或模型提供的内容写成新的文档</td>
+</tr>
+<tr>
+<td>文档资源</td>
+<td>带稳定身份和版本的文件或打开的编辑器实例</td>
+</tr>
+<tr>
+<td>能力</td>
+<td>有明确输入、权限、实现、输出与可用条件的业务操作</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>已提交、通过校验、可被定位的输出文件</td>
+</tr>
+<tr>
+<td>打开</td>
+<td>在 Friday 标签页展示已生成文件，独立于文件生成是否成功</td>
+</tr>
+<tr>
+<td>降级</td>
+<td>文件已生成，但部分文字或结构以图片等较弱形式保留</td>
+</tr>
+<tr>
+<td>暂不可用</td>
+<td>能力有定义但当前运行环境、文档状态或授权不满足条件</td>
+</tr>
+</tbody></table></div>
+<p>“Word 文件生成成功”至少表示 DOCX 已落盘且回读合格。“已打开”还要求 Friday 成功加载对应资源。两句话不应混用。</p>
+<h2 id="heading-7">4 用户与典型场景</h2>
+<h3 id="heading-8">4.1 主要用户</h3>
+<p>需要把收到的 PDF 继续编辑的普通用户；通过 AI 助手整理材料的用户；以 Office 处理合同、表格和扫描材料的高频用户；需要定位失败原因的支持与测试人员。</p>
+<h3 id="heading-9">4.2 用户故事</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>用户故事</th>
+<th>验收关注点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>US01</td>
+<td>我只打开 PDF，直接告诉 AI“把这份转成 Word”</td>
+<td>冷启动可执行，不要求先打开 Word</td>
+</tr>
+<tr>
+<td>US02</td>
+<td>我点击转 Word，再用 AI 做相同操作</td>
+<td>同源能力、同样权限和质量规则</td>
+</tr>
+<tr>
+<td>US03</td>
+<td>我修改 PDF 后转换，希望包含刚才的编辑</td>
+<td>使用当前已确认快照，不偷偷保存覆盖源</td>
+</tr>
+<tr>
+<td>US04</td>
+<td>我在长任务期间切换标签</td>
+<td>不串文档，能看见任务来源与进度</td>
+</tr>
+<tr>
+<td>US05</td>
+<td>我取消保存位置或密码输入</td>
+<td>结束任务，不报成功、不自动重试</td>
+</tr>
+<tr>
+<td>US06</td>
+<td>我重复发送同一句指令或网络重试</td>
+<td>不重复转换、弹窗和覆盖</td>
+</tr>
+<tr>
+<td>US07</td>
+<td>我的 PDF 是扫描件</td>
+<td>清楚知道输出是否含可编辑文字</td>
+</tr>
+<tr>
+<td>US08</td>
+<td>文件生成后 Word 标签打不开</td>
+<td>可以找到已生成文件并重试打开</td>
+</tr>
+<tr>
+<td>US09</td>
+<td>我让 AI 把摘要写成 Word</td>
+<td>走创建语义，内容不是整份 PDF 的替代转换</td>
+</tr>
+<tr>
+<td>US10</td>
+<td>我要求转 Excel，但本版未接通</td>
+<td>执行前准确告知，无无效调用循环</td>
+</tr>
+<tr>
+<td>US11</td>
+<td>我在主助手说“把当前 PDF 转成 Word”</td>
+<td>绑定 Office 当前资源，经同一领域服务执行</td>
+</tr>
+<tr>
+<td>US12</td>
+<td>我把一份磁盘 PDF 交给主助手转换</td>
+<td>先验证文件授权，再走同一转换能力</td>
+</tr>
+</tbody></table></div>
+<h2 id="heading-10">5 端到端体验</h2>
+<h3 id="heading-11">5.1 转换标准流程</h3>
+<ol>
+<li>用户点击转 Word 或提出转换要求。</li>
+<li>系统确认源文档身份、当前能力与必要授权。当前只有一份明确 PDF 时不重复询问文件。</li>
+<li>UI 显示源文档名称和转换目标。多份附件且指代不明时只询问源文件。</li>
+<li>获取源快照与版本。若必须先保存才能取得完整内容，应明确说明并由用户决定；不能未经授权覆盖原 PDF。</li>
+<li>选择或确认输出位置。已确认路径可复用，新增覆盖仍需确认。</li>
+<li>执行本地转换。密码通过本地交互提交，不经模型上下文。</li>
+<li>校验 DOCX、提交文件、登记 artifact，再尝试在 Friday 中打开。</li>
+<li>返回实际文件位置、质量提示和打开状态。必要时提供打开、定位文件或重试打开操作。</li>
+</ol>
+<h3 id="heading-12">5.2 摘要创建流程</h3>
+<p>系统先读取授权源内容，模型生成摘要；创建操作只接收摘要内容与文档类型，使用创建流水线交付。工具回传保存结果之前，AI 不得声称“已生成文件”。如果生成内容为空、导入失败或保存失败，应返回对应原因，而不是提交空白 DOCX。</p>
+<h3 id="heading-13">5.3 提交后的异常流程</h3>
+<p>目标文件已提交而标签打开失败时，任务状态是“已生成，打开失败”，不回滚或删除已经交付的文件。重试动作只重试打开，不能重新执行转换。应用关闭前已经提交的结果应能在任务记录中找到。</p>
+<h3 id="heading-14">5.4 不支持功能的流程</h3>
+<p>菜单可以保留转 Excel、转 PPT 位置，显示禁用原因“此版本尚未接入”。AI 请求的工具 schema 不包含这些输出格式。用户直接问起时，助手说明具体缺口；不得声称整个环境都不能创建文件，也不得不断调用必失败工具。</p>
+<h2 id="heading-15">6 详细功能需求</h2>
+<h3 id="heading-16">6.1 能力发现与一致性</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>优先级</th>
+<th>需求与验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CAP01</td>
+<td>P0</td>
+<td>同一能力描述提供操作 ID、版本、输入输出格式、可用条件、风险和结果语义；按钮、AI 与执行器不得各写一份支持列表</td>
+</tr>
+<tr>
+<td>CAP02</td>
+<td>P0</td>
+<td>执行前重新校验实时能力；查询后文档关闭、授权撤销或引擎失败时返回可理解状态</td>
+</tr>
+<tr>
+<td>CAP03</td>
+<td>P0</td>
+<td>支持、暂不可用、未实现和无权限可区分，提供 reasonCode 与建议动作</td>
+</tr>
+<tr>
+<td>CAP04</td>
+<td>P0</td>
+<td>模型请求只暴露当前文档类型和权限范围内的工具及格式，不把六类编辑器所有工具一律注入</td>
+</tr>
+<tr>
+<td>CAP05</td>
+<td>P0</td>
+<td>启动或 CI 检查宣称支持却无 handler、parser 枚举不一致、结果合同不符等问题</td>
+</tr>
+<tr>
+<td>CAP06</td>
+<td>P0</td>
+<td>能力查询不能只因 Docs 尚未加载就称 DOCX 不支持；可懒加载与缺失依赖必须区分</td>
+</tr>
+<tr>
+<td>CAP07</td>
+<td>P1</td>
+<td>管理诊断展示遗留能力和迁移覆盖率；分母是已盘点的业务操作，不是含糊的“所有功能”</td>
+</tr>
+</tbody></table></div>
+<h3 id="heading-17">6.2 请求意图与资源绑定</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>优先级</th>
+<th>需求与验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SRC01</td>
+<td>P0</td>
+<td>“这份 PDF”绑定发起消息时的资源 ID，不依赖稍后执行时的全局活动标签</td>
+</tr>
+<tr>
+<td>SRC02</td>
+<td>P0</td>
+<td>记录 source revision 与操作快照；未保存编辑不得被静默遗漏</td>
+</tr>
+<tr>
+<td>SRC03</td>
+<td>P0</td>
+<td>转换本身不得改写源文件；如用户另行选择保存，应将保存与转换作为两个清楚的动作</td>
+</tr>
+<tr>
+<td>SRC04</td>
+<td>P0</td>
+<td>快照未完成前文档变化应重新确认或重取；快照完成后处理固定版本，进度中说明其版本</td>
+</tr>
+<tr>
+<td>SRC05</td>
+<td>P0</td>
+<td>多 PDF 或多附件且指代不明时询问选择，不擅自使用最近文件</td>
+</tr>
+<tr>
+<td>SRC06</td>
+<td>P0</td>
+<td>renderer 调用只能操作其拥有或被授予的文档；主助手文件访问遵守现有沙箱和用户授权</td>
+</tr>
+<tr>
+<td>SRC07</td>
+<td>P0</td>
+<td>源 PDF 被移动、外部修改或失效时，使用已冻结快照或明确失败；不得读取另一路径的替代文件</td>
+</tr>
+<tr>
+<td>SRC08</td>
+<td>P0</td>
+<td>只读及加密权限遵循既有政策，转换不成为绕过限制的方式</td>
+</tr>
+</tbody></table></div>
+<h3 id="heading-18">6.3 转换与创建</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>优先级</th>
+<th>需求与验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DOC01</td>
+<td>P0</td>
+<td>PDF→DOCX 不需要模型重新生成全文，原生转换由共享 converter 执行</td>
+</tr>
+<tr>
+<td>DOC02</td>
+<td>P0</td>
+<td>PDF 按钮、PDF AI 和主助手同一路线使用同一领域服务，输入不同只由 adapter 处理</td>
+</tr>
+<tr>
+<td>DOC03</td>
+<td>P0</td>
+<td>只打开 PDF 的冷启动可创建或转换 DOCX，Docs 按需初始化，结果在 Friday 标签中打开</td>
+</tr>
+<tr>
+<td>DOC04</td>
+<td>P0</td>
+<td>创建 DOCX 等待内容导入、序列化、写入和回读，不能在标签排队时返回完成</td>
+</tr>
+<tr>
+<td>DOC05</td>
+<td>P0</td>
+<td>无有效内容节点或导入错误时不交付空白成功文件；保留具体失败原因</td>
+</tr>
+<tr>
+<td>DOC06</td>
+<td>P0</td>
+<td>转换与创建返回不同 operationId，历史中可分辨内容来源</td>
+</tr>
+<tr>
+<td>DOC07</td>
+<td>P0</td>
+<td>不新增独立 GenOffice 窗口，不让上游 standalone 回退意外接管 Friday 标签生命周期</td>
+</tr>
+<tr>
+<td>DOC08</td>
+<td>P0</td>
+<td>当前未实现的 html 或其他创建类型不在可执行 schema 中，消除声明与 parser 差异</td>
+</tr>
+<tr>
+<td>DOC09</td>
+<td>P0</td>
+<td>已有可用 pdf、md 创建能力不得无说明被破坏；按宿主实测状态保留或提供具体暂不可用原因</td>
+</tr>
+<tr>
+<td>DOC10</td>
+<td>P1</td>
+<td>新格式仅新增路由 adapter 与契约样本测试，即可通过同一目录进入多个入口</td>
+</tr>
+</tbody></table></div>
+<h3 id="heading-19">6.4 文件交付与结果</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>优先级</th>
+<th>需求与验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OUT01</td>
+<td>P0</td>
+<td>输出为实际 DOCX，不以修改扩展名、文本文件或仅新建标签作为成功</td>
+</tr>
+<tr>
+<td>OUT02</td>
+<td>P0</td>
+<td>验证 ZIP 关键部件、document XML 可解析及 fixture 内容回读；仅判断文件非零不够</td>
+</tr>
+<tr>
+<td>OUT03</td>
+<td>P0</td>
+<td>输出 artifact 包含任务 ID、路径、类型、大小、源版本、质量、持久化状态和打开状态</td>
+</tr>
+<tr>
+<td>OUT04</td>
+<td>P0</td>
+<td>输出不得覆盖源 PDF；同名文件覆盖需确认，确认必须绑定目标和当时文件身份</td>
+</tr>
+<tr>
+<td>OUT05</td>
+<td>P0</td>
+<td>写入使用临时文件和可恢复提交；失败不损坏已有目标，不留下被当作成功结果的半文件</td>
+</tr>
+<tr>
+<td>OUT06</td>
+<td>P0</td>
+<td>已提交但打开失败时保留文件，显示可定位路径与重试打开入口</td>
+</tr>
+<tr>
+<td>OUT07</td>
+<td>P0</td>
+<td>文件路径、标题、资源 ID 和标签标题保存后同步；同名不同目录不混淆</td>
+</tr>
+<tr>
+<td>OUT08</td>
+<td>P0</td>
+<td>标题中的非法字符被规范化，扩展名由格式确定；拒绝路径穿越、源路径别名覆盖等情况</td>
+</tr>
+<tr>
+<td>OUT09</td>
+<td>P0</td>
+<td>AI 最终回复依据结构化结果，失败或取消不得生成伪造下载链接或声称已创建</td>
+</tr>
+</tbody></table></div>
+<h3 id="heading-20">6.5 任务与错误</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>优先级</th>
+<th>需求与验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TASK01</td>
+<td>P0</td>
+<td>显示准备、等待授权或输入、转换、校验、保存、打开及终态；不以随机百分比替代真实阶段</td>
+</tr>
+<tr>
+<td>TASK02</td>
+<td>P0</td>
+<td>支持保存对话框取消、密码取消和执行取消；提交前取消不产生最终 artifact</td>
+</tr>
+<tr>
+<td>TASK03</td>
+<td>P0</td>
+<td>同一请求重试复用任务或结果，不能重复保存弹窗、转换与覆盖</td>
+</tr>
+<tr>
+<td>TASK04</td>
+<td>P0</td>
+<td>同源冲突有明确 busy 或排队结果；不同源任务也不能突破经过验证的全局内存并发限额</td>
+</tr>
+<tr>
+<td>TASK05</td>
+<td>P0</td>
+<td>发起视图在准备阶段关闭时取消；快照完成后普通切换标签不取消，显式取消仍有效</td>
+</tr>
+<tr>
+<td>TASK06</td>
+<td>P0</td>
+<td>转换器无安全中断能力时提示“正在停止”，结果不得晚到后被提交；长时间无响应可终止隔离进程</td>
+</tr>
+<tr>
+<td>TASK07</td>
+<td>P0</td>
+<td>超时、崩溃与应用重启后不盲目重放覆盖操作；恢复时查询已有提交结果</td>
+</tr>
+<tr>
+<td>TASK08</td>
+<td>P0</td>
+<td>已进入不可中断提交阶段时说明状态；提交已完成则返回文件结果，不虚报取消成功</td>
+</tr>
+<tr>
+<td>TASK09</td>
+<td>P0</td>
+<td>错误有稳定 code、阶段、可恢复性和 nextAction，界面提供中英文文案</td>
+</tr>
+<tr>
+<td>TASK10</td>
+<td>P0</td>
+<td>不把操作取消归类为网络或模型错误，不自动让模型重复执行</td>
+</tr>
+<tr>
+<td>TASK11</td>
+<td>P0</td>
+<td>所有路径释放锁、临时文件、renderer 等待器和子进程；清理失败可诊断但不能删除已有用户数据</td>
+</tr>
+<tr>
+<td>TASK12</td>
+<td>P1</td>
+<td>支持从任务记录直接重新打开或定位结果；重启后是否继续转换由安全恢复策略决定</td>
+</tr>
+</tbody></table></div>
+<h3 id="heading-21">6.6 质量与扫描件</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>优先级</th>
+<th>需求与验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>QUA01</td>
+<td>P0</td>
+<td>区分 editable、mixed、imageOnly 或 unknown 质量状态，不能只用 ok 表示全部可编辑</td>
+</tr>
+<tr>
+<td>QUA02</td>
+<td>P0</td>
+<td>扫描或混合页记录 OCR 与图片降级页码，用户可看到并回到原 PDF 校对</td>
+</tr>
+<tr>
+<td>QUA03</td>
+<td>P0</td>
+<td>无 OCR helper 时提前显示限制；能生成图片型 DOCX 仍需明确不是完整文字转换</td>
+</tr>
+<tr>
+<td>QUA04</td>
+<td>P0</td>
+<td>数字文本样本保持关键字段、数字和阅读顺序；复杂版面无法自动保证时提供真实警告</td>
+</tr>
+<tr>
+<td>QUA05</td>
+<td>P0</td>
+<td>不能仅凭页面截图判断成功，测试必须验证实际文字、表格或图像对象</td>
+</tr>
+<tr>
+<td>QUA06</td>
+<td>P0</td>
+<td>本地转换默认不上传 PDF；引入云端 OCR 必须另行说明并授权，本版不隐式启用</td>
+</tr>
+<tr>
+<td>QUA07</td>
+<td>P1</td>
+<td>对真实复杂文档建立分类型质量基准，不宣称任意 PDF 无损转换</td>
+</tr>
+</tbody></table></div>
+<h2 id="heading-22">7 交互状态与示例文案</h2>
+<p>文案示例表达产品语义，最终通过 i18n 实现，不要求所有入口逐字相同。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>状态</th>
+<th>示例提示</th>
+<th>可用动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>正在准备</td>
+<td>正在获取《合同.pdf》的当前内容</td>
+<td>取消</td>
+</tr>
+<tr>
+<td>未保存且无安全快照</td>
+<td>要包含当前修改，需要先保存 PDF。是否保存后转换？</td>
+<td>保存并继续、取消</td>
+</tr>
+<tr>
+<td>等待密码</td>
+<td>这份 PDF 需要打开密码</td>
+<td>输入、取消</td>
+</tr>
+<tr>
+<td>转换中</td>
+<td>正在转换第 3 页，共 12 页</td>
+<td>取消</td>
+</tr>
+<tr>
+<td>校验中</td>
+<td>正在检查生成的 Word 文件</td>
+<td>等待或取消，按实际阶段</td>
+</tr>
+<tr>
+<td>成功并打开</td>
+<td>Word 已生成并打开，保存于所选位置</td>
+<td>查看、定位</td>
+</tr>
+<tr>
+<td>成功有降级</td>
+<td>Word 已生成，第 4、6 页保留为图片，请校对</td>
+<td>查看结果、查看原页</td>
+</tr>
+<tr>
+<td>打开失败</td>
+<td>Word 已生成，但未能在 Friday 打开</td>
+<td>重试打开、定位文件</td>
+</tr>
+<tr>
+<td>用户取消</td>
+<td>已取消转换</td>
+<td>重新开始</td>
+</tr>
+<tr>
+<td>源失效</td>
+<td>未取得源文件的完整内容，未生成结果</td>
+<td>重新打开源文档</td>
+</tr>
+<tr>
+<td>不支持格式</td>
+<td>此版本尚未接入 PDF 转 Excel</td>
+<td>查看可用格式</td>
+</tr>
+<tr>
+<td>保存失败</td>
+<td>无法写入所选位置，原有文件未被替换</td>
+<td>更换位置、查看详情</td>
+</tr>
+<tr>
+<td>恢复失败</td>
+<td>文件提交未完成，已保留备份供恢复</td>
+<td>打开诊断与恢复位置</td>
+</tr>
+</tbody></table></div>
+<p>对于错误恢复失败，不能保证“原文件未变”时就不能使用该文案。应显示实际恢复状态和备份位置，禁止隐藏问题。</p>
+<h2 id="heading-23">8 权限与安全需求</h2>
+<p>按钮点击是用户发起请求的证据，但不代表允许任意覆盖、外部上传和访问其他路径。AI 的自然语言意图也不能作为绕过现有审批策略的通行证。两类入口共享同一权限规则，授权来源可以不同。</p>
+<p>现有中央工具的审批与审计继续使用，Office 内工具需通过受控 adapter 接入。审批一次只覆盖指定操作、源资源、版本与目标，不能被转交成对子操作或任意目标的通用放行开关。</p>
+<p>PDF 内容和 HTML 输入均视为不可信文档内容。文档里的“调用某工具”“上传文件”不是用户指令。创建 HTML/DOCX 时不得运行内容脚本或访问未授权外部资源。支持诊断日志不得包含 PDF 全文、密码或模型密钥，路径默认可脱敏，用户主动导出的诊断包需清楚显示范围。</p>
+<h2 id="heading-24">9 数据与资源合同</h2>
+<h3 id="heading-25">9.1 用户可见任务记录</h3>
+<p>至少记录 taskId、操作名、源显示名、源资源 ID 与版本、目标类型、开始结束时间、最终状态、artifact 引用、质量提示、错误码和可执行后续动作。持久化应复用现有任务和审计事实源。</p>
+<p>不得把密码和模型生成全文复制进普通任务日志。临时快照只用于处理，按安全期限清理。用户未保存的文档快照不应因诊断包导出而泄露。</p>
+<h3 id="heading-26">9.2 结果状态</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>结果</th>
+<th>是否有有效 artifact</th>
+<th>AI 可用措辞</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>succeeded</td>
+<td>是，已通过校验</td>
+<td>已生成，可说明打开状态</td>
+</tr>
+<tr>
+<td>succeeded_with_warnings</td>
+<td>是，质量或打开有警告</td>
+<td>已生成，并明确警告</td>
+</tr>
+<tr>
+<td>cancelled</td>
+<td>否，或仅内部临时数据</td>
+<td>已取消</td>
+</tr>
+<tr>
+<td>failed</td>
+<td>否</td>
+<td>未生成，说明原因</td>
+</tr>
+<tr>
+<td>interrupted</td>
+<td>待恢复检查</td>
+<td>任务中断，正在核对是否已有结果</td>
+</tr>
+</tbody></table></div>
+<p>进度事件丢失不能改变任务最终结果。任务详情查询是判断事实的依据，模型聊天文本只是对事实的解释。</p>
+<h2 id="heading-27">10 性能与资源要求</h2>
+<p>以下为建议验收预算，尚未实测，不是现有性能结论。G1 时由研发与测试冻结测试机 CPU、内存、Windows 版本、冷暖启动和样本规模。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>建议目标</th>
+<th>测量方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>操作反馈</td>
+<td>发起后 1 秒内出现任务或等待交互状态</td>
+<td>本地集成测试时间戳</td>
+</tr>
+<tr>
+<td>能力查询</td>
+<td>暖态 p95 不超过 200 ms</td>
+<td>固定机器重复查询，排除首次引擎加载</td>
+</tr>
+<tr>
+<td>冷启动</td>
+<td>3 秒内可见正在加载，不得无反馈等待</td>
+<td>仅 PDF 已加载的冷启动</td>
+</tr>
+<tr>
+<td>取消反馈</td>
+<td>请求后 1 秒内进入停止或取消态</td>
+<td>执行取消注入；不等同子进程终止耗时</td>
+</tr>
+<tr>
+<td>界面响应</td>
+<td>转换期间不出现持续超过 1 秒的输入阻塞</td>
+<td>UI 心跳与主进程延迟采样</td>
+</tr>
+<tr>
+<td>内存与大文件</td>
+<td>在声明限制内不 OOM，超限执行前拒绝或说明</td>
+<td>页数、文件大小、峰值 RSS 记录</td>
+</tr>
+<tr>
+<td>转换耗时</td>
+<td>按数字、扫描、混合三类建立 p50/p95 基线后定阈值</td>
+<td>不能用单个合成 PDF 推断</td>
+</tr>
+</tbody></table></div>
+<p>建议首期将转换全局并发设为 1，源与目标另加锁；是否增加并发由峰值内存和事件循环实验决定。文件大小和页数上限应在性能实验后配置并进入能力查询，不在文案里给出未经验证的支持规模。</p>
+<h2 id="heading-28">11 样本体系与质量验收</h2>
+<h3 id="heading-29">11.1 样本分组</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>组别</th>
+<th>最低覆盖</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A 数字文本</td>
+<td>单页英文、多页中文、混合中英、特殊符号、数字日期</td>
+</tr>
+<tr>
+<td>B 结构</td>
+<td>标题、列表、简单与跨页表格、双栏、页眉页脚、图片</td>
+</tr>
+<tr>
+<td>C 扫描</td>
+<td>清晰扫描、低质量扫描、混合文本与扫描、多语言</td>
+</tr>
+<tr>
+<td>D 加密</td>
+<td>需密码、错密码、取消、已授权但只读情况</td>
+</tr>
+<tr>
+<td>E 文件系统</td>
+<td>中文空格路径、同名不同目录、目标占用、无权限、磁盘故障注入</td>
+</tr>
+<tr>
+<td>F 生命周期</td>
+<td>未保存修改、切换标签、关闭源、应用退出、renderer 崩溃</td>
+</tr>
+<tr>
+<td>G 负载</td>
+<td>多次请求、大页数、大图片、超出限制</td>
+</tr>
+<tr>
+<td>H 创建</td>
+<td>标题正文、表格列表、空内容、无有效节点、序列化与保存错误</td>
+</tr>
+</tbody></table></div>
+<p>样本必须带授权来源，优先合成或脱敏。用户文件只能在用户授权范围内保存和分析，不能随测试提交到公开仓库。</p>
+<h3 id="heading-30">11.2 质量通过标准</h3>
+<p>固定数字文本 fixture 的唯一标记、数字和正文完整回读，关键字段不得遗漏、篡改或重复；预期段落、表格和图片存在。合成中文样本采用明确的可编辑文本断言。</p>
+<p>真实复杂文档采用人工标注关键字段与页对应关系，文本、结构、版面分别评分。评分阈值在样本冻结后确定，不将研究阶段的建议值当实测。扫描无 OCR 时不要求凭空产生文字，但必须判定 imageOnly 或 mixed 并展示警告；不能算作“完整可编辑转换”通过。</p>
+<p>相同源经按钮和 AI 的结果以语义与质量对照，不要求 DOCX ZIP 字节完全相同，避免时间戳和元数据造成无意义差异。</p>
+<h2 id="heading-31">12 发布验收矩阵</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>场景与输入</th>
+<th>预期事实</th>
+<th>级别</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC01</td>
+<td>仅加载 PDF，AI 转 Word</td>
+<td>共用 convert 成功，真实 DOCX，Friday 标签打开</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC02</td>
+<td>同样本点按钮</td>
+<td>converter、质量和授权规则与 AC01 一致</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC03</td>
+<td>主助手转当前 PDF</td>
+<td>绑定正确资源，不使用旧磁盘内容</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC04</td>
+<td>主助手转授权离线 PDF</td>
+<td>同一领域服务，路径权限有效</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC05</td>
+<td>PDF 面板创建摘要 DOCX</td>
+<td>冷加载 Docs，保存回读后才返回成功</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC06</td>
+<td>create_document 空内容或无有效节点</td>
+<td>明确失败，无空白成功结果</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC07</td>
+<td>AI 请求 Excel/PPT</td>
+<td>schema 不宣称可执行；说明缺口</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC08</td>
+<td>直接伪造不支持的 format</td>
+<td>主进程拒绝，不依赖前端过滤</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC09</td>
+<td>伪造 sender 或其他文档 ID</td>
+<td>访问被拒绝，无数据和路径泄露</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC10</td>
+<td>保存对话框取消</td>
+<td>终态 cancelled，无最终文件</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC11</td>
+<td>密码取消或多次错密码</td>
+<td>正确提示、可结束、无日志密码</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC12</td>
+<td>未保存修改后转换</td>
+<td>输出包含确认版本，源文件不被转换擅改</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC13</td>
+<td>快照前修改文档</td>
+<td>检测版本变化，重新准备或确认</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC14</td>
+<td>快照后切换标签</td>
+<td>继续处理冻结源，不转换新标签</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC15</td>
+<td>准备时关闭源</td>
+<td>安全取消并释放等待器</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC16</td>
+<td>快照后关闭源</td>
+<td>按任务策略继续或明确取消，不能误提交其他源</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC17</td>
+<td>相同 idempotency key 重试</td>
+<td>同一个任务和 artifact，不重复副作用</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC18</td>
+<td>相同 key 不同参数或不同主体</td>
+<td>拒绝冲突，不泄露已有任务结果</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC19</td>
+<td>两任务竞争同一目标</td>
+<td>单次有效提交，其他 busy 或排队</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC20</td>
+<td>保存前目标被外部更改</td>
+<td>旧确认失效，不能静默覆盖</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC21</td>
+<td>写 temp、rename 或备份恢复失败</td>
+<td>结果真实，原文件或可恢复备份受到保护</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC22</td>
+<td>提交前取消</td>
+<td>无最终 artifact，临时文件清理</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC23</td>
+<td>已提交再取消</td>
+<td>返回已提交事实，不删除已生成文件</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC24</td>
+<td>文件生成后标签打开失败</td>
+<td>成功有警告，可重试打开，不重转</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC25</td>
+<td>Docs 导入或序列化失败</td>
+<td>创建失败，无提前成功</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC26</td>
+<td>renderer 崩溃或 ack 超时</td>
+<td>有确定终态，晚到消息不能再提交</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC27</td>
+<td>扫描且 OCR 缺失</td>
+<td>如有图片型结果，明确质量降级</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC28</td>
+<td>OCR helper 可用</td>
+<td>helper 路径、语言与页质量记录可信</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC29</td>
+<td>大文件执行中取消</td>
+<td>UI 可用，子进程停止或结果丢弃，不能晚提交</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC30</td>
+<td>转换期间主进程响应</td>
+<td>满足冻结后的响应预算</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC31</td>
+<td>源与目标路径别名、大小写或链接</td>
+<td>识别可能覆盖原件，拒绝危险目标</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC32</td>
+<td>app 重启时有提交中任务</td>
+<td>核对 journal 后恢复事实，不盲目重做</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC33</td>
+<td>诊断与会话导出</td>
+<td>无密码、Key 或未经授权文档全文</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC34</td>
+<td>中英文切换</td>
+<td>状态、错误与禁用原因均正常</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC35</td>
+<td>干净安装及已有版本升级</td>
+<td>资源与数据库兼容，原用户数据保留</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC36</td>
+<td>安装环境无源码目录</td>
+<td>PDFium、OCR 资源按声明探测并正确运行</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC37</td>
+<td>历史工具名和 IPC 兼容</td>
+<td>兼容入口转发，无第二套转换实现</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC38</td>
+<td>已有 PDF/MD 创建与普通保存</td>
+<td>不因本次接入而回归</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC39</td>
+<td>对照构建清单</td>
+<td>main、vendor、bundle 与安装包可追溯</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC40</td>
+<td>新增一个测试转换 adapter</td>
+<td>可由注册表投影到各入口，无新增按钮业务分支</td>
+<td>P1 架构验证</td>
+</tr>
+<tr>
+<td>AC41</td>
+<td>核对本次依赖来源</td>
+<td>记录官方目标、中间 fork、实际 vendor SHA，未知项不假称已验证</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC42</td>
+<td>bundle manifest 与 host 协议不匹配</td>
+<td>构建或启动可识别，相关能力给准确不可用原因</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC43</td>
+<td>必需创建 hook/ack 缺失，或 renderer 版本混用</td>
+<td>不回退到提前成功或独立窗口，诊断可定位接口</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC44</td>
+<td>adapter 契约兼容/不兼容 fixture</td>
+<td>支持的组合通过，不兼容组合被拒绝；不冒充真实新上游合并已验收</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC45</td>
+<td>审查上游新应用接入模板</td>
+<td>构建、入口、AI、格式、资源及对等检查齐全，Markdown/HTML 原需求保留</td>
+<td>P0 规划门禁</td>
+</tr>
+<tr>
+<td>AC46</td>
+<td>干净重建与安装产物对照</td>
+<td>无未知缓存、旧 bundle 或开发路径依赖；来源摘要一致</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC47</td>
+<td>候选回滚到匹配资源组合</td>
+<td>不混用主/renderer，已生成文件与旧任务记录保留</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>AC48</td>
+<td>复核 vendor 差异清单</td>
+<td>每条差异有目的、测试、维护责任与删除条件，不存在未登记深层业务移植</td>
+<td>P0</td>
+</tr>
+</tbody></table></div>
+<p>每项测试记录执行版本、环境、样本、预期、实际、日志或 artifact。未执行不能填“通过”。任何 P0 失败均不能宣布该候选版本已完成本专项。</p>
+<h2 id="heading-32">13 指标与发布口径</h2>
+<p>目标是专项验收中 P0 全部通过，不以统计成功率掩盖确定性失败。真实使用指标可记录请求成功率、取消率、错误分布、重复副作用次数、保存后打开失败率、转换质量警告占比和任务耗时。</p>
+<p>“重复副作用次数”应为零；“报告成功却无有效文件”应为零。架构覆盖率只对本版明确迁移的操作计算，不得用 PDF 两条能力完成就写成“Office 全面 AI 原生化完成”。不采集文档全文来统计这些指标。</p>
+<p>性能目标和转换质量阈值在 G1 冻结，安装版观察窗口与灰度用户数量由发布计划决定。未定义统计窗口时，不写“线上成功率已达 99%”等无证据结论。</p>
+<h2 id="heading-33">14 分阶段交付与退出条件</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>交付物</th>
+<th>退出条件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>G0 研究</td>
+<td>本三份新文档、红测试、差异与风险</td>
+<td>根因和范围可追溯，无误把创建当转换</td>
+</tr>
+<tr>
+<td>G1 合同</td>
+<td>能力目录、状态、错误、审批与资源协议</td>
+<td>研发测试共同冻结，已有 Core 映射明确</td>
+</tr>
+<tr>
+<td>G2 主链路</td>
+<td>共用 convert/create、冷加载与真实交付</td>
+<td>AC01 至 AC06 及同源集成测试通过</td>
+</tr>
+<tr>
+<td>G3 可靠性</td>
+<td>取消、锁、幂等、故障恢复与回读</td>
+<td>相关 P0 故障注入全部通过</td>
+</tr>
+<tr>
+<td>G4 质量</td>
+<td>分类型样本报告、能力探测与性能基线</td>
+<td>支持声明与实测一致</td>
+</tr>
+<tr>
+<td>G5 发布</td>
+<td>安装候选包、升级结果、构建清单、发布说明</td>
+<td>安装环境验收通过后再确定发布</td>
+</tr>
+</tbody></table></div>
+<p>本次文档交付到 G0，不等于 G2 至 G5 完成。版本号在生成候选包前单独冻结，不在研究文档中虚构下一版已发布。</p>
+<h2 id="heading-34">15 回滚与兼容</h2>
+<p>新目录按 capability version 和 feature flag 控制，不同入口对同一操作必须一起切换。回滚不能让按钮使用新执行器而 AI 回到已知坏回调。新创建能力若不可用，应准确降级为暂不可用，而非恢复虚假支持。</p>
+<p>数据库迁移只新增兼容字段或使用现有可扩展结构，保留旧任务和会话。回滚不得删除用户已生成文件。若候选版本出现文件损坏、源覆盖或错误成功，应暂停相应写能力并保留只读和可用的原操作。</p>
+<h2 id="heading-35">16 文档与总体项目关系</h2>
+<p>原三份 GenOffice 升级文档、旧 PDF 专项文档和已有 AI Core 总体文档均保留。本版三份新文档描述当前发现与新的实施合同，后续只在本目录迭代其版本和变更记录，不把旧报告内容改写成“当时已经知道”。</p>
+<p>Markdown、HTML 的完整对等功能继续按总体文档追踪。本版为它们提供可复用的能力接入方法，但不能用能力层完成替代两个应用的入口、编辑器、构建、资源、工具和格式质量验收。</p>
+<h2 id="heading-36">17 发布前必须回答的问题</h2>
+<p>需要研发和测试明确：源快照如何覆盖未保存编辑；创建 DOCX 的保存确认是否可靠；能力目录是否映射到实际构建资源；OCR 缺失时如何告知；取消是否能阻止晚提交；断电恢复是否保护旧目标；主助手与内嵌 AI 的审批是否一致；安装版是否仍依赖开发路径。</p>
+<p>这些问题都有技术任务与验收项。它们不是要求用户逐个做技术选择，而是研发必须通过实现和证据解决的交付责任。</p>
+<h2 id="heading-37">18 持续融合 GenOffice 的产品与工程合同</h2>
+<h3 id="heading-38">18.1 维护目标</h3>
+<p>用户后续要持续跟进 GenOffice 的新模块和功能。本次修复应降低重复接入与升级冲突，而不是锁死当前定制版本。长期目标为“固定版本、可追溯融合、可验证功能对等”，不承诺未经评估自动合并任意上游变更。</p>
+<p>2026-11-05 补充核验：官方 releases/latest 指向 v0.12.852，tag 引用 SHA 为 4b55db9ed1994575a695160ffc6cfd0bfc866211。它是后续全量升级的评估候选；原 v0.12.600 总体文档保留为历史基线，不将旧差异统计直接转用于新候选。上游发布说明提到 PDF→Word 的重复页眉与连续页码改进，后续需纳入转换质量回归，不能视为 Friday 宿主创建接口已修复。来源与验证边界见研究报告第 2、13、14 节。</p>
+<h3 id="heading-39">18.2 详细需求</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>优先级</th>
+<th>需求与验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UPD01</td>
+<td>P0</td>
+<td>上游目标固定到官方 tag/SHA，不用含糊“最新”；保留 v0.12.600 历史基线，记录本次核验的 v0.12.852 候选，实际启动升级时重新核对并冻结目标，不冒称已融合</td>
+</tr>
+<tr>
+<td>UPD02</td>
+<td>P0</td>
+<td>记录官方仓库、中间来源/fork 与实际 vendor SHA 的关系，remote 名称不是来源证明</td>
+</tr>
+<tr>
+<td>UPD03</td>
+<td>P0</td>
+<td>Friday 权限、任务、数据库、窗口和交付留在宿主，vendor 仅必要通用接口，禁止反向依赖 Friday 模块</td>
+</tr>
+<tr>
+<td>UPD04</td>
+<td>P0</td>
+<td>vendor 差异有独立清单、用途、依赖接口、测试和删除条件；上游已解决时删除重复实现</td>
+</tr>
+<tr>
+<td>UPD05</td>
+<td>P0</td>
+<td>host、adapter、main、preload 与 renderer 有可检查的版本/资源合同，不兼容不能延迟到用户操作才笼统失败</td>
+</tr>
+<tr>
+<td>UPD06</td>
+<td>P0</td>
+<td>构建和编辑器注册提供 manifest 扩展点，新应用不需复制整套文件权限与交付流程</td>
+</tr>
+<tr>
+<td>UPD07</td>
+<td>P0</td>
+<td>安装包绑定主仓库 SHA、vendor SHA、协议/adapter 版本、资源与包摘要，可定位用户实际运行组合</td>
+</tr>
+<tr>
+<td>UPD08</td>
+<td>P0</td>
+<td>上游升级后完整重建所需资源并验证，不能手改 resources/office，不能把未知旧缓存写入候选包</td>
+</tr>
+<tr>
+<td>UPD09</td>
+<td>P0</td>
+<td>每次升级运行已迁移操作的正向、安全负向、取消、恢复与内容回读回归，既有 P0 失败阻塞发布</td>
+</tr>
+<tr>
+<td>UPD10</td>
+<td>P0</td>
+<td>上游新工具/格式默认为候选，通过 adapter、权限和产物验收后才能开放；缺接口显示具体原因</td>
+</tr>
+<tr>
+<td>UPD11</td>
+<td>P0</td>
+<td>回滚以匹配的 host/vendor/bundle 组合进行，兼容旧用户数据和已交付文件，不仅回滚单一 JS 文件</td>
+</tr>
+<tr>
+<td>UPD12</td>
+<td>P0</td>
+<td>Markdown/HTML 等新模块有完整功能对照模板，不能用格式输出或一个 AI 工具替代完整应用对等</td>
+</tr>
+</tbody></table></div>
+<p>本版验收 UPD 的架构基础、模板、当前构建组合和不兼容检测；不要求本专项同时完成未来版本全量合并、所有新应用或其全部功能验收。后续每次实际融合时复用这些门禁并补真实目标版本证据，不能仅凭本次模板已存在就称后续升级完成。</p>
+<h3 id="heading-40">18.3 后续升级应看到的结果</h3>
+<p>研发能够回答“本次升级来自哪里、改了哪些宿主接口、保留哪些 Friday 差异、哪些新能力已验收、哪些暂不可用、怎样回滚”。用户看到的功能列表与实际可执行能力一致，原有 PDF 转 Word 不因上游升级重新退化为调用失败。</p>
+<p>本次三份新文档作为后续专项实施和升级评审的依据；原总体文档与旧 PDF 文档原样保留。对旧结论的新增发现放在本次报告或后续变更记录，不覆盖历史。</p>
+<footer class="bottom">版本 1.0 · 18 个主章节 · 约 8,226 个汉字（不含代码、英文与标点）<br>HTML 为 Markdown 源稿的离线阅读版。源码与接口以文档所列固定 SHA 为准。<div class="doc-nav"><a href="02-product-requirements.md">查看 Markdown 源稿</a><a href="index.html">返回文档导航</a></div></footer></main></div></body></html>

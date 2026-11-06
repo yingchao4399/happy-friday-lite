@@ -10,24 +10,39 @@
  *     into a self-contained CJS bundle loadable from our JS main process.
  *  4. Copy an allowlist of artifacts into resources/office/.
  *
- * Usage: node scripts/build-office.mjs [--skip-renderer] [--skip-native]
+ * Usage: node scripts/build-office.mjs [--skip-renderer] [--skip-native] [--experimental-html]
  */
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
+import { createHash } from 'node:crypto'
+import { getBuildOfficeEditors } from '../src-electron/office/editor-registry.js'
+import { assertOfficeBundle } from '../src-electron/office/bundle-contract.js'
+import { captureOfficeSources, publishOfficeBundle, writeOfficeBundleManifest } from './office/integration-manifest.mjs'
+import { validateOfficeUpstreamLock } from './office/upstream-lock.mjs'
+import { validateOfficeHtmlUpstream } from './office/html-upstream.mjs'
+import { htmlMainAdapterPlugin } from './office/html-main-adapter.mjs'
+import { htmlDocxAdapterPlugin } from './office/html-docx-adapter.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const VENDOR = path.join(ROOT, 'vendor', 'happyoffice')
-const OFFICE_ROOT = path.join(ROOT, 'resources', 'office')
+const HTML_VENDOR = path.join(ROOT, 'vendor', 'genoffice-html')
+const FINAL_OFFICE_ROOT = path.join(ROOT, 'resources', 'office')
+// 所有阶段写入隔离目录，完整校验后再替换，失败时保留上一份匹配资源。
+const OFFICE_ROOT = path.join(ROOT, 'resources', `.office-stage-${process.pid}`)
 
-const EDITORS = ['docs', 'sheets', 'slides', 'pdf']
-const BUNDLE_ENTRIES = [...EDITORS, 'office-utils', 'attachment-parser']
+// 实验构建包含完整 HTML 资源；公开 registry 和默认文件关联仍保持关闭。
+const EXPERIMENTAL_HTML = process.argv.includes('--experimental-html')
+const EDITORS = getBuildOfficeEditors({ experimentalHtml: EXPERIMENTAL_HTML }).map(editor => editor.id)
+const SUPPORT_ENTRIES = ['office-utils', 'attachment-parser', 'pdf-converter']
+const BUNDLE_ENTRIES = [...EDITORS, ...SUPPORT_ENTRIES]
 const SKIP_RENDERER = process.argv.includes('--skip-renderer')
 const SKIP_NATIVE = process.argv.includes('--skip-native')
 const SKIP_CLI = process.argv.includes('--skip-cli')
+const REQUIRE_CLEAN = process.argv.includes('--require-clean')
 
 function run(cmd, args, opts = {}) {
   // Do not use a shell for direct process launches on Windows.  The previous
@@ -57,10 +72,47 @@ function ensureVendorDeps() {
       env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' },
     })
   }
+  if (EXPERIMENTAL_HTML) {
+    const lockSha256 = createHash('sha256').update(fs.readFileSync(path.join(HTML_VENDOR, 'package-lock.json'))).digest('hex')
+    const markerPath = path.join(HTML_VENDOR, 'node_modules', '.friday-html-dependencies.json')
+    let marker
+    try { marker = JSON.parse(fs.readFileSync(markerPath, 'utf8')) } catch { /* 首次或不完整安装必须重装 */ }
+    if (marker?.lockSha256 !== lockSha256 || marker?.mode !== 'all-workspaces' || marker?.platform !== process.platform || marker?.arch !== process.arch) {
+      // HTML 通过相对源码路径引用 html2docx 等 workspace；仅安装 HTML
+      // manifest 的直接依赖会漏掉 docx/zip 等实际运行包。
+      console.log('[office] 安装固定 HTML 源码树的完整独立依赖…')
+      // GenOffice 的根 postinstall 会运行 install-electron，下载其 standalone
+      // Electron 43。Friday 使用自身 Electron runtime；该下载与 HTML bundle
+      // 无关，且 ELECTRON_SKIP_BINARY_DOWNLOAD 不被该脚本读取。
+      run('npm', ['ci', '--ignore-scripts', '--legacy-peer-deps', '--no-audit', '--no-fund'], {
+        cwd: HTML_VENDOR,
+        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' },
+      })
+      verifyHtmlBuildDependencies()
+      fs.writeFileSync(markerPath, JSON.stringify({ lockSha256, mode: 'all-workspaces', platform: process.platform, arch: process.arch }) + '\n')
+    }
+  }
+}
+
+function verifyHtmlBuildDependencies() {
+  const require = createRequire(path.join(HTML_VENDOR, 'package.json'))
+  // electron-vite intentionally hides its CLI subpath behind package exports;
+  // npm's .bin shim has already executed it during the workspace build. Verify
+  // the installed file directly instead of relying on a forbidden subpath.
+  const electronVite = path.join(HTML_VENDOR, 'node_modules', 'electron-vite', 'bin', 'electron-vite.js')
+  const esbuild = require('esbuild')
+  const probe = esbuild.transformSync('const htmlBuildProbe = 1', { loader: 'js' })
+  if (!fs.existsSync(electronVite) || !probe.code.includes('htmlBuildProbe')) {
+    throw new Error('OFFICE_HTML_BUILD_DEPENDENCIES_INCOMPLETE')
+  }
+  // workspace 相对路径是官方 HTML runtime 的打包依赖，不能只验证 direct deps。
+  for (const dependency of ['@genoffice/html2docx', '@genoffice/file-parse', 'docx', 'jszip']) {
+    require.resolve(dependency)
+  }
 }
 
 function copyDir(src, dest) {
-  fs.cpSync(src, dest, { recursive: true })
+  fs.cpSync(src, dest, { recursive: true, dereference: true })
 }
 
 // ---- 1. Rust sidecar -------------------------------------------------------
@@ -69,7 +121,7 @@ function buildSidecar() {
   // 跳过编译仍需保留已构建的引擎，stage 会重建 sheets 目录。
   // 否则一次只改 UI 的构建会静默移除表格运行必需的 sidecar。
   if (SKIP_NATIVE) {
-    const existing = path.join(OFFICE_ROOT, 'native', process.platform === 'win32' ? 'xlsx-sidecar.exe' : 'xlsx-sidecar')
+    const existing = path.join(FINAL_OFFICE_ROOT, 'native', process.platform === 'win32' ? 'xlsx-sidecar.exe' : 'xlsx-sidecar')
     return fs.existsSync(existing) ? existing : null
   }
   const cargoManifest = path.join(VENDOR, 'apps', 'sheets', 'native', 'xlsx-engine', 'Cargo.toml')
@@ -91,16 +143,29 @@ function buildSidecar() {
 
 function buildEditorApps() {
   for (const editor of EDITORS) {
-    const out = path.join(VENDOR, 'apps', editor, 'out')
+    const sourceRoot = editor === 'html' ? HTML_VENDOR : VENDOR
+    const out = path.join(sourceRoot, 'apps', editor, 'out')
     if (SKIP_RENDERER && fs.existsSync(path.join(out, 'renderer', 'index.html'))) {
       console.log(`[office] ${editor}: renderer build cached (--skip-renderer)`)
       continue
     }
     console.log(`[office] Building ${editor} (electron-vite)…`)
-    run('npx', ['electron-vite', 'build'], {
-      cwd: path.join(VENDOR, 'apps', editor),
-      env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' },
-    })
+    if (editor === 'html') {
+      // npm --ignore-scripts deliberately skips bin-link creation. Resolve the
+      // pinned executable directly so a partially finalized npm install cannot
+      // make npx fetch a different electron-vite version.
+      const electronVite = path.join(HTML_VENDOR, 'node_modules', 'electron-vite', 'bin', 'electron-vite.js')
+      if (!fs.existsSync(electronVite)) throw new Error('OFFICE_HTML_ELECTRON_VITE_CLI_MISSING')
+      run(process.execPath, [electronVite, 'build', '--config', path.join(ROOT, 'scripts/office/html.electron-vite.config.mjs')], {
+        cwd: path.join(sourceRoot, 'apps', editor),
+        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' },
+      })
+    } else {
+      run('npx', ['electron-vite', 'build'], {
+        cwd: path.join(sourceRoot, 'apps', editor),
+        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' },
+      })
+    }
   }
 }
 
@@ -185,6 +250,52 @@ function lazyAttachmentParserPlugin() {
   }
 }
 
+// npm ci may be interrupted before npm materializes workspace links. Resolve
+// the locked official workspace exports directly from their checked source
+// tree, so the bundle never depends on links left by a previous machine.
+function htmlWorkspacePlugin() {
+  const packages = new Map()
+  for (const parent of ['apps', 'packages']) {
+    const directory = path.join(HTML_VENDOR, parent)
+    for (const name of fs.readdirSync(directory)) {
+      const root = path.join(directory, name)
+      const manifest = path.join(root, 'package.json')
+      if (fs.existsSync(manifest)) {
+        const metadata = JSON.parse(fs.readFileSync(manifest, 'utf8'))
+        if (metadata.name) packages.set(metadata.name, { root, metadata })
+      }
+    }
+  }
+  const entryFor = (metadata, subpath) => {
+    const exportValue = metadata.exports?.[subpath]
+    const candidates = typeof exportValue === 'string' ? [exportValue] : exportValue && typeof exportValue === 'object'
+      ? [exportValue.node, exportValue.import, exportValue.default, exportValue.require].filter(value => typeof value === 'string')
+      : []
+    if (!subpath || subpath === '.') candidates.push(metadata.module, metadata.main, 'src/index.ts', 'src/index.js', 'index.ts', 'index.js')
+    return candidates.find(Boolean) || null
+  }
+  return {
+    name: 'friday-html-workspace-source',
+    setup(build) {
+      build.onResolve({ filter: /^@genoffice\// }, args => {
+        const parts = args.path.split('/')
+        const name = parts.slice(0, 2).join('/')
+        const workspace = packages.get(name)
+        if (!workspace) return
+        const subpath = parts.length > 2 ? `./${parts.slice(2).join('/')}` : '.'
+        let target = entryFor(workspace.metadata, subpath)
+        if (!target && workspace.metadata.name === '@genoffice/xlsx-gateway') {
+          target = `src/${subpath.replace(/^\.\//, '')}.ts`
+        }
+        if (!target) throw new Error(`OFFICE_HTML_WORKSPACE_EXPORT_MISSING: ${args.path}`)
+        const absolute = path.resolve(workspace.root, target)
+        if (!fs.existsSync(absolute)) throw new Error(`OFFICE_HTML_WORKSPACE_FILE_MISSING: ${args.path}`)
+        return { path: absolute }
+      })
+    },
+  }
+}
+
 async function buildMainBundles() {
   console.log('[office] Bundling editor main-process modules (esbuild)…')
   const vendorRequire = createRequire(path.join(VENDOR, 'package.json'))
@@ -202,7 +313,8 @@ async function buildMainBundles() {
   const outDir = path.join(OFFICE_ROOT, 'main')
   fs.mkdirSync(outDir, { recursive: true })
   for (const editor of BUNDLE_ENTRIES) {
-    const outputName = ['office-utils', 'attachment-parser'].includes(editor) ? editor : `${editor}-main`
+    const sourceRoot = editor === 'html' ? HTML_VENDOR : VENDOR
+    const outputName = SUPPORT_ENTRIES.includes(editor) ? editor : `${editor}-main`
     await esbuild.build({
       entryPoints: [path.join(entriesRoot, `${editor}.ts`)],
       bundle: true,
@@ -210,7 +322,9 @@ async function buildMainBundles() {
       format: 'cjs',
       target: 'node22',
       minify: true,
-      keepNames: true,
+      // HTML → DOCX 将闭包自足的函数序列化到浏览器；keepNames 会在函数体内
+      // 插入主进程 __name helper，跨进程执行时变成未定义引用。
+      keepNames: editor !== 'html',
       outfile: path.join(outDir, `${outputName}.cjs`),
       // CJS 的位置必须运行时计算；写死开发目录会让安装版及目录迁移失效。
       banner: { js: "const __fridayBundleUrl = require('node:url').pathToFileURL(__filename).href;" },
@@ -218,11 +332,13 @@ async function buildMainBundles() {
         'import.meta.url': '__fridayBundleUrl',
       },
       external: ['electron'],
-      alias: {
+      nodePaths: [path.join(sourceRoot, 'node_modules')],
+      alias: editor === 'html' ? {} : {
         'harfbuzzjs/dist/harfbuzz.js': path.join(harfbuzzDist, 'harfbuzz.js'),
       },
       // 上游自动更新依赖在本产品中不使用，stub 为空模块
-      plugins: [lazyAttachmentParserPlugin(), stubPlugin(['electron-updater']), rawImportPlugin(), assetImportPlugin()],
+      // HTML 的解析器也来自同一固定树，不能重定向到旧四编辑器的 parser。
+      plugins: [...(editor === 'html' ? [htmlMainAdapterPlugin(), htmlDocxAdapterPlugin(), htmlWorkspacePlugin()] : [lazyAttachmentParserPlugin()]), stubPlugin(['electron-updater']), rawImportPlugin(), assetImportPlugin()],
       logLevel: 'warning',
     })
     console.log(`[office] bundled ${outputName}.cjs`)
@@ -247,12 +363,18 @@ function buildCli() {
 function stage(sidecarBin, ocrHelper, printHelper) {
   console.log('[office] Staging artifacts into resources/office…')
   for (const editor of EDITORS) {
-    const out = path.join(VENDOR, 'apps', editor, 'out')
+    const out = path.join(editor === 'html' ? HTML_VENDOR : VENDOR, 'apps', editor, 'out')
     const dest = path.join(OFFICE_ROOT, editor)
     fs.rmSync(dest, { recursive: true, force: true })
     fs.mkdirSync(dest, { recursive: true })
     copyDir(path.join(out, 'preload'), path.join(dest, 'preload'))
     copyDir(path.join(out, 'renderer'), path.join(dest, 'renderer'))
+    if (editor === 'html') {
+      for (const file of ['LICENSE', 'NOTICE', 'LICENSE-UNICODE.txt']) {
+        const license = path.join(HTML_VENDOR, file)
+        if (fs.existsSync(license)) fs.copyFileSync(license, path.join(dest, file))
+      }
+    }
   }
   if (ocrHelper) {
     const ocrDir = path.join(OFFICE_ROOT, 'ocr')
@@ -285,6 +407,9 @@ function stage(sidecarBin, ocrHelper, printHelper) {
     if (fs.existsSync(path.join(cliDist, 'node_modules'))) {
       copyDir(path.join(cliDist, 'node_modules'), path.join(cliDir, 'node_modules'))
     }
+  } else {
+    const cachedCli = path.join(FINAL_OFFICE_ROOT, 'cli')
+    if (fs.existsSync(cachedCli)) copyDir(cachedCli, path.join(OFFICE_ROOT, 'cli'))
   }
   // PDF 运行时 WASM（打包后 electron-builder 将其放到 Resources/wasm）
   const wasmDir = path.join(OFFICE_ROOT, 'wasm')
@@ -345,6 +470,17 @@ async function main() {
     console.error('[office] vendor/happyoffice is missing. Run: git submodule update --init vendor/happyoffice')
     process.exit(1)
   }
+  if (REQUIRE_CLEAN && (SKIP_RENDERER || SKIP_NATIVE || SKIP_CLI)) throw new Error('OFFICE_RELEASE_REQUIRES_FULL_BUILD')
+  const upstream = validateOfficeUpstreamLock({ projectRoot: ROOT, vendorRoot: VENDOR })
+  if (!upstream.ok) throw new Error(upstream.code || 'OFFICE_UPSTREAM_LOCK_INVALID')
+  if (EXPERIMENTAL_HTML) {
+    const htmlUpstream = validateOfficeHtmlUpstream({ projectRoot: ROOT, sourceRoot: HTML_VENDOR })
+    if (!htmlUpstream.ok) throw new Error(htmlUpstream.code || 'OFFICE_HTML_UPSTREAM_INVALID')
+  }
+  const sources = captureOfficeSources(ROOT, VENDOR, { experimentalHtml: EXPERIMENTAL_HTML })
+  if (REQUIRE_CLEAN && (sources.main.dirty || sources.vendor.dirty)) throw new Error('OFFICE_RELEASE_REQUIRES_CLEAN_SOURCES')
+  if (fs.existsSync(OFFICE_ROOT)) throw new Error('OFFICE_STAGING_ALREADY_EXISTS')
+  fs.mkdirSync(OFFICE_ROOT, { recursive: true })
   ensureVendorDeps()
   const sidecarBin = buildSidecar()
   let ocrHelper = null
@@ -363,7 +499,21 @@ async function main() {
   buildCli()
   stage(sidecarBin, ocrHelper, printHelper)
   stageSkill()
+  const afterSources = captureOfficeSources(ROOT, VENDOR, { experimentalHtml: EXPERIMENTAL_HTML })
+  if (sources.identityDigest !== afterSources.identityDigest) throw new Error('OFFICE_SOURCES_CHANGED_DURING_BUILD')
+  const releaseVersion = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).releaseVersion
+  writeOfficeBundleManifest({ root: OFFICE_ROOT, projectRoot: ROOT, sources, releaseVersion, experimentalHtml: EXPERIMENTAL_HTML,
+    renderer: SKIP_RENDERER ? 'cached-unverified' : 'fresh', cli: SKIP_CLI ? 'cached-unverified' : 'fresh', native: SKIP_NATIVE ? 'cached-unverified' : sidecarBin ? 'fresh' : 'unavailable' })
+  assertOfficeBundle(OFFICE_ROOT, { verifyAll: true, requireClean: REQUIRE_CLEAN })
+  const backup = path.join(ROOT, 'resources', `.office-previous-${process.pid}`)
+  const published = publishOfficeBundle({ stagingRoot: OFFICE_ROOT, finalRoot: FINAL_OFFICE_ROOT, backupRoot: backup })
+  if (published.backupCleanupError) console.warn('[office] 上一组合备份暂未清除：', published.backupCleanupError)
   console.log('[office] Done. Artifacts staged in resources/office')
 }
 
-main().catch(error => { console.error(error); process.exitCode = 1 })
+main().catch(error => {
+  // 失败的候选从未成为运行目录；只清理本进程持有的 staging。
+  if (fs.existsSync(OFFICE_ROOT)) fs.rmSync(OFFICE_ROOT, { recursive: true, force: true })
+  console.error(error)
+  process.exitCode = 1
+})

@@ -1,0 +1,28 @@
+{
+  "observedOn": "2026-11-05",
+  "repository": "https://github.com/genspark-ai/genoffice",
+  "requestedReleaseUrl": "https://github.com/genspark-ai/genoffice/releases/latest",
+  "resolvedReleaseUrl": "https://github.com/genspark-ai/genoffice/releases/tag/v0.12.852",
+  "releaseTag": "v0.12.852",
+  "latestBadgeObserved": true,
+  "displayedReleaseTime": "2026-11-05 07:44",
+  "displayedTimeZone": "not specified in fetched page",
+  "tagRefSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+  "tagVerificationCommand": "git -C vendor/happyoffice ls-remote https://github.com/genspark-ai/genoffice.git refs/tags/v0.12.852 refs/tags/v0.12.852^{}",
+  "tagVerificationExitCode": 0,
+  "tagVerificationOutput": "4b55db9ed1994575a695160ffc6cfd0bfc866211\trefs/tags/v0.12.852",
+  "releaseNotesRelevantParaphrase": [
+    "PDF to Word adds repeating headers and continuous page numbers and improves DOCX compatibility.",
+    "Agent tool permission handling and context-window handling for compatible custom models are also mentioned."
+  ],
+  "historicalPlanningTarget": "v0.12.600",
+  "currentFridayVendorSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+  "candidateIntegratedIntoFriday": false,
+  "candidateSourceDiffAudited": false,
+  "candidateBuildAndInstallVerified": false,
+  "limitations": [
+    "This records official release metadata and a remote tag lookup, not source ancestry or compatibility validation.",
+    "Release-note improvements have not been tested in Friday.",
+    "Latest can change after this observation; freeze tag and SHA again when beginning an upgrade."
+  ]
+}

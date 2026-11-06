@@ -1,10 +1,10 @@
 import { useTabStore, useKnowledgeStore } from '@/store';
 import { electronService } from '@/services/electron';
+import { OFFICE_TAB_RE, officeEditorPath } from '../views/office/officeTypes.js';
 
 // 标签页会话持久化：退出时保存、启动时恢复
 // 存储于主进程 session.json，通过 session-get / session-save IPC 读写
 
-const OFFICE_TAB_RE = /^office-(docs|sheets|slides|pdf)-(\d+)$/;
 const FRIDAY_TAB_RE = /^friday-(\d+)$/;
 const NOTE_PATH_RE = /^\/note\/(.+)$/;
 
@@ -13,7 +13,8 @@ export function captureSessionState() {
   const tabStore = useTabStore();
   const knowledgeStore = useKnowledgeStore();
   return {
-    tabs: tabStore.openedTabs.map(t => {
+    // 演示视图依附编辑器生命周期，不能重启后误恢复成可编辑源文档。
+    tabs: tabStore.openedTabs.filter(t => !t.officePresentation).map(t => {
       const out = { id: t.id, path: t.path, fullPath: t.fullPath };
       if (t.title) out.title = t.title;
       if (t.i18nKey) out.i18nKey = t.i18nKey;
@@ -62,11 +63,12 @@ async function reopenOfficeTab(tab) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const res = await electronService.invoke('office-open-file', { filePath: tab.officeFilePath });
-      if (res?.success && res.viewId) {
+      const fullPath = officeEditorPath(res?.viewId);
+      if (res?.success && fullPath) {
         return {
           id: `office-${res.viewId}`,
-          path: `/office/${res.viewId.replace('-', '/')}`,
-          fullPath: `/office/${res.viewId.replace('-', '/')}`
+          path: fullPath,
+          fullPath,
         };
       }
       if (res && res.success === false) break; // 编辑器明确拒绝（格式不支持等）：不再重试
@@ -99,7 +101,7 @@ export async function restoreSession(router) {
   const restored = [];
 
   for (const saved of session.tabs) {
-    if (!saved || typeof saved.id !== 'string') continue;
+    if (!saved || typeof saved.id !== 'string' || saved.officePresentation) continue;
     const tab = { ...saved };
 
     // Friday 对话标签：直接恢复

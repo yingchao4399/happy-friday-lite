@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import vm from 'node:vm'
 import { clampDockPosition } from '../../src/components/ai-core/dock-position.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -14,6 +15,9 @@ test('Global Agent Dock exposes route context without fabricating agents or task
   assert.match(source, /route\.path/)
   assert.match(source, /params\[name\]/)
   assert.match(source, /agentRoutingActive/)
+  assert.match(source, /listen\('office-operation-updated', scheduleOfficeTaskRefresh\)/)
+  assert.match(source, /unlistenOfficeOperation\?\.\(\)/)
+  assert.match(source, /officeTaskRefreshPending = true/)
   assert.match(source, /officeOverlay/)
   assert.match(source, /office-dock-set-expanded/)
   assert.match(source, /office-dock-open-friday/)
@@ -82,8 +86,45 @@ test('Office Dock preload exposes the complete conversation contract', async () 
   ]) {
     assert.match(preload, new RegExp(`['"]${channel}['"]`), `missing invoke channel ${channel}`)
   }
-  for (const channel of ['chat-chunk', 'chat-done', 'chat-error', 'chat-session-created', 'session-title-updated', 'config-changed']) {
+  for (const channel of ['chat-chunk', 'chat-done', 'chat-error', 'chat-session-created', 'session-title-updated', 'config-changed', 'office-operation-updated', 'office-operation-progress']) {
     assert.match(preload, new RegExp(`['"]${channel}['"]`), `missing event channel ${channel}`)
   }
   assert.match(preload, /on\s*\(channel, callback\)/)
+})
+
+test('main and Office Dock preloads forward operation controls and unsubscribe task events', async () => {
+  for (const file of ['preload.cjs', 'preload-office-dock.cjs']) {
+    const calls = [], subscriptions = new Map()
+    let api
+    const electron = {
+      contextBridge: { exposeInMainWorld(_name, value) { api = value } }, webUtils: {},
+      ipcRenderer: {
+        invoke(channel, args) { calls.push({ channel, args }); return Promise.resolve({ ok: true }) },
+        on(channel, listener) { subscriptions.set(channel, listener) },
+        removeListener(channel, listener) { if (subscriptions.get(channel) === listener) subscriptions.delete(channel) }
+      }
+    }
+    vm.runInNewContext(await readFile(path.join(root, file), 'utf8'), {
+      require: name => { assert.equal(name, 'electron'); return electron }, process: { platform: process.platform },
+      document: { addEventListener() {} }, setTimeout, clearTimeout
+    }, { filename: file })
+    for (const channel of ['office-get-capabilities', 'office-get-operation-task', 'office-cancel-operation-task', 'office-reopen-artifact']) {
+      const args = { taskId: 'task:1' }
+      await api.invoke(channel, args)
+      assert.equal(calls.at(-1).channel, channel)
+      assert.equal(calls.at(-1).args, args)
+    }
+    for (const channel of ['office-operation-updated', 'office-operation-progress']) {
+      let payload
+      const off = api.on(channel, value => { payload = value })
+      assert.equal(typeof subscriptions.get(channel), 'function', `${file} must allow ${channel}`)
+      const update = { taskId: 'task:1', phase: 'committing' }
+      subscriptions.get(channel)({ sender: 'hidden' }, update)
+      assert.equal(payload, update)
+      off()
+      assert.equal(subscriptions.has(channel), false)
+    }
+    api.on('arbitrary-private-channel', () => { throw new Error('must never subscribe') })
+    assert.equal(subscriptions.has('arbitrary-private-channel'), false)
+  }
 })

@@ -98,6 +98,32 @@
       "cancelled": "已取消",
       "partially_completed": "部分完成",
       "unknown": "未知"
-    }
+    },
+    "officeSaved": "文件已保存并通过校验",
+    "officeReopen": "重新打开文件",
+    "officeQualities": {
+      "mixed": "可编辑内容与图片页面混合",
+      "unknown": "质量待确认",
+      "imageOnly": "仅保留图片页面",
+      "editable": "可编辑内容"
+    },
+    "officeOpenFailed": "文件已保存，但打开编辑器失败，可重新打开。",
+    "officeQuality": "内容质量",
+    "officePhase": "Office 阶段",
+    "officePhases": {
+      "accepted": "已受理",
+      "snapshotting": "保存源文档快照",
+      "converting": "转换中",
+      "importing": "导入正文",
+      "completed": "已交付",
+      "verifying": "回读校验",
+      "committing": "保存文件",
+      "interrupted": "执行被中断",
+      "succeeded": "已交付",
+      "validating": "校验文档结构",
+      "failed": "失败",
+      "cancelled": "已取消"
+    },
+    "officeReopenFailed": "文件无法重新打开，请检查文件是否已被移动或修改。"
   }
 }

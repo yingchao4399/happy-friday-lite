@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "officialRepository": "https://github.com/genspark-ai/genoffice.git",
+  "tag": "v0.12.852",
+  "sha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+  "sourceRoot": "vendor/genoffice-html",
+  "purpose": "html-only",
+  "editors": ["html"],
+  "packageLockSha256": "2d0a7f5f556a67192098d7524003b3706e61f99d178e364c3413cd0ab3323977",
+  "notes": "独立官方源码只用于构建 AI HTML 及其完整依赖闭包。现有 Docs、Sheets、Slides、PDF 继续使用 vendor/happyoffice；本锁不表示其已升级，也不声明该 tag 为最新版本。"
+}

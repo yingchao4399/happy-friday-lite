@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-11-06T04:52:44+08:00",
+  "candidate": "3.0.7.01-preview.35",
+  "platform": "win32-x64",
+  "installer": {
+    "path": "release/Happy-Friday-Lite-3.0.7.01-preview.35-win-x64-setup.exe",
+    "size": 268045593,
+    "sha256": "381F43EF8779BF7A922F4A7BBB8D3B6C2D51C1A0698EA121E104B46F6A096D99",
+    "sha512": "b+V7rmyD4EbZFF4MZpyPLsng7EtXqAyj+ziHTr2spW6bGeyHUM2XxSSe7KedajNC7UXCd+ZSYdagqBWvrVEpcw==",
+    "unsigned": true
+  },
+  "officeBundle": {
+    "ok": true,
+    "resourceCount": 2497,
+    "releaseVersion": "3.0.7.01-preview.35",
+    "identityDigest": "bfd823df5d6c334926d1e130777c9e18e2e9b1217968ca42ee2b919abb41ef3a",
+    "resourcesDigest": "a5016f4ccd2b588b848e0f8d6dc5905db27abeb8da8269322f97d5f5ca7047af"
+  },
+  "nativeModules": {
+    "ok": true,
+    "checks": ["packaged Harness imports", "node-addon-require-builtin binding", "3 Windows native helpers are PE executables"]
+  },
+  "startupSmoke": {
+    "ok": true,
+    "checks": ["main window", "preload", "clipboard IPC", "recitation IPC", "Python IPC", "knowledge-base IPC"]
+  },
+  "updateMetadata": {
+    "path": "release/latest.yml",
+    "checkedAgainstInstaller": true,
+    "electronBuilderExit": 1,
+    "electronBuilderError": "UNKNOWN: unknown error while opening latest.yml after installer and blockmap generation",
+    "manuallyReconciled": true
+  },
+  "notClosed": [
+    "isolated installer installation and launch",
+    "upgrade, uninstall and rollback",
+    "complex PDF quality matrix",
+    "clean release gate",
+    "GitHub push and Release upload",
+    "GenOffice upstream source/patch audit"
+  ]
+}

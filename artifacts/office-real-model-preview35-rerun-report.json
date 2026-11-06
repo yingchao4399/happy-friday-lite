@@ -1,0 +1,60 @@
+{
+  "ok": false,
+  "checkedAt": "2026-11-06T08:42:35.553Z",
+  "mode": "real-model-pdf-ai-panel",
+  "model": {
+    "selectedConfiguredModel": true,
+    "modelFingerprint": "73395b78866fd456",
+    "credentialStorage": "memory-only",
+    "source": "existing-user-config-read-only"
+  },
+  "runtime": {
+    "mode": "isolated-packaged-modules",
+    "moduleRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app",
+    "releaseVersion": "3.0.7.01-preview.35",
+    "electronRuntime": "42.2.0",
+    "officeRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office",
+    "manifestSha256": "c572de7d6ca87a4db862e6a02677ca198bb0161ba4e7f3c11fb6c125a30de7b1",
+    "identityDigest": "bfd823df5d6c334926d1e130777c9e18e2e9b1217968ca42ee2b919abb41ef3a",
+    "resourcesDigest": "a5016f4ccd2b588b848e0f8d6dc5905db27abeb8da8269322f97d5f5ca7047af",
+    "limitation": "真实模型与原 PDF AiPanel 工具循环；主窗口和原生审批由隔离 harness 驱动，不覆盖 Core 自由规划、安装器交互或复杂 PDF 质量。"
+  },
+  "isolatedDataDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-office-real-model-7sBifk",
+  "syntheticInputOnly": true,
+  "modelConfigurationCopiedToDisk": false,
+  "sourceConfigUnchanged": true,
+  "approvals": [
+    {
+      "tool": "office_document_convert",
+      "decision": "approved",
+      "nativeDialogStubbed": true,
+      "registryApprovalRequested": true
+    }
+  ],
+  "saveDialogStubs": 0,
+  "coreFreePlanning": {
+    "tested": false,
+    "reason": "本探针只覆盖 PDF AiPanel；未将确定性 Core fixture 当作真实模型自由规划。"
+  },
+  "steps": [
+    {
+      "name": "natural language PDF to Word",
+      "ok": false,
+      "entry": "real PDF AiPanel textarea input + send button",
+      "prompt": "请把当前 PDF 转换为可编辑的 Word（.docx）文件并保存，保留全部文字，不修改源 PDF，不联网搜索。请实际完成转换后告诉我保存结果。",
+      "expectedTool": "convert_document",
+      "operationId": "office.document.convert",
+      "modelRequests": 2,
+      "modelSelectedTools": [
+        "convert_document"
+      ],
+      "transportUnmodified": true,
+      "code": "OFFICE_REAL_MODEL_ARTIFACT_INVALID"
+    }
+  ],
+  "code": "OFFICE_REAL_MODEL_ARTIFACT_INVALID",
+  "error": {
+    "code": "OFFICE_REAL_MODEL_ARTIFACT_INVALID"
+  },
+  "sourceHashUnchanged": true
+}

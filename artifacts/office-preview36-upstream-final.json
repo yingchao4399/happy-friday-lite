@@ -1,0 +1,343 @@
+{
+  "ok": true,
+  "code": null,
+  "issues": [],
+  "lock": {
+    "schemaVersion": 1,
+    "officialRepository": "https://github.com/genspark-ai/genoffice.git",
+    "observedAt": "2026-11-06T06:09:04.114Z",
+    "observedCandidate": {
+      "tag": "v0.12.852",
+      "tagObjectSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+      "commitSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+      "tagKind": "lightweight",
+      "observation": "Previously observed candidate; official ref rechecked 2026-11-06. This does not claim latest, approval, or integration."
+    },
+    "approvedTarget": null,
+    "integrationState": "current-vendor-not-latest-claim",
+    "vendorRepository": "https://github.com/cheney-plus/happyoffice.git",
+    "vendorPath": "vendor/happyoffice",
+    "vendorHeadSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+    "vendorDescribe": "v0.10.639-27-g8ed0c8d0",
+    "vendorBaseSha": null,
+    "integrationCommit": null,
+    "integrationMethod": "pending-three-way-audit",
+    "patchSetId": "friday-office-host-v1-20261106",
+    "patchManifestSha256": "44dc27285af1b37e60709cd2079d2730979b020662c531690e4e681b6b985e06",
+    "hostProtocolVersion": "1.0",
+    "adapterVersion": "1.0",
+    "packageLockSha256": "c1cc94cc333f7b19cb25da3088a2f71fbaa2628f5646490548c2036e1aa7517c",
+    "requiredEditors": [
+      "docs",
+      "sheets",
+      "slides",
+      "pdf"
+    ],
+    "notes": "Current vendor is a Friday fork with uncommitted runtime edits. Source diff identities remain in integration-manifest.json. The official base and all historical private changes require a three-way audit before an integrated upstream release is claimed.",
+    "vendorPackageLockSha256": "33d48aa506479731a731a33005587842677cb2746e4be744dec5dd765787383c"
+  },
+  "patchManifest": {
+    "schemaVersion": 1,
+    "officialRepository": "https://github.com/genspark-ai/genoffice.git",
+    "patchSetId": "friday-office-host-v1-20261106",
+    "reviewStatus": "inventory-pending",
+    "coverage": "Known integration surfaces only; the full committed and working-tree three-way diff has not been audited.",
+    "patches": [
+      {
+        "id": "FRIDAY-OFFICE-001",
+        "scope": "vendor",
+        "files": [
+          "apps/docs/src/main/docs-main.ts",
+          "apps/sheets/src/main/sheets-main.ts",
+          "apps/slides/src/main/slides-main.ts",
+          "apps/pdf/src/main/pdf-main.ts"
+        ],
+        "purpose": "将独立 GenOffice 编辑器嵌入 Friday 宿主并注入运行时、AI、文件与生命周期回调。",
+        "upstreamHooks": [
+          "configureDocsRuntime",
+          "configureSheetsRuntime",
+          "configureSlidesRuntime",
+          "configurePdfRuntime",
+          "create*View",
+          "register*Ipc"
+        ],
+        "adapterImpact": "宿主 thin adapter 与 required exports 依赖这些钩子。",
+        "protocolImpact": "Office host protocol 1.0；签名改变必须同时升级调用和合同。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node --test scripts/tests/office-bundle-contract.test.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          },
+          {
+            "command": "npm run office:build",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "需对批准的官方目标逐文件比对，当前未声明存在等价接口。",
+        "retentionReason": "Friday 需要复用编辑器实现并由自身负责宿主生命周期。",
+        "removalCondition": "官方提供相同宿主合同且完成回归后，删除对应 fork 钩子。",
+        "reviewStatus": "inventory-pending"
+      },
+      {
+        "id": "FRIDAY-OFFICE-002",
+        "scope": "vendor",
+        "files": [
+          "apps/pdf/src/main/pdf-main.ts",
+          "apps/pdf/src/preload/index.ts",
+          "apps/pdf/src/renderer/App.tsx",
+          "apps/pdf/src/shared/ipc.ts"
+        ],
+        "purpose": "导出当前 PDF 私有快照，保留未保存修改，同时保护源文件。",
+        "upstreamHooks": [
+          "exportPdfSnapshot"
+        ],
+        "adapterImpact": "转换服务以 resource/revision 绑定快照，不经 UI 自动点击。",
+        "protocolImpact": "快照字节、revision 与生命周期确认属于 host protocol 1.0。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node --test scripts/tests/office-operation-service.test.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          },
+          {
+            "command": "node scripts/probe-office-pdf-ai-delivery.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "需检查目标版本是否提供含当前编辑态的 bytes-out 快照。",
+        "retentionReason": "从源路径重读会丢失未保存修改，不能满足同一业务合同。",
+        "removalCondition": "官方快照在内容、revision、关闭及取消语义上对等并通过样本回归。",
+        "reviewStatus": "inventory-pending"
+      },
+      {
+        "id": "FRIDAY-OFFICE-003",
+        "scope": "vendor",
+        "files": [
+          "apps/docs/src/main/docs-main.ts",
+          "apps/docs/src/preload/index.ts",
+          "apps/docs/src/renderer/App.tsx",
+          "apps/docs/src/renderer/file-actions.ts",
+          "apps/docs/src/shared/ipc.ts"
+        ],
+        "purpose": "HTML 内容导入 Docs 后等待真实序列化确认，避免把排队成功当作文档已创建。",
+        "upstreamHooks": [
+          "serializeDocsAiContent"
+        ],
+        "adapterImpact": "创建回调与冷加载依赖 ack/nonce、超时和取消清理。",
+        "protocolImpact": "交付必须回读有效 DOCX；ack 改动需协议回归。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node --test scripts/tests/office-operation-service.test.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          },
+          {
+            "command": "node scripts/probe-office-core-delivery.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "需核对新版本创建/导入完成事件，不能仅按函数同名判断。",
+        "retentionReason": "源代码中创建回调存在不等于宿主已完成真实落盘。",
+        "removalCondition": "官方提供可验证的导入和 DOCX bytes-out 完成结果，故障/迟到确认回归通过。",
+        "reviewStatus": "inventory-pending"
+      },
+      {
+        "id": "FRIDAY-OFFICE-004",
+        "scope": "host",
+        "files": [
+          "scripts/office/entries/pdf-converter.ts",
+          "src-electron/office/converter-adapter.js",
+          "src-electron/office/conversion-worker.js"
+        ],
+        "purpose": "薄包装复用 vendor PDF 转换算法，worker 隔离计算并定位 PDFium/OCR 资源。",
+        "upstreamHooks": [
+          "packages/pdf2docx"
+        ],
+        "adapterImpact": "bytes-in/out 和逐页质量报告，不复制转换算法。",
+        "protocolImpact": "转换结果必须满足当前 DOCX artifact 和 quality 合同。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node --test scripts/tests/office-converter-adapter.test.mjs scripts/tests/office-pdf-converter.test.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "算法持续使用上游；目标版本导出/API/资源路径变化待审计。",
+        "retentionReason": "Friday 需隔离计算并与自身取消/交付服务连接。",
+        "removalCondition": "官方宿主 API 满足隔离、取消、资源及质量合同后收敛包装。",
+        "reviewStatus": "inventory-pending"
+      },
+      {
+        "id": "FRIDAY-OFFICE-005",
+        "scope": "host",
+        "files": [
+          "src-electron/office/operations.js",
+          "src-electron/office/operation-catalog.js",
+          "src-electron/office/operation-tasks.js",
+          "src-electron/office/artifact-delivery.js",
+          "src-electron/office/office-host.js"
+        ],
+        "purpose": "菜单、Office 内 AI、Friday 主助手共用操作服务、交付、幂等和恢复。",
+        "upstreamHooks": [
+          "createDocument",
+          "convertDocument",
+          "convertOffice"
+        ],
+        "adapterImpact": "Friday 领域服务保留 actor/space/approval 与结果证据。",
+        "protocolImpact": "operation/phase/artifact 合同；格式扩展必须新增对等 adapter 验收。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node --test scripts/tests/office-operation-service.test.mjs scripts/tests/office-operation-tasks.test.mjs scripts/tests/office-artifact-delivery.test.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "属于 Friday 宿主业务责任，需复核上游服务的可复用边界。",
+        "retentionReason": "多入口统一执行与本地文件安全需在同一宿主合同中维护。",
+        "removalCondition": "若迁移至官方完整宿主服务，先证明权限、恢复及交付语义对等。",
+        "reviewStatus": "inventory-pending"
+      },
+      {
+        "id": "FRIDAY-OFFICE-006",
+        "scope": "host",
+        "files": [
+          "src-electron/agent/tools/builtin/officeOperations.js",
+          "src-electron/agent/tools/registry.js",
+          "src-electron/office/office-agent.js",
+          "vendor/happyoffice/apps/pdf/src/renderer/ai/tools.ts",
+          "vendor/happyoffice/apps/pdf/src/renderer/ai/pdf-skill.ts"
+        ],
+        "purpose": "从操作目录投影 AI 工具，接入 AI Core、审批、审计和真实交付结果。",
+        "upstreamHooks": [
+          "PDF AI tools",
+          "Office runtime AI callbacks"
+        ],
+        "adapterImpact": "宿主负责可信身份与 scope；模型不可自设审批身份。",
+        "protocolImpact": "工具发现/参数/结果与 operation catalog 同步。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node --test scripts/tests/office-registry-contract.test.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          },
+          {
+            "command": "node scripts/probe-office-core-delivery.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "需核对目标官方 AI Markdown/HTML 和各编辑器 AI 能力全集。",
+        "retentionReason": "Friday 主助手与嵌入 AI 必须获得相同真实能力状态。",
+        "removalCondition": "官方工具目录可满足 Friday 可信上下文/审批/结果要求后替换投影。",
+        "reviewStatus": "inventory-pending"
+      },
+      {
+        "id": "FRIDAY-OFFICE-007",
+        "scope": "build",
+        "files": [
+          "src-electron/office/editor-registry.js",
+          "src-electron/office/bundle-contract.js",
+          "scripts/build-office.mjs",
+          "scripts/office/integration-manifest.mjs",
+          "scripts/verify-office-integration.mjs"
+        ],
+        "purpose": "从 registry 构建/校验资源、required exports、来源身份与版本组合。",
+        "upstreamHooks": [
+          "apps/*/out",
+          "packages/cli/dist",
+          "PDFium/OCR/native resources"
+        ],
+        "adapterImpact": "新增编辑器在完整功能验收前保持 disabled。",
+        "protocolImpact": "adapter/host protocol 版本必须与源码、锁文件及资源一致。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node --test scripts/tests/office-bundle-contract.test.mjs scripts/tests/office-integration-gate.test.mjs",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          },
+          {
+            "command": "npm run office:verify",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "上游构建目录及导出变化需按批准目标审计。",
+        "retentionReason": "Friday 打包白名单和安装资源与上游独立应用不同。",
+        "removalCondition": "官方嵌入分发提供匹配合同后移除重复构建适配。",
+        "reviewStatus": "inventory-pending"
+      },
+      {
+        "id": "FRIDAY-OFFICE-008",
+        "scope": "build",
+        "files": [
+          "scripts/build-office.mjs",
+          "scripts/verify-packaged-office.mjs",
+          "scripts/office/entries",
+          "src-electron/office/office-host.js"
+        ],
+        "purpose": "确保无源码安装目录可定位 CJS、WASM、OCR/打印原生 helper 与 CLI。",
+        "upstreamHooks": [
+          "packages/pdf2docx/ocr-helper",
+          "packages/electron-utils/native",
+          "xlsx-sidecar"
+        ],
+        "adapterImpact": "所有路径按 resources 根计算，不依赖开发机 cwd。",
+        "protocolImpact": "平台/架构和 required resources 是版本组合的一部分。",
+        "owner": "Friday Office integration maintainers (individual sign-off pending)",
+        "verification": [
+          {
+            "command": "node scripts/verify-packaged-office.mjs release/win-unpacked/resources/office",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          },
+          {
+            "command": "node scripts/verify-packaged-native-modules.mjs --appDir release/win-unpacked",
+            "result": "pending-for-approved-target",
+            "evidence": null
+          }
+        ],
+        "upstreamEquivalent": "官方打包 hook/产物路径需与 Friday 平台构建逐项对照。",
+        "retentionReason": "Friday 不运行官方独立应用打包 hook，需显式构建和验收资源。",
+        "removalCondition": "官方可嵌入分发覆盖目标平台，干净安装/升级/回滚实测通过。",
+        "reviewStatus": "inventory-pending"
+      }
+    ]
+  },
+  "lockPath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\office-upstream.lock.json",
+  "patchManifestPath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\office-vendor-patches.json",
+  "vendorHeadSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+  "audit": {
+    "lockSha256": "d708ddec07a9dff09787c98275bedd48dd3fbf0ea96e86db89418ec4e29cbafc",
+    "patchManifestSha256": "44dc27285af1b37e60709cd2079d2730979b020662c531690e4e681b6b985e06",
+    "packageLockSha256": "c1cc94cc333f7b19cb25da3088a2f71fbaa2628f5646490548c2036e1aa7517c",
+    "vendorPackageLockSha256": "33d48aa506479731a731a33005587842677cb2746e4be744dec5dd765787383c",
+    "officialRepository": "https://github.com/genspark-ai/genoffice.git",
+    "targetStatus": "candidate-only",
+    "targetTag": "v0.12.852",
+    "targetCommitSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+    "vendorHeadSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+    "integrationState": "current-vendor-not-latest-claim",
+    "patchSetId": "friday-office-host-v1-20261106",
+    "patchReviewStatus": "inventory-pending",
+    "hostProtocolVersion": "1.0",
+    "adapterVersion": "1.0",
+    "requiredEditors": [
+      "docs",
+      "sheets",
+      "slides",
+      "pdf"
+    ],
+    "remoteVerified": true
+  }
+}

@@ -1,10 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
+import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import { createAiRequest, assertTaskTransition } from './contracts.js'
 import { AiCoreError, policyDenied } from './errors.js'
 
 const TERMINAL = new Set(['completed', 'failed', 'cancelled'])
+const OFFICE_DELIVERY_CAPABILITIES = new Set(['office_document_convert', 'office_document_create', 'office_create', 'office_export', 'note_to_word'])
+const STRICT_OFFICE_CAPABILITIES = new Set(['office_document_convert', 'office_document_create'])
 function clone(value) {
   return value == null ? value : structuredClone(value)
 }
@@ -60,6 +63,49 @@ function publicResult(result) {
   })
 }
 
+function parsedOutput(output) {
+  if (typeof output !== 'string') return output
+  try { return JSON.parse(output) } catch { return null }
+}
+
+function resolvedOfficeOutput(value, context) {
+  const normalized = value.replace(/\\/g, '/')
+  const virtual = normalized.startsWith('/SANDBOX/')
+  if (virtual || !path.isAbsolute(value)) {
+    if (!context.agentRootDir) return virtual ? null : path.resolve(value)
+    const sandbox = path.resolve(context.agentRootDir, 'SANDBOX')
+    const resolved = path.resolve(sandbox, virtual ? normalized.slice('/SANDBOX/'.length) : value)
+    const relative = path.relative(sandbox, resolved)
+    return relative.startsWith('..' + path.sep) || relative === '..' || path.isAbsolute(relative) ? null : resolved
+  }
+  return path.resolve(value)
+}
+
+function sameOfficePath(expected, actual) {
+  // Windows 的 JS realpath 可能保留 ADMINI~1 等 DOS 短名，而宿主异步
+  // realpath 返回长名；native 必须将同一已交付文件解析到相同名称。
+  const canonical = value => { try { return realpathSync.native(value) } catch { return path.resolve(value) } }
+  const left = canonical(expected)
+  const right = canonical(actual)
+  return process.platform === 'win32' ? left.toLowerCase() === right.toLowerCase() : left === right
+}
+
+/** 只有宿主 Office 交付合同可替代独立回读步骤；路径按可信运行时根目录解析。 */
+export function hasVerifiedOfficeArtifact(capabilityId, output, args = {}, context = {}) {
+  if (!OFFICE_DELIVERY_CAPABILITIES.has(capabilityId)) return false
+  const result = parsedOutput(output)
+  const artifact = result?.data?.artifact
+  const expectedPath = args.target?.out || args.out
+  if (expectedPath) {
+    const resolved = typeof expectedPath === 'string' ? resolvedOfficeOutput(expectedPath, context) : null
+    if (!resolved || !artifact?.path || !sameOfficePath(resolved, artifact.path)) return false
+  }
+  return result?.ok === true && ['succeeded', 'completed'].includes(result.status) &&
+    artifact?.persisted === true && typeof artifact.path === 'string' && path.isAbsolute(artifact.path) &&
+    Number.isSafeInteger(artifact.bytes) && artifact.bytes > 0 && /^[a-f0-9]{64}$/i.test(artifact.sha256 || '') &&
+    artifact.validation?.valid === true && Number.isFinite(Date.parse(artifact.validation.checkedAt))
+}
+
 function capabilityOutputSucceeded(output) {
   if (output == null) return false
   if (typeof output === 'string') {
@@ -68,7 +114,7 @@ function capabilityOutputSucceeded(output) {
     try { return capabilityOutputSucceeded(JSON.parse(text)) } catch { return true }
   }
   if (typeof output !== 'object') return true
-  if (output.ok === false || output.success === false || output.error || ['error', 'failed'].includes(String(output.status || '').toLowerCase())) return false
+  if (output.ok === false || output.success === false || output.error || ['error', 'failed', 'cancelled', 'interrupted', 'blocked', 'task_pending'].includes(String(output.status || '').toLowerCase())) return false
   return true
 }
 
@@ -246,6 +292,8 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
         const output = await executeCapability(step.capabilityId, args, {
           ...executionContext,
           actor: request.context.actor.id,
+          taskId: task.id,
+          stepId: step.id,
           threadId: request.context.threadId || task.id,
           requestId: `${request.context.requestId}:${step.id}`,
           spaceId: request.context.spaceId,
@@ -261,7 +309,9 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
           requireApproval: true,
           approvalGranted: true
         })
-        if (!capabilityOutputSucceeded(output)) throw Object.assign(new Error('能力返回失败结果，任务未通过结果检查'), { code: 'AI_CORE_OUTPUT_NOT_VERIFIED', stage: 'verify' })
+        const domainStatus = String(parsedOutput(output)?.status || '').toLowerCase()
+        if (domainStatus === 'cancelled') throw Object.assign(new Error('Office 操作已取消'), { code: 'AI_CORE_TASK_CANCELLED', stage: 'execute' })
+        if (!capabilityOutputSucceeded(output) || (STRICT_OFFICE_CAPABILITIES.has(step.capabilityId) && !hasVerifiedOfficeArtifact(step.capabilityId, output, args, executionContext))) throw Object.assign(new Error('能力返回失败结果或缺少可信文件交付，任务未通过结果检查'), { code: 'AI_CORE_OUTPUT_NOT_VERIFIED', stage: 'verify' })
         const item = { stepId: step.id, capabilityId: step.capabilityId, output: clone(output), completedAt: now() }
         outputs.push(item)
         task.steps.push(item)
@@ -269,6 +319,13 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
         persist(task)
         event(task, 'capability.completed', { stepId: step.id, capabilityId: step.capabilityId })
         if (controller.signal.aborted) {
+          if (outputs.some(completed => hasVerifiedOfficeArtifact(completed.capabilityId, completed.output))) {
+            event(task, 'task.cancel_after_delivery', { stepId: step.id, capabilityId: step.capabilityId })
+            if (step === prepared.plan.steps.at(-1)) continue
+            task.output = { steps: outputs, verification: { status: 'passed', mode: 'partial-office-delivery', checkedAt: now() }, cancellation: { requested: true, remainingStepsCancelled: true } }
+            transition(task, 'partially_completed')
+            return publicResult({ ...task, events: backend.listEvents(task.id) })
+          }
           task.output = { steps: outputs, verification: { status: 'not_run', reason: 'cancelled' } }
           task.checkpoint = { stepId: step.id, capabilityId: step.capabilityId, status: 'cancelled' }
           transition(task, 'cancelled')
@@ -284,6 +341,7 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
         const writeIndex = prepared.plan.steps.indexOf(write)
         const writeArgs = resolveInputReferences(capabilityArgs(request, write, writeIndex), outputs.slice(0, writeIndex))
         const writeOutput = outputs[writeIndex]?.output
+        if (hasVerifiedOfficeArtifact(write.capabilityId, writeOutput, writeArgs, executionContext)) return false
         return !prepared.plan.steps.some((read, readIndex) => {
           if (readIndex <= writeIndex || read.type !== 'read') return false
           let readArgs
@@ -296,12 +354,17 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
         transition(task, 'partially_completed')
         return publicResult({ ...task, events: backend.listEvents(task.id) })
       }
-      task.output = { steps: outputs, verification: { status: 'passed', mode: writeSteps.length ? 'readback-capability' : 'read-result', checkedAt: now() } }
+      task.output = { steps: outputs, verification: { status: 'passed', mode: writeSteps.some(write => hasVerifiedOfficeArtifact(write.capabilityId, outputs.find(item => item.stepId === write.id)?.output)) ? 'office-artifact-readback' : writeSteps.length ? 'readback-capability' : 'read-result', checkedAt: now() } }
       transition(task, 'completed')
       return publicResult({ ...task, events: backend.listEvents(task.id) })
     } catch (error) {
-      if (controller.signal.aborted) {
+      if (controller.signal.aborted || error?.code === 'AI_CORE_TASK_CANCELLED') {
         task.error = null
+        if (outputs.some(completed => hasVerifiedOfficeArtifact(completed.capabilityId, completed.output))) {
+          task.output = { steps: outputs, verification: { status: 'passed', mode: 'partial-office-delivery', checkedAt: now() }, cancellation: { requested: true, remainingStepsCancelled: true } }
+          if (!TERMINAL.has(task.status)) transition(task, 'partially_completed')
+          return publicResult({ ...task, events: backend.listEvents(task.id) })
+        }
         task.checkpoint = { ...(task.checkpoint || {}), status: 'cancelled' }
         if (!TERMINAL.has(task.status)) transition(task, 'cancelled')
         return publicResult({ ...task, events: backend.listEvents(task.id) })
@@ -432,6 +495,10 @@ export function createAiCoreRuntime({ facade, executeCapability, store = null, n
 
   function recoverInterrupted() {
     for (const task of backend.listTasks()) {
+      // Office 服务先于 Core 懒加载，并独立恢复自己创建的领域任务。
+      // 此时首次打开 Dock 不能把当前进程正在执行的 Office 操作误判为重启中断。
+      const officeRecord = backend.listEvents(task.id).filter(event => event.type === 'office.operation.updated').at(-1)?.payload?.record
+      if (officeRecord?.ownsCoreTask === true) continue
       if (['running', 'verifying'].includes(task.status)) {
         task.error = { code: 'AI_CORE_INTERRUPTED', stage: 'recovery', message: '应用在任务执行期间退出；请检查目标资源后再重新提交。' }
         task.checkpoint = { ...(task.checkpoint || {}), status: 'interrupted' }

@@ -6,5 +6,7 @@ import { NOTE_ASSET_SCHEME } from './note-resources.js'
 protocol.registerSchemesAsPrivileged([
   { scheme: NOTE_ASSET_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } },
   { scheme: 'genoffice-app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true, codeCache: true } },
-  { scheme: 'genoffice-docx-media', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }
+  { scheme: 'genoffice-docx-media', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } },
+  { scheme: 'html-preview', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } },
+  { scheme: 'html-asset', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }
 ])

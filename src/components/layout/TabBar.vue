@@ -124,6 +124,7 @@ import {
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { electronService } from '@/services/electron';
 import { wheelIntent } from '@/utils/tabNavigation';
+import { closeOfficeEditorTab } from '@/views/office/officeTypes';
 import OfficeIcon from '@/components/icons/OfficeIcon.vue';
 import CalendarIcon from '@/components/icons/CalendarIcon.vue';
 import KnowledgeIcon from '@/components/icons/KnowledgeIcon.vue';
@@ -252,23 +253,12 @@ const requestFridayClose = async (id) => {
   return allowed;
 };
 
-// Office 编辑器 Tab（id: office-<type>-<instId>）：关闭前自动保存并释放对应编辑器视图
-// （脏文件不再弹确认框）
-const OFFICE_TAB_RE = /^office-(docs|sheets|slides|pdf)-(\d+)$/;
-
-const requestOfficeAutoSave = async (id) => {
-  const match = id.match(OFFICE_TAB_RE);
-  if (!match) return;
-  const viewId = `${match[1]}-${match[2]}`;
-  try {
-    await electronService.invoke('office-auto-save', { viewId });
-    await electronService.invoke('office-close', { viewId });
-  } catch { /* ignore */ }
-};
+// HTML 由宿主执行保存/丢弃/取消确认；只在明确关闭成功后移除标签。
+const requestOfficeClose = id => closeOfficeEditorTab(id, (channel, args) => electronService.invoke(channel, args));
 
 const closeTab = async (id) => {
   if (!(await requestFridayClose(id))) return;
-  await requestOfficeAutoSave(id);
+  if (!(await requestOfficeClose(id))) return;
   tabStore.removeTab(id);
   navigateToActiveTab();
 };
@@ -303,16 +293,19 @@ const closeOtherTabs = async () => {
   const keepId = contextMenu.value.tabId;
   const closingIds = tabStore.openedTabs.filter(t => t.id !== keepId).map(t => t.id);
   hideContextMenu();
-  for (const id of closingIds) await requestOfficeAutoSave(id);
-  tabStore.closeOtherTabs(keepId);
+  for (const id of closingIds) {
+    if ((await requestFridayClose(id)) && (await requestOfficeClose(id))) tabStore.removeTab(id);
+  }
+  tabStore.setActiveTab(keepId);
   navigateToActiveTab();
 };
 
 const closeAllTabs = async () => {
   const closingIds = tabStore.openedTabs.map(t => t.id);
   hideContextMenu();
-  for (const id of closingIds) await requestOfficeAutoSave(id);
-  tabStore.closeAllTabs();
+  for (const id of closingIds) {
+    if ((await requestFridayClose(id)) && (await requestOfficeClose(id))) tabStore.removeTab(id);
+  }
   navigateToActiveTab();
 };
 

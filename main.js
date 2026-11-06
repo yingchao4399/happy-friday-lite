@@ -16,6 +16,7 @@ import { stopLazyHarness, closeLazyAgentConnections } from './src-electron/lazy-
 import { initOfficeSession, shutdownOfficeHost } from './src-electron/office/office-session.js'
 import { registerOfficeIpc } from './src-electron/office/office-ipc.js'
 import { isHeadlessExportRun, runHeadlessExportEntry } from './src-electron/office/office-headless.js'
+import { enablePackagedPreviewHtml } from './src-electron/office/office-files.js'
 import { resolveDataDir, applyUserDataRedirect, migrateDataIfNeeded } from './src-electron/data-dir.js'
 import { initSession, registerSessionIpc } from './src-electron/session.js'
 import { registerClipboardCommands, startClipboardCapture, stopClipboardCapture } from './src-electron/clipboard.js'
@@ -29,6 +30,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const isDev = !app.isPackaged
+enablePackagedPreviewHtml({ isPackaged: app.isPackaged, appVersion: app.getVersion() })
 
 // Windows 系统通知需与 appId 一致（electron-builder build.appId），否则通知不显示
 app.setAppUserModelId('com.happyfriday.lite')
@@ -132,7 +134,8 @@ setRestoreLifecycle({
     if (mainWindow && !mainWindow.isDestroyed()) kbWatcherHandle = startKnowledgeWatcher(mainWindow, resolvedDataDir.dataDir)
   }
 })
-installIpcCapabilityGateway(ipcMain, () => mainWindow)
+// CLI 隐藏导出不初始化应用数据库，也不提供 Agent/UI 能力入口。
+if (!headlessExportRun) installIpcCapabilityGateway(ipcMain, () => mainWindow)
 
 if (!headlessExportRun) {
   // 系统打开文件请求：macOS open-file 事件 / Windows、Linux second-instance argv。

@@ -1,10 +1,11 @@
 <template>
   <div class="office-home">
     <HomeHero />
-    <QuickCards @new="type => $emit('new-doc', type)" @open-local="$emit('open-local')" />
+    <QuickCards :editor-types="editorTypes" @new="type => $emit('new-doc', type)" @open-local="$emit('open-local')" />
     <RecentsSection
       v-model:filter="filter"
-      :entries="filteredEntries"
+      :entries="visibleEntries"
+      :editor-types="editorTypes"
       @open="entry => $emit('open-recent', entry)"
       @toggle-star="toggleStar"
       @remove="removeRecent"
@@ -16,13 +17,14 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import HomeHero from './HomeHero.vue';
 import QuickCards from './QuickCards.vue';
 import RecentsSection from './RecentsSection.vue';
 import { useOfficeHome } from './useOfficeHome';
 
 defineEmits(['new-doc', 'open-local', 'open-recent']);
+const props = defineProps({ editorTypes: { type: Array, default: () => ['docs', 'sheets', 'slides', 'pdf'] } });
 
 const {
   filter,
@@ -34,6 +36,7 @@ const {
   reveal,
   renameRecent,
 } = useOfficeHome();
+const visibleEntries = computed(() => filteredEntries.value.filter(entry => props.editorTypes.includes(entry.type)));
 
 onMounted(loadRecents);
 

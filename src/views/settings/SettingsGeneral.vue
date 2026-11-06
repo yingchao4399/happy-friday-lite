@@ -156,6 +156,12 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </span>
           </div>
+          <div class="setting-item clickable" @click="goToAiToolsSettings">
+            <span class="item-label">{{ t('settings.aiToolsServices') }}</span>
+            <span class="item-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </span>
+          </div>
           <div class="setting-item">
             <span class="item-label">{{ t('settings.noteFimCompletion') }}</span>
             <label class="toggle-switch">
@@ -1634,6 +1640,9 @@ onDeactivated(() => {
 
 const goToModelSettings = () => {
   router.push('/settings/model');
+};
+const goToAiToolsSettings = () => {
+  router.push('/settings/ai-tools');
 };
 
 const goToModuleSettings = () => {

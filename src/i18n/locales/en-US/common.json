@@ -98,6 +98,32 @@
       "cancelled": "Cancelled",
       "partially_completed": "Partially completed",
       "unknown": "Unknown"
-    }
+    },
+    "officeSaved": "File saved and validated",
+    "officeReopen": "Open file again",
+    "officeQualities": {
+      "mixed": "Editable content with image pages",
+      "unknown": "Quality not confirmed",
+      "imageOnly": "Image pages only",
+      "editable": "Editable content"
+    },
+    "officeOpenFailed": "The file was saved, but the editor could not open it. Try opening it again.",
+    "officeQuality": "Content quality",
+    "officePhase": "Office phase",
+    "officePhases": {
+      "accepted": "Accepted",
+      "snapshotting": "Capturing source snapshot",
+      "converting": "Converting",
+      "importing": "Importing content",
+      "completed": "Delivered",
+      "verifying": "Reading back for validation",
+      "committing": "Saving file",
+      "interrupted": "Interrupted",
+      "succeeded": "Delivered",
+      "validating": "Validating document",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "officeReopenFailed": "The file could not be opened. Check whether it was moved or changed."
   }
 }

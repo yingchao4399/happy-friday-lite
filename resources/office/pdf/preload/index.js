@@ -79,6 +79,12 @@ const PDF_CHANNELS = {
   exportImages: "pdf:export-images",
   convertOffice: "pdf:convert-office",
   createDocument: "pdf:create-document",
+  getCapabilities: "pdf:get-capabilities",
+  convertDocument: "pdf:convert-document",
+  cancelOperation: "pdf:cancel-operation",
+  snapshotRequest: "pdf:snapshot-request",
+  snapshotResult: "pdf:snapshot-result",
+  snapshotFinished: "pdf:snapshot-finished",
   generateImage: "pdf:generate-image",
   listSignatures: "pdf:list-signatures",
   addSignature: "pdf:add-signature",
@@ -138,7 +144,21 @@ const api = {
   cropPages: (request) => electron.ipcRenderer.invoke(PDF_CHANNELS.cropPages, request),
   exportImages: (request) => electron.ipcRenderer.invoke(PDF_CHANNELS.exportImages, request),
   convertOffice: (format) => electron.ipcRenderer.invoke(PDF_CHANNELS.convertOffice, format),
-  createDocument: (request) => electron.ipcRenderer.invoke(PDF_CHANNELS.createDocument, request),
+  getCapabilities: () => electron.ipcRenderer.invoke(PDF_CHANNELS.getCapabilities),
+  convertDocument: (request, requestId) => electron.ipcRenderer.invoke(PDF_CHANNELS.convertDocument, request, requestId),
+  cancelOperation: (requestId) => electron.ipcRenderer.invoke(PDF_CHANNELS.cancelOperation, requestId),
+  onSnapshotRequest: (handler) => {
+    const listener = (_e, request) => handler(request);
+    electron.ipcRenderer.on(PDF_CHANNELS.snapshotRequest, listener);
+    return () => electron.ipcRenderer.removeListener(PDF_CHANNELS.snapshotRequest, listener);
+  },
+  sendSnapshotResult: (result) => electron.ipcRenderer.send(PDF_CHANNELS.snapshotResult, result),
+  onSnapshotFinished: (handler) => {
+    const listener = (_e, request) => handler(request);
+    electron.ipcRenderer.on(PDF_CHANNELS.snapshotFinished, listener);
+    return () => electron.ipcRenderer.removeListener(PDF_CHANNELS.snapshotFinished, listener);
+  },
+  createDocument: (request, requestId) => electron.ipcRenderer.invoke(PDF_CHANNELS.createDocument, request, requestId),
   imageSearch: (query, maxResults) => electron.ipcRenderer.invoke(AI_CHANNELS.imageSearch, query, maxResults),
   fetchImage: (url) => electron.ipcRenderer.invoke(AI_CHANNELS.fetchImage, url),
   generateImage: (op) => electron.ipcRenderer.invoke(PDF_CHANNELS.generateImage, op),

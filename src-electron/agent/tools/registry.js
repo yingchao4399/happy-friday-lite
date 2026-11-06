@@ -155,7 +155,7 @@ export async function executeCapability(name, args = {}, ctx = {}, options = {})
   const riskAssessment = getRiskAssessment(args)
   // 未通过校验的输入可能包含敏感数据，不记录原始值。
   let businessArgs = '[not validated]'
-  const hidden = !def || def.meta?.sensitive
+  const hidden = !def || def.meta?.sensitive || def.meta?.auditSensitive
   const auditOptions = { metadataOnly: actor === 'friday-ui' || actor === 'user:local' }
   let status = 'success'
   let output

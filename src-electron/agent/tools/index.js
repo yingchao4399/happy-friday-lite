@@ -19,6 +19,7 @@ import './builtin/aiChat.js'
 import './builtin/resources.js'
 import './builtin/uiControl.js'
 import './builtin/appActions.js'
+import './builtin/officeOperations.js'
 
 // 笔记操作工具（search/get/create/update）
 import './builtin/noteOps.js'

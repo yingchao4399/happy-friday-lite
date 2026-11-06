@@ -74,6 +74,12 @@ release-acceptance*/
 !docs/typewriter/05-workspace-and-plugin-ecosystem-plan.md
 .codegraph/
 
+# 由固定官方来源锁重新获取，不能把独立源码或未完成同步目录作为主仓库内容提交。
+/vendor/genoffice-html/
+/vendor/.genoffice-html-stage-*/
+/vendor/.genoffice-html-sync.lock
+!docs/office-ai-html-next/*.md
+
 !docs/typewriter/06-preview13-16-delivery.md
 !docs/typewriter/07-preview17-root-cause-report.md
 
@@ -84,3 +90,10 @@ release-acceptance*/
 
 # Friday Preview.22 research and delivery documents
 !docs/Preview-22-*.md
+
+# Office capability research, PRD and technical plan
+!docs/office-ai-capability-2026-11-05/01-research-report.md
+!docs/office-ai-capability-2026-11-05/02-product-requirements.md
+!docs/office-ai-capability-2026-11-05/03-architecture-and-work-breakdown.md
+!docs/office-ai-capability-2026-11-05/04-upstream-integration-contract.md
+!docs/office-ai-capability-2026-11-05/05-implementation-and-validation.md

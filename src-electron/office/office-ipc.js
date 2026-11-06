@@ -23,7 +23,7 @@ import {
   executeOfficeMenuCommand,
   isOfficeMainSender,
 } from './office-host.js'
-import { resolveEditorType } from './office-files.js'
+import { resolveEditorType, isExperimentalHtmlEnabled } from './office-files.js'
 import { isOfficeDockSender, moveOfficeDock, openFridayFromOfficeDock, setOfficeDockExpanded, setOfficeDockPosition } from './dock-overlay.js'
 
 /**
@@ -58,14 +58,19 @@ export function registerOfficeIpc() {
     return executeOfficeMenuCommand(viewId,command)
   })
 
-  ipcMain.handle('office-open-file', (_e, { filePath, viewId, background } = {}) => {
-    if (typeof filePath !== 'string' || !resolveEditorType(filePath)) {
+  ipcMain.handle('office-open-file', (event, { filePath, viewId, background } = {}) => {
+    const type = typeof filePath === 'string' ? resolveEditorType(filePath, { experimentalHtml: isExperimentalHtmlEnabled() }) : null
+    if (!type) {
       return { success: false, error: 'unsupported file type' }
     }
+    if (type === 'html' && !isOfficeMainSender(event.sender)) throw new Error('OFFICE_COMMAND_OWNER_REQUIRED')
     return openOfficeFile(filePath, { viewId, background: background === true })
   })
 
-  ipcMain.handle('office-close', (_e, { viewId } = {}) => closeOfficeFile(viewId))
+  ipcMain.handle('office-close', (event, { viewId } = {}) => {
+    if (typeof viewId === 'string' && viewId.startsWith('html-') && !isOfficeMainSender(event.sender)) throw new Error('OFFICE_COMMAND_OWNER_REQUIRED')
+    return closeOfficeFile(viewId)
+  })
   ipcMain.handle('office-locate-span', (_e, { viewId, selection } = {}) => locateOfficeSpan(viewId, selection))
 
   // 关闭编辑器 Tab 前自动保存：触发编辑器保存并等待落盘（不再弹确认框）
@@ -76,10 +81,11 @@ export function registerOfficeIpc() {
     return autoSaveOfficeFile(viewId)
   })
 
-  ipcMain.handle('office-new', (_e, { type, viewId, name } = {}) => {
-    if (!['docs', 'sheets', 'slides', 'pdf'].includes(type)) {
+  ipcMain.handle('office-new', (event, { type, viewId, name } = {}) => {
+    if (!['docs', 'sheets', 'slides', 'pdf'].includes(type) && !(type === 'html' && isExperimentalHtmlEnabled())) {
       return { success: false, error: 'unsupported editor type' }
     }
+    if (type === 'html' && !isOfficeMainSender(event.sender)) throw new Error('OFFICE_COMMAND_OWNER_REQUIRED')
     return newOfficeDocument(type, viewId, typeof name === 'string' ? name : '')
   })
 
@@ -122,7 +128,10 @@ export function registerOfficeIpc() {
 
   ipcMain.handle('office-reveal-path', (_e, filePath) => revealOfficePath(filePath))
 
-  ipcMain.handle('office-open-dialog', () => openOfficeFileDialog())
+  ipcMain.handle('office-open-dialog', event => {
+    if (!isOfficeMainSender(event.sender)) throw new Error('OFFICE_COMMAND_OWNER_REQUIRED')
+    return openOfficeFileDialog()
+  })
 
   ipcMain.handle('office-is-dirty', (_e, { viewId } = {}) => queryOfficeDirty(viewId))
 }

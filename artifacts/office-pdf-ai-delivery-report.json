@@ -1,0 +1,210 @@
+{
+  "ok": true,
+  "checkedAt": "2026-11-05T19:39:25.737Z",
+  "steps": [
+    {
+      "name": "native approval requested",
+      "approved": true
+    },
+    {
+      "name": "PDF renderer → create_document → Friday host",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "9a5b6a4b-423c-4e77-bbd9-be744aeb1c2b",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\knowledge\\agent\\SANDBOX\\PDF AI 创建验收-9a5b6a4b.docx",
+          "artifact": {
+            "id": "48b15b17-10c0-46d8-b0dc-48544e0a17e8",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\knowledge\\agent\\SANDBOX\\PDF AI 创建验收-9a5b6a4b.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "bb251d12f99d38153c969a0aae620d425a955799dc7b96becc79414e49459b89",
+            "bytes": 3079,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-05T19:39:29.533Z",
+              "textCharacters": 42,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": null,
+            "quality": {
+              "level": "editable",
+              "nodeCount": 2,
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "native approval requested",
+      "approved": true
+    },
+    {
+      "name": "PDF renderer → convert_document → worker → verified DOCX",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "a85708af-383b-456c-bb35-6e95992f93ef",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\knowledge\\agent\\SANDBOX\\PDF AI conversion-a85708af.docx",
+          "artifact": {
+            "id": "33dd0c88-9d75-4f7b-bad6-662c5f38e401",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\knowledge\\agent\\SANDBOX\\PDF AI conversion-a85708af.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "ec07ddae71285636dc8d0eed19fc2bfc831f29a590239772edecfc3c847fcc09",
+            "bytes": 3120,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-05T19:39:32.018Z",
+              "textCharacters": 29,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": {
+              "resourceId": "pdf-1",
+              "revision": "fff64221ec08b62d32a166d21c619e6695f6d0ef9463713a64d0f08442600827",
+              "sha256": "fff64221ec08b62d32a166d21c619e6695f6d0ef9463713a64d0f08442600827"
+            },
+            "quality": {
+              "level": "editable",
+              "pages": 1,
+              "pageResults": [
+                {
+                  "page": 1,
+                  "status": "ok",
+                  "confidence": 1
+                }
+              ],
+              "imagePages": [],
+              "editablePages": [
+                1
+              ],
+              "ocr": "not-needed",
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-3"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "PDF menu → shared service → verified DOCX",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "61ff15da-6268-4c4e-a9f1-e1152fccd259",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\menu-result.docx",
+          "artifact": {
+            "id": "74816953-2a72-4413-88ed-c87eb59bff8a",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\menu-result.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "9c251fb6540d41d983c2e507b149fa0e40a200e35d0aea8be479c5ed9e84b7ea",
+            "bytes": 3120,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-05T19:39:34.114Z",
+              "textCharacters": 29,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": {
+              "resourceId": "pdf-1",
+              "revision": "fff64221ec08b62d32a166d21c619e6695f6d0ef9463713a64d0f08442600827",
+              "sha256": "fff64221ec08b62d32a166d21c619e6695f6d0ef9463713a64d0f08442600827"
+            },
+            "quality": {
+              "level": "editable",
+              "pages": 1,
+              "pageResults": [
+                {
+                  "page": 1,
+                  "status": "ok",
+                  "confidence": 1
+                }
+              ],
+              "imagePages": [],
+              "editablePages": [
+                1
+              ],
+              "ocr": "not-needed",
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-4"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "native approval requested",
+      "approved": true
+    },
+    {
+      "name": "Friday assistant registry → shared service → verified DOCX",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "10ce65cc-35f6-4b40-8239-2f5005b8f3ad",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\knowledge\\agent\\SANDBOX\\Friday main assistant-10ce65cc.docx",
+          "artifact": {
+            "id": "d21a92bc-81f9-403b-b2f3-a48d63fcc1a5",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-AdDJqp\\knowledge\\agent\\SANDBOX\\Friday main assistant-10ce65cc.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "910ad0099f784fe565120471f896dd6daece69c87f402f337290ac62850128a4",
+            "bytes": 3120,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-05T19:39:35.682Z",
+              "textCharacters": 29,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": {
+              "resourceId": "pdf-1",
+              "revision": "fff64221ec08b62d32a166d21c619e6695f6d0ef9463713a64d0f08442600827",
+              "sha256": "fff64221ec08b62d32a166d21c619e6695f6d0ef9463713a64d0f08442600827"
+            },
+            "quality": {
+              "level": "editable",
+              "pages": 1,
+              "pageResults": [
+                {
+                  "page": 1,
+                  "status": "ok",
+                  "confidence": 1
+                }
+              ],
+              "imagePages": [],
+              "editablePages": [
+                1
+              ],
+              "ocr": "not-needed",
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-5"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

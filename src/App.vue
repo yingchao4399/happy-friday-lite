@@ -43,6 +43,7 @@ import { openMarkdownAsNotePage } from '@/utils/markdownImport';
 import { restoreSession, scheduleSessionSave, flushSessionSave } from '@/utils/tabSession';
 import { routeHorizontalWheel } from '@/utils/tabNavigation';
 import { useKnowledgeStore } from '@/store';
+import { isOfficeEditorType, officeEditorPath } from '@/views/office/officeTypes';
 
 const appStore = useAppStore();
 const DeepSeekHarness = defineAsyncComponent(() => import('@/views/harness/DeepSeekHarness.vue'));
@@ -69,6 +70,7 @@ let disposeCommands,disposePlugins;
 let shellUnmounted = false;
 let unlistenConfig = null;
 let unlistenOfficeOpened = null;
+let unlistenOfficeSettings = null;
 let unlistenOfficeDockOpenFriday = null;
 let unlistenOpenFileRequest = null;
 let unlistenClipboardHotkey = null;
@@ -92,10 +94,16 @@ async function handleOsOpenFile(filePath) {
     }
     return;
   }
+  // 系统 HTML 打开保留原默认应用；编辑必须由明确的 AI HTML 动作触发。
+  if (['html', 'htm'].includes(ext)) {
+    electronService.invoke('kb-open-file-external', { filePath }).catch(() => {});
+    return;
+  }
   try {
     const res = await electronService.invoke('office-open-file', { filePath });
-    if (res?.success && res.viewId) {
-      await router.push(`/office/${String(res.viewId).replace('-', '/')}`);
+    const editorPath = officeEditorPath(res?.viewId);
+    if (res?.success && editorPath) {
+      await router.push(editorPath);
       return;
     }
   } catch (_e) { /* 落入系统默认程序兜底 */ }
@@ -139,7 +147,7 @@ watch(
     // （每个打开的文件/新建文档对应主进程一个视图实例，Tab id 与其 viewId 一一对应）
     if (rootPath === '/office') {
       const segs = newPath.split('/');
-      const editorType = ['docs', 'sheets', 'slides', 'pdf'].includes(segs[2]) ? segs[2] : null;
+      const editorType = isOfficeEditorType(segs[2]) ? segs[2] : null;
       if (editorType && segs[3]) {
         const id = `office-${editorType}-${segs[3]}`;
         const existing = tabStore.openedTabs.find(t => t.id === id);
@@ -332,11 +340,26 @@ onMounted(async () => {
     unlistenOfficeOpened = electronService.listen('office-opened', (event) => {
       const viewId = event.payload?.viewId;
       if (typeof viewId === 'string' && viewId.includes('-')) {
-        router.push(`/office/${viewId.replace('-', '/')}`);
+        const editorPath = officeEditorPath(viewId);
+        if (editorPath) {
+          if (event.payload?.presentation === true) {
+            tabStore.addTab({
+              id: `office-${viewId}`, path: '/office/html', fullPath: editorPath,
+              title: event.payload.title || '', i18nKey: 'office.html', icon: 'OfficeIcon', officePresentation: true
+            });
+          }
+          router.push(editorPath);
+        }
       }
     });
     unlistenOfficeDockOpenFriday = electronService.listen('office-dock-open-friday', () => {
       router.push('/friday');
+    });
+    unlistenOfficeSettings = electronService.listen('office-open-settings', async event => {
+      if (event.payload?.section === 'skills') {
+        await router.push('/friday');
+        window.dispatchEvent(new CustomEvent('friday-open-management', { detail: { section: 'skills' } }));
+      } else await router.push('/settings/model');
     });
 
     // 操作系统打开文件请求（系统文件关联双击/open-file 事件）：
@@ -377,6 +400,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  unlistenOfficeSettings?.();
   shellUnmounted = true;
   cancelStartupDeferred?.();
   startupDeferredHandle = null;

@@ -1,0 +1,392 @@
+{
+  "ok": true,
+  "checkedAt": "2026-11-06T06:11:10.303Z",
+  "mode": "deterministic-planner-no-remote-model",
+  "coverage": "Core 审批、真实 registry schema/scope/audit、真实 Office renderer/worker 和文件回读；不证明远端模型规划或工具选择",
+  "runtime": {
+    "mode": "isolated-packaged-modules",
+    "moduleRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app",
+    "releaseVersion": "3.0.7.01-preview.35",
+    "electronRuntime": "42.2.0",
+    "officeRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office",
+    "manifestSha256": "c572de7d6ca87a4db862e6a02677ca198bb0161ba4e7f3c11fb6c125a30de7b1",
+    "identityDigest": "bfd823df5d6c334926d1e130777c9e18e2e9b1217968ca42ee2b919abb41ef3a",
+    "resourcesDigest": "a5016f4ccd2b588b848e0f8d6dc5905db27abeb8da8269322f97d5f5ca7047af",
+    "limitation": "确定性隔离驱动；不代替安装器、真实主窗口交互或远端模型工具选择验收"
+  },
+  "isolatedDataDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3",
+  "steps": [
+    {
+      "name": "Core terminal observation",
+      "key": "probe:core:virtual",
+      "taskId": "79e508b9-29c2-418b-b83d-ffd64c25bf84",
+      "status": "completed",
+      "error": null,
+      "operation": {
+        "id": "79e508b9-29c2-418b-b83d-ffd64c25bf84",
+        "taskId": "79e508b9-29c2-418b-b83d-ffd64c25bf84",
+        "actorId": "user:local",
+        "spaceId": "friday",
+        "operationId": "office.document.create",
+        "operationIdentity": "4258d60b61b2bd4252defbf3e75a1e88e0b8529f5d25a6e85e71b18b70801235",
+        "idempotencyHash": "4258d60b61b2bd4252defbf3e75a1e88e0b8529f5d25a6e85e71b18b70801235",
+        "requestFingerprint": "e64fcded88a12991fc16abad6f67a50117a2ea83741af148aba7d00e39b0ab15",
+        "ownsCoreTask": false,
+        "stepId": "step-1",
+        "sourceEntry": "main-assistant",
+        "phase": "completed",
+        "status": "completed",
+        "createdAt": "2026-11-06T06:11:23.613Z",
+        "updatedAt": "2026-11-06T06:11:32.322Z",
+        "source": null,
+        "target": {
+          "format": "docx",
+          "out": "/SANDBOX/reports/core-virtual.docx"
+        },
+        "result": {
+          "ok": true,
+          "status": "succeeded",
+          "taskId": "79e508b9-29c2-418b-b83d-ffd64c25bf84",
+          "data": {
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-virtual.docx",
+            "artifact": {
+              "id": "8f9cc73e-4b12-4fcc-b30d-faba23cba676",
+              "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-virtual.docx",
+              "format": "docx",
+              "persisted": true,
+              "sha256": "0725540e97cef1088e490ab9d7f32e31e8b3ce44f2adce9af87ac3b2f6ddde16",
+              "bytes": 3091,
+              "validation": {
+                "valid": true,
+                "checkedAt": "2026-11-06T06:11:32.303Z",
+                "textCharacters": 43,
+                "drawings": 0,
+                "partCount": 9
+              },
+              "source": null,
+              "quality": {
+                "level": "editable",
+                "nodeCount": 2,
+                "warnings": []
+              },
+              "open": {
+                "status": "not-requested"
+              }
+            }
+          }
+        },
+        "error": null,
+        "quality": {
+          "level": "editable",
+          "nodeCount": 2,
+          "warnings": []
+        }
+      }
+    },
+    {
+      "name": "Core approval → actual registry → Docs serialize → virtual SANDBOX delivery",
+      "taskId": "79e508b9-29c2-418b-b83d-ffd64c25bf84",
+      "status": "completed",
+      "verification": {
+        "status": "passed",
+        "mode": "office-artifact-readback",
+        "checkedAt": "2026-11-06T06:11:32.461Z"
+      },
+      "artifact": {
+        "id": "8f9cc73e-4b12-4fcc-b30d-faba23cba676",
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-virtual.docx",
+        "format": "docx",
+        "persisted": true,
+        "sha256": "0725540e97cef1088e490ab9d7f32e31e8b3ce44f2adce9af87ac3b2f6ddde16",
+        "bytes": 3091,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:11:32.303Z",
+          "textCharacters": 43,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "source": null,
+        "quality": {
+          "level": "editable",
+          "nodeCount": 2,
+          "warnings": []
+        },
+        "open": {
+          "status": "not-requested"
+        }
+      },
+      "markerFoundInDocxXml": true,
+      "operationIdentity": "4258d60b61b2bd4252defbf3e75a1e88e0b8529f5d25a6e85e71b18b70801235"
+    },
+    {
+      "name": "Core terminal observation",
+      "key": "probe:core:relative",
+      "taskId": "9abbe88a-e664-4538-bf8f-ac946a133487",
+      "status": "completed",
+      "error": null,
+      "operation": {
+        "id": "9abbe88a-e664-4538-bf8f-ac946a133487",
+        "taskId": "9abbe88a-e664-4538-bf8f-ac946a133487",
+        "actorId": "user:local",
+        "spaceId": "friday",
+        "operationId": "office.document.create",
+        "operationIdentity": "6099305d857da3d08ddf4a7e14a1db13ce919c33a3ddc5a905cb04c159dac7b7",
+        "idempotencyHash": "6099305d857da3d08ddf4a7e14a1db13ce919c33a3ddc5a905cb04c159dac7b7",
+        "requestFingerprint": "76b25204d11221fd1972be6196651d3f615d737224fcdae61aa245d2d1bb1c34",
+        "ownsCoreTask": false,
+        "stepId": "step-1",
+        "sourceEntry": "main-assistant",
+        "phase": "completed",
+        "status": "completed",
+        "createdAt": "2026-11-06T06:11:32.789Z",
+        "updatedAt": "2026-11-06T06:11:36.405Z",
+        "source": null,
+        "target": {
+          "format": "docx",
+          "out": "reports/core-relative.docx"
+        },
+        "result": {
+          "ok": true,
+          "status": "succeeded",
+          "taskId": "9abbe88a-e664-4538-bf8f-ac946a133487",
+          "data": {
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-relative.docx",
+            "artifact": {
+              "id": "7e5e8ed9-500f-4e0c-a1c3-7615ca099693",
+              "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-relative.docx",
+              "format": "docx",
+              "persisted": true,
+              "sha256": "f26b41dfe4491a7ce6e3b586474b776247c5a885cf45123e3b0f4db417bfb85e",
+              "bytes": 3048,
+              "validation": {
+                "valid": true,
+                "checkedAt": "2026-11-06T06:11:34.142Z",
+                "textCharacters": 25,
+                "drawings": 0,
+                "partCount": 9
+              },
+              "source": null,
+              "quality": {
+                "level": "editable",
+                "nodeCount": 1,
+                "warnings": []
+              },
+              "open": {
+                "status": "opened",
+                "viewId": "docs-1"
+              }
+            }
+          }
+        },
+        "error": null,
+        "quality": {
+          "level": "editable",
+          "nodeCount": 1,
+          "warnings": []
+        }
+      }
+    },
+    {
+      "name": "Core relative SANDBOX path → actual DOCX delivery and editor open",
+      "taskId": "9abbe88a-e664-4538-bf8f-ac946a133487",
+      "status": "completed",
+      "verification": {
+        "status": "passed",
+        "mode": "office-artifact-readback",
+        "checkedAt": "2026-11-06T06:11:36.466Z"
+      },
+      "artifact": {
+        "id": "7e5e8ed9-500f-4e0c-a1c3-7615ca099693",
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-relative.docx",
+        "format": "docx",
+        "persisted": true,
+        "sha256": "f26b41dfe4491a7ce6e3b586474b776247c5a885cf45123e3b0f4db417bfb85e",
+        "bytes": 3048,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:11:34.142Z",
+          "textCharacters": 25,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "source": null,
+        "quality": {
+          "level": "editable",
+          "nodeCount": 1,
+          "warnings": []
+        },
+        "open": {
+          "status": "opened",
+          "viewId": "docs-1"
+        }
+      },
+      "markerFoundInDocxXml": true,
+      "operationIdentity": "6099305d857da3d08ddf4a7e14a1db13ce919c33a3ddc5a905cb04c159dac7b7"
+    },
+    {
+      "name": "Core terminal observation",
+      "key": "probe:core:convert",
+      "taskId": "3e9d4f39-6f98-4995-995c-bba33be9b34c",
+      "status": "completed",
+      "error": null,
+      "operation": {
+        "id": "3e9d4f39-6f98-4995-995c-bba33be9b34c",
+        "taskId": "3e9d4f39-6f98-4995-995c-bba33be9b34c",
+        "actorId": "user:local",
+        "spaceId": "friday",
+        "operationId": "office.document.convert",
+        "operationIdentity": "4376855e7a1b7dab5558d2d1170fbbbe494e3f196b03fa147352a741879db59b",
+        "idempotencyHash": "4376855e7a1b7dab5558d2d1170fbbbe494e3f196b03fa147352a741879db59b",
+        "requestFingerprint": "02823a2c00285dc6dff8ea90143b3084fff9c53e62b1f82607a06945092dafdb",
+        "ownsCoreTask": false,
+        "stepId": "step-1",
+        "sourceEntry": "main-assistant",
+        "phase": "completed",
+        "status": "completed",
+        "createdAt": "2026-11-06T06:11:37.492Z",
+        "updatedAt": "2026-11-06T06:11:39.339Z",
+        "source": {
+          "resourceId": "pdf-2",
+          "revision": "d23da74b248de04913c2f92e597ae35ba196c7cf9b8d29d089c7194f0096fba7",
+          "sha256": "d23da74b248de04913c2f92e597ae35ba196c7cf9b8d29d089c7194f0096fba7"
+        },
+        "target": {
+          "format": "docx",
+          "out": "/SANDBOX/reports/core-converted.docx"
+        },
+        "result": {
+          "ok": true,
+          "status": "succeeded",
+          "taskId": "3e9d4f39-6f98-4995-995c-bba33be9b34c",
+          "data": {
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-converted.docx",
+            "artifact": {
+              "id": "b4e4d2a4-af1a-4e20-bcb0-8fe56dcf4d7c",
+              "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-converted.docx",
+              "format": "docx",
+              "persisted": true,
+              "sha256": "42d269d41a10128fe597740fc47efba0938d4e7a463dc78850a52b4de900f704",
+              "bytes": 3128,
+              "validation": {
+                "valid": true,
+                "checkedAt": "2026-11-06T06:11:39.329Z",
+                "textCharacters": 31,
+                "drawings": 0,
+                "partCount": 9
+              },
+              "source": {
+                "resourceId": "pdf-2",
+                "revision": "d23da74b248de04913c2f92e597ae35ba196c7cf9b8d29d089c7194f0096fba7",
+                "sha256": "d23da74b248de04913c2f92e597ae35ba196c7cf9b8d29d089c7194f0096fba7"
+              },
+              "quality": {
+                "level": "editable",
+                "pages": 1,
+                "pageResults": [
+                  {
+                    "page": 1,
+                    "status": "ok",
+                    "confidence": 1
+                  }
+                ],
+                "imagePages": [],
+                "editablePages": [
+                  1
+                ],
+                "ocr": "not-needed",
+                "warnings": []
+              },
+              "open": {
+                "status": "not-requested"
+              }
+            }
+          }
+        },
+        "error": null,
+        "quality": {
+          "level": "editable",
+          "pages": 1,
+          "pageResults": [
+            {
+              "page": 1,
+              "status": "ok",
+              "confidence": 1
+            }
+          ],
+          "imagePages": [],
+          "editablePages": [
+            1
+          ],
+          "ocr": "not-needed",
+          "warnings": []
+        }
+      }
+    },
+    {
+      "name": "Core approval → actual registry → current PDF snapshot → worker → verified DOCX",
+      "taskId": "3e9d4f39-6f98-4995-995c-bba33be9b34c",
+      "status": "completed",
+      "verification": {
+        "status": "passed",
+        "mode": "office-artifact-readback",
+        "checkedAt": "2026-11-06T06:11:39.449Z"
+      },
+      "artifact": {
+        "id": "b4e4d2a4-af1a-4e20-bcb0-8fe56dcf4d7c",
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-office-core-delivery-zMamr3\\knowledge\\agent\\SANDBOX\\reports\\core-converted.docx",
+        "format": "docx",
+        "persisted": true,
+        "sha256": "42d269d41a10128fe597740fc47efba0938d4e7a463dc78850a52b4de900f704",
+        "bytes": 3128,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:11:39.329Z",
+          "textCharacters": 31,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "source": {
+          "resourceId": "pdf-2",
+          "revision": "d23da74b248de04913c2f92e597ae35ba196c7cf9b8d29d089c7194f0096fba7",
+          "sha256": "d23da74b248de04913c2f92e597ae35ba196c7cf9b8d29d089c7194f0096fba7"
+        },
+        "quality": {
+          "level": "editable",
+          "pages": 1,
+          "pageResults": [
+            {
+              "page": 1,
+              "status": "ok",
+              "confidence": 1
+            }
+          ],
+          "imagePages": [],
+          "editablePages": [
+            1
+          ],
+          "ocr": "not-needed",
+          "warnings": []
+        },
+        "open": {
+          "status": "not-requested"
+        }
+      },
+      "markerFoundInDocxXml": true,
+      "operationIdentity": "4376855e7a1b7dab5558d2d1170fbbbe494e3f196b03fa147352a741879db59b",
+      "sourceSha256Before": "2733ef0ab00affe1ddf9cc165708c2bde2e04e836edb47224162fe65e4d0b85b",
+      "sourceSha256After": "2733ef0ab00affe1ddf9cc165708c2bde2e04e836edb47224162fe65e4d0b85b"
+    },
+    {
+      "name": "negative contract fixture: success text without artifact is rejected",
+      "fixtureOnly": true,
+      "status": "failed",
+      "code": "AI_CORE_OUTPUT_NOT_VERIFIED"
+    },
+    {
+      "name": "real registry audit hides generated HTML content",
+      "count": 3,
+      "privateMarkersAbsent": true
+    }
+  ]
+}

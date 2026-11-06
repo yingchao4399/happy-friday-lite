@@ -1,17 +1,46 @@
 import path from 'path'
 import fs from 'fs'
+import { randomUUID } from 'node:crypto'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell } from 'electron'
 import { registerOfficeAiBridge } from './office-ai-bridge.js'
+import { createHtmlDocumentBridge } from './html-document-bridge.js'
+import { createHtmlArtifact } from './html-artifact.js'
+import { createHtmlProjectBoundary } from './html-project-boundary.js'
 import { getDataDir } from '../config.js'
+import { loadConfig } from '../config.js'
+import { OFFICE_EDITOR_REGISTRY, getBuildOfficeEditors } from './editor-registry.js'
+import { isExperimentalHtmlEnabled, resolveEditorType } from './office-files.js'
+import { assertOfficeBundle, validateOfficeBundle, validateLoadedOfficeModule } from './bundle-contract.js'
+import { findOfficeOperation, projectOfficeCapabilities } from './operation-catalog.js'
+import { createOfficeOperationService } from './operations.js'
+import { getOfficeTaskLedger } from './operation-tasks.js'
+import { prepareOfficeTarget, officeFault, sha256, validateDocx } from './artifact-delivery.js'
+import { convertOfficePdfSnapshot } from './converter-adapter.js'
+import officeMessagesZh from '../../src/i18n/locales/zh-CN/office-operations.json' with { type: 'json' }
+import officeMessagesEn from '../../src/i18n/locales/en-US/office-operations.json' with { type: 'json' }
 import { normalizeOfficeDocumentSelection } from './document-selection.js'
 import { registerOfficeFileCommands } from './file-commands.js'
-import { showOfficeDockOverlay, updateOfficeDockBounds, hideOfficeDockOverlay, destroyOfficeDockOverlay } from './dock-overlay.js'
+import { showOfficeDockOverlay, updateOfficeDockBounds, hideOfficeDockOverlay, destroyOfficeDockOverlay, isOfficeDockSender, notifyOfficeDockOperation } from './dock-overlay.js'
 import '../app-protocol-privileges.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const _require = createRequire(import.meta.url)
+const expectedReleaseVersion = _require('../../package.json').releaseVersion
+let htmlDocumentBridge = null
+
+async function waitForOfficeData(entry, signal, timeoutMs = 30000) {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    if (signal?.aborted) throw officeFault('OFFICE_OPERATION_CANCELLED')
+    if (!entry?.view?.webContents || entry.view.webContents.isDestroyed()) throw officeFault('OFFICE_SOURCE_NOT_FOUND')
+    if (entry.openError) throw officeFault('OFFICE_SOURCE_OPEN_FAILED')
+    if (entry.dataReadyMs != null) return true
+    await new Promise(resolve => setTimeout(resolve, 50))
+  }
+  throw officeFault('OFFICE_SOURCE_NOT_READY')
+}
 
 /**
  * Office Host（主进程适配层）。
@@ -23,20 +52,22 @@ const _require = createRequire(import.meta.url)
  * renderer 自行管理。
  */
 
-const EDITORS = ['docs', 'sheets', 'slides', 'pdf']
+const runtimeEditors = () => getBuildOfficeEditors({ experimentalHtml: isExperimentalHtmlEnabled() }).map(editor => editor.id)
+const experimentalOptions = editor => ({ allowExperimental: editor === 'html' && isExperimentalHtmlEnabled() })
 
-const EXT_TO_TYPE = {
-  '.docx': 'docs',
-  '.xlsx': 'sheets',
-  '.xlsm': 'sheets',
-  '.csv': 'sheets',
-  '.pptx': 'slides',
-  '.pdf': 'pdf',
+// 只在明确开启本机文件重排后延迟加载固定来源，普通本地搜索不启动 Office。
+export async function getHtmlFileSearchReranker() {
+  if (!isExperimentalHtmlEnabled()) return null
+  await ensureEditor('html')
+  return state.bundles?.html?.HtmlFileSearchReranker || null
 }
 
 const state = {
   mainWindow: null,
   bundles: null,
+  // HTML 的 preload 复用 Docs 提供的 project:* 聊天持久化合同，但 HTML
+  // 可以在 Docs 视图之前冷启动。缓存只保存共享服务模块，不创建 Docs 视图。
+  sharedServices: { project: null },
   // 打开的编辑器视图：viewId（'docs-1'）→ { viewId, type, view, filePath }
   views: new Map(),
   // viewId 自增序号（跨类型全局，保证唯一）
@@ -50,9 +81,11 @@ const state = {
   wasWindowFullScreen: false,
   initialized: false,
   latestDocumentSelection: null,
+  editorErrors: new Map(),
 }
 
 let savedEventSubscribers = []
+const htmlProjectBoundary = createHtmlProjectBoundary({ resolveEntry: sender => entryByWebContents(sender) })
 
 export function onOfficeFileSaved(fn) {
   savedEventSubscribers.push(fn)
@@ -62,6 +95,41 @@ function officeRoot() {
   return app.isPackaged
     ? path.join(process.resourcesPath, 'office')
     : path.join(__dirname, '..', '..', 'resources', 'office')
+}
+
+/**
+ * HTML documents are rendered inside a privileged Friday renderer page. A
+ * document can contain arbitrary scripts and links, so a top-level navigation
+ * must never be allowed to replace that renderer with an external page (or a
+ * different Office renderer). The preview itself lives in an iframe and uses
+ * html-preview://; Electron reports that as a frame navigation, not the
+ * top-level will-navigate event handled here.
+ */
+function isTrustedHtmlRendererUrl(value) {
+  if (typeof value !== 'string' || !value) return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'genoffice-app:' && url.hostname === 'html' && url.pathname === '/index.html'
+  } catch {
+    return false
+  }
+}
+
+function installHtmlTopLevelNavigationGuard(entry) {
+  const contents = entry?.view?.webContents
+  if (entry?.type !== 'html' || !contents || typeof contents.on !== 'function') return
+  const guard = (event, url) => {
+    // will-navigate is a top-level event in Electron. Keep this check for
+    // mocks/future Electron versions that expose isMainFrame on the event, so
+    // normal html-preview iframe navigation remains unaffected.
+    if (event?.isMainFrame === false) return
+    const current = typeof contents.getURL === 'function' ? contents.getURL() : ''
+    if (isTrustedHtmlRendererUrl(url) && (isTrustedHtmlRendererUrl(current) || !current)) return
+    if (typeof event?.preventDefault === 'function') event.preventDefault()
+    console.warn(`[Office:${entry.viewId}] blocked HTML top-level navigation: ${url}`)
+  }
+  contents.on('will-navigate', guard)
+  entry.htmlNavigationGuard = guard
 }
 
 let protocolInstaller = null
@@ -87,6 +155,16 @@ export function isOfficeAvailable() {
 export function executeOfficeMenuCommand(viewId, command) {
   const entry=state.views.get(viewId)
   if(!entry || state.visibleId!==viewId || entry.view.webContents.isDestroyed())throw new Error('OFFICE_DOCUMENT_INACTIVE')
+  if (entry.type === 'html') {
+    if (entry.presentation) throw new Error('OFFICE_COMMAND_UNSUPPORTED')
+    const html = state.bundles.html
+    const wc = entry.view.webContents
+    if (command === 'save' || command === 'save-as') return html.requestHtmlSave(wc, command === 'save' ? 'save' : 'saveAs').then(success => ({ success }))
+    if (command === 'print') html.sendHtmlPrintRequest(wc)
+    else if (['export-pdf', 'export-docx', 'export-html'].includes(command)) html.sendHtmlExportRequest(wc, command.slice(7))
+    else throw new Error('OFFICE_COMMAND_UNSUPPORTED')
+    return { success: true }
+  }
   const allowed={docs:['save','save-as','undo','redo','find','print'],sheets:['save','save-as','undo','redo','print','export-pdf','export-csv'],slides:['save','save-as','undo','redo','print','export-pdf','export-images']}
   if(!allowed[entry.type]?.includes(command))throw new Error('OFFICE_COMMAND_UNSUPPORTED')
   const channel={docs:'menu:command',sheets:'menu:action',slides:'slides:menu'}[entry.type]
@@ -109,6 +187,7 @@ function editorPaths(editor) {
 async function loadBundles(editors) {
   const bundles = {}
   for (const editor of editors) {
+    assertOfficeBundle(officeRoot(), { editor, expectedReleaseVersion, ...experimentalOptions(editor) })
     const { bundlePath } = editorPaths(editor)
     if (!fs.existsSync(bundlePath)) {
       console.warn(`[Office] bundle missing: ${bundlePath}`)
@@ -116,8 +195,36 @@ async function loadBundles(editors) {
     }
     const mod = await import(pathToFileURL(bundlePath).href)
     bundles[editor] = mod.default ?? mod
+    const contract = validateLoadedOfficeModule(editor, bundles[editor], experimentalOptions(editor))
+    if (!contract.ok) throw officeFault(contract.code)
   }
   return bundles
+}
+
+/**
+ * HTML 冷启动时注册共享 project:* IPC。
+ *
+ * GenOffice HTML 的 preload 不拥有聊天数据库，它调用 shell 级
+ * project:resolveChat/appendChat/loadChat/rebindChat。Friday 以前只在 Docs
+ * 首次加载时注册这些 handler，导致“先打开 HTML”时 renderer 启动后才发现
+ * No handler registered。这里只加载 Docs 的主模块并注册其项目服务，不配置
+ * Docs runtime、创建视图，也不把 Docs 计入已加载编辑器列表。
+ */
+async function ensureSharedProjectIpc() {
+  if (state.sharedServices.project) return true
+  try {
+    const docs = state.bundles?.docs || (await loadBundles(['docs'])).docs
+    if (typeof docs?.registerProjectIpc !== 'function') {
+      console.warn('[Office] HTML shared project IPC unavailable: Docs project export missing')
+      return false
+    }
+    docs.registerProjectIpc()
+    state.sharedServices.project = docs
+    return true
+  } catch (error) {
+    console.warn('[Office] HTML shared project IPC registration failed:', error?.message || error)
+    return false
+  }
 }
 
 /**
@@ -133,13 +240,13 @@ function tolerateDuplicateIpcHandlers() {
     } catch {
       /* channel not registered yet */
     }
-    return rawHandle(channel, listener)
+    return rawHandle(channel, htmlProjectBoundary.wrap(channel, listener))
   }
   ipcMain.handle.__officePatched = true
 }
 
 function configureRuntimes(editor) {
-  const { docs, sheets, slides, pdf } = state.bundles
+  const { docs, sheets, slides, pdf, html } = state.bundles
   const root = officeRoot()
 
   if (editor === 'docs') docs.configureDocsRuntime({
@@ -172,11 +279,32 @@ function configureRuntimes(editor) {
   if (editor === 'pdf') pdf.configurePdfRuntime({
     preloadPath: editorPaths('pdf').preloadPath,
     rendererFile: editorPaths('pdf').rendererFile,
+    getCapabilities: () => getOfficeCapabilities(localOfficeContext('pdf-ai')),
+    createDocument: (request, context) => executeEmbeddedOfficeOperation('office_document_create', {
+      content: { kind: 'html-fragment', value: request.content }, target: { format: request.type, title: request.title },
+    }, context),
+    convertDocument: (request, context) => executeEmbeddedOfficeOperation('office_document_convert', {
+      source: {}, target: { format: request.targetFormat, title: request.title },
+    }, context),
     openGeneratedPath: (p) => {
       openOfficeFile(p, { notifyOpened: true })
       return true
     },
   })
+
+  if (editor === 'html') {
+    // 独立官方源码树内的语言/无头状态必须由同一个 bundle 实例设置。
+    html.setHtmlUiLang(loadConfig().language === 'en-US' ? 'en' : 'zh')
+    html.setHtmlHeadlessMode(false)
+    html.configureHtmlRuntime({
+      preloadPath: editorPaths('html').preloadPath,
+      rendererFile: editorPaths('html').rendererFile,
+      openGeneratedPath: filePath => {
+        void openOfficeFile(filePath, { notifyOpened: true })
+        return true
+      },
+    })
+  }
 }
 
 function registerEditorIpc(editor) {
@@ -185,6 +313,7 @@ function registerEditorIpc(editor) {
   if (editor === 'docs') {
     docs.registerAiIpc?.()
     docs.registerProjectIpc?.()
+    if (typeof docs.registerProjectIpc === 'function') state.sharedServices.project = docs
     docs.registerDocsIpc()
   } else if (editor === 'sheets') {
     sheets.registerSheetsIpc()
@@ -203,7 +332,19 @@ function registerEditorIpc(editor) {
   }
   // Friday 接管编辑器 ai:* 通道（须在编辑器注册之后，后注册者覆盖）。
   // force 允许 Host 初始化阶段的早期注册在 vendor bundle 注册后再次覆盖同名通道。
-  registerOfficeAiBridge({ force: true })
+  registerOfficeAiBridge({ force: true, ...(state.bundles.html ? { services: {
+    webSearch: state.bundles.html.htmlAiWebSearch,
+    imageSearch: state.bundles.html.htmlAiImageSearch,
+    generateImage: state.bundles.html.htmlAiGenerateImageWithProvider,
+    mediaCatalog: state.bundles.html.htmlAiMediaProviders,
+    fetchImage: state.bundles.html.htmlAiFetchRemoteImage,
+    readBodyCapped: state.bundles.html.htmlAiReadBodyCapped,
+    testMedia: state.bundles.html.htmlAiTestMediaProvider,
+    analyzeMedia: state.bundles.html.htmlAiAnalyzeMedia,
+    readGrantedMedia: state.bundles.html.htmlAiReadGrantedMedia,
+    probeDecision: state.bundles.html.htmlAiProbeDecision,
+    SearchReranker: state.bundles.html.HtmlFileSearchReranker,
+  } } : {}) })
 }
 
 /**
@@ -243,7 +384,7 @@ function registerAppPrefsIpc() {
 }
 
 function wireShellHooks(editor) {
-  const { docs, sheets, slides } = state.bundles
+  const { docs, sheets, slides, html } = state.bundles
   const win = state.mainWindow
 
   if (editor === 'docs') docs.setDocsShellWindow?.(win)
@@ -273,6 +414,53 @@ function wireShellHooks(editor) {
     try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* ignore */ }
     emitFileSaved('slides', filePath, entry?.viewId)
   })
+  if (editor === 'html') {
+    html.setHtmlFileSavedHook((wc, filePath) => {
+      const entry = entryByWebContents(wc)
+      if (entry) entry.filePath = filePath
+      try { officeFileStore()?.recordRecentFile?.(filePath) } catch { /* 最近列表失败不影响保存 */ }
+      emitFileSaved('html', filePath, entry?.viewId)
+      if (entry) notifyVue('office-file-saved', { type: 'html', viewId: entry.viewId, filePath })
+    })
+    html.setHtmlProvisionalTitleHook((wc, title) => {
+      const entry = entryByWebContents(wc)
+      if (entry) entry.title = title
+      if (entry) notifyVue('office-provisional-title', { type: 'html', viewId: entry.viewId, title })
+    })
+    html.setHtmlPresentHooks({
+      hostWindow: wc => entryByWebContents(wc) ? state.mainWindow : null,
+      setBleed: (wc, on) => {
+        const entry = entryByWebContents(wc)
+        if (!entry) return
+        if (on) { showView(entry.viewId); enterHtmlFullScreen() }
+        else leaveHtmlFullScreen()
+      },
+      openTab: (owner, title) => {
+        const source = entryByWebContents(owner)
+        if (!source) return false
+        const viewId = allocViewId('html')
+        const view = html.createHtmlPresentView(owner, title)
+        attachView({ viewId, type: 'html', view, filePath: source.filePath })
+        state.views.get(viewId).presentation = true
+        state.views.get(viewId).title = title
+        showView(viewId)
+        notifyVue('office-opened', { success: true, type: 'html', viewId, filePath: source.filePath, presentation: true, title })
+        return true
+      },
+      closeTab: wc => {
+        const entry = entryByWebContents(wc)
+        if (!entry?.presentation) return false
+        hideView(entry.viewId, true)
+        notifyVue('office-view-closed', { type: 'html', viewId: entry.viewId, presentation: true })
+        return true
+      },
+    })
+    html.setHtmlDocxExportPrepareHook?.(async filePath => {
+      const entry = [...state.views.values()].find(item => item.type === 'docs' && item.filePath === filePath)
+      return entry ? closeOfficeFile(entry.viewId) : true
+    })
+    html.setHtmlDocxExportedHook?.(filePath => { void openOfficeFile(filePath, { notifyOpened: true }) })
+  }
   // PDF 编辑器无 opened hook，openOfficeFile 内统一补记
 }
 
@@ -281,7 +469,7 @@ const pendingEditors = new Map()
 // 合并同一文件的进行中请求，避免重复创建 WebContentsView 和重复解析文档。
 const pendingOfficeOpens = new Map()
 async function ensureEditor(type) {
-  if (!EDITORS.includes(type) || !state.initialized) return false
+  if (!runtimeEditors().includes(type) || !state.initialized) return false
   if (state.bundles[type]) return true
   if (pendingEditors.has(type)) return pendingEditors.get(type)
   const loading = (async () => {
@@ -292,14 +480,17 @@ async function ensureEditor(type) {
       state.bundles[type] = loaded[type]
       configureRuntimes(type)
       registerEditorIpc(type)
+      if (type === 'html') await ensureSharedProjectIpc()
       // 延迟注册的编辑器不得覆盖 Friday 的主题/自动保存策略。
       registerAppPrefsIpc()
       wireShellHooks(type)
       if (type === 'slides') wireSlidesShowFullscreen()
+      state.editorErrors.delete(type)
       console.log('[Office] 引擎首次加载完成:', type, Math.round(performance.now() - started), 'ms')
       return true
     } catch (error) {
       delete state.bundles[type]
+      state.editorErrors.set(type, error.code || 'OFFICE_EDITOR_LOAD_FAILED')
       console.warn('[Office] 引擎加载失败:', type, error.message)
       return false
     } finally { pendingEditors.delete(type) }
@@ -310,6 +501,122 @@ async function ensureEditor(type) {
 
 /** 诊断只报告引擎状态，不包含文档正文或用户配置。 */
 export function getOfficeLoadedEditors() { return Object.keys(state.bundles || {}) }
+
+/** 编辑器入口只接受宿主校验结果；实验 HTML 还须通过实际模块加载与配置。 */
+export async function getOfficeEditorCapabilities() {
+  const editors = []
+  for (const definition of OFFICE_EDITOR_REGISTRY) {
+    const id = definition.id
+    const row = { id, enabled: definition.enabled === true, available: false, reasonCode: null }
+    if (!runtimeEditors().includes(id)) row.reasonCode = definition.experimental ? 'OFFICE_EXPERIMENTAL_DISABLED' : definition.candidateReason || 'OFFICE_EDITOR_NOT_INTEGRATED'
+    else if (!state.initialized) row.reasonCode = 'OFFICE_HOST_UNAVAILABLE'
+    else {
+      const checked = validateOfficeBundle(officeRoot(), { editor: id, expectedReleaseVersion, ...experimentalOptions(id) })
+      if (!checked.ok) row.reasonCode = checked.code
+      else if (id === 'html' && !await ensureEditor(id)) row.reasonCode = state.editorErrors.get(id) || 'OFFICE_EDITOR_LOAD_FAILED'
+      else {
+        const loaded = state.bundles[id]
+        const contract = loaded ? validateLoadedOfficeModule(id, loaded, experimentalOptions(id)) : { ok: true }
+        row.available = contract.ok
+        row.reasonCode = contract.code || null
+      }
+    }
+    editors.push(row)
+  }
+  return { editors }
+}
+
+/** 可信诊断读取真实缓冲区；不向普通 renderer 增加正文读取 IPC。 */
+export async function readOfficeHtmlSource(viewId) {
+  const entry = state.views.get(viewId)
+  if (!entry || entry.type !== 'html' || entry.presentation || entry.view.webContents.isDestroyed()) throw officeFault('OFFICE_SOURCE_NOT_FOUND')
+  return state.bundles.html.htmlReadText(entry.view.webContents)
+}
+
+function htmlOperationEntry(documentId, context = {}, strict = false) {
+  const entry = state.views.get(context.resourceId || documentId || state.visibleId) || [...state.views.values()].find(view => view.documentId === documentId)
+  if (!entry || entry.type !== 'html' || entry.presentation || entry.view.webContents.isDestroyed() || !htmlDocumentBridge) throw officeFault('OFFICE_SOURCE_NOT_FOUND')
+  if (strict && documentId !== entry.documentId) throw officeFault('OFFICE_SOURCE_CHANGED')
+  return entry
+}
+
+export async function createOfficeHtmlDocument(request, context = {}) {
+  if (!isExperimentalHtmlEnabled() || !await ensureEditor('html')) throw officeFault('OFFICE_EDITOR_NOT_INTEGRATED')
+  const trusted = { ...localOfficeContext('main-assistant'), ...context }
+  const ledger = await getOfficeTaskLedger()
+  const { task, reused } = await ledger.create({ request: { operationId: 'office.html.create', target: { format: 'html', title: request.title }, idempotencyKey: request.idempotencyKey }, context: trusted, fingerprint: sha256(JSON.stringify(request)) })
+  if (reused) return task.result || { ok: false, taskId: task.id, status: task.status }
+  const update = patch => ledger.update(task.id, { ...patch, operationIdentity: task.operationIdentity }, trusted)
+  let artifact
+  try {
+    await update({ phase: 'persisting' })
+    const directory = path.join(trusted.agentRootDir, 'SANDBOX')
+    await fs.promises.mkdir(directory, { recursive: true })
+    artifact = await createHtmlArtifact({ directory, title: validTitle(request.title), source: request.source, signal: trusted.signal })
+    let opened = null
+    if (request.openAfterSave !== false && !trusted.signal?.aborted) opened = await openOfficeFile(artifact.path, { notifyOpened: true })
+    artifact.open = { status: opened?.success ? 'opened' : request.openAfterSave === false ? 'not-requested' : 'not-opened', ...(opened?.viewId ? { viewId: opened.viewId } : {}) }
+    const result = { ok: true, status: 'succeeded', taskId: task.id, documentId: state.views.get(opened?.viewId)?.documentId, viewId: opened?.viewId, artifact, data: { artifact } }
+    await update({ phase: 'succeeded', result })
+    return result
+  } catch (error) {
+    // 已保存的产物不因打开失败或迟到取消消失，保留精确文件交付状态。
+    if (artifact) {
+      const result = { ok: true, status: 'succeeded', taskId: task.id, artifact: { ...artifact, open: { status: 'failed' } }, data: { artifact } }
+      await update({ phase: 'succeeded', result })
+      return result
+    }
+    await update({ phase: trusted.signal?.aborted ? 'cancelled' : 'failed', error: { code: error.code || 'OFFICE_HTML_CREATE_FAILED' } })
+    throw error
+  }
+}
+
+export async function readOfficeHtmlDocument(documentId, context = {}) {
+  const entry = htmlOperationEntry(documentId, context)
+  await waitForOfficeData(entry, context.signal)
+  const snapshot = await htmlDocumentBridge.request(entry.view.webContents, { kind: 'read' }, context)
+  return { ...snapshot, documentId: entry.documentId, viewId: entry.viewId, sha256: sha256(snapshot.source), dirty: await queryOfficeDirty(entry.viewId) }
+}
+
+// 主助手和 HTML 内 AI 使用同一个源码版本、compileOps 与撤销栈，不从磁盘副本编辑。
+export async function executeOfficeHtmlDocument(request, context = {}) {
+  const entry = htmlOperationEntry(request?.documentId, context, true)
+  if (!['apply', 'replace', 'export'].includes(request?.kind) || !Number.isSafeInteger(request.revision)) throw officeFault('OFFICE_HTML_REQUEST_INVALID')
+  if (request.kind === 'apply' && (!Array.isArray(request.ops) || !request.ops.length || request.ops.length > 100)) throw officeFault('OFFICE_HTML_REQUEST_INVALID')
+  if (request.kind === 'replace' && (typeof request.source !== 'string' || request.source.length > 8 * 1024 * 1024)) throw officeFault('OFFICE_HTML_REQUEST_INVALID')
+  if (request.kind === 'export' && !['html', 'pdf', 'docx'].includes(request.format)) throw officeFault('OFFICE_HTML_REQUEST_INVALID')
+  const trusted = { ...localOfficeContext('main-assistant'), ...context }
+  const ledger = await getOfficeTaskLedger()
+  const operationId = request.kind === 'export' ? 'office.html.export' : 'office.html.apply'
+  const { task, reused } = await ledger.create({ request: { operationId, source: { resourceId: entry.viewId, revision: request.revision }, target: { format: request.format || 'html' }, idempotencyKey: request.idempotencyKey },
+    context: trusted, fingerprint: sha256(JSON.stringify(request)) })
+  if (reused) return task.result || { ok: false, taskId: task.id, status: task.status }
+  const update = patch => ledger.update(task.id, { ...patch, operationIdentity: task.operationIdentity }, trusted)
+  try {
+    await waitForOfficeData(entry, context.signal)
+    await update({ phase: request.kind === 'export' ? 'serializing' : 'executing' })
+    const result = await htmlDocumentBridge.request(entry.view.webContents, request, { signal: context.signal })
+    if (!result?.ok) {
+      const failure = { ok: false, status: result?.canceled ? 'cancelled' : 'failed', taskId: task.id, code: result?.canceled ? 'OFFICE_OPERATION_CANCELLED' : 'OFFICE_HTML_OPERATION_REJECTED', errors: result?.errors }
+      await update({ phase: failure.status, result: failure })
+      return failure
+    }
+    let artifact = null
+    if (request.kind === 'export') {
+      const filePath = path.resolve(result.path)
+      const bytes = await fs.promises.readFile(filePath)
+      if (!bytes.length || (request.format === 'docx' && !validateDocx(bytes)) || (request.format === 'pdf' && !bytes.subarray(0, 5).equals(Buffer.from('%PDF-')))) throw officeFault('OFFICE_HTML_EXPORT_INVALID')
+      artifact = { id: randomUUID(), path: filePath, format: request.format, size: bytes.length, sha256: sha256(bytes), sourceRevision: result.revision }
+    }
+    const output = { ok: true, taskId: task.id, status: 'succeeded', documentId: entry.documentId, viewId: entry.viewId, revision: result.revision,
+      ...(artifact ? { artifact, data: { artifact: { ...artifact, persisted: true, validation: { valid: true } } } } : { sourceSha256: sha256(result.source), saved: false }) }
+    await update({ phase: 'succeeded', result: output })
+    return output
+  } catch (error) {
+    await update({ phase: context.signal?.aborted ? 'cancelled' : 'failed', error: { code: error.code || 'OFFICE_HTML_OPERATION_FAILED' } })
+    throw error
+  }
+}
 
 function emitFileSaved(type, filePath, viewId) {
   if (!filePath) return
@@ -407,6 +714,8 @@ function clearDataReadyProbe(entry) {
 
 function attachView(entry) {
   const { viewId, type, view } = entry
+  // viewId 可以被路由复用，文档身份不可复用；旧 AI/资产授权不能迁移到新文档。
+  entry.documentId = randomUUID()
   // `openMs` measures host-side view creation. Keep a separate timestamp for
   // the user-visible milestone: the embedded editor has mounted a real,
   // usable canvas/content surface. This is intentionally asynchronous because
@@ -455,6 +764,7 @@ function attachView(entry) {
       })
     }
   })
+  installHtmlTopLevelNavigationGuard(entry)
   const startInteractiveProbe = () => {
     if (entry.firstInteractiveTimer || entry.firstInteractiveMs != null) return
     entry.openProgress = 'renderer-loading'
@@ -470,6 +780,7 @@ function attachView(entry) {
       sheets: 'canvas, [class*="univer" i], [class*="sheet" i], [contenteditable="true"]',
       slides: 'canvas, [class*="slide" i], [class*="canvas" i], [contenteditable="true"]',
       pdf: 'canvas, [class*="pdf" i], [class*="page" i]',
+      html: 'iframe, .cm-editor, textarea',
     }
     const selector = selectors[type] || 'canvas, [contenteditable="true"], textarea'
     const script = `(function(){
@@ -528,9 +839,7 @@ function attachView(entry) {
   }
   const startDataReadyProbe = () => {
     if (entry.dataReadyTimer || entry.dataReadyMs != null) return
-    const dataScript = type === 'docs'
-      ? 'Boolean(window.__aidocs?.editor?.state?.doc?.content?.size > 10)'
-      : 'Boolean(window.__genofficeControl?.({ cmd: "selection" })?.status === "ok")'
+    const dataScript = 'Boolean(window.__genofficeControl?.({ cmd: "selection" })?.status === "ok")'
     const poll = async () => {
       const wc = view?.webContents
       if (!wc || entry.dataReadyMs != null || wc.isDestroyed()) {
@@ -540,7 +849,11 @@ function attachView(entry) {
       if (entry.dataReadyProbeBusy) return
       entry.dataReadyProbeBusy = true
       try {
-        const ready = await wc.executeJavaScript(dataScript, true)
+        const ready = type === 'html'
+          ? entry.presentation
+            ? await wc.executeJavaScript('Boolean(document.querySelector("iframe"))', true)
+            : (typeof await state.bundles.html.htmlReadText(wc) === 'string')
+          : await wc.executeJavaScript(dataScript, true)
         if (ready && entry.dataReadyMs == null) {
           entry.dataReadyMs = Math.max(0, Math.round(performance.now() - entry.openStartedAt))
           entry.openProgress = 'data-ready'
@@ -568,8 +881,9 @@ function attachView(entry) {
       clearDataReadyProbe(entry)
     }, 30000)
   }
-  view.webContents.once('dom-ready', startInteractiveProbe)
-  view.webContents.once('did-finish-load', startInteractiveProbe)
+  const startReadinessProbes = () => { startInteractiveProbe(); startDataReadyProbe() }
+  view.webContents.once('dom-ready', startReadinessProbes)
+  view.webContents.once('did-finish-load', startReadinessProbes)
   // 编辑器内全屏（如 Slides 放映）：从"窗口内全屏"升级为整个屏幕的系统全屏
   view.webContents.on('enter-html-full-screen', enterHtmlFullScreen)
   view.webContents.on('leave-html-full-screen', leaveHtmlFullScreen)
@@ -580,7 +894,7 @@ function attachView(entry) {
     // 保留崩溃现场供上层提示恢复；关闭视图并通知前端（对应 Tab 激活时会重建）
     hideView(viewId, true)
     clearOfficeDocumentSelection(viewId)
-    notifyVue('office-view-closed', { type, viewId })
+    notifyVue('office-view-closed', { type, viewId, ...(entry.presentation ? { presentation: true } : {}) })
   })
 }
 
@@ -605,6 +919,10 @@ function hideView(viewId, destroy = false) {
   if (!entry) return
   clearInteractiveProbe(entry)
   clearDataReadyProbe(entry)
+  if (entry.htmlNavigationGuard && typeof entry.view.webContents.off === 'function') {
+    entry.view.webContents.off('will-navigate', entry.htmlNavigationGuard)
+    entry.htmlNavigationGuard = null
+  }
   entry.view.setVisible(false)
   state.mainWindow?.contentView?.removeChildView(entry.view)
   state.views.delete(viewId)
@@ -652,7 +970,6 @@ function entryByWebContents(arg) {
   return null
 }
 
-let activePdfDocxExport = null
 
 function pdfPasswordPrompt(parent, retry = false) {
   const preload = path.join(__dirname, 'pdf-password-preload.cjs')
@@ -690,101 +1007,229 @@ function pdfPasswordPrompt(parent, retry = false) {
   })
 }
 
-async function waitForPdfFile(filePath, timeoutMs = 120000) {
-  const deadline = Date.now() + timeoutMs
-  while (Date.now() < deadline) {
-    try {
-      const stat = await fs.promises.stat(filePath)
-      if (stat.isFile() && stat.size > 0) return true
-    } catch { /* renderer has not flushed yet */ }
-    await new Promise(resolve => setTimeout(resolve, 50))
+let officeOperations = null
+const localOfficeContext = sourceEntry => ({
+  actor: 'user:local', spaceId: 'friday', sourceEntry, mainWindow: state.mainWindow,
+  agentRootDir: path.join(getDataDir(), 'knowledge', 'agent'),
+})
+
+function officeText(key) {
+  return (loadConfig().language === 'en-US' ? officeMessagesEn : officeMessagesZh)[key]
+}
+
+function validTitle(value) {
+  const title = String(value || 'document').replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-').replace(/[. ]+$/g, '').slice(0, 120)
+  return !title || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(title) ? 'document' : title
+}
+
+export async function getOfficeCapabilities() {
+  const checked = new Map()
+  return projectOfficeCapabilities(async definition => {
+    if (!state.initialized) return { ok: false, code: 'OFFICE_HOST_UNAVAILABLE' }
+    for (const editor of definition.requiredEditors) {
+      if (editor === 'html' && !isExperimentalHtmlEnabled()) return { ok: false, code: 'OFFICE_EDITOR_NOT_INTEGRATED' }
+      if (!checked.has(editor)) checked.set(editor, validateOfficeBundle(officeRoot(), { editor, expectedReleaseVersion, ...experimentalOptions(editor) }))
+      const result = checked.get(editor)
+      if (!result.ok) return result
+    }
+    // bundle 合同已校验所有共享服务与 PDFium 的资源摘要，不重复读取 WASM。
+    return { ok: true }
+  })
+}
+
+async function executeEmbeddedOfficeOperation(name, args, pdfContext) {
+  const entry = entryByWebContents(pdfContext?.sender)
+  if (!entry || entry.type !== 'pdf') return { ok: false, status: 'failed', code: 'OFFICE_SENDER_INVALID', error: 'OFFICE_SENDER_INVALID' }
+  if (!findOfficeOperation({ capabilityName: name, targetFormat: args?.target?.format })) {
+    return { ok: false, status: 'failed', code: 'OFFICE_OPERATION_UNSUPPORTED', error: 'OFFICE_OPERATION_UNSUPPORTED' }
   }
-  return false
+  const controller = new AbortController()
+  const destroyed = () => controller.abort()
+  pdfContext.sender.once('destroyed', destroyed)
+  pdfContext.signal?.addEventListener('abort', destroyed, { once: true })
+  if (pdfContext.signal?.aborted) destroyed()
+  try {
+    await import('../agent/tools/builtin/officeOperations.js')
+    const { executeCapability } = await import('../agent/tools/registry.js')
+    const context = { ...localOfficeContext(name === 'office_document_create' ? 'pdf-create' : 'pdf-ai'),
+      resourceId: entry.viewId, signal: controller.signal, requestId: pdfContext.requestId || randomUUID() }
+    return await executeCapability(name, { ...args, idempotencyKey: context.requestId }, context,
+      { actor: 'user:local', scopes: ['read', 'write', 'ui'], requireApproval: true })
+  } catch (error) {
+    return { ok: false, status: controller.signal.aborted ? 'cancelled' : 'failed', code: error.code || 'OFFICE_AI_OPERATION_REJECTED', error: error.code || 'OFFICE_AI_OPERATION_REJECTED' }
+  } finally {
+    pdfContext.sender.removeListener('destroyed', destroyed)
+    pdfContext.signal?.removeEventListener('abort', destroyed)
+  }
+}
+
+async function ensureOfficeOperationService() {
+  if (officeOperations) return officeOperations
+  const ledger = await getOfficeTaskLedger()
+  officeOperations = createOfficeOperationService({
+    ledger, journalDir: path.join(getDataDir(), 'office', 'delivery-journal'),
+    capabilities: getOfficeCapabilities,
+    async resolveSource(request, context) {
+      let entry = state.views.get(context.resourceId || request?.resourceId)
+      if (!entry && request?.filePath) {
+        const sourcePath = path.isAbsolute(request.filePath) ? request.filePath : path.join(context.agentRootDir || localOfficeContext('').agentRootDir, request.filePath)
+        if (path.extname(sourcePath).toLowerCase() !== '.pdf') throw officeFault('OFFICE_SOURCE_TYPE_INVALID')
+        const opened = await openOfficeFile(sourcePath, { background: true, notifyOpened: true })
+        if (!opened.success) throw officeFault('OFFICE_SOURCE_OPEN_FAILED')
+        entry = state.views.get(opened.viewId)
+      }
+      if (!entry || entry.type !== 'pdf' || entry.view.webContents.isDestroyed()) throw officeFault('OFFICE_SOURCE_NOT_FOUND')
+      const wc = entry.view.webContents
+      const originalPath = entry.filePath
+      let acquired = false
+      return { resourceId: entry.viewId, filePath: originalPath, wc,
+        async acquire({ signal }) {
+          await waitForOfficeData(entry, signal)
+          acquired = true
+          state.bundles.pdf.setPdfSaveAsInFlight(wc, true)
+        },
+        assertCurrent() {
+          if (wc.isDestroyed() || state.views.get(entry.viewId)?.view?.webContents !== wc || entry.filePath !== originalPath) throw officeFault('OFFICE_SOURCE_CHANGED')
+        },
+        async release() {
+          if (!acquired) return
+          acquired = false
+          if (!wc.isDestroyed()) state.bundles.pdf.setPdfSaveAsInFlight(wc, false)
+        } }
+    },
+    async snapshotSource(source, options) {
+      source.assertCurrent()
+      return state.bundles.pdf.exportPdfSnapshot(source.wc, options)
+    },
+    async selectTarget(request, context, source, task) {
+      const title = validTitle(request.target.title || path.basename(source?.filePath || 'document', '.pdf'))
+      if (context.sourceEntry === 'pdf-menu') {
+        const selected = await dialog.showSaveDialog(state.mainWindow, {
+          defaultPath: path.join(source?.filePath ? path.dirname(source.filePath) : app.getPath('documents'), title + '.docx'),
+          filters: [{ name: officeText('word'), extensions: ['docx'] }],
+        })
+        if (selected.canceled || !selected.filePath) return null
+        const targetPath = path.extname(selected.filePath).toLowerCase() === '.docx' ? selected.filePath : selected.filePath + '.docx'
+        const exists = fs.existsSync(targetPath)
+        if (exists) {
+          const answer = await dialog.showMessageBox(state.mainWindow, { type: 'warning',
+            buttons: [officeText('cancel'), officeText('replace')], defaultId: 0, cancelId: 0,
+            message: officeText('overwrite'), detail: targetPath })
+          if (answer.response !== 1) return null
+        }
+        return prepareOfficeTarget(targetPath, { sourcePath: source?.filePath, allowOverwrite: exists })
+      }
+      const sandbox = path.join(context.agentRootDir || localOfficeContext('').agentRootDir, 'SANDBOX')
+      await fs.promises.mkdir(sandbox, { recursive: true })
+      let out = request.target.out
+      if (out?.replace(/\\/g, '/').startsWith('/SANDBOX/')) out = out.replace(/\\/g, '/').slice('/SANDBOX/'.length)
+      const targetPath = out ? (path.isAbsolute(out) ? out : path.resolve(sandbox, out)) : path.join(sandbox, title + '-' + task.id.slice(0, 8) + '.docx')
+      const relative = path.relative(sandbox, targetPath)
+      if (relative.startsWith('..') || path.isAbsolute(relative)) throw officeFault('OFFICE_OUTPUT_OUTSIDE_SANDBOX')
+      // 逐层检查真实父目录，避免 mkdir 顺着已有链接在 SANDBOX 外创建目录。
+      const realSandbox = await fs.promises.realpath(sandbox)
+      let parent = realSandbox
+      for (const part of path.dirname(relative).split(path.sep).filter(part => part && part !== '.')) {
+        const next = path.join(parent, part)
+        try { await fs.promises.mkdir(next) } catch (error) { if (error.code !== 'EEXIST') throw error }
+        const real = await fs.promises.realpath(next)
+        const inside = path.relative(realSandbox, real)
+        if (inside.startsWith('..') || path.isAbsolute(inside)) throw officeFault('OFFICE_OUTPUT_OUTSIDE_SANDBOX')
+        parent = real
+      }
+      return prepareOfficeTarget(path.join(parent, path.basename(targetPath)), { sourcePath: source?.filePath, allowedRoot: realSandbox })
+    },
+    async createDocx(content, { signal, onPhase }) {
+      if (!await ensureEditor('docs')) throw officeFault('OFFICE_DOCS_UNAVAILABLE')
+      const view = state.bundles.docs.createDocsView()
+      const wc = view.webContents
+      wc.setBackgroundThrottling(false)
+      state.mainWindow.contentView.addChildView(view)
+      view.setVisible(false)
+      view.setBounds(contentBounds())
+      try {
+        await onPhase('serializing')
+        return await state.bundles.docs.serializeDocsAiContent(wc, { title: content.title || 'document', html: content.html }, { signal, timeoutMs: 120000 })
+      } finally {
+        state.mainWindow?.contentView.removeChildView(view)
+        state.bundles.docs.teardownDocsRenderer?.(wc)
+        if (!wc.isDestroyed()) wc.close()
+      }
+    },
+    async convertSnapshot(bytes, { signal, onProgress }) {
+      const request = { bytes, wasmPath: path.join(officeRoot(), 'wasm', 'pdfium.wasm'), ocrHelperDir: path.join(officeRoot(), 'ocr') }
+      const options = { bundlePath: path.join(officeRoot(), 'main', 'pdf-converter.cjs'), signal, onProgress }
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try { return await convertOfficePdfSnapshot(request, options) } catch (error) {
+          if (error.code !== 'password-required') throw error
+          const password = await pdfPasswordPrompt(state.mainWindow, attempt > 0)
+          if (password === null) throw officeFault('OFFICE_OPERATION_CANCELLED')
+          request.password = password
+        }
+      }
+      throw officeFault('OFFICE_PDF_PASSWORD_REJECTED')
+    },
+    async openArtifact(artifact) {
+      const result = await openOfficeFile(artifact.path, { notifyOpened: true })
+      if (!result.success) return { status: 'failed', code: 'OFFICE_OPEN_FAILED' }
+      const deadline = Date.now() + 30000
+      while (Date.now() < deadline) {
+        const entry = state.views.get(result.viewId)
+        if (!entry || entry.view.webContents.isDestroyed()) return { status: 'failed', code: 'OFFICE_OPEN_VIEW_CLOSED' }
+        if (entry.openError) return { status: 'failed', code: 'OFFICE_OPEN_LOAD_FAILED', viewId: result.viewId }
+        if (entry.dataReadyMs != null) return { status: 'opened', viewId: result.viewId }
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+      return { status: 'failed', code: 'OFFICE_OPEN_TIMEOUT', viewId: result.viewId }
+    },
+    onTask: task => { notifyVue('office-operation-updated', task); notifyOfficeDockOperation('office-operation-updated', task) },
+    onProgress: (taskId, progress) => {
+      const payload = { taskId, ...progress }
+      notifyVue('office-operation-progress', payload)
+      notifyOfficeDockOperation('office-operation-progress', payload)
+    },
+  })
+  return officeOperations
+}
+
+export async function executeOfficeOperation(request, context) {
+  return (await ensureOfficeOperationService()).execute(request, context)
+}
+export async function getOfficeOperationTask(id, context) { return (await ensureOfficeOperationService()).get(id, context) }
+export async function cancelOfficeOperationTask(id, context) { return (await ensureOfficeOperationService()).cancel(id, context) }
+export async function reopenOfficeArtifact(id, context) {
+  const ledger = await getOfficeTaskLedger()
+  const records = await ledger.list(context)
+  const record = records.find(item => item.id === id || item.result?.data?.artifact?.id === id)
+  const artifact = record?.result?.data?.artifact
+  if (artifact?.format === 'html') {
+    if (!artifact.persisted || !artifact.validation?.valid || sha256(await fs.promises.readFile(artifact.path)) !== artifact.sha256) throw officeFault('OFFICE_ARTIFACT_CHANGED')
+    const opened = await openOfficeFile(artifact.path, { notifyOpened: true })
+    const next = { ...artifact, open: { status: opened.success ? 'opened' : 'failed', ...(opened.viewId ? { viewId: opened.viewId } : {}) } }
+    await ledger.update(record.id, { operationIdentity: record.operationIdentity, result: { ...record.result, artifact: next, data: { ...record.result.data, artifact: next } } }, context)
+    return { ok: true, data: { artifact: next } }
+  }
+  return (await ensureOfficeOperationService()).reopen(id, context)
+}
+
+export function syncOfficeUiLanguage(language) {
+  const lang = language === 'en-US' ? 'en' : 'zh'
+  state.bundles?.html?.setHtmlUiLang(lang)
+  for (const entry of state.views.values()) {
+    if (!entry.view.webContents.isDestroyed()) entry.view.webContents.send('app:language-changed', lang)
+  }
 }
 
 async function exportPdfToDocx(entry) {
-  if (activePdfDocxExport) {
-    await dialog.showMessageBox(state.mainWindow, { type: 'info', message: 'PDF 正在转换为 Word，请等待当前任务完成。' })
-    return { ok: false, error: { code: 'PDF_DOCX_BUSY', recoverable: true } }
-  }
-  const pdf = state.bundles?.pdf
-  const wc = entry?.view?.webContents
-  if (!pdf || !wc || wc.isDestroyed() || !entry.filePath) return { ok: false, error: { code: 'PDF_DOCX_SOURCE_INVALID', recoverable: true } }
-  if (typeof pdf.convertPdfFileToDocxLocalWithPrompt !== 'function') {
-    return { ok: false, error: { code: 'PDF_DOCX_HANDLER_UNAVAILABLE', recoverable: false } }
-  }
-  const sourcePath = entry.filePath
-  activePdfDocxExport = { viewId: entry.viewId, sourcePath }
-  let temporary = null
-  let backup = null
+  const controller = new AbortController()
+  const wc = entry.view.webContents
+  const closed = () => controller.abort()
+  wc.once('destroyed', closed)
   try {
-    const flushed = await pdf.flushPdfSave(wc)
-    if (flushed === false || !(await waitForPdfFile(sourcePath))) return { ok: false, error: { code: 'PDF_DOCX_SAVE_REQUIRED', recoverable: true } }
-    const selected = await dialog.showSaveDialog(state.mainWindow, {
-      defaultPath: sourcePath.replace(/\.pdf$/i, '.docx'),
-      filters: [{ name: 'Word 文档', extensions: ['docx'] }],
-    })
-    if (selected.canceled || !selected.filePath) return { ok: false, cancelled: true }
-    const targetPath = selected.filePath
-    if (path.resolve(targetPath).toLocaleLowerCase() === path.resolve(sourcePath).toLocaleLowerCase()) {
-      return { ok: false, error: { code: 'PDF_DOCX_SOURCE_OVERWRITE', recoverable: true } }
-    }
-    if (fs.existsSync(targetPath)) {
-      const overwrite = await dialog.showMessageBox(state.mainWindow, {
-        type: 'warning', buttons: ['取消', '覆盖'], defaultId: 0, cancelId: 0,
-        message: '目标 Word 文件已存在，是否覆盖？', detail: targetPath,
-      })
-      if (overwrite.response !== 1) return { ok: false, cancelled: true }
-    }
-    const runViewId = entry.viewId
-    const result = await pdf.convertPdfFileToDocxLocalWithPrompt(
-      sourcePath,
-      retry => pdfPasswordPrompt(state.mainWindow, retry),
-      (page, total) => {
-        if (state.mainWindow && !state.mainWindow.isDestroyed() && total > 0) state.mainWindow.setProgressBar(page / total)
-      },
-    )
-    if (result === null) return { ok: false, cancelled: true }
-    if (state.views.get(runViewId)?.view?.webContents !== wc || path.resolve(entry.filePath) !== path.resolve(sourcePath)) {
-      return { ok: false, error: { code: 'PDF_DOCX_SOURCE_CHANGED', recoverable: true } }
-    }
-    const AdmZip = _require('adm-zip')
-    const buffer = Buffer.from(result.docx)
-    const zip = new AdmZip(buffer)
-    if (!buffer.length || !zip.getEntry('[Content_Types].xml') || !zip.getEntry('word/document.xml')) {
-      return { ok: false, error: { code: 'PDF_DOCX_OUTPUT_INVALID', recoverable: true } }
-    }
-    temporary = path.join(path.dirname(targetPath), `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.tmp`)
-    await fs.promises.writeFile(temporary, buffer, { flag: 'wx' })
-    if (fs.existsSync(targetPath)) {
-      backup = path.join(path.dirname(targetPath), `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.bak`)
-      await fs.promises.rename(targetPath, backup)
-    }
-    try {
-      await fs.promises.rename(temporary, targetPath)
-    } catch (error) {
-      if (backup) await fs.promises.rename(backup, targetPath).catch(() => {})
-      throw error
-    }
-    if (backup) await fs.promises.unlink(backup).catch(() => {})
-    temporary = null
-    backup = null
-    await openOfficeFile(targetPath, { notifyOpened: true })
-    const degraded = result.pageResults?.filter(page => page.status !== 'ok')?.map(page => page.page) || []
-    if (degraded.length) await dialog.showMessageBox(state.mainWindow, { type: 'info', message: `Word 已生成。第 ${degraded.join(', ')} 页包含 OCR 或图片退化内容，请校对。` })
-    return { ok: true, data: { path: targetPath, pages: result.pages, degradedPages: degraded } }
-  } catch (error) {
-    console.warn('[Office] PDF→Word failed:', error?.code || error?.message || error)
-    return { ok: false, error: { code: error?.code || error?.message || 'PDF_DOCX_FAILED', recoverable: true } }
-  } finally {
-    if (temporary) await fs.promises.unlink(temporary).catch(() => {})
-    if (backup) {
-      await fs.promises.unlink(targetPath).catch(() => {})
-      await fs.promises.rename(backup, targetPath).catch(() => {})
-    }
-    activePdfDocxExport = null
-    if (state.mainWindow && !state.mainWindow.isDestroyed()) state.mainWindow.setProgressBar(-1)
-  }
+    return await executeOfficeOperation({ operationId: 'office.document.convert', idempotencyKey: randomUUID(),
+      source: { resourceId: entry.viewId }, target: { format: 'docx' } },
+      { ...localOfficeContext('pdf-menu'), resourceId: entry.viewId, signal: controller.signal })
+  } finally { wc.removeListener('destroyed', closed) }
 }
 
 // ---- 对外 API ---------------------------------------------------------------
@@ -797,22 +1242,39 @@ export async function initOfficeHost(mainWindow) {
   }
   state.mainWindow = mainWindow
   state.bundles = {}
+  state.sharedServices = { project: null }
 
   // ready 之后挂载 genoffice-app:// 协议处理器（各编辑器 renderer 目录）
   if (protocolInstaller && typeof protocolInstaller.installRendererProtocol === 'function') {
     const roots = {}
-    for (const editor of EDITORS) {
+    for (const editor of runtimeEditors()) {
       roots[editor] = path.join(officeRoot(), editor, 'renderer')
     }
     protocolInstaller.installRendererProtocol(roots)
   }
 
   tolerateDuplicateIpcHandlers()
+  htmlDocumentBridge?.dispose()
+  htmlDocumentBridge = createHtmlDocumentBridge(ipcMain)
+  ipcMain.handle('friday:html-preview-sync', event => {
+    const entry = entryByWebContents(event.sender)
+    if (!entry || entry.type !== 'html' || event.senderFrame !== event.sender.mainFrame) throw officeFault('OFFICE_AI_SENDER_INVALID')
+    // 同一 sender 的 preview:update send 已按 IPC 顺序被处理，此 ack 才允许挂载新的 iframe。
+    return true
+  })
   // OfficeWorkspace 会在具体编辑器 bundle 懒加载完成前推送模型配置；
   // 先注册唯一的 office-set-ai-model 及 Friday 降级通道，避免启动竞态报
   // "No handler registered for 'office-set-ai-model'"。编辑器加载后由
   // registerEditorIpc(force) 再次覆盖上游同名 ai:* 处理器。
-  registerOfficeAiBridge()
+  registerOfficeAiBridge({
+    resolveOwner: sender => {
+      const entry = entryByWebContents(sender)
+      return entry && !entry.presentation ? { documentId: entry.documentId, viewId: entry.viewId } : null
+    },
+    isModelSettingsSender: isOfficeMainSender,
+    ensureServices: () => ensureEditor('html'),
+    openSettings: section => { state.mainWindow?.show(); notifyVue('office-open-settings', { section }); return true },
+  })
   registerAppPrefsIpc()
   registerOfficeFileCommands({
     findEntry: entryByWebContents,
@@ -874,6 +1336,17 @@ export async function initOfficeHost(mainWindow) {
   }
 
   state.initialized = true
+  const operationService = await ensureOfficeOperationService()
+  await operationService.recover(localOfficeContext('recovery'))
+  const officeIpc = (channel, handler) => ipcMain.handle(channel, (event, value) => {
+    if (!isOfficeMainSender(event.sender) && !isOfficeDockSender(event.sender)) throw officeFault('OFFICE_SENDER_INVALID')
+    return handler(value, localOfficeContext('task-panel'))
+  })
+  officeIpc('office-get-capabilities', () => getOfficeCapabilities())
+  officeIpc('office-get-editor-capabilities', () => getOfficeEditorCapabilities())
+  officeIpc('office-get-operation-task', (value, context) => getOfficeOperationTask(value?.taskId, context))
+  officeIpc('office-cancel-operation-task', (value, context) => cancelOfficeOperationTask(value?.taskId, context))
+  officeIpc('office-reopen-artifact', (value, context) => reopenOfficeArtifact(value?.artifactIdOrTaskId, context))
   console.log('[Office] Office Host initialized with editors:', Object.keys(state.bundles).join(', '))
   return true
 }
@@ -939,6 +1412,14 @@ function createTypeView(type, filePath) {
   if (type === 'slides') {
     return { view: b.slides.createSlidesView(filePath || null), filePath }
   }
+  if (type === 'html') {
+    const view = b.html.createHtmlView(filePath || null)
+    // HTML 在首次 create 内安装模块 IPC；共享通道始终归 Friday 托管。
+    registerOfficeAiBridge({ force: true })
+    registerAppPrefsIpc()
+    return { view, filePath }
+  }
+  if (type !== 'pdf') throw officeFault('OFFICE_EDITOR_NOT_INTEGRATED')
   return { view: b.pdf.createPdfView(filePath || null), filePath }
 }
 
@@ -1043,7 +1524,8 @@ function blankPdfBuffer() {
 async function createBlankOfficeFile(type, displayName) {
   const dir = officeDefaultSaveDir()
   fs.mkdirSync(dir, { recursive: true })
-  const ext = { docs: '.docx', sheets: '.xlsx', slides: '.pptx', pdf: '.pdf' }[type]
+  const ext = { docs: '.docx', sheets: '.xlsx', slides: '.pptx', pdf: '.pdf', html: '.html' }[type]
+  if (!ext) throw officeFault('OFFICE_EDITOR_NOT_INTEGRATED')
   const fallbackName = `${({ docs: 'Word 文档', sheets: 'Excel 工作簿', slides: 'PowerPoint 演示', pdf: 'PDF 文档' }[type] || 'Office 文档')} ${new Date().toISOString().slice(0, 10)}`
   const filePath = uniqueOfficePath(dir, `${String(displayName || fallbackName).trim() || fallbackName}${ext}`)
   if (type === 'sheets') {
@@ -1055,6 +1537,8 @@ async function createBlankOfficeFile(type, displayName) {
     fs.writeFileSync(filePath, blankDocxBuffer())
   } else if (type === 'slides') {
     fs.writeFileSync(filePath, await blankPptxBuffer())
+  } else if (type === 'html') {
+    fs.writeFileSync(filePath, '<!doctype html>\n<html><head><meta charset="utf-8"><title></title></head><body></body></html>\n', 'utf8')
   } else {
     fs.writeFileSync(filePath, blankPdfBuffer())
   }
@@ -1070,7 +1554,7 @@ async function createBlankOfficeFile(type, displayName) {
 async function openOfficeFileInternal(filePath, type, requestedViewId, openStartedAt) {
   // 同一文件已在某个视图打开 → 直接激活
   for (const [id, entry] of state.views) {
-    if (entry.type === type && entry.filePath === filePath && !entry.view.webContents.isDestroyed()) {
+    if (entry.type === type && !entry.presentation && entry.filePath === filePath && !entry.view.webContents.isDestroyed()) {
       return { success: true, type, viewId: id, filePath, reused: true }
     }
   }
@@ -1087,8 +1571,7 @@ async function openOfficeFileInternal(filePath, type, requestedViewId, openStart
 
 export async function openOfficeFile(filePath, opts = {}) {
   const started = performance.now()
-  const { resolveEditorType } = await import('./office-files.js')
-  const type = resolveEditorType(filePath)
+  const type = resolveEditorType(filePath, { experimentalHtml: isExperimentalHtmlEnabled() })
   const coldStart = Boolean(type && !state.bundles?.[type])
   if (!type || !await ensureEditor(type)) {
     return { success: false, error: `unsupported file type: ${filePath}` }
@@ -1231,6 +1714,17 @@ export async function autoSaveOfficeFile(viewId) {
         saveDurableMs: durable ? Math.max(0, Math.round(performance.now() - saveStartedAt)) : null,
       })
     }
+    if (type === 'html') {
+      if (entry.presentation) return finish({ success: true, saved: false })
+      if (!b.html.htmlIsDirty(wc.id) && b.html.htmlFilePath(wc.id)) return finish({ success: true, saved: false })
+      const ok = await b.html.requestHtmlSave(wc, 'save')
+      const target = b.html.htmlFilePath(wc.id)
+      if (target) entry.filePath = target
+      const durable = ok === true && await waitDurable(target)
+      return finish({ success: ok === true && durable, saved: ok === true }, ok === true && durable ? 'complete' : 'failed', {
+        saveDurableMs: durable ? Math.max(0, Math.round(performance.now() - saveStartedAt)) : null,
+      })
+    }
   } catch (e) {
     return finish({ success: false, error: e?.message || String(e) }, 'failed')
   }
@@ -1256,6 +1750,9 @@ export async function closeOfficeFile(viewId) {
     if (bundles.slides.slidesIsDirty(wc.id)) proceed = await bundles.slides.requestSlidesClose(wc, state.mainWindow)
   } else if (type === 'pdf') {
     if (bundles.pdf.pdfIsDirty(wc.id)) proceed = await bundles.pdf.requestPdfClose(wc, state.mainWindow)
+  } else if (type === 'html' && !entry.presentation) {
+    // 必须保留上游 Save / Discard / Cancel 完整语义；取消时不得先移除视图。
+    proceed = await bundles.html.requestHtmlClose(wc, state.mainWindow)
   }
   if (!proceed) return false
 
@@ -1263,7 +1760,7 @@ export async function closeOfficeFile(viewId) {
   clearOfficeDocumentSelection(viewId)
   // Windows Electron 42 已实测安全释放；其他平台暂保留上游的冻结规避，等待平台验收。
   hideView(viewId, type !== 'docs' || process.platform === 'win32')
-  notifyVue('office-view-closed', { type, viewId })
+  notifyVue('office-view-closed', { type, viewId, ...(entry.presentation ? { presentation: true } : {}) })
   return true
 }
 
@@ -1356,6 +1853,8 @@ export function getOfficeState() {
     type: e.type,
     viewId: e.viewId,
     filePath: e.filePath,
+    presentation: e.presentation === true,
+    title: e.title || null,
     open: !e.view.webContents.isDestroyed(),
     openProgress: e.openProgress || 'view-created',
     openError: e.openError || null,
@@ -1443,7 +1942,7 @@ function recentEntries() {
         path: p,
         name: path.basename(p),
         dir: path.dirname(p),
-        type: EXT_TO_TYPE[path.extname(p).toLowerCase()] || 'docs',
+        type: resolveEditorType(p, { experimentalHtml: isExperimentalHtmlEnabled() }) || 'docs',
         mtimeMs,
         sizeBytes,
         missing,
@@ -1564,7 +2063,7 @@ export async function openOfficeFileDialog() {
   const { canceled, filePaths } = await dialog.showOpenDialog(state.mainWindow, {
     properties: ['openFile'],
     filters: [
-      { name: 'Office Documents', extensions: ['docx', 'xlsx', 'xlsm', 'csv', 'pptx', 'pdf'] },
+      { name: 'Office Documents', extensions: ['docx', 'xlsx', 'xlsm', 'csv', 'pptx', 'pdf', ...(isExperimentalHtmlEnabled() ? ['html', 'htm'] : [])] },
     ],
   })
   if (canceled || !filePaths?.length) return { success: false, cancelled: true }
@@ -1581,12 +2080,16 @@ export async function queryOfficeDirty(viewId) {
     case 'sheets': return b.sheets.sheetsPendingEditCount(wc.id) > 0
     case 'slides': return b.slides.slidesIsDirty(wc.id)
     case 'pdf': return b.pdf.pdfIsDirty(wc.id)
+    case 'html': return !entry.presentation && b.html.htmlIsDirty(wc.id)
     default: return false
   }
 }
 
 /** 应用退出前释放资源（停止 sidecar、关闭视图） */
 export function shutdownOfficeHost() {
+  htmlDocumentBridge?.dispose()
+  htmlDocumentBridge = null
+  officeOperations?.shutdown()
   destroyOfficeDockOverlay()
   pendingOfficeOpens.clear()
   state.latestDocumentSelection = null
@@ -1596,6 +2099,7 @@ export function shutdownOfficeHost() {
     hideView(viewId, entry.type !== 'docs' || process.platform === 'win32')
   }
   savedEventSubscribers = []
+  state.sharedServices = { project: null }
 }
 
 /** 调试/诊断：将指定编辑器视图当前画面截图保存为 PNG */

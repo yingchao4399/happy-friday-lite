@@ -43,7 +43,8 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
-  }
+  },
+  initialSection: { type: String, default: 'memory' }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -57,7 +58,7 @@ const activeSection = ref('memory');
 
 // 每次打开抽屉时默认回到「记忆管理」tab
 watch(visible, (val) => {
-  if (val) activeSection.value = 'memory';
+  if (val) activeSection.value = ['memory', 'skills', 'mcp', 'usage'].includes(props.initialSection) ? props.initialSection : 'memory';
 });
 
 const navItems = computed(() => [

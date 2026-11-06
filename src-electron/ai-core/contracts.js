@@ -137,7 +137,7 @@ export function assertTaskTransition(from, to) {
     draft: new Set(['awaiting_approval', 'running', 'cancelled']),
     awaiting_approval: new Set(['running', 'paused', 'failed', 'cancelled']),
     running: new Set(['verifying', 'paused', 'failed', 'cancelled', 'partially_completed']),
-    verifying: new Set(['completed', 'failed', 'partially_completed', 'paused']),
+    verifying: new Set(['completed', 'failed', 'partially_completed', 'paused', 'cancelled']),
     paused: new Set(['running', 'cancelled', 'failed']),
     failed: new Set(['paused', 'running', 'cancelled']),
     partially_completed: new Set(['paused', 'running', 'completed', 'cancelled']),

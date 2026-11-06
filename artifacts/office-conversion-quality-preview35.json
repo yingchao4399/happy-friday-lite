@@ -1,0 +1,3273 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "checkedAt": "2026-11-06T06:23:29.875Z",
+  "runtime": {
+    "mode": "packaged-converter-and-worker",
+    "moduleRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app",
+    "releaseVersion": "3.0.7.01-preview.35",
+    "applicationVersion": "3.0.7",
+    "nodeVersion": "v24.19.0",
+    "platform": "win32",
+    "arch": "x64",
+    "officeReleaseVersion": "3.0.7.01-preview.35",
+    "sourceIdentityDigest": "bfd823df5d6c334926d1e130777c9e18e2e9b1217968ca42ee2b919abb41ef3a",
+    "resourcesDigest": "a5016f4ccd2b588b848e0f8d6dc5905db27abeb8da8269322f97d5f5ca7047af",
+    "files": [
+      {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office\\main\\pdf-converter.cjs",
+        "sha256": "1a73d8ac3c030e7fe4eb8d1a23e51406b60e7de3654fe3c5c9e13a4758529380"
+      },
+      {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office\\wasm\\pdfium.wasm",
+        "sha256": "5e4cd023c3dad4a895b3571ca573d3fc51bac6de48360d95283134385b954eaa"
+      },
+      {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app\\src-electron\\office\\converter-adapter.js",
+        "sha256": "b0ed17c1e0d95c0e5be319aa4d5c76aeb1aa64939686be9fe923936d93cdac13"
+      },
+      {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app\\src-electron\\office\\conversion-worker.js",
+        "sha256": "58efac45887ad2e788976aa225cf37561c5ac3ab13c1fe531252f2416feff64e"
+      },
+      {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app\\src-electron\\office\\artifact-delivery.js",
+        "sha256": "b315ffd9659666d546c5bf6898bb4a916497f09f19250ffad03975d6e4cb4da7"
+      },
+      {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office\\integration-manifest.json",
+        "sha256": "c572de7d6ca87a4db862e6a02677ca198bb0161ba4e7f3c11fb6c125a30de7b1"
+      }
+    ],
+    "nativeOcrHelper": {
+      "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office\\ocr\\win-ocr.exe",
+      "sha256": "6e6ff3038541e73b7d0a34875f0bf5644c19e11571acb895ce405cd3595c6e88"
+    }
+  },
+  "fixturePolicy": "Only generated PDF/PNG samples; no user document is read.",
+  "samplesDirectory": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk",
+  "cases": [
+    {
+      "id": "english-multipage",
+      "specification": {
+        "id": "english-multipage",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\english-multipage.pdf",
+        "expectedPages": 3,
+        "markers": [
+          "FRIDAY MULTIPAGE PAGE 1 MARKER 1429",
+          "FRIDAY MULTIPAGE PAGE 2 MARKER 1430",
+          "FRIDAY MULTIPAGE PAGE 3 MARKER 1431"
+        ],
+        "ocr": false
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\english-multipage.pdf",
+        "bytes": 2236,
+        "sha256": "0dcffe184e231bd01fc4e1400f852df50943fd228a80a1601b099a6b4343987f",
+        "sha256After": "0dcffe184e231bd01fc4e1400f852df50943fd228a80a1601b099a6b4343987f"
+      },
+      "ocrRequested": false,
+      "progress": [
+        {
+          "page": 1,
+          "total": 3,
+          "elapsedMs": 767
+        },
+        {
+          "page": 2,
+          "total": 3,
+          "elapsedMs": 780
+        },
+        {
+          "page": 3,
+          "total": 3,
+          "elapsedMs": 795
+        }
+      ],
+      "conversion": {
+        "pages": 3,
+        "scannedDocument": false,
+        "warnings": [
+          "headers/footers: 3 repeated line(s) detected across pages and deduplicated"
+        ],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "ok",
+            "confidence": 1
+          },
+          {
+            "page": 2,
+            "status": "ok",
+            "confidence": 1
+          },
+          {
+            "page": 3,
+            "status": "ok",
+            "confidence": 1
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\english-multipage.docx",
+        "bytes": 3827,
+        "sha256": "9fe8c8d0adf9a7edebdd5462908c8b86b016c165e024bae02bae442e85064cab",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:35.120Z",
+          "textCharacters": 1650,
+          "drawings": 0,
+          "partCount": 10
+        },
+        "readback": {
+          "text": "Page 1 body line 1 preserves editable English content. Page 1 body line 2 preserves editable English content. Page 1 body line 3 preserves editable English content. Page 1 body line 4 preserves editable English content. Page 1 body line 5 preserves editable English content. Page 1 body line 6 preserves editable English content. Page 1 body line 7 preserves editable English content. Page 1 body line 8 preserves editable English content. Page 1 body line 9 preserves editable English content. Page 1 body line 10 preserves editable English content.\nPage 2 body line 1 preserves editable English content. Page 2 body line 2 preserves editable English content. Page 2 body line 3 preserves editable English content. Page 2 body line 4 preserves editable English content. Page 2 body line 5 preserves editable English content. Page 2 body line 6 preserves editable English content. Page 2 body line 7 preserves editable English content. Page 2 body line 8 preserves editable English content. Page 2 body line 9 preserves editable English content. Page 2 body line 10 preserves editable English content.\nPage 3 body line 1 preserves editable English content. Page 3 body line 2 preserves editable English content. Page 3 body line 3 preserves editable English content. Page 3 body line 4 preserves editable English content. Page 3 body line 5 preserves editable English content. Page 3 body line 6 preserves editable English content. Page 3 body line 7 preserves editable English content. Page 3 body line 8 preserves editable English content. Page 3 body line 9 preserves editable English content. Page 3 body line 10 preserves editable English content.",
+          "textCharacters": 1652,
+          "markers": [
+            {
+              "marker": "FRIDAY MULTIPAGE PAGE 1 MARKER 1429",
+              "found": false,
+              "index": -1,
+              "exactTextPresent": false
+            },
+            {
+              "marker": "FRIDAY MULTIPAGE PAGE 2 MARKER 1430",
+              "found": false,
+              "index": -1,
+              "exactTextPresent": false
+            },
+            {
+              "marker": "FRIDAY MULTIPAGE PAGE 3 MARKER 1431",
+              "found": false,
+              "index": -1,
+              "exactTextPresent": false
+            }
+          ],
+          "imageParts": [],
+          "drawings": 0,
+          "tables": 0,
+          "tableRows": 0,
+          "tableCells": 0,
+          "columns": [],
+          "explicitPageBreaks": 0,
+          "sections": 1,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 1628,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 59,
+        "maxObservedGapMs": 441,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": false,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 3,
+              "actual": 3
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": false
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "two-column",
+      "specification": {
+        "id": "two-column",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\two-column.pdf",
+        "expectedPages": 1,
+        "markers": [
+          "FRIDAY TWO COLUMN TITLE",
+          "LEFT COLUMN ALPHA",
+          "LEFT COLUMN BETA",
+          "RIGHT COLUMN GAMMA",
+          "RIGHT COLUMN DELTA"
+        ],
+        "expectedReadingOrder": [
+          "LEFT COLUMN ALPHA",
+          "LEFT COLUMN BETA",
+          "RIGHT COLUMN GAMMA",
+          "RIGHT COLUMN DELTA"
+        ],
+        "ocr": false,
+        "inspectColumns": true
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\two-column.pdf",
+        "bytes": 1446,
+        "sha256": "07ac38bac58fda2f875354b5eee1bb18114bff63521ad1edf8e2c0fdbe390d10",
+        "sha256After": "07ac38bac58fda2f875354b5eee1bb18114bff63521ad1edf8e2c0fdbe390d10"
+      },
+      "ocrRequested": false,
+      "progress": [
+        {
+          "page": 1,
+          "total": 1,
+          "elapsedMs": 587
+        }
+      ],
+      "conversion": {
+        "pages": 1,
+        "scannedDocument": false,
+        "warnings": [],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "ok",
+            "confidence": 1
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\two-column.docx",
+        "bytes": 3400,
+        "sha256": "db0613c3752c3490a036b17e2a4f9e3685017b00baa6e807d8329e23ef35e94a",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:36.732Z",
+          "textCharacters": 573,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "readback": {
+          "text": "FRIDAY TWO COLUMN TITLE\nLEFT COLUMN ALPHA\nLeft paragraph line 1 content\nLeft paragraph line 2 content\nLeft paragraph line 3 content\nLeft paragraph line 4 content\nLeft paragraph line 5 content\nLeft paragraph line 6 content\nLEFT COLUMN BETA\nLeft paragraph line 8 content\nLeft paragraph line 9 content\nRIGHT COLUMN GAMMA Right paragraph line 1 content Right paragraph line 2 content Right paragraph line 3 content Right paragraph line 4 content Right paragraph line 5 content Right paragraph line 6 content RIGHT COLUMN DELTA Right paragraph line 8 content Right paragraph line 9 content",
+          "textCharacters": 584,
+          "markers": [
+            {
+              "marker": "FRIDAY TWO COLUMN TITLE",
+              "found": true,
+              "index": 0,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "LEFT COLUMN ALPHA",
+              "found": true,
+              "index": 20,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "LEFT COLUMN BETA",
+              "found": true,
+              "index": 185,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "RIGHT COLUMN GAMMA",
+              "found": true,
+              "index": 249,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "RIGHT COLUMN DELTA",
+              "found": true,
+              "index": 421,
+              "exactTextPresent": true
+            }
+          ],
+          "imageParts": [],
+          "drawings": 0,
+          "tables": 0,
+          "tableRows": 0,
+          "tableCells": 0,
+          "columns": [
+            {
+              "count": "2",
+              "spacing": "2691"
+            }
+          ],
+          "explicitPageBreaks": 0,
+          "sections": 2,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 947,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 43,
+        "maxObservedGapMs": 63,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 1,
+              "actual": 1
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": true
+          },
+          {
+            "name": "column text follows left-column then right-column order",
+            "pass": true,
+            "detail": [
+              20,
+              185,
+              249,
+              421
+            ]
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "grid-table",
+      "specification": {
+        "id": "grid-table",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\grid-table.pdf",
+        "expectedPages": 1,
+        "markers": [
+          "FRIDAY GRID TABLE 3640",
+          "ALPHA",
+          "BETA",
+          "TOTAL",
+          "100",
+          "200",
+          "300"
+        ],
+        "minTables": 1,
+        "ocr": false
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\grid-table.pdf",
+        "bytes": 1326,
+        "sha256": "9337974a9e68cd991b558126c9ff27a1a7d8f84d4399fba93c8abf59229866cc",
+        "sha256After": "9337974a9e68cd991b558126c9ff27a1a7d8f84d4399fba93c8abf59229866cc"
+      },
+      "ocrRequested": false,
+      "progress": [
+        {
+          "page": 1,
+          "total": 1,
+          "elapsedMs": 477
+        }
+      ],
+      "conversion": {
+        "pages": 1,
+        "scannedDocument": false,
+        "warnings": [],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "ok",
+            "confidence": 1
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\grid-table.docx",
+        "bytes": 3456,
+        "sha256": "93bb7bd6e1f76a0df259f970d8b79c00a52565fda29d1fb3a89695cf12d3d4c1",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:37.579Z",
+          "textCharacters": 62,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "readback": {
+          "text": "FRIDAY GRID TABLE 3640\nITEM\nPRICE\nCOUNT\nALPHA\n100\n2\nBETA\n200\n3\nTOTAL\n300\n5",
+          "textCharacters": 74,
+          "markers": [
+            {
+              "marker": "FRIDAY GRID TABLE 3640",
+              "found": true,
+              "index": 0,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "ALPHA",
+              "found": true,
+              "index": 33,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "BETA",
+              "found": true,
+              "index": 42,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "TOTAL",
+              "found": true,
+              "index": 50,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "100",
+              "found": true,
+              "index": 38,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "200",
+              "found": true,
+              "index": 46,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "300",
+              "found": true,
+              "index": 55,
+              "exactTextPresent": true
+            }
+          ],
+          "imageParts": [],
+          "drawings": 0,
+          "tables": 1,
+          "tableRows": 4,
+          "tableCells": 12,
+          "columns": [],
+          "explicitPageBreaks": 0,
+          "sections": 1,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 798,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 39,
+        "maxObservedGapMs": 47,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 1,
+              "actual": 1
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": true
+          },
+          {
+            "name": "table remains an editable table",
+            "pass": true,
+            "detail": {
+              "tables": 1,
+              "rows": 4,
+              "cells": 12
+            }
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "text-and-image",
+      "specification": {
+        "id": "text-and-image",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\text-and-image.pdf",
+        "expectedPages": 1,
+        "markers": [
+          "FRIDAY IMAGE BEFORE 4751",
+          "FRIDAY IMAGE AFTER 4752"
+        ],
+        "minImages": 1,
+        "ocr": false
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\text-and-image.pdf",
+        "bytes": 2518,
+        "sha256": "9c9f98dc2fbc296d338e9fcaf9f27d2acb7372aa9a30e813395a68ec5c452e6a",
+        "sha256After": "9c9f98dc2fbc296d338e9fcaf9f27d2acb7372aa9a30e813395a68ec5c452e6a"
+      },
+      "ocrRequested": false,
+      "progress": [
+        {
+          "page": 1,
+          "total": 1,
+          "elapsedMs": 466
+        }
+      ],
+      "conversion": {
+        "pages": 1,
+        "scannedDocument": false,
+        "warnings": [],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "ok",
+            "confidence": 1
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\text-and-image.docx",
+        "bytes": 3922,
+        "sha256": "366f11a1abd8a4b370df4a228e4a5e283bb4b602d02f7e0d8c6591b1ec5248bd",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:38.365Z",
+          "textCharacters": 47,
+          "drawings": 1,
+          "partCount": 11
+        },
+        "readback": {
+          "text": "FRIDAY IMAGE BEFORE 4751\nFRIDAY IMAGE AFTER 4752",
+          "textCharacters": 48,
+          "markers": [
+            {
+              "marker": "FRIDAY IMAGE BEFORE 4751",
+              "found": true,
+              "index": 0,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "FRIDAY IMAGE AFTER 4752",
+              "found": true,
+              "index": 21,
+              "exactTextPresent": true
+            }
+          ],
+          "imageParts": [
+            {
+              "path": "word/media/aidocs1.png",
+              "bytes": 336,
+              "sha256": "b463f3563bd22e1b1f61b692d521d4538886bd922bb409ac633d9e4c50d6ed2b"
+            }
+          ],
+          "drawings": 1,
+          "tables": 0,
+          "tableRows": 0,
+          "tableCells": 0,
+          "columns": [],
+          "explicitPageBreaks": 0,
+          "sections": 1,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 750,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 38,
+        "maxObservedGapMs": 47,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 1,
+              "actual": 1
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": true
+          },
+          {
+            "name": "image content preserved in output",
+            "pass": true
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "scan-without-ocr",
+      "specification": {
+        "id": "scan-without-ocr",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\scan-without-ocr.pdf",
+        "expectedPages": 1,
+        "markers": [],
+        "absentMarkers": [
+          "FRIDAY SCAN ALPHA",
+          "PDF WORD QUALITY MATRIX",
+          "LOCAL OCR RECOGNITION TEST"
+        ],
+        "expectedStatuses": [
+          "scanned"
+        ],
+        "minImages": 1,
+        "requireWarning": true,
+        "ocr": false
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\scan-without-ocr.pdf",
+        "bytes": 43416,
+        "sha256": "5369bde846c1d7452e48505638666ec0f505034b96c8e6cfcd593235a2e04a70",
+        "sha256After": "5369bde846c1d7452e48505638666ec0f505034b96c8e6cfcd593235a2e04a70"
+      },
+      "ocrRequested": false,
+      "progress": [
+        {
+          "page": 1,
+          "total": 1,
+          "elapsedMs": 757
+        }
+      ],
+      "conversion": {
+        "pages": 1,
+        "scannedDocument": true,
+        "warnings": [
+          "page 1: scanned page, exported as full-page image"
+        ],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "scanned"
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\scan-without-ocr.docx",
+        "bytes": 24913,
+        "sha256": "5cb0dbbddf75116904256e207d012b945ba5e0aa284156eea88a8c56d5524722",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:39.390Z",
+          "textCharacters": 0,
+          "drawings": 1,
+          "partCount": 11
+        },
+        "readback": {
+          "text": "",
+          "textCharacters": 0,
+          "markers": [],
+          "imageParts": [
+            {
+              "path": "word/media/aidocs1.png",
+              "bytes": 26809,
+              "sha256": "6b3296ebc09dc418f3ec6e9cabe868cb2389c129fe66904f6c3c4f2bb65457f1"
+            }
+          ],
+          "drawings": 1,
+          "tables": 0,
+          "tableRows": 0,
+          "tableCells": 0,
+          "columns": [],
+          "explicitPageBreaks": 0,
+          "sections": 1,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 999,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 47,
+        "maxObservedGapMs": 59,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 1,
+              "actual": 1
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": true
+          },
+          {
+            "name": "scan without OCR does not pretend editable recognized text",
+            "pass": true
+          },
+          {
+            "name": "expected per-page conversion modes disclosed",
+            "pass": true,
+            "detail": [
+              {
+                "page": 1,
+                "status": "scanned"
+              }
+            ]
+          },
+          {
+            "name": "image content preserved in output",
+            "pass": true
+          },
+          {
+            "name": "bitmap fallback warning returned",
+            "pass": true,
+            "detail": [
+              "page 1: scanned page, exported as full-page image"
+            ]
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "scan-with-real-ocr",
+      "specification": {
+        "id": "scan-with-real-ocr",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\scan-with-real-ocr.pdf",
+        "expectedPages": 1,
+        "markers": [
+          "FRIDAY SCAN ALPHA",
+          "PDF WORD QUALITY MATRIX",
+          "LOCAL OCR RECOGNITION TEST"
+        ],
+        "expectedStatuses": [
+          "ocr"
+        ],
+        "ocr": true,
+        "requireRealOcr": true
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\scan-with-real-ocr.pdf",
+        "bytes": 43416,
+        "sha256": "5369bde846c1d7452e48505638666ec0f505034b96c8e6cfcd593235a2e04a70",
+        "sha256After": "5369bde846c1d7452e48505638666ec0f505034b96c8e6cfcd593235a2e04a70"
+      },
+      "ocrRequested": true,
+      "progress": [
+        {
+          "page": 1,
+          "total": 1,
+          "elapsedMs": 1734
+        }
+      ],
+      "conversion": {
+        "pages": 1,
+        "scannedDocument": false,
+        "warnings": [
+          "page 1: scanned page, text recovered via local OCR (confidence 1.00)"
+        ],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "ocr",
+            "confidence": 1
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\scan-with-real-ocr.docx",
+        "bytes": 3289,
+        "sha256": "779cb3467b55e05c2cea2bfc5ea1f0d5b5684e42b47bb2a4c7f1004574c49e33",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:41.586Z",
+          "textCharacters": 184,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "readback": {
+          "text": "FRIDAY SCAN ALPHA\nPDF WORD QUALITY MATRIX\nLOCAL OCR RECOGNITION TEST\nThis generated page contains pixels and no PDF text layer. The output must disclose whether text recognition was used.",
+          "textCharacters": 187,
+          "markers": [
+            {
+              "marker": "FRIDAY SCAN ALPHA",
+              "found": true,
+              "index": 0,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "PDF WORD QUALITY MATRIX",
+              "found": true,
+              "index": 15,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "LOCAL OCR RECOGNITION TEST",
+              "found": true,
+              "index": 35,
+              "exactTextPresent": true
+            }
+          ],
+          "imageParts": [],
+          "drawings": 0,
+          "tables": 0,
+          "tableRows": 0,
+          "tableCells": 0,
+          "columns": [],
+          "explicitPageBreaks": 0,
+          "sections": 1,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 2102,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 105,
+        "maxObservedGapMs": 53,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 1,
+              "actual": 1
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": true
+          },
+          {
+            "name": "expected per-page conversion modes disclosed",
+            "pass": true,
+            "detail": [
+              {
+                "page": 1,
+                "status": "ocr",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "name": "real installed OCR helper independently recognized generated pixels",
+            "pass": true
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "mixed-digital-and-scan",
+      "specification": {
+        "id": "mixed-digital-and-scan",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\mixed-digital-and-scan.pdf",
+        "expectedPages": 3,
+        "markers": [
+          "FRIDAY MIXED DIGITAL ONE 5862",
+          "FRIDAY SCAN ALPHA",
+          "PDF WORD QUALITY MATRIX",
+          "LOCAL OCR RECOGNITION TEST",
+          "FRIDAY MIXED DIGITAL THREE 5863"
+        ],
+        "expectedStatuses": [
+          "ok",
+          "ocr",
+          "ok"
+        ],
+        "ocr": true,
+        "requireRealOcr": true
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\mixed-digital-and-scan.pdf",
+        "bytes": 43878,
+        "sha256": "a9384fcf2a77b11f50628bc8fe0b7ee63d57217f963f8d1b255cdb6ceeb6a7e0",
+        "sha256After": "a9384fcf2a77b11f50628bc8fe0b7ee63d57217f963f8d1b255cdb6ceeb6a7e0"
+      },
+      "ocrRequested": true,
+      "progress": [
+        {
+          "page": 1,
+          "total": 3,
+          "elapsedMs": 809
+        },
+        {
+          "page": 2,
+          "total": 3,
+          "elapsedMs": 1626
+        },
+        {
+          "page": 3,
+          "total": 3,
+          "elapsedMs": 1628
+        }
+      ],
+      "conversion": {
+        "pages": 3,
+        "scannedDocument": false,
+        "warnings": [
+          "page 2: scanned page, text recovered via local OCR (confidence 1.00)"
+        ],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "ok",
+            "confidence": 1
+          },
+          {
+            "page": 2,
+            "status": "ocr",
+            "confidence": 1
+          },
+          {
+            "page": 3,
+            "status": "ok",
+            "confidence": 1
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\mixed-digital-and-scan.docx",
+        "bytes": 3375,
+        "sha256": "0a47dbe8bb32a3943dbe0ac5f089eeb0091e3fa2173aa0cae69e23c4000c9a11",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:43.532Z",
+          "textCharacters": 244,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "readback": {
+          "text": "FRIDAY MIXED DIGITAL ONE 5862\nFRIDAY SCAN ALPHA\nPDF WORD QUALITY MATRIX\nLOCAL OCR RECOGNITION TEST\nThis generated page contains pixels and no PDF text layer. The output must disclose whether text recognition was used.\nFRIDAY MIXED DIGITAL THREE 5863",
+          "textCharacters": 249,
+          "markers": [
+            {
+              "marker": "FRIDAY MIXED DIGITAL ONE 5862",
+              "found": true,
+              "index": 0,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "FRIDAY SCAN ALPHA",
+              "found": true,
+              "index": 25,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "PDF WORD QUALITY MATRIX",
+              "found": true,
+              "index": 40,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "LOCAL OCR RECOGNITION TEST",
+              "found": true,
+              "index": 60,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "FRIDAY MIXED DIGITAL THREE 5863",
+              "found": true,
+              "index": 183,
+              "exactTextPresent": true
+            }
+          ],
+          "imageParts": [],
+          "drawings": 0,
+          "tables": 0,
+          "tableRows": 0,
+          "tableCells": 0,
+          "columns": [],
+          "explicitPageBreaks": 0,
+          "sections": 1,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 1896,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 103,
+        "maxObservedGapMs": 38,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 3,
+              "actual": 3
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": true
+          },
+          {
+            "name": "expected per-page conversion modes disclosed",
+            "pass": true,
+            "detail": [
+              {
+                "page": 1,
+                "status": "ok",
+                "confidence": 1
+              },
+              {
+                "page": 2,
+                "status": "ocr",
+                "confidence": 1
+              },
+              {
+                "page": 3,
+                "status": "ok",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "name": "real installed OCR helper independently recognized generated pixels",
+            "pass": true
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "damaged-pdf",
+      "specification": {
+        "id": "damaged-pdf",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\damaged-pdf.pdf",
+        "expectedError": true,
+        "ocr": false
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\damaged-pdf.pdf",
+        "bytes": 84,
+        "sha256": "74d7b43408e2729227de068221fb6f897bc8a2198ddc750f27bf3f3dd2b3ab59",
+        "sha256After": "74d7b43408e2729227de068221fb6f897bc8a2198ddc750f27bf3f3dd2b3ab59"
+      },
+      "ocrRequested": false,
+      "progress": [],
+      "error": {
+        "code": "corrupt",
+        "message": "PDFium could not load the document (corrupt, FPDF error 3)"
+      },
+      "elapsedMs": 316,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 17,
+        "maxObservedGapMs": 24,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "damaged source rejected with an error",
+            "pass": true,
+            "detail": {
+              "code": "corrupt",
+              "message": "PDFium could not load the document (corrupt, FPDF error 3)"
+            }
+          },
+          {
+            "name": "damaged source is not a timeout or worker crash",
+            "pass": true
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "cancel-in-flight",
+      "specification": {
+        "id": "cancel-in-flight",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\cancel-in-flight.pdf",
+        "expectedErrorCode": "OFFICE_OPERATION_CANCELLED",
+        "cancelOnFirstProgress": true,
+        "ocr": false
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\cancel-in-flight.pdf",
+        "bytes": 58559,
+        "sha256": "8f4157f1b1cb6bc3cd078c74ff094fe356a9dfda1243b8d1fa57ea4e70718478",
+        "sha256After": "8f4157f1b1cb6bc3cd078c74ff094fe356a9dfda1243b8d1fa57ea4e70718478"
+      },
+      "ocrRequested": false,
+      "progress": [
+        {
+          "page": 1,
+          "total": 80,
+          "elapsedMs": 1518
+        }
+      ],
+      "error": {
+        "code": "OFFICE_OPERATION_CANCELLED",
+        "message": "OFFICE_OPERATION_CANCELLED"
+      },
+      "elapsedMs": 1527,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 81,
+        "maxObservedGapMs": 27,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": true,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "expected cancellation identity",
+            "pass": true,
+            "detail": {
+              "code": "OFFICE_OPERATION_CANCELLED",
+              "message": "OFFICE_OPERATION_CANCELLED"
+            }
+          },
+          {
+            "name": "conversion reached a real source page before abort",
+            "pass": true
+          },
+          {
+            "name": "cancelled result not written",
+            "pass": true
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    },
+    {
+      "id": "chinese-text-layer",
+      "specification": {
+        "id": "chinese-text-layer",
+        "sourcePath": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\chinese-text-layer.pdf",
+        "expectedPages": 1,
+        "markers": [
+          "中文转换质量验证",
+          "同源文件不可修改",
+          "FRIDAY CHINESE TEST 8246"
+        ],
+        "ocr": false,
+        "font": {
+          "path": "C:\\WINDOWS\\Fonts\\simhei.ttf",
+          "sha256": "9b1959db3b3abeb7efdaec26edf7dfe871a6039de8d614af7248575207be629e"
+        }
+      },
+      "source": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\chinese-text-layer.pdf",
+        "bytes": 5003589,
+        "sha256": "b932330660160b40a4cd7772caede31423c3b3418fd5207b4afc8f44cc8d07e5",
+        "sha256After": "b932330660160b40a4cd7772caede31423c3b3418fd5207b4afc8f44cc8d07e5"
+      },
+      "ocrRequested": false,
+      "progress": [
+        {
+          "page": 1,
+          "total": 1,
+          "elapsedMs": 466
+        }
+      ],
+      "conversion": {
+        "pages": 1,
+        "scannedDocument": false,
+        "warnings": [],
+        "pageResults": [
+          {
+            "page": 1,
+            "status": "ok",
+            "confidence": 1
+          }
+        ]
+      },
+      "output": {
+        "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-conversion-quality-preview35-samples-qtM8Pk\\chinese-text-layer.docx",
+        "bytes": 3219,
+        "sha256": "38f7b781540ebbded9d95de196a18993c156bc9880935bc6e64a9cc1db58343b",
+        "persistedHashMatches": true,
+        "validation": {
+          "valid": true,
+          "checkedAt": "2026-11-06T06:23:46.344Z",
+          "textCharacters": 40,
+          "drawings": 0,
+          "partCount": 9
+        },
+        "readback": {
+          "text": "中文转换质量验证同源文件不可修改\nFRIDAY CHINESE TEST 8246",
+          "textCharacters": 41,
+          "markers": [
+            {
+              "marker": "中文转换质量验证",
+              "found": true,
+              "index": 0,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "同源文件不可修改",
+              "found": true,
+              "index": 8,
+              "exactTextPresent": true
+            },
+            {
+              "marker": "FRIDAY CHINESE TEST 8246",
+              "found": true,
+              "index": 16,
+              "exactTextPresent": true
+            }
+          ],
+          "imageParts": [],
+          "drawings": 0,
+          "tables": 0,
+          "tableRows": 0,
+          "tableCells": 0,
+          "columns": [],
+          "explicitPageBreaks": 0,
+          "sections": 1,
+          "note": "DOCX flow pagination and visual geometry are not established by XML counters; pages is the converter source-page count."
+        }
+      },
+      "elapsedMs": 776,
+      "hostEventLoop": {
+        "timerIntervalMs": 10,
+        "ticks": 41,
+        "maxObservedGapMs": 56,
+        "note": "Host timer observation only; no UI render-rate or packaged-main-process performance claim."
+      },
+      "aborted": false,
+      "workerCount": 1,
+      "workerTerminated": true,
+      "sourceUnchanged": true,
+      "noLateProgressAfterReturn": true,
+      "assessment": {
+        "pass": true,
+        "checks": [
+          {
+            "name": "source bytes unchanged",
+            "pass": true
+          },
+          {
+            "name": "worker terminated before returning",
+            "pass": true
+          },
+          {
+            "name": "no late progress after worker return",
+            "pass": true
+          },
+          {
+            "name": "conversion returned successfully",
+            "pass": true
+          },
+          {
+            "name": "OOXML package validated",
+            "pass": true
+          },
+          {
+            "name": "persisted bytes match worker output",
+            "pass": true
+          },
+          {
+            "name": "expected source-page count",
+            "pass": true,
+            "detail": {
+              "expected": 1,
+              "actual": 1
+            }
+          },
+          {
+            "name": "all editable text markers recovered",
+            "pass": true
+          }
+        ],
+        "visualFidelity": "not-rendered-or-human-reviewed",
+        "limitation": "Passing measured checks establishes the named markers/structures, page outcomes and worker behavior; it does not establish perfect layout or arbitrary-document quality."
+      }
+    }
+  ],
+  "limitations": [
+    "Structural validity is necessary but does not establish layout fidelity.",
+    "Source-page count is not a rendered Word pagination measurement.",
+    "No DOCX visual rendering or human comparison is performed by this script.",
+    "A synthetic matrix does not establish quality for arbitrary real PDF documents, an installed application, or live-model tool selection."
+  ],
+  "chineseFixture": {
+    "included": true,
+    "font": {
+      "path": "C:\\WINDOWS\\Fonts\\simhei.ttf",
+      "sha256": "9b1959db3b3abeb7efdaec26edf7dfe871a6039de8d614af7248575207be629e"
+    }
+  },
+  "realOcr": {
+    "helper": {
+      "path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office\\ocr\\win-ocr.exe",
+      "sha256": "6e6ff3038541e73b7d0a34875f0bf5644c19e11571acb895ce405cd3595c6e88"
+    },
+    "processStatus": 0,
+    "signal": null,
+    "stderr": "",
+    "recognizedText": "FRIDAY SCAN ALPHA\nPDF WORD QUALITY MATRIX\nLOCAL OCR RECOGNITION TEST\nThis generated page contains pixels and no PDF text layer\nThe output must disclose whether text recognition was used.",
+    "lines": [
+      {
+        "t": "FRIDAY SCAN ALPHA",
+        "c": 1,
+        "b": [
+          0.10049,
+          0.866793,
+          0.455065,
+          0.886995
+        ],
+        "chars": [
+          {
+            "t": "F",
+            "b": [
+              0.10049,
+              0.867424,
+              0.120779,
+              0.886364
+            ]
+          },
+          {
+            "t": "R",
+            "b": [
+              0.120779,
+              0.867424,
+              0.141068,
+              0.886364
+            ]
+          },
+          {
+            "t": "I",
+            "b": [
+              0.141068,
+              0.867424,
+              0.161356,
+              0.886364
+            ]
+          },
+          {
+            "t": "D",
+            "b": [
+              0.161356,
+              0.867424,
+              0.181645,
+              0.886364
+            ]
+          },
+          {
+            "t": "A",
+            "b": [
+              0.181645,
+              0.867424,
+              0.201934,
+              0.886364
+            ]
+          },
+          {
+            "t": "Y",
+            "b": [
+              0.201934,
+              0.867424,
+              0.222222,
+              0.886364
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "S",
+            "b": [
+              0.232843,
+              0.866793,
+              0.256127,
+              0.886995
+            ]
+          },
+          {
+            "t": "C",
+            "b": [
+              0.256127,
+              0.866793,
+              0.279412,
+              0.886995
+            ]
+          },
+          {
+            "t": "A",
+            "b": [
+              0.279412,
+              0.866793,
+              0.302696,
+              0.886995
+            ]
+          },
+          {
+            "t": "N",
+            "b": [
+              0.302696,
+              0.866793,
+              0.32598,
+              0.886995
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "A",
+            "b": [
+              0.337418,
+              0.867424,
+              0.360948,
+              0.886364
+            ]
+          },
+          {
+            "t": "L",
+            "b": [
+              0.360948,
+              0.867424,
+              0.384477,
+              0.886364
+            ]
+          },
+          {
+            "t": "P",
+            "b": [
+              0.384477,
+              0.867424,
+              0.408007,
+              0.886364
+            ]
+          },
+          {
+            "t": "H",
+            "b": [
+              0.408007,
+              0.867424,
+              0.431536,
+              0.886364
+            ]
+          },
+          {
+            "t": "A",
+            "b": [
+              0.431536,
+              0.867424,
+              0.455065,
+              0.886364
+            ]
+          }
+        ]
+      },
+      {
+        "t": "PDF WORD QUALITY MATRIX",
+        "c": 1,
+        "b": [
+          0.10049,
+          0.816288,
+          0.582516,
+          0.837753
+        ],
+        "chars": [
+          {
+            "t": "P",
+            "b": [
+              0.10049,
+              0.818182,
+              0.122004,
+              0.837121
+            ]
+          },
+          {
+            "t": "D",
+            "b": [
+              0.122004,
+              0.818182,
+              0.143519,
+              0.837121
+            ]
+          },
+          {
+            "t": "F",
+            "b": [
+              0.143519,
+              0.818182,
+              0.165033,
+              0.837121
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "W",
+            "b": [
+              0.176471,
+              0.817551,
+              0.203227,
+              0.837753
+            ]
+          },
+          {
+            "t": "O",
+            "b": [
+              0.203227,
+              0.817551,
+              0.229984,
+              0.837753
+            ]
+          },
+          {
+            "t": "R",
+            "b": [
+              0.229984,
+              0.817551,
+              0.25674,
+              0.837753
+            ]
+          },
+          {
+            "t": "D",
+            "b": [
+              0.25674,
+              0.817551,
+              0.283497,
+              0.837753
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "Q",
+            "b": [
+              0.295752,
+              0.816288,
+              0.316993,
+              0.837753
+            ]
+          },
+          {
+            "t": "U",
+            "b": [
+              0.316993,
+              0.816288,
+              0.338235,
+              0.837753
+            ]
+          },
+          {
+            "t": "A",
+            "b": [
+              0.338235,
+              0.816288,
+              0.359477,
+              0.837753
+            ]
+          },
+          {
+            "t": "L",
+            "b": [
+              0.359477,
+              0.816288,
+              0.380719,
+              0.837753
+            ]
+          },
+          {
+            "t": "I",
+            "b": [
+              0.380719,
+              0.816288,
+              0.401961,
+              0.837753
+            ]
+          },
+          {
+            "t": "T",
+            "b": [
+              0.401961,
+              0.816288,
+              0.423203,
+              0.837753
+            ]
+          },
+          {
+            "t": "Y",
+            "b": [
+              0.423203,
+              0.816288,
+              0.444444,
+              0.837753
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "M",
+            "b": [
+              0.455882,
+              0.818182,
+              0.476988,
+              0.837121
+            ]
+          },
+          {
+            "t": "A",
+            "b": [
+              0.476988,
+              0.818182,
+              0.498094,
+              0.837121
+            ]
+          },
+          {
+            "t": "T",
+            "b": [
+              0.498094,
+              0.818182,
+              0.519199,
+              0.837121
+            ]
+          },
+          {
+            "t": "R",
+            "b": [
+              0.519199,
+              0.818182,
+              0.540305,
+              0.837121
+            ]
+          },
+          {
+            "t": "I",
+            "b": [
+              0.540305,
+              0.818182,
+              0.561411,
+              0.837121
+            ]
+          },
+          {
+            "t": "X",
+            "b": [
+              0.561411,
+              0.818182,
+              0.582516,
+              0.837121
+            ]
+          }
+        ]
+      },
+      {
+        "t": "LOCAL OCR RECOGNITION TEST",
+        "c": 1,
+        "b": [
+          0.10049,
+          0.768308,
+          0.64951,
+          0.78851
+        ],
+        "chars": [
+          {
+            "t": "L",
+            "b": [
+              0.10049,
+              0.768308,
+              0.123529,
+              0.78851
+            ]
+          },
+          {
+            "t": "O",
+            "b": [
+              0.123529,
+              0.768308,
+              0.146569,
+              0.78851
+            ]
+          },
+          {
+            "t": "C",
+            "b": [
+              0.146569,
+              0.768308,
+              0.169608,
+              0.78851
+            ]
+          },
+          {
+            "t": "A",
+            "b": [
+              0.169608,
+              0.768308,
+              0.192647,
+              0.78851
+            ]
+          },
+          {
+            "t": "L",
+            "b": [
+              0.192647,
+              0.768308,
+              0.215686,
+              0.78851
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "O",
+            "b": [
+              0.226307,
+              0.768308,
+              0.251362,
+              0.78851
+            ]
+          },
+          {
+            "t": "C",
+            "b": [
+              0.251362,
+              0.768308,
+              0.276416,
+              0.78851
+            ]
+          },
+          {
+            "t": "R",
+            "b": [
+              0.276416,
+              0.768308,
+              0.301471,
+              0.78851
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "R",
+            "b": [
+              0.312908,
+              0.768308,
+              0.334522,
+              0.78851
+            ]
+          },
+          {
+            "t": "E",
+            "b": [
+              0.334522,
+              0.768308,
+              0.356135,
+              0.78851
+            ]
+          },
+          {
+            "t": "C",
+            "b": [
+              0.356135,
+              0.768308,
+              0.377748,
+              0.78851
+            ]
+          },
+          {
+            "t": "O",
+            "b": [
+              0.377748,
+              0.768308,
+              0.399361,
+              0.78851
+            ]
+          },
+          {
+            "t": "G",
+            "b": [
+              0.399361,
+              0.768308,
+              0.420974,
+              0.78851
+            ]
+          },
+          {
+            "t": "N",
+            "b": [
+              0.420974,
+              0.768308,
+              0.442588,
+              0.78851
+            ]
+          },
+          {
+            "t": "I",
+            "b": [
+              0.442588,
+              0.768308,
+              0.464201,
+              0.78851
+            ]
+          },
+          {
+            "t": "T",
+            "b": [
+              0.464201,
+              0.768308,
+              0.485814,
+              0.78851
+            ]
+          },
+          {
+            "t": "I",
+            "b": [
+              0.485814,
+              0.768308,
+              0.507427,
+              0.78851
+            ]
+          },
+          {
+            "t": "O",
+            "b": [
+              0.507427,
+              0.768308,
+              0.52904,
+              0.78851
+            ]
+          },
+          {
+            "t": "N",
+            "b": [
+              0.52904,
+              0.768308,
+              0.550654,
+              0.78851
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "T",
+            "b": [
+              0.562908,
+              0.768308,
+              0.584559,
+              0.78851
+            ]
+          },
+          {
+            "t": "E",
+            "b": [
+              0.584559,
+              0.768308,
+              0.606209,
+              0.78851
+            ]
+          },
+          {
+            "t": "S",
+            "b": [
+              0.606209,
+              0.768308,
+              0.627859,
+              0.78851
+            ]
+          },
+          {
+            "t": "T",
+            "b": [
+              0.627859,
+              0.768308,
+              0.64951,
+              0.78851
+            ]
+          }
+        ]
+      },
+      {
+        "t": "This generated page contains pixels and no PDF text layer",
+        "c": 1,
+        "b": [
+          0.098039,
+          0.661616,
+          0.734477,
+          0.679293
+        ],
+        "chars": [
+          {
+            "t": "T",
+            "b": [
+              0.098039,
+              0.665404,
+              0.109477,
+              0.679293
+            ]
+          },
+          {
+            "t": "h",
+            "b": [
+              0.109477,
+              0.665404,
+              0.120915,
+              0.679293
+            ]
+          },
+          {
+            "t": "i",
+            "b": [
+              0.120915,
+              0.665404,
+              0.132353,
+              0.679293
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.132353,
+              0.665404,
+              0.143791,
+              0.679293
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "g",
+            "b": [
+              0.151961,
+              0.661616,
+              0.163943,
+              0.679293
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.163943,
+              0.661616,
+              0.175926,
+              0.679293
+            ]
+          },
+          {
+            "t": "n",
+            "b": [
+              0.175926,
+              0.661616,
+              0.187908,
+              0.679293
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.187908,
+              0.661616,
+              0.199891,
+              0.679293
+            ]
+          },
+          {
+            "t": "r",
+            "b": [
+              0.199891,
+              0.661616,
+              0.211874,
+              0.679293
+            ]
+          },
+          {
+            "t": "a",
+            "b": [
+              0.211874,
+              0.661616,
+              0.223856,
+              0.679293
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.223856,
+              0.661616,
+              0.235839,
+              0.679293
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.235839,
+              0.661616,
+              0.247821,
+              0.679293
+            ]
+          },
+          {
+            "t": "d",
+            "b": [
+              0.247821,
+              0.661616,
+              0.259804,
+              0.679293
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "p",
+            "b": [
+              0.269608,
+              0.661616,
+              0.28268,
+              0.675505
+            ]
+          },
+          {
+            "t": "a",
+            "b": [
+              0.28268,
+              0.661616,
+              0.295752,
+              0.675505
+            ]
+          },
+          {
+            "t": "g",
+            "b": [
+              0.295752,
+              0.661616,
+              0.308824,
+              0.675505
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.308824,
+              0.661616,
+              0.321895,
+              0.675505
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "c",
+            "b": [
+              0.330065,
+              0.665404,
+              0.341299,
+              0.679293
+            ]
+          },
+          {
+            "t": "o",
+            "b": [
+              0.341299,
+              0.665404,
+              0.352533,
+              0.679293
+            ]
+          },
+          {
+            "t": "n",
+            "b": [
+              0.352533,
+              0.665404,
+              0.363766,
+              0.679293
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.363766,
+              0.665404,
+              0.375,
+              0.679293
+            ]
+          },
+          {
+            "t": "a",
+            "b": [
+              0.375,
+              0.665404,
+              0.386234,
+              0.679293
+            ]
+          },
+          {
+            "t": "i",
+            "b": [
+              0.386234,
+              0.665404,
+              0.397467,
+              0.679293
+            ]
+          },
+          {
+            "t": "n",
+            "b": [
+              0.397467,
+              0.665404,
+              0.408701,
+              0.679293
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.408701,
+              0.665404,
+              0.419935,
+              0.679293
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "p",
+            "b": [
+              0.428922,
+              0.661616,
+              0.438998,
+              0.679293
+            ]
+          },
+          {
+            "t": "i",
+            "b": [
+              0.438998,
+              0.661616,
+              0.449074,
+              0.679293
+            ]
+          },
+          {
+            "t": "x",
+            "b": [
+              0.449074,
+              0.661616,
+              0.45915,
+              0.679293
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.45915,
+              0.661616,
+              0.469227,
+              0.679293
+            ]
+          },
+          {
+            "t": "l",
+            "b": [
+              0.469227,
+              0.661616,
+              0.479303,
+              0.679293
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.479303,
+              0.661616,
+              0.489379,
+              0.679293
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "a",
+            "b": [
+              0.498366,
+              0.665404,
+              0.511166,
+              0.679293
+            ]
+          },
+          {
+            "t": "n",
+            "b": [
+              0.511166,
+              0.665404,
+              0.523965,
+              0.679293
+            ]
+          },
+          {
+            "t": "d",
+            "b": [
+              0.523965,
+              0.665404,
+              0.536765,
+              0.679293
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "n",
+            "b": [
+              0.546569,
+              0.665404,
+              0.559232,
+              0.675505
+            ]
+          },
+          {
+            "t": "o",
+            "b": [
+              0.559232,
+              0.665404,
+              0.571895,
+              0.675505
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "P",
+            "b": [
+              0.580882,
+              0.665404,
+              0.596405,
+              0.679293
+            ]
+          },
+          {
+            "t": "D",
+            "b": [
+              0.596405,
+              0.665404,
+              0.611928,
+              0.679293
+            ]
+          },
+          {
+            "t": "F",
+            "b": [
+              0.611928,
+              0.665404,
+              0.627451,
+              0.679293
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.634804,
+              0.665404,
+              0.644608,
+              0.678662
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.644608,
+              0.665404,
+              0.654412,
+              0.678662
+            ]
+          },
+          {
+            "t": "x",
+            "b": [
+              0.654412,
+              0.665404,
+              0.664216,
+              0.678662
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.664216,
+              0.665404,
+              0.67402,
+              0.678662
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "l",
+            "b": [
+              0.68219,
+              0.661616,
+              0.692647,
+              0.679293
+            ]
+          },
+          {
+            "t": "a",
+            "b": [
+              0.692647,
+              0.661616,
+              0.703105,
+              0.679293
+            ]
+          },
+          {
+            "t": "y",
+            "b": [
+              0.703105,
+              0.661616,
+              0.713562,
+              0.679293
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.713562,
+              0.661616,
+              0.72402,
+              0.679293
+            ]
+          },
+          {
+            "t": "r",
+            "b": [
+              0.72402,
+              0.661616,
+              0.734477,
+              0.679293
+            ]
+          }
+        ]
+      },
+      {
+        "t": "The output must disclose whether text recognition was used.",
+        "c": 1,
+        "b": [
+          0.098039,
+          0.626894,
+          0.752451,
+          0.644571
+        ],
+        "chars": [
+          {
+            "t": "T",
+            "b": [
+              0.098039,
+              0.630682,
+              0.111928,
+              0.644571
+            ]
+          },
+          {
+            "t": "h",
+            "b": [
+              0.111928,
+              0.630682,
+              0.125817,
+              0.644571
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.125817,
+              0.630682,
+              0.139706,
+              0.644571
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "o",
+            "b": [
+              0.147876,
+              0.626894,
+              0.159041,
+              0.643939
+            ]
+          },
+          {
+            "t": "u",
+            "b": [
+              0.159041,
+              0.626894,
+              0.170207,
+              0.643939
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.170207,
+              0.626894,
+              0.181373,
+              0.643939
+            ]
+          },
+          {
+            "t": "p",
+            "b": [
+              0.181373,
+              0.626894,
+              0.192538,
+              0.643939
+            ]
+          },
+          {
+            "t": "u",
+            "b": [
+              0.192538,
+              0.626894,
+              0.203704,
+              0.643939
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.203704,
+              0.626894,
+              0.214869,
+              0.643939
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "m",
+            "b": [
+              0.223039,
+              0.630682,
+              0.236111,
+              0.643939
+            ]
+          },
+          {
+            "t": "u",
+            "b": [
+              0.236111,
+              0.630682,
+              0.249183,
+              0.643939
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.249183,
+              0.630682,
+              0.262255,
+              0.643939
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.262255,
+              0.630682,
+              0.275327,
+              0.643939
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "d",
+            "b": [
+              0.28268,
+              0.630682,
+              0.293505,
+              0.644571
+            ]
+          },
+          {
+            "t": "i",
+            "b": [
+              0.293505,
+              0.630682,
+              0.30433,
+              0.644571
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.30433,
+              0.630682,
+              0.315155,
+              0.644571
+            ]
+          },
+          {
+            "t": "c",
+            "b": [
+              0.315155,
+              0.630682,
+              0.32598,
+              0.644571
+            ]
+          },
+          {
+            "t": "l",
+            "b": [
+              0.32598,
+              0.630682,
+              0.336806,
+              0.644571
+            ]
+          },
+          {
+            "t": "o",
+            "b": [
+              0.336806,
+              0.630682,
+              0.347631,
+              0.644571
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.347631,
+              0.630682,
+              0.358456,
+              0.644571
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.358456,
+              0.630682,
+              0.369281,
+              0.644571
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "w",
+            "b": [
+              0.377451,
+              0.630682,
+              0.389939,
+              0.644571
+            ]
+          },
+          {
+            "t": "h",
+            "b": [
+              0.389939,
+              0.630682,
+              0.402428,
+              0.644571
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.402428,
+              0.630682,
+              0.414916,
+              0.644571
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.414916,
+              0.630682,
+              0.427404,
+              0.644571
+            ]
+          },
+          {
+            "t": "h",
+            "b": [
+              0.427404,
+              0.630682,
+              0.439893,
+              0.644571
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.439893,
+              0.630682,
+              0.452381,
+              0.644571
+            ]
+          },
+          {
+            "t": "r",
+            "b": [
+              0.452381,
+              0.630682,
+              0.464869,
+              0.644571
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.471405,
+              0.630682,
+              0.481209,
+              0.643939
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.481209,
+              0.630682,
+              0.491013,
+              0.643939
+            ]
+          },
+          {
+            "t": "x",
+            "b": [
+              0.491013,
+              0.630682,
+              0.500817,
+              0.643939
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.500817,
+              0.630682,
+              0.510621,
+              0.643939
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "r",
+            "b": [
+              0.518791,
+              0.626894,
+              0.529486,
+              0.644571
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.529486,
+              0.626894,
+              0.540181,
+              0.644571
+            ]
+          },
+          {
+            "t": "c",
+            "b": [
+              0.540181,
+              0.626894,
+              0.550876,
+              0.644571
+            ]
+          },
+          {
+            "t": "o",
+            "b": [
+              0.550876,
+              0.626894,
+              0.561572,
+              0.644571
+            ]
+          },
+          {
+            "t": "g",
+            "b": [
+              0.561572,
+              0.626894,
+              0.572267,
+              0.644571
+            ]
+          },
+          {
+            "t": "n",
+            "b": [
+              0.572267,
+              0.626894,
+              0.582962,
+              0.644571
+            ]
+          },
+          {
+            "t": "i",
+            "b": [
+              0.582962,
+              0.626894,
+              0.593657,
+              0.644571
+            ]
+          },
+          {
+            "t": "t",
+            "b": [
+              0.593657,
+              0.626894,
+              0.604352,
+              0.644571
+            ]
+          },
+          {
+            "t": "i",
+            "b": [
+              0.604352,
+              0.626894,
+              0.615048,
+              0.644571
+            ]
+          },
+          {
+            "t": "o",
+            "b": [
+              0.615048,
+              0.626894,
+              0.625743,
+              0.644571
+            ]
+          },
+          {
+            "t": "n",
+            "b": [
+              0.625743,
+              0.626894,
+              0.636438,
+              0.644571
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "w",
+            "b": [
+              0.644608,
+              0.630682,
+              0.658769,
+              0.640783
+            ]
+          },
+          {
+            "t": "a",
+            "b": [
+              0.658769,
+              0.630682,
+              0.67293,
+              0.640783
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.67293,
+              0.630682,
+              0.687092,
+              0.640783
+            ]
+          },
+          {
+            "t": " ",
+            "b": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "t": "u",
+            "b": [
+              0.696078,
+              0.630682,
+              0.707353,
+              0.644571
+            ]
+          },
+          {
+            "t": "s",
+            "b": [
+              0.707353,
+              0.630682,
+              0.718627,
+              0.644571
+            ]
+          },
+          {
+            "t": "e",
+            "b": [
+              0.718627,
+              0.630682,
+              0.729902,
+              0.644571
+            ]
+          },
+          {
+            "t": "d",
+            "b": [
+              0.729902,
+              0.630682,
+              0.741176,
+              0.644571
+            ]
+          },
+          {
+            "t": ".",
+            "b": [
+              0.741176,
+              0.630682,
+              0.752451,
+              0.644571
+            ]
+          }
+        ]
+      }
+    ],
+    "paperShare": 0.982212,
+    "verified": true
+  },
+  "runtimeFilesUnchanged": true,
+  "summary": {
+    "total": 10,
+    "passed": 9,
+    "failed": [
+      {
+        "id": "english-multipage",
+        "checks": [
+          {
+            "name": "all editable text markers recovered",
+            "pass": false
+          }
+        ]
+      }
+    ],
+    "visualFidelity": "not assessed"
+  },
+  "elapsedMs": 16579,
+  "finishedAt": "2026-11-06T06:23:46.456Z"
+}

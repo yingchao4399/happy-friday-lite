@@ -160,6 +160,14 @@ export function isOfficeDockSender(sender) {
   return Boolean(dockView && !dockView.webContents.isDestroyed() && dockView.webContents === sender)
 }
 
+/** Office 任务只向本地可信 Dock 转发自身的两类状态事件。 */
+export function notifyOfficeDockOperation(channel, payload) {
+  if (!['office-operation-updated', 'office-operation-progress'].includes(channel)) return false
+  if (!loaded || !dockView || dockView.webContents.isDestroyed()) return false
+  dockView.webContents.send(channel, payload)
+  return true
+}
+
 export function openFridayFromOfficeDock() {
   if (!mainWindow || mainWindow.isDestroyed()) return false
   mainWindow.webContents.send('office-dock-open-friday')

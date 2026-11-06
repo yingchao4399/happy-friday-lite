@@ -27,6 +27,10 @@ const channels = new Set([
   'ai-core-task-pause',
   'ai-core-task-resume',
   'ai-core-task-cancel',
+  'office-get-capabilities',
+  'office-get-operation-task',
+  'office-cancel-operation-task',
+  'office-reopen-artifact',
   'office-dock-set-expanded',
   'office-dock-move',
   'office-dock-set-position',
@@ -39,7 +43,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return ipcRenderer.invoke(channel, args)
   },
   on(channel, callback) {
-    const events = new Set(['chat-chunk', 'chat-done', 'chat-error', 'chat-session-created', 'session-title-updated', 'config-changed'])
+    const events = new Set(['chat-chunk', 'chat-done', 'chat-error', 'chat-session-created', 'session-title-updated', 'config-changed', 'office-operation-updated', 'office-operation-progress'])
     if (!events.has(channel)) return () => {}
     const subscription = (event, ...args) => callback(...args)
     ipcRenderer.on(channel, subscription)

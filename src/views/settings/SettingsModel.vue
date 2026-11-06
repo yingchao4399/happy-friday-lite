@@ -1,10 +1,6 @@
 <template>
   <div class="model-settings-page">
-    <button class="back-btn" @click="goBack">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"></polyline>
-      </svg>
-    </button>
+    <SettingsBackButton />
     <h1 class="page-title">{{ t('settings.modelSettings') }}</h1>
 
     <div class="settings-content">
@@ -433,6 +429,7 @@
 </template>
 
 <script setup>
+import SettingsBackButton from '@/components/settings/SettingsBackButton.vue'
 import { ref, computed, onMounted, onUnmounted, onDeactivated } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -1034,30 +1031,6 @@ function formatTime(ts) {
   align-items: center;
   padding: 32px 40px;
   position: relative;
-}
-
-.back-btn {
-  position: absolute;
-  top: 12px;
-  left: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-primary);
-  transition: all 0.15s;
-  border-radius: 6px;
-}
-
-.back-btn:hover {
-  background-color: var(--bg-hover);
-}
-
-.back-btn svg {
-  display: block;
 }
 
 .page-title {

@@ -88,9 +88,17 @@
             <span class="agent-dock-status" :class="`status-${task.status}`">{{ statusLabel(task.status) }}</span>
           </div>
           <p v-if="task.error?.message" class="agent-dock-task-error">{{ task.error.message }}</p>
+          <p v-if="officeTaskRecord(task)" class="agent-dock-office-phase">{{ t('common.agentDock.officePhase') }}: {{ officePhaseLabel(task) }}</p>
+          <div v-if="officeTaskArtifact(task)" class="agent-dock-office-artifact">
+            <p>{{ t('common.agentDock.officeSaved') }}</p>
+            <p class="agent-dock-office-path">{{ officeTaskArtifact(task).path }}</p>
+            <p v-if="officeTaskArtifact(task).quality?.level">{{ t('common.agentDock.officeQuality') }}: {{ officeQualityLabel(task) }}</p>
+            <p v-if="officeTaskArtifact(task).open?.status === 'failed'" class="agent-dock-task-error">{{ t('common.agentDock.officeOpenFailed') }}</p>
+            <button type="button" :disabled="busyTaskId === task.id" @click="reopenOfficeResult(task)">{{ t('common.agentDock.officeReopen') }}</button>
+          </div>
           <div class="agent-dock-actions">
             <button v-if="task.status === 'awaiting_approval'" type="button" @click="requestApproval(task)">{{ t('common.agentDock.review') }}</button>
-            <button v-if="['running', 'verifying'].includes(task.status) && !task.pauseRequested" type="button" :disabled="busyTaskId === task.id" @click="controlTask(task, 'pause')">{{ t('common.agentDock.pause') }}</button>
+            <button v-if="['running', 'verifying'].includes(task.status) && !task.pauseRequested && !isStandaloneOfficeTask(task)" type="button" :disabled="busyTaskId === task.id" @click="controlTask(task, 'pause')">{{ t('common.agentDock.pause') }}</button>
             <button v-if="task.status === 'paused'" type="button" :disabled="busyTaskId === task.id" @click="controlTask(task, 'resume')">{{ t('common.agentDock.resume') }}</button>
             <button v-if="['awaiting_approval', 'running', 'verifying', 'paused'].includes(task.status)" class="danger" type="button" :disabled="busyTaskId === task.id" @click="requestCancel(task)">{{ t('common.agentDock.cancelTask') }}</button>
           </div>
@@ -139,6 +147,7 @@ import ScopedHistoryButton from '@/components/chat/ScopedHistoryButton.vue'
 import NewConversationButton from '@/components/chat/NewConversationButton.vue'
 import { conversationStore } from '@/services/conversationStore'
 import { clampDockPosition } from './dock-position.js'
+import { officeTaskRecord, officeTaskArtifact, isStandaloneOfficeTask } from './office-task-view.js'
 
 const { t } = useI18n()
 const props = defineProps({ officeOverlay: { type: Boolean, default: false } })
@@ -176,6 +185,10 @@ let unlistenDockDone = null
 let unlistenDockError = null
 let unlistenDockSessionCreated = null
 let unlistenAssistantConfig = null
+let unlistenOfficeOperation = null
+let officeTaskRefreshTimer = null
+let officeTaskRefreshPending = false
+let dockDisposed = false
 let refreshTimer = null
 let resizeObserver = null
 let capabilitiesRequestSeq = 0
@@ -228,6 +241,31 @@ function statusLabel(status) {
   const key = `common.agentDock.status.${status || 'unknown'}`
   const translated = t(key)
   return translated === key ? String(status || '') : translated
+}
+
+function officePhaseLabel(task) {
+  const phase = officeTaskRecord(task)?.phase || 'accepted'
+  const key = `common.agentDock.officePhases.${phase}`
+  const label = t(key)
+  return label === key ? phase : label
+}
+
+function officeQualityLabel(task) {
+  const level = officeTaskArtifact(task)?.quality?.level || 'unknown'
+  const key = `common.agentDock.officeQualities.${level}`
+  const label = t(key)
+  return label === key ? level : label
+}
+
+async function reopenOfficeResult(task) {
+  if (busyTaskId.value) return
+  busyTaskId.value = task.id
+  try {
+    await electronService.reopenOfficeArtifact(officeTaskArtifact(task)?.id || task.id)
+    await refreshTasks()
+  } catch (_error) {
+    error.value = t('common.agentDock.officeReopenFailed')
+  } finally { busyTaskId.value = '' }
 }
 
 function normalizeDockModel(model) {
@@ -434,7 +472,8 @@ function stopTriggerDrag() {
 }
 
 async function refreshTasks() {
-  if (loading.value) return
+  if (dockDisposed) return
+  if (loading.value) { officeTaskRefreshPending = true; return }
   loading.value = true
   error.value = ''
   try {
@@ -444,7 +483,19 @@ async function refreshTasks() {
     error.value = t('common.agentDock.loadFailed')
   } finally {
     loading.value = false
+    if (officeTaskRefreshPending && !dockDisposed) {
+      officeTaskRefreshPending = false
+      scheduleOfficeTaskRefresh()
+    }
   }
+}
+
+function scheduleOfficeTaskRefresh() {
+  if (dockDisposed || officeTaskRefreshTimer !== null) return
+  officeTaskRefreshTimer = window.setTimeout(() => {
+    officeTaskRefreshTimer = null
+    void refreshTasks()
+  }, 100)
 }
 
 async function refreshCapabilities() {
@@ -519,7 +570,8 @@ async function confirmCancelTask() {
   if (!task || busyTaskId.value) return
   busyTaskId.value = task.id
   try {
-    await electronService.aiCoreCancelTask(task.id)
+    if (isStandaloneOfficeTask(task)) await electronService.cancelOfficeOperationTask(task.id)
+    else await electronService.aiCoreCancelTask(task.id)
     await refreshTasks()
   } catch (_error) {
     error.value = t('common.agentDock.actionFailed')
@@ -568,6 +620,8 @@ watch(open, async () => {
 })
 
 onMounted(() => {
+  dockDisposed = false
+  unlistenOfficeOperation = electronService.listen('office-operation-updated', scheduleOfficeTaskRefresh)
   const applyAssistantSettings = (config) => {
     const saved = config?.globalAgentDock || {}
     assistantSettings.value = {
@@ -628,6 +682,11 @@ watch(routePath, () => {
 })
 
 onUnmounted(() => {
+  dockDisposed = true
+  unlistenOfficeOperation?.()
+  window.clearTimeout(officeTaskRefreshTimer)
+  officeTaskRefreshTimer = null
+  officeTaskRefreshPending = false
   if (refreshTimer !== null && typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(refreshTimer)
   window.clearTimeout(refreshTimer)
   refreshTimer = null
@@ -709,4 +768,8 @@ onUnmounted(() => {
 .agent-dock-footer { display: flex; flex: none; justify-content: space-between; gap: 8px; padding: 11px 14px; }
 @media (max-width: 600px) { .agent-dock:not(.agent-dock--office-overlay) { right: 14px; bottom: 14px; } .agent-dock-panel { width: min(390px, calc(100vw - 16px)); } }
 @media (prefers-reduced-motion: reduce) { .agent-dock *, .agent-dock *::before, .agent-dock *::after { scroll-behavior: auto !important; transition-duration: 0s !important; } }
+.agent-dock-office-artifact { margin: 8px 0; font-size: 12px; }
+.agent-dock-office-artifact p { margin: 4px 0; }
+.agent-dock-office-path { overflow-wrap: anywhere; user-select: text; }
+.agent-dock-office-phase { font-size: 12px; opacity: .8; }
 </style>

@@ -1,5 +1,17 @@
 # Happy Friday Lite
 
+## 下一预览版：Office 共用业务操作（开发中）
+
+- PDF 转 DOCX、从 HTML 正文创建 DOCX 已接入同一 Office 业务服务。真实 Electron fixture 已验证 PDF renderer 转换/创建 API、菜单 IPC 与主助手 registry 的 DOCX 正文、摘要和打开结果；远端模型工具选择、Core 完整对话和安装验收仍在进行。
+- 任务分别记录源快照、转换质量、已保存文件和编辑器打开结果。扫描件的图片页、混合可编辑页会明确提示；重新打开已保存结果不重复转换。
+- AI 生成文件继续遵守现有 `SANDBOX` 输出与审批规则。只有 DOCX 包校验、持久交付和落盘回读通过，才能报告成功。
+- GenOffice 继续提供编辑器和转换引擎。共用编辑器注册表、必需 hooks 与构建资源清单为后续跟随上游更新提供边界；打包核对版本、真实源码身份和资源摘要。AI Markdown、AI HTML 的完整功能对等仍按后续融合计划推进。
+- preview.36 新增机器可读的官方来源锁、私有差异账本和三方审计工具。日常构建核对宿主/vendor 两份依赖锁与实际源码；正式上游升级门禁要求固定官方引用、融合提交及逐项差异审计。候选 `v0.12.852` 尚未融合，当前 vendor 仍为 `v0.10.639-27-g8ed0c8d0`。
+- preview.36 修复 Windows 更新元数据流水线：从最终安装器和 blockmap 实测生成校验和、build-info 与 `latest.yml`，原子写入后回读；技术版本 `3.0.8-preview.36` 高于旧预览技术版本 `3.0.7`，展示版本为 `3.0.7.01-preview.36`。新增从包内实际模块和资源运行三入口及 Core 验收的模式；确定性驱动与真实模型/人工交互分别验收。
+- preview.35 候选安装器及历史证据保留。preview.36 的构建、质量、安装/升级/回滚和 GitHub 状态以[实施与验收账本](docs/office-ai-capability-2026-11-05/05-implementation-and-validation.md)为准；持续更新规则见[上游集成合同](docs/office-ai-capability-2026-11-05/04-upstream-integration-contract.md)。
+
+AI HTML 已开始接入，采用单独固定的官方源码树与依赖，避免替换现有四类编辑器的共享包。开发构建先执行 `node scripts/sync-office-html-upstream.mjs`，再执行 `npm run office:build -- --experimental-html`；清单单独记录 HTML 来源身份，宿主加载还需显式设置 `FRIDAY_OFFICE_EXPERIMENTAL_HTML=1`。默认文件关联和普通用户入口继续按验收状态控制；AI、资源隔离、导出及安装对等仍在实施。详见 [AI HTML 三份实施文档](docs/office-ai-html-next/index.html)。
+
 ## 3.0.7.01-preview.33
 
 - 修复笔记工具栏“插入”菜单缺少简体中文文案的问题，补齐视频、音频、附件、笔记、笔记引用、知识库和知识库引用。
@@ -269,6 +281,8 @@ npm run electron:build:arm64
 ```
 
 构建产物输出至 `release/` 目录。
+
+Office 资源由 `npm run office:build` 生成，禁止手改 `resources/office/`。各打包脚本先重建 Office，再执行 `npm run office:verify`；门禁会将当前源码与生成清单比对，源码改变后必须重新构建。正式清洁候选还需执行 `npm run office:build:release` 和 `npm run office:verify:release`。这些检查证明源码与资源组合匹配，真实运行与安装验收仍需分别完成。
 
 > 说明：请在「设置 -> 通用 -> Python 环境」中配置 Python 环境：
 > 1. 点击「自动检测」自动发现系统已安装的 Python；或手动选择 Python 可执行文件路径；

@@ -1,0 +1,12 @@
+FRIDAY TWO COLUMN TITLE
+LEFT COLUMN ALPHA
+Left paragraph line 1 content
+Left paragraph line 2 content
+Left paragraph line 3 content
+Left paragraph line 4 content
+Left paragraph line 5 content
+Left paragraph line 6 content
+LEFT COLUMN BETA
+Left paragraph line 8 content
+Left paragraph line 9 content
+RIGHT COLUMN GAMMA Right paragraph line 1 content Right paragraph line 2 content Right paragraph line 3 content Right paragraph line 4 content Right paragraph line 5 content Right paragraph line 6 content RIGHT COLUMN DELTA Right paragraph line 8 content Right paragraph line 9 content

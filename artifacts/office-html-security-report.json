@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "checkedAt": "2026-11-06T17:41:47.926Z",
+  "electron": "42.2.0",
+  "steps": [
+    {
+      "name": "作者脚本、事件处理、嵌套主动内容和刷新被隔离；可信 inspector 正常启动",
+      "inspected": {
+        "api": "undefined",
+        "frames": 0,
+        "handlerCount": 0,
+        "require": "undefined",
+        "scriptCount": 1
+      }
+    },
+    {
+      "name": "受控 inspector 选择仍返回 sid 和几何信息"
+    },
+    {
+      "name": "演示保留作者脚本，伪造编辑消息全部不被接纳",
+      "sourceSha256": "6c3034a2d8d253756868759a1ed4be1677f36f6c4bd0b5a44a6bcfbaa674b6cd",
+      "adaptedModuleSha256": "2580aafa3797a2b2c4d2f845eef4ace50707a0bfc1f397b1f57fc42e56a0e985"
+    }
+  ],
+  "limitations": [
+    "真实 Chromium 派生预览与 inspector 边界；最终 HTML App 的模式切换、协议与安装版另行验收。"
+  ],
+  "stage": "edit-isolation-passed"
+}

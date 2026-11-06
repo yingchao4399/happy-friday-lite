@@ -6,6 +6,7 @@ import { getDataDir } from '../config.js'
 import { loadDocument } from '../rag/loaders.js'
 import * as db from '../db.js'
 import { mediaFormats } from '../rag/mediaTranscription.js'
+import { rerankLocalFileHits } from '../office/ai-local-search.js'
 
 export const documentFormats = ['txt', 'text', 'log', 'md', 'markdown', 'mdx', 'csv', 'xml', 'html', 'htm', 'json', 'pdf', 'epub', 'docx', 'xls', 'xlsx', 'pptx', 'note', 'png', 'jpg', 'jpeg', 'bmp', 'tif', 'tiff']
 const supported = new Set([...documentFormats, ...mediaFormats])
@@ -92,5 +93,6 @@ async function searchContent(query, limit) {
   const tmp = `${indexFile}.tmp`
   fs.writeFileSync(tmp, JSON.stringify(index), 'utf8')
   fs.renameSync(tmp, indexFile)
-  return results.sort((a, b) => b.score - a.score).slice(0, limit)
+  const ranked = await rerankLocalFileHits(query, results.sort((a, b) => b.score - a.score))
+  return ranked.slice(0, limit)
 }

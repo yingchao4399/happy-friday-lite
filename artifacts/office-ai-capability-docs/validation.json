@@ -1,0 +1,155 @@
+{
+  "checkedAt": "2026-11-06T11:54:22.212Z",
+  "status": "document-build-and-static-checks-passed",
+  "productFixStatus": "implementation-in-progress",
+  "productEvidenceDocument": "05-implementation-and-validation.md",
+  "documents": [
+    {
+      "file": "01-research-report",
+      "chapters": 14,
+      "hanCharacters": 7780,
+      "markdownBytes": 33450,
+      "htmlBytes": 50174,
+      "sha256": "fe1ba4078f89b68a190671b55bfc76b85c73b6915080cc8a160078c385cc2bc6"
+    },
+    {
+      "file": "02-product-requirements",
+      "chapters": 18,
+      "hanCharacters": 8226,
+      "markdownBytes": 32733,
+      "htmlBytes": 51576,
+      "sha256": "255264503567e15aee10ff48c161584cd398f68a0293fe322c4c961ec6589b29"
+    },
+    {
+      "file": "03-architecture-and-work-breakdown",
+      "chapters": 21,
+      "hanCharacters": 10305,
+      "markdownBytes": 50581,
+      "htmlBytes": 73340,
+      "sha256": "d2e6395ff6331050d17d9345e33960d5ddff0f9d848d914bd3569f31d6324815"
+    },
+    {
+      "file": "04-upstream-integration-contract",
+      "chapters": 13,
+      "hanCharacters": 7717,
+      "markdownBytes": 38306,
+      "htmlBytes": 54726,
+      "sha256": "c7037675b519f276cee4b8ca319a2b2a3e866c9c1a05d8af3d80db19bc43f114"
+    },
+    {
+      "file": "05-implementation-and-validation",
+      "chapters": 14,
+      "hanCharacters": 8941,
+      "markdownBytes": 44026,
+      "htmlBytes": 61190,
+      "sha256": "bd17936fc4773d09600066fe59fce95a7c3e403b0b16dc63953066ecca82b665"
+    }
+  ],
+  "requirements": 65,
+  "acceptanceCases": 48,
+  "workPackages": 14,
+  "originalDocuments": [
+    {
+      "file": "GenOffice-v0.12.600-升级分析报告.md",
+      "sha256": "8B65B67AB97B740E5236B959FF9393F5A0B348D8172B3A89BAF9CF7482F055BB",
+      "unchanged": true
+    },
+    {
+      "file": "GenOffice-v0.12.600-融合升级方案.md",
+      "sha256": "D17E30433EDA49561BAF48EE0DFA0AEB63E4B765590ABDF76D8C08DE860F11BE",
+      "unchanged": true
+    },
+    {
+      "file": "GenOffice-v0.12.600-融合升级PRD.md",
+      "sha256": "4F20C3FF905D14E95A591DAF46E1C064730BEE16576B9F20F4CEB3305544DE11",
+      "unchanged": true
+    },
+    {
+      "file": "PDF转Word-故障研究报告.md",
+      "sha256": "1B20413D9160B658529C60618526BB4558B227F5CA8F5B5FE1AA9F907BF33B7B",
+      "unchanged": true
+    },
+    {
+      "file": "PDF转Word-修复方案.md",
+      "sha256": "F358E5DB523F544C552D17ABCA024355F16816712EB6F54DFD184689841E22C7",
+      "unchanged": true
+    },
+    {
+      "file": "PDF转Word-修复PRD.md",
+      "sha256": "8F590CC71D6AADCC11071B9EA73073BD2DDEFDE882F40B2CDB550CC12C6AA844",
+      "unchanged": true
+    }
+  ],
+  "htmlChecks": [
+    {
+      "file": "index.html",
+      "localLinks": true,
+      "utf8": true,
+      "selfContained": true,
+      "anchorsUnique": true
+    },
+    {
+      "file": "01-research-report.html",
+      "localLinks": true,
+      "utf8": true,
+      "selfContained": true,
+      "anchorsUnique": true
+    },
+    {
+      "file": "02-product-requirements.html",
+      "localLinks": true,
+      "utf8": true,
+      "selfContained": true,
+      "anchorsUnique": true
+    },
+    {
+      "file": "03-architecture-and-work-breakdown.html",
+      "localLinks": true,
+      "utf8": true,
+      "selfContained": true,
+      "anchorsUnique": true
+    },
+    {
+      "file": "04-upstream-integration-contract.html",
+      "localLinks": true,
+      "utf8": true,
+      "selfContained": true,
+      "anchorsUnique": true
+    },
+    {
+      "file": "05-implementation-and-validation.html",
+      "localLinks": true,
+      "utf8": true,
+      "selfContained": true,
+      "anchorsUnique": true
+    }
+  ],
+  "upstreamObservation": {
+    "observedOn": "2026-11-05",
+    "repository": "https://github.com/genspark-ai/genoffice",
+    "requestedReleaseUrl": "https://github.com/genspark-ai/genoffice/releases/latest",
+    "resolvedReleaseUrl": "https://github.com/genspark-ai/genoffice/releases/tag/v0.12.852",
+    "releaseTag": "v0.12.852",
+    "latestBadgeObserved": true,
+    "displayedReleaseTime": "2026-11-05 07:44",
+    "displayedTimeZone": "not specified in fetched page",
+    "tagRefSha": "4b55db9ed1994575a695160ffc6cfd0bfc866211",
+    "tagVerificationCommand": "git -C vendor/happyoffice ls-remote https://github.com/genspark-ai/genoffice.git refs/tags/v0.12.852 refs/tags/v0.12.852^{}",
+    "tagVerificationExitCode": 0,
+    "tagVerificationOutput": "4b55db9ed1994575a695160ffc6cfd0bfc866211\trefs/tags/v0.12.852",
+    "releaseNotesRelevantParaphrase": [
+      "PDF to Word adds repeating headers and continuous page numbers and improves DOCX compatibility.",
+      "Agent tool permission handling and context-window handling for compatible custom models are also mentioned."
+    ],
+    "historicalPlanningTarget": "v0.12.600",
+    "currentFridayVendorSha": "8ed0c8d099c3c3d87b1a998d9189da3d120ff820",
+    "candidateIntegratedIntoFriday": false,
+    "candidateSourceDiffAudited": false,
+    "candidateBuildAndInstallVerified": false,
+    "limitations": [
+      "This records official release metadata and a remote tag lookup, not source ancestry or compatibility validation.",
+      "Release-note improvements have not been tested in Friday.",
+      "Latest can change after this observation; freeze tag and SHA again when beginning an upgrade."
+    ]
+  }
+}

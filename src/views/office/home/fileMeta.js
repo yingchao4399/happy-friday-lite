@@ -8,6 +8,7 @@ export const TYPE_META = {
   sheets: { color: '#217346', exts: ['xlsx', 'xlsm', 'csv'] },
   slides: { color: '#c43e1c', exts: ['pptx'] },
   pdf: { color: '#d93025', exts: ['pdf'] },
+  html: { color: '#d56a24', exts: ['html', 'htm'] },
 }
 
 export function extOf(filePath) {

@@ -30,7 +30,7 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
-  // null/undefined 隐藏弹窗；'docs' | 'sheets' | 'slides' | 'pdf' 弹出对应命名框
+  // null/undefined 隐藏弹窗；类型须由宿主能力门控后传入。
   type: { type: String, default: null },
 });
 const emit = defineEmits(['confirm', 'cancel']);
@@ -44,6 +44,7 @@ const TYPE_META = {
   sheets: { ext: '.xlsx', titleKey: 'office.newSheet', defaultKey: 'office.newSheet' },
   slides: { ext: '.pptx', titleKey: 'office.newSlides', defaultKey: 'office.newSlides' },
   pdf: { ext: '.pdf', titleKey: 'office.newPdf', defaultKey: 'office.newPdf' },
+  html: { ext: '.html', titleKey: 'office.newHtml', defaultKey: 'office.newHtml' },
 };
 
 const meta = computed(() => TYPE_META[props.type] || null);
@@ -51,10 +52,9 @@ const title = computed(() => (meta.value ? t(meta.value.titleKey) : ''));
 const ext = computed(() => meta.value?.ext || '');
 
 function automaticName(type) {
-  const labels = { docs: 'Word 文档', sheets: 'Excel 工作簿', slides: 'PowerPoint 演示', pdf: 'PDF 文档' };
   const now = new Date();
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  return `${labels[type] || 'Office 文档'} ${date}`;
+  return `${t(TYPE_META[type]?.defaultKey || 'office.title')} ${date}`;
 }
 
 watch(

@@ -8,6 +8,10 @@
         </div>
       </div>
       <div class="header-right">
+        <span v-if="htmlEditError" class="html-edit-error" role="alert">{{ htmlEditError }}</span>
+        <button v-if="file.type === 'html' && htmlEditAvailable" class="html-edit-button" :disabled="htmlEditBusy" @click="openInHtmlEditor">
+          {{ htmlEditBusy ? t('office.openingHtml') : t('office.editWithAiHtml') }}
+        </button>
         <div v-if="file.type === 'epub' && tocItems.length" ref="tocMenuWrapRef" class="toc-menu-wrap">
           <button class="toc-menu-btn" title="打开目录" @click="tocMenuOpen = !tocMenuOpen">
             <span class="toc-menu-icon">☰</span><span>目录</span>
@@ -87,7 +91,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, onActivated } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { normalizeOfficeEditorCapabilities, openOfficeHtmlFile } from '@/views/office/officeTypes';
 import PdfViewer from './PdfViewer.vue';
 import EpubViewer from './EpubViewer.vue';
 import MarkdownViewer from './MarkdownViewer.vue';
@@ -101,6 +108,44 @@ import { getFileIconComponent } from '../utils';
 const props = defineProps({
   file: { type: Object, required: true }
 });
+
+const { t } = useI18n();
+const router = useRouter();
+const htmlEditAvailable = ref(false);
+const htmlEditBusy = ref(false);
+const htmlEditError = ref('');
+let capabilityRequest = 0;
+
+async function refreshHtmlEditorAvailability() {
+  const request = ++capabilityRequest;
+  htmlEditAvailable.value = false;
+  if (props.file.type !== 'html' || !window.electronAPI) return;
+  try {
+    const capabilities = normalizeOfficeEditorCapabilities(await window.electronAPI.invoke('office-get-editor-capabilities'));
+    if (request === capabilityRequest) htmlEditAvailable.value = capabilities.html.available;
+  } catch { /* 宿主缺失或能力查询失败时不显示候选入口 */ }
+}
+
+async function openInHtmlEditor() {
+  if (htmlEditBusy.value || !window.electronAPI || props.file.type !== 'html') return;
+  htmlEditBusy.value = true;
+  htmlEditError.value = '';
+  try {
+    const result = await openOfficeHtmlFile(props.file.path, (channel, value) => window.electronAPI.invoke(channel, value));
+    if (result.success) await router.push(result.editorPath);
+    else htmlEditError.value = t('office.htmlEditUnavailable');
+  } catch {
+    htmlEditError.value = t('office.openFailed');
+  } finally {
+    htmlEditBusy.value = false;
+  }
+}
+
+watch(() => [props.file.path, props.file.type], () => {
+  htmlEditError.value = '';
+  void refreshHtmlEditorAvailability();
+}, { immediate: true });
+onActivated(refreshHtmlEditorAvailability);
 
 const currentPage = ref(1);
 const totalPages = ref(0);
@@ -156,6 +201,7 @@ onMounted(() => {
   document.addEventListener('keydown', closeTocOnEscape);
 });
 onBeforeUnmount(() => {
+  capabilityRequest++;
   document.removeEventListener('pointerdown', closeTocOnOutside);
   document.removeEventListener('focusin', closeTocOnOutside);
   document.removeEventListener('keydown', closeTocOnEscape);
@@ -187,6 +233,20 @@ function nextPage() {
 </script>
 
 <style scoped lang="scss">
+.html-edit-button {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.6; cursor: wait; }
+}
+
+.html-edit-error { color: var(--text-error, #b42318); font-size: 12px; }
+
 .file-viewer-overlay {
   position: relative;
   width: 100%;

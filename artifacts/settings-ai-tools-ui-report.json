@@ -1,0 +1,201 @@
+{
+  "ok": true,
+  "checkedAt": "2026-11-06T18:59:38.752Z",
+  "electron": "42.2.0",
+  "steps": [
+    {
+      "name": "模型页与新设置页返回按钮位置、计算样式、箭头完全一致",
+      "model": {
+        "offset": {
+          "x": 16,
+          "y": 12
+        },
+        "rect": {
+          "x": 94,
+          "y": 68,
+          "width": 30,
+          "height": 30
+        },
+        "style": {
+          "position": "absolute",
+          "top": "12px",
+          "left": "16px",
+          "paddingTop": "6px",
+          "paddingRight": "6px",
+          "paddingBottom": "6px",
+          "paddingLeft": "6px",
+          "width": "30px",
+          "height": "30px",
+          "borderTopWidth": "0px",
+          "borderRadius": "6px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(28, 25, 23)",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "transitionProperty": "all",
+          "transitionDuration": "0.15s",
+          "cursor": "pointer"
+        },
+        "svg": {
+          "width": "18",
+          "height": "18",
+          "stroke": "2.5",
+          "points": "15 18 9 12 15 6"
+        }
+      },
+      "tools": {
+        "offset": {
+          "x": 16,
+          "y": 12
+        },
+        "rect": {
+          "x": 94,
+          "y": 68,
+          "width": 30,
+          "height": 30
+        },
+        "style": {
+          "position": "absolute",
+          "top": "12px",
+          "left": "16px",
+          "paddingTop": "6px",
+          "paddingRight": "6px",
+          "paddingBottom": "6px",
+          "paddingLeft": "6px",
+          "width": "30px",
+          "height": "30px",
+          "borderTopWidth": "0px",
+          "borderRadius": "6px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(28, 25, 23)",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "transitionProperty": "all",
+          "transitionDuration": "0.15s",
+          "cursor": "pointer"
+        },
+        "svg": {
+          "width": "18",
+          "height": "18",
+          "stroke": "2.5",
+          "points": "15 18 9 12 15 6"
+        }
+      }
+    },
+    {
+      "name": "二级内容保留 GenOffice 五项设置",
+      "sections": [
+        "网络搜索",
+        "本机文件搜索",
+        "生图",
+        "图片解析",
+        "视频解析"
+      ]
+    },
+    {
+      "name": "Jev 开关、端点、自定义与 Cloudflare 条件字段可操作"
+    },
+    {
+      "name": "同提供商三项媒体字段共享输入；保存与测试调用配置接口（仅模拟 IPC）"
+    },
+    {
+      "name": "返回设置首页；入口顺序和点击路由正确",
+      "order": [
+        "模型设置",
+        "生图、媒体与搜索",
+        "开启笔记内容补全",
+        "显示全局助手",
+        "助手形象",
+        "分身模式",
+        "Agent 选择"
+      ]
+    },
+    {
+      "name": "1150×800 窗口下返回按钮仍保持相同位置与样式",
+      "model": {
+        "offset": {
+          "x": 16,
+          "y": 12
+        },
+        "rect": {
+          "x": 94,
+          "y": 68,
+          "width": 30,
+          "height": 30
+        },
+        "style": {
+          "position": "absolute",
+          "top": "12px",
+          "left": "16px",
+          "paddingTop": "6px",
+          "paddingRight": "6px",
+          "paddingBottom": "6px",
+          "paddingLeft": "6px",
+          "width": "30px",
+          "height": "30px",
+          "borderTopWidth": "0px",
+          "borderRadius": "6px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(28, 25, 23)",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "transitionProperty": "all",
+          "transitionDuration": "0.15s",
+          "cursor": "pointer"
+        },
+        "svg": {
+          "width": "18",
+          "height": "18",
+          "stroke": "2.5",
+          "points": "15 18 9 12 15 6"
+        }
+      },
+      "tools": {
+        "offset": {
+          "x": 16,
+          "y": 12
+        },
+        "rect": {
+          "x": 94,
+          "y": 68,
+          "width": 30,
+          "height": 30
+        },
+        "style": {
+          "position": "absolute",
+          "top": "12px",
+          "left": "16px",
+          "paddingTop": "6px",
+          "paddingRight": "6px",
+          "paddingBottom": "6px",
+          "paddingLeft": "6px",
+          "width": "30px",
+          "height": "30px",
+          "borderTopWidth": "0px",
+          "borderRadius": "6px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(28, 25, 23)",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "transitionProperty": "all",
+          "transitionDuration": "0.15s",
+          "cursor": "pointer"
+        },
+        "svg": {
+          "width": "18",
+          "height": "18",
+          "stroke": "2.5",
+          "points": "15 18 9 12 15 6"
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "真实 Vue 组件在隔离 Electron 窗口中渲染；IPC 使用无密钥测试数据。未验证真实主窗口外壳、安装版或远程 API。"
+  ],
+  "stage": "page-loaded"
+}

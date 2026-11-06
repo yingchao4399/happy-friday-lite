@@ -1,6 +1,9 @@
 import { toIpcPayload } from '../utils/ipcPayload.js'
 
 export const electronService = {
+  getOfficeAiServices() { return this.request('office-ai-services-get') },
+  saveOfficeAiServices(patch) { return this.request('office-ai-services-save', patch) },
+  testOfficeAiServices(input) { return this.request('office-ai-services-test', input) },
   aiCoreHealth() { return this.request('ai-core-health') },
   aiCoreListCapabilities(context = {}) { return this.request('ai-core-list-capabilities', { context }) },
   aiCorePlan(request) { return this.request('ai-core-plan', request) },
@@ -14,6 +17,11 @@ export const electronService = {
   aiCoreUndoTask(taskId, actorId = 'user:local') { return this.request('ai-core-task-undo', { taskId, actorId }) },
   executeOfficeCommand(viewId,command) { return this.request('office-menu-command',{viewId,command}) },
   getOfficeDocumentSelection() { return this.request('office-get-selection') },
+  getOfficeCapabilities() { return this.request('office-get-capabilities') },
+  getOfficeEditorCapabilities() { return this.request('office-get-editor-capabilities') },
+  getOfficeOperationTask(taskId) { return this.request('office-get-operation-task', { taskId }) },
+  cancelOfficeOperationTask(taskId) { return this.request('office-cancel-operation-task', { taskId }) },
+  reopenOfficeArtifact(artifactIdOrTaskId) { return this.request('office-reopen-artifact', { artifactIdOrTaskId }) },
   openClipboardNote(noteId) { return this.request('clipboard-note-open', { noteId }) },
   openClipboardQuick() { return this.request('clipboard-quick-open') },
   getClipboardDesktopState() { return this.request('clipboard-desktop-state') },

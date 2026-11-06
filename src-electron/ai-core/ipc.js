@@ -2,6 +2,7 @@ import electron from 'electron'
 import { createAiCoreFacade } from './facade.js'
 import { AI_CORE_CONTRACT_VERSION, createCapabilityDefinition } from './contracts.js'
 import { createAiCoreRuntime } from './task-runtime.js'
+import { getAiCoreStore } from './store.js'
 import { executeCapability, getRequiredScopes, listRegisteredTools } from '../agent/tools/registry.js'
 import * as db from '../db.js'
 import { getDataDir } from '../config.js'
@@ -34,25 +35,10 @@ async function loadCatalog() {
   }))
 }
 
-function createStore() {
-  const live = new Map()
-  return {
-    saveTask(task) { live.set(task.id, structuredClone(task)); return db.saveAiCoreTask(task) },
-    getTask(id) { return structuredClone(live.get(id) || db.getAiCoreTask(id)) },
-    listTasks(actorId) {
-      const merged = new Map(db.listAiCoreTasks(actorId).map(task => [task.id, task]))
-      for (const [id, task] of live) if (!actorId || task.actorId === actorId) merged.set(id, structuredClone(task))
-      return [...merged.values()]
-    },
-    saveEvent: event => db.saveAiCoreTaskEvent(event),
-    listEvents: taskId => db.listAiCoreTaskEvents(taskId)
-  }
-}
-
 async function createRuntime(mainWindow) {
   const capabilities = await loadCatalog()
   const facade = createAiCoreFacade({ capabilities })
-  const runtime = createAiCoreRuntime({ facade, executeCapability, store: createStore(), executionContext: {
+  const runtime = createAiCoreRuntime({ facade, executeCapability, store: getAiCoreStore(db), executionContext: {
     dataDir: getDataDir(), agentRootDir: getAgentRootDir(), logger: createLogger('AiCore'), mainWindow
   } })
   runtime.recoverInterrupted()

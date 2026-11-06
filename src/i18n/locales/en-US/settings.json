@@ -1,4 +1,5 @@
 {
+  "aiToolsServices": "Image generation, media and search",
   "title": "Settings",
   "moduleOrderTitle": "Module order",
   "moduleOrderHint": "Drag modules or use the buttons to reorder the sidebar. New modules are appended.",

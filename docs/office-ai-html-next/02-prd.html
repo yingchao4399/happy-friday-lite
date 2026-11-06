@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>产品需求 PRD</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:#f4f6f7;color:#222e36;font:16px/1.85 'Microsoft YaHei','PingFang SC',system-ui,sans-serif}
+a{color:#145f78;text-underline-offset:3px}a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #ba7517;outline-offset:3px}
+header{background:#fff;border-bottom:1px solid #d7e0e2}.bar{max-width:1420px;margin:auto;padding:15px 25px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-weight:700;margin-right:auto}.nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}.nav [aria-current=page]{font-weight:700;color:#173f4a}
+.layout{max-width:1420px;margin:25px auto 60px;padding:0 22px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:22px;align-items:start}
+.toc{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:16px;font-size:13px}
+.toc summary{font-size:15px;font-weight:700;cursor:pointer}.toc a{display:block;padding:5px 0;text-decoration:none;line-height:1.5}.toc a.sub{padding-left:12px}
+main{min-width:0;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:34px 40px}.landing{max-width:1100px;margin:28px auto 60px}
+.note{background:#fff7e5;border-left:4px solid #c58b28;padding:12px 16px;margin-bottom:24px;font-size:14px}
+h1{font-size:29px;line-height:1.5;margin:0 0 20px}h2{font-size:22px;line-height:1.5;margin:40px 0 16px;padding-top:14px;border-top:1px solid #d7e0e2}h3{font-size:18px;margin:25px 0 10px}
+p,li,td,th{overflow-wrap:anywhere}p{margin:12px 0}li{margin:6px 0}.table-scroll{overflow-x:auto;border:1px solid #d7e0e2;border-radius:4px;margin:18px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;line-height:1.75}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-right:1px solid #d7e0e2;border-bottom:1px solid #d7e0e2}th{background:#eaf2f1}tr:last-child td{border-bottom:0}
+pre{background:#f1f4f4;border:1px solid #d7e0e2;padding:16px;overflow:auto;font:13px/1.7 Consolas,monospace}code{font-family:Consolas,monospace;background:#eff3f3;padding:1px 3px;overflow-wrap:anywhere}pre code{padding:0;background:none}
+footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#586870;font-size:13px}.docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.item{border:1px solid #d7e0e2;border-radius:6px;padding:20px}.item h2{border:0;margin:0 0 10px;padding:0;font-size:19px}.item p{font-size:14px}
+@media(max-width:800px){.layout{display:block;padding:0 12px;margin-top:14px}.toc{position:static;max-height:270px;margin-bottom:14px}main,.landing{padding:22px 18px}.landing{margin:14px 12px}.docs{grid-template-columns:1fr}.bar{padding:13px 16px}h1{font-size:24px}h2{font-size:20px}}
+@media print{body{background:white;font-size:10pt}header,.toc{display:none}.layout{display:block;margin:0;padding:0}main,.landing{border:0;padding:0;margin:0}table{min-width:0;font-size:8pt}th,td{padding:5pt;border:1px solid #aaa}.table-scroll{overflow:visible;border:0}pre{white-space:pre-wrap}h2,h3{break-after:avoid}@page{size:A4;margin:16mm}}
+</style></head><body><header><div class="bar"><span class="brand">Friday Office · AI HTML 规划</span><nav class="nav" aria-label="文档导航"><a href="index.html">文档导航</a><a href="01-integration-plan.html">融合研究与实施方案</a><a href="02-prd.html" aria-current="page">产品需求 PRD</a><a href="03-technical-integration.html">技术对接与拆解</a><a href="04-implementation-and-validation.html">实施与验收记录</a><a href="05-ai-service-contract-audit.html">AI 服务合同审计</a></nav></div></header><div class="layout"><aside class="toc"><details open><summary>本篇目录</summary><a class="" href="#section-2">1. 目标与判断口径</a><a class="sub" href="#section-3">1.1 对等目标的冻结</a><a class="" href="#section-4">2. 用户、场景与范围</a><a class="" href="#section-5">3. 产品原则</a><a class="" href="#section-6">4. 用户流程</a><a class="sub" href="#section-7">4.1 创建与编辑</a><a class="sub" href="#section-8">4.2 AI 生成与修改</a><a class="sub" href="#section-9">4.3 导出与恢复</a><a class="" href="#section-10">5. 功能需求和验收矩阵</a><a class="sub" href="#section-11">5.1 具体工具与服务的产品含义</a><a class="sub" href="#section-12">5.2 精确输出限制</a><a class="" href="#section-13">6. 一致性、授权和安全</a><a class="" href="#section-14">7. 非功能需求</a><a class="" href="#section-15">8. 测试数据、证据与发布门槛</a><a class="" href="#section-16">9. 实施阶段与需决策问题</a><a class="" href="#section-17">10. 资料依据</a></details></aside><main><div class="note"><strong>阅读提示：</strong>前三篇为下一版规划；第 04 篇记录实际实施与验收。源代码接入、编译、运行、完整对等和发布分别核验，不以局部通过代替整体完成。</div><h1 id="section-1">Friday AI HTML 融合产品需求文档</h1>
+<p>状态：研究与拟实施要求，尚未实施或验收。日期：2026-11-06。适用产品：Happy Friday Lite 下一版 Windows 桌面候选。本文保留既有总体升级和 PDF 专项文档，不覆盖其历史结论；具体技术接口和版本审计以本次配套技术对接文档、融合方案及实施时冻结的代码为准。</p>
+<h2 id="section-2">1. 目标与判断口径</h2>
+<p>用户能够在 Friday 中创建、打开、编辑、预览、让 AI 生成或修改、保存和导出 HTML 文档，体验达到选定的 GenOffice 开源 AI HTML 应用同等功能，而不只是能打开网页或回答聊天。Friday 可保留自己的品牌、标签、配置、权限和主助手界面；用户任务、可观察的操作阶段、结果格式及失败恢复需要与冻结目标等效。</p>
+<p>本轮只产出研究及方案文档。本文列出的能力、数字、验收和路线是<strong>目标合同或拟验证假设</strong>，不表示 Friday 现在已实现，也不是本轮已测试通过的结论。既有四类 Office 和 PDF→Word 的能力、用户数据和历史必须回归，不以新模块上线为由牺牲已有行为。</p>
+<h3 id="section-3">1.1 对等目标的冻结</h3>
+<ol>
+<li>既有研究以 GenOffice <code>v0.12.600</code>、commit <code>1a0fcec971c714d11777cbd5c68da1c933572d14</code> 为历史参考，其 <code>HTML-01</code> 至 <code>HTML-12</code> 均为 P0，详情保留在总体报告和 PRD。它们是本次需求基线，实施时不得无故删减。</li>
+<li><code>v0.12.852</code> 是之前观察到的升级候选，不等于已批准、已集成或永远最新。启动研发前重新核实官方 tag、tag 指向的完整 commit、来源、许可及发布时间，记录查询时间，确认具体目标；评估其相对 <code>v0.12.600</code> 的 HTML 模块、依赖和安全变化。若选用其他目标，同样冻结完整身份和逐项差异；不得把未经审查的目标行为写成已经证实的现状。</li>
+<li>建立目标版本的逐项能力台账，覆盖菜单、工具栏、快捷键、上下文操作、AI tool、IPC、资源、导出、自动化和实际条件。已有 <code>HTML-01</code> 至 <code>HTML-12</code> 为父编号，新增细项采用稳定子编号。分别统计映射率和通过率；未知、条件阻塞、未实现或待验收均不是通过。</li>
+<li>在相同平台、相同输入及同类别的有效模型和外部服务配置下比较。生成内容不要求逐字或逐像素相同，但用户能完成的工作、文件格式、工具动作、必要确认、取消和恢复应等效。上游源码或菜单存在、mock 成功、空数组、<code>unsupported</code> 均不能证明正常功能可用。</li>
+</ol>
+<h2 id="section-4">2. 用户、场景与范围</h2>
+<p><strong>用户</strong>包括编辑现有 HTML 的用户、用自然语言生成报告/活动页/仪表盘的用户、需要本地预览或导出文档的用户，以及需要反复编辑并继续 AI 会话的用户。</p>
+<p><strong>主要场景</strong>：新建空白 HTML；打开本地 <code>.html/.htm</code>；在源码、分屏、预览间编辑；选择元素后要求 AI 修改；提供附件让 AI 规划并生成页面；在预览运行合法交互；保存、另存、演示、导出 PDF/DOCX/单文件 HTML 或打印；关闭并重新打开文档继续工作。</p>
+<p><strong>本版 P0</strong>：完整接入冻结目标的 AI HTML 应用及其用户可达能力，包括 12 组功能、有效服务条件下的搜索/图片等工具、Friday 文件与会话集成、GUI 和目标支持的自动化、真实安装版验收与四类 Office 回归。任何上游能力缺口不得以“只是增强项”或不可用占位静默放行。对于目标新增功能，完成差异盘点并纳入台账。</p>
+<p><strong>边界</strong>：本专项不自动承诺 AI Markdown、全部 GenOffice 升级或任意格式互转；原有总体需求保留。没有明确证据时不承诺 HTML→HTML headless 或独立 HTML read/apply CLI。PDF 转 Word 是已有专项，相关未关闭验收按其独立账本处理，本功能不得破坏它。桌面环境与所选外部服务有各自限制，不能因文本模型可用就声称图片生成、联网搜索均已可用。</p>
+<h2 id="section-5">3. 产品原则</h2>
+<ul>
+<li><strong>HTML 源码是文档真相</strong>：可视操作、AI 修改、撤销、保存及导出都反映同一版本的源码，不能以预览 DOM 快照覆盖源码，尤其是脚本产生的动态节点。</li>
+<li><strong>文件与会话身份明确</strong>：基于稳定文档/标签身份及规范路径，而非仅凭文件名；窗口或标签切换不能把操作、历史或产物发给另一文档。</li>
+<li><strong>区分生成、保存和打开</strong>：未保存的编辑、已写入文件、导出成功、已在目标应用打开分别表述；失败或取消不得报成功，也不能截断旧文件。</li>
+<li><strong>按能力真实告知</strong>：模型、搜索、媒体、网络、权限分别判断；真实零结果、服务未配置、权限不足、网络或配额错误是不同状态。</li>
+<li><strong>兼容原入口</strong>：原 HtmlViewer 和系统打开偏好继续可用；显式的“用 AI HTML 编辑”与只读查看区分，既有偏好迁移、默认行为与回退规则须在实现前冻结和验证。</li>
+<li><strong>保持上游功能的安全边界</strong>：保留合法的页面脚本和交互，通过隔离和权限控制保护 Friday 宿主、用户文件与密钥，不能靠一律关闭脚本代替等效实现。</li>
+</ul>
+<h2 id="section-6">4. 用户流程</h2>
+<h3 id="section-7">4.1 创建与编辑</h3>
+<ol>
+<li>用户从 Office 新建 AI HTML，或通过明确的编辑动作打开授权文件。显示文档标题、保存状态与编辑入口。</li>
+<li>用户在源码、分屏或预览模式切换；在可映射的静态元素上选择、编辑或使用工具栏，操作反映到同一个源码文档，并可撤销/重做。</li>
+<li>用户选择保存或另存，系统核对文档身份与目标；新文档要求选择位置；需要替换已有文件时按目标合同确认；失败或取消保留当前未保存内容。</li>
+<li>关闭含未保存修改的文档时提供保存、丢弃、取消；保存中仍发生新编辑时，不得把新版本错误标记为已保存。</li>
+</ol>
+<h3 id="section-8">4.2 AI 生成与修改</h3>
+<ol>
+<li>用户通过 HTML 内 AI 输入需求、选区或附件；系统绑定当前文档和当前版本，列出实际可用的模型及工具。</li>
+<li>对整页任务，根据目标行为进行澄清、展示可编辑的 brief/风格方案并等待用户确认，再启动独立 writer 生成流式草稿；对局部修改使用可追踪工具操作而不是把聊天文字冒充文档修改。</li>
+<li>用户可停止、决定保留或放弃中断草稿；提供可见的失败和重试反馈。若生成期间用户修改文档、切换或关闭标签，旧结果必须经版本和 owner 校验，不得覆盖较新的编辑或写入其他文档。</li>
+<li>系统显示操作完成与否及未保存状态；仅当确实写盘后才能称文件已保存。AI 修改前快照和撤销按目标能力呈现，不宣称内存快照是永久版本库。</li>
+</ol>
+<h3 id="section-9">4.3 导出与恢复</h3>
+<p>导出从确认的当前文档版本取数据，必要的样式预览先提交；用户选择目标并处理覆盖，再生成、校验并报告路径、限制及打开状态。输出已有文件、目标文档正被打开且 dirty、用户取消、转换失败或打开失败时，保留原文件及已生成文件的真实状态；重试打开不应重新覆盖或重复转换。</p>
+<h2 id="section-10">5. 功能需求和验收矩阵</h2>
+<p>下表是产品级父项；每条命令、可选条件和反例须在冻结目标后继续拆成子项，并记录上游证据、Friday 入口、平台、样本、依赖、操作、期望、实际结果、证据、责任人及状态。除明确写为目标版本差异待确认的细节外，均为 P0。验收必须有真实候选包或环境的操作证据，具体通过不能预填。</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>用户需求</th>
+<th>至少覆盖的可测验收</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTML-01 文件</td>
+<td><code>.html/.htm</code> 新建、打开、编辑、保存、另存、重命名、关闭，标题/路径、dirty、最近文件和 AI 命名一致；保留目标的自动保存与外部变化处理。</td>
+<td>中文及空格路径、同名不同目录；首次保存取消、写失败、保存期间继续编辑、关闭三选项；对 clean/dirty 文件分别触发外部变化并验证冲突决定及重开内容；原查看器及系统打开偏好不被误改。</td>
+</tr>
+<tr>
+<td>HTML-02 源码/预览</td>
+<td>保留源码、分屏、预览三模式，源码与可映射静态元素、breadcrumb、查找替换和文档外壳关联。</td>
+<td>轮流在各模式修改，保存重开后结构、样式、脚本及外壳保持；源码光标与预览选择相互定位；撤销/重做作用于正确文档。</td>
+</tr>
+<tr>
+<td>HTML-03 视口/交互</td>
+<td>提供目标的桌面、平板、手机预览与缩放；允许合法作者脚本，动态无静态映射节点不得伪装成可源码编辑元素。</td>
+<td>各视口/缩放和交互页实际运行；映射失效或脚本改动后的节点不误写源码，界面明确告知限制；主题、焦点及快捷键按冻结目标对照。</td>
+</tr>
+<tr>
+<td>HTML-04 可视编辑</td>
+<td>目标支持的文本、结构、拖动、调整尺寸、上移/下移、复制/删除及各类插入均可用。</td>
+<td>heading、paragraph、list、button、image、table、section、divider 等命令逐个测；空白 skeleton、表格选择边界、复杂嵌套、撤销及重开结果对照；目标版本变化另登记。</td>
+</tr>
+<tr>
+<td>HTML-05 样式/图片</td>
+<td>目标文本、颜色、对齐、尺寸、比例、透明度、边距、自定义 CSS 和图片插入/替换/裁剪/处理等控件可用，编辑写回源码与合法资产。</td>
+<td>每个控件对照参考行为；实时预览可取消；保存/导出前 flush，重开与输出反映最终样式；图片失败不破坏原文件，尺寸及引用有效。</td>
+</tr>
+<tr>
+<td>HTML-06 AI 局部</td>
+<td>目标支持的读取/修改工具、选区、队列、批量原子操作和文档版本保护接通。历史参考包括 <code>get_outline</code>、<code>read_source</code>、<code>apply_ops</code> 及九种操作。</td>
+<td>每种操作有成功与失败；批量失败无半写；异步附件展开、人工编辑、切标签和 Stop 后旧操作不落到错误版本；适当位置可撤销。</td>
+</tr>
+<tr>
+<td>HTML-07 AI 整页</td>
+<td>支持目标的澄清、计划/风格确认、writer 草稿和 new/redesign/restyle/extract 等实际流程，用户可修改方案。</td>
+<td>分别完成各意图；方案确认前后状态可辨；流式中断、继续、保留、放弃及失败后重试，源码/dirty 状态正确；不能只显示一段聊天。</td>
+</tr>
+<tr>
+<td>HTML-08 工具/附件</td>
+<td>目标能力包括 10 个工具的配置条件与执行、文本和图片附件、搜索、图片抓取/生成、skills、流式与取消；以冻结目标实际清单为准。</td>
+<td>每个实际工具在有效配置下请求并完成相应结果；文本长附件分页、图片多模态、拖放/粘贴和附件引用生效；真实零结果与错误、未配置、取消可区分；空数组、<code>null</code> 或 <code>unsupported</code> 不算完成。</td>
+</tr>
+<tr>
+<td>HTML-09 会话/隐私</td>
+<td>目标聊天持久化与项目绑定、首存/重命名关系、AI 前快照、撤销和脱敏投影按目标行为适配 Friday。</td>
+<td>多标签同名不同路径及首存/另存/重命名/重启后历史不串；参考目标最多 20 个内存快照的边界待目标确认；敏感值不进入对应 AI 投影、仍能按授权保存在本地；不得声称脱敏等于加密。</td>
+</tr>
+<tr>
+<td>HTML-10 演示</td>
+<td>目标的去 chrome 演示、全屏或新演示标签，以及未保存内容的实时显示和返回编辑行为可用。</td>
+<td>各入口、Esc、关闭演示和 owner、切换标签/窗口后焦点正确，无孤儿视图、布局污染或文档丢失。</td>
+</tr>
+<tr>
+<td>HTML-11 输出/打印</td>
+<td>按目标支持 GUI DOCX、PDF、单文件 HTML、系统打印及 HTML→PDF/DOCX 自动化。</td>
+<td>从已保存与 dirty 状态分别输出并实际打开；逐格式验证资源和内容、覆盖/取消/错误保护；打印与 PDF 分别实测；无开发源码目录的安装包运行自动化并校验文件与退出结果。</td>
+</tr>
+<tr>
+<td>HTML-12 资产/隔离</td>
+<td>合法相对资源及资源迁移工作；运行不可信 HTML 时宿主、密钥和非授权文件受保护，保留目标合法交互。</td>
+<td>首存/跨目录另存、资源重写、失败回滚及清理；路径穿越/别名/符号链接越界拒绝；脚本、链接、表单、弹窗、网络请求按明确策略实测；不能访问 Friday preload/Node/密钥或任意写盘。</td>
+</tr>
+</tbody></table></div>
+<h3 id="section-11">5.1 具体工具与服务的产品含义</h3>
+<p>历史 <code>v0.12.600</code> 清单为 <code>get_outline</code>、<code>read_source</code>、<code>apply_ops</code>、<code>ask_clarification</code>、<code>plan_page</code>、<code>write_document</code>、<code>search_images</code>、<code>generate_image</code>、<code>web_search</code>、<code>read_attachment</code>；目标版本冻结后重新核验实际清单、可用条件和返回。附件读取或图片抓取的底层 IPC 不应误写成同名 Agent 工具。</p>
+<p>用户能够在设置或操作状态中区分：文字模型未配置、不支持工具调用或多模态；搜索未配置或网络不可用；图片生成未配置、配额或服务错误；有配置但搜索确实无结果；文件未授权；取消。可恢复错误提供重试或配置入口，用户无需反复触发必然失败的工具。授权外请求、超时及取消不能被伪装为零结果。</p>
+<p>目标服务在有效配置下支持的任务必须有真实请求和结果验收。模型文字、网页搜索、图片搜索、图片生成和本地资产分别判断；用户配置、账号、费用及网络是实施与测试前置条件。界面和日志不展示密钥，不能为兼容上游工具新建一份明文密钥配置；统一配置的具体实现由技术文档定义并验证。</p>
+<h3 id="section-12">5.2 精确输出限制</h3>
+<p>历史参考中，单文件 HTML 只尝试内联可读取的本地图片，并报告未能内联的项目，不等于任意网页及其外部资源的完整离线归档。系统打印允许脚本、PDF 导出使用不同脚本策略，动态页面在两者不保证相同；DOCX 输出有网页布局和 CSS 的转换限制，不承诺任意网页完美还原。以目标版本实测为准，用户应在导出结果中看到实际限制或失败，而不是错误的全保真承诺。</p>
+<p>GUI 导出、系统打印、应用 headless 与现有 Friday CLI/agent 路由分别验收。对 CLI 需核对实际命令、目标格式、机器可读结果、退出状态和产物，不能仅以 vendor 存在导出函数推断可用。不得把受限 HTML 片段导入 DOCX 路线称作完整网页转 DOCX 的等价实现。</p>
+<h2 id="section-13">6. 一致性、授权和安全</h2>
+<ol>
+<li>明确文件 owner、文档 ID、快照/修订号和调用方；每次异步 AI 或导出操作从开始到提交保持身份绑定。保存、另存、关闭、外部修改和冲突处理需要定义原子行为，Windows 大小写、路径别名、符号链接及同名文件都应覆盖。</li>
+<li>执行写入、覆盖、访问附件或资源及联网请求时，按 Friday 宿主的授权模型执行；授权范围、取消和超时可追踪。模型生成内容和被读取网页均为不可信数据，不能把其中的指令提升为用户授权。</li>
+<li>网页作者脚本运行在隔离预览中。对资源访问、外链导航、弹窗、文件协议、网络、下载及打印设置清晰规则，并在保持目标合法交互的同时验证边界。上游 iframe 的历史 sandbox 配置不是“任意 HTML 绝对安全”的证明，实施须重新核验目标版及 Electron 组合。</li>
+<li>聊天、诊断、任务状态及日志按最小必要原则处理文档正文、路径、附件与密钥；必要的脱敏不应破坏正常文件。遥测和支持包若存在，需声明收集范围与授权，不记录明文密钥或未授权正文。</li>
+<li>服务不可用时隐藏或禁用不可执行动作并说明原因；服务正常配置后对应能力必须真的可用。开发和运行时出现能力声明与 handler 不一致应阻断发布，而非由模型猜测或循环重试。</li>
+</ol>
+<h2 id="section-14">7. 非功能需求</h2>
+<ul>
+<li><strong>可靠性</strong>：失败、取消、崩溃或目标占用不破坏源和已有目标；跨目录资产处理有可检查的回滚；未保存状态不会因异步完成而被清除。</li>
+<li><strong>性能</strong>：对小、中、大 HTML、长对话、较多 DOM 元素和图片样本记录打开、编辑、预览刷新、内存、AI 流式和导出耗时，验证 Stop 时界面保持响应。研发在冻结环境与样本后提出预算、测量方法及阈值并经评审；没有基线时不把未经测量的数字写成已达标。</li>
+<li><strong>可访问与国际化</strong>：至少完成中英文的实际界面、菜单、错误与恢复动作验证；键盘可达、焦点顺序、可见焦点、缩放与目标快捷键逐项对照。支持哪些额外语言按目标和 Friday 实际资源登记。</li>
+<li><strong>离线与网络</strong>：本地编辑和保存不应因外部模型或搜索不可用而无故失效；需要网络的模型、资源和服务准确显示状态，重连后可恢复。</li>
+<li><strong>兼容性</strong>：候选须在约定 Windows 环境干净安装并与旧版升级；原四类 Office、文件关联、打开偏好、用户文件、会话和 PDF 专项不回归。其他平台支持须单独列验收，不由 Windows 成功外推。</li>
+</ul>
+<h2 id="section-15">8. 测试数据、证据与发布门槛</h2>
+<p>测试集至少包含空白页、静态文章和复杂 CSS、脚本交互及动态节点、Unicode 和中英文路径、同名多目录、本地/远程/缺失图片、多个附件和长文本、外链与恶意协议、损坏文件、只读/占用目标、大 DOM 及慢网络。为每份数据记录授权、来源、哈希、适用条件和预期；真实用户文档应经授权并排除敏感信息。</p>
+<p>验收分为：固定上游参考行为；单元与合同；开发版真实 renderer/preload/host；真实模型与配置有效的外部服务；人工真实操作；无源码的安装包；旧版升级和回滚。每层分别留证，不用 mock、源码静态存在或单一截图替代其他层。AI 至少覆盖生成、局部修改、附件、搜索、取消、失败及恢复；有条件的工具须有真实有效配置的成功证据。GUI/CLI/打印分别留产物、摘要及可打开验证。</p>
+<p>发布必须同时具备：冻结的上游 tag/commit 与差异审计；HTML-01～12 逐子项 100% 映射并按目标条件通过；新旧入口和四类 Office 回归；安全、隐私、故障及性能证据；已提交且可取得的 Friday/vendor 源码身份、匹配资源与包 hash；干净安装、升级、用户数据保留和整套回滚报告。测试记录须包含样本/配置标识、源码与包身份、系统环境、实际操作、结果和复核人。缺条件或未测记为阻塞/待验收，不能标为通过或不适用。</p>
+<p>回滚以主程序、vendor、Office 资源、配置协议和数据兼容性为一个匹配组合；保留用户 HTML、素材、已导出文件和会话，不覆盖新产生的数据。旧版无法编辑新模块时，应明确保留文件和可恢复路径。公开发布、安装包生成及上游融合分别以各自实际证据声明。</p>
+<h2 id="section-16">9. 实施阶段与需决策问题</h2>
+<ol>
+<li><strong>目标与参考冻结</strong>：重新核验官方候选；审计 v0.12.600 与候选的 HTML 差异，产出完整能力台账、参考运行和依赖/许可证清单。禁止凭候选名称暗示已融合。</li>
+<li><strong>接入与联调</strong>：构建编辑器和 Friday 宿主的文件、资源、预览、AI、provider、会话、菜单和导出全链；对未接通项保持准确不可用，并在对应 P0 项下跟踪。</li>
+<li><strong>对等与回归</strong>：逐子项在有效服务条件下与上游对照，完成异常、安全、性能及现有 Office 回归；任何 P0 缺口持续阻断候选。</li>
+<li><strong>交付</strong>：冻结可拉取源码和匹配资源，干净构建，完成真实安装/升级/回滚及人工验收，再由负责人决定发布。各阶段的执行记录另建台账，不能将本 PRD 的预期写成已通过。</li>
+</ol>
+<p>研发启动前需要确定：最终上游 tag/commit 与其功能差异、测试模型/搜索/媒体的可用服务和账号、Windows 测试矩阵、默认打开偏好迁移、文件和会话在另存/重命名后的参考语义、诊断与隐私范围、性能预算、相关责任人。无法确定的项目明确列为待决或验收阻塞，不自行降低对等目标。</p>
+<h2 id="section-17">10. 资料依据</h2>
+<ul>
+<li><a href="../GenOffice-v0.12.600-%E5%8D%87%E7%BA%A7%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A.md">既有 GenOffice v0.12.600 升级分析报告</a>，第 8.6、8.8、8.9 节：历史固定目标、HTML-01～12、工具及输出边界；为静态研究，不是 Friday 运行通过记录。</li>
+<li><a href="../GenOffice-v0.12.600-%E8%9E%8D%E5%90%88%E5%8D%87%E7%BA%A7PRD.md">既有 GenOffice 融合升级 PRD</a>，第 4.3～4.7 节：完整对等、服务、自动化、数据身份与逐项验收规则。</li>
+<li><a href="../GenOffice-v0.12.600-%E8%9E%8D%E5%90%88%E5%8D%87%E7%BA%A7%E6%96%B9%E6%A1%88.md">既有 GenOffice 融合升级方案</a>，第 4.5～4.6 节：宿主、服务、预览隔离和已有 CLI 路线。</li>
+<li><a href="../office-ai-capability-2026-11-05/04-upstream-integration-contract.md">持续上游集成合同</a>，第 2.6、4、9 节：preview.36 实际基础、HTML 当前 disabled、U0～U5 升级和验收门禁。</li>
+<li><a href="../../release/preview.36-release-notes.md">preview.36 发布说明</a>：已有 PDF 专项的已验与限制；不能作为 AI HTML 已接入的证据。</li>
+</ul>
+<footer>本页面为离线阅读版。<a href="02-prd.md">Markdown 源稿</a> · <a href="index.html">返回文档导航</a></footer></main></div></body></html>

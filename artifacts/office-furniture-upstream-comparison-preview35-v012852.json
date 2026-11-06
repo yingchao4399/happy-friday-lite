@@ -1,0 +1,184 @@
+{
+  "checkedAt": "2026-11-06T06:30:35.686Z",
+  "official": {
+    "repository": "https://github.com/genspark-ai/genoffice.git",
+    "tag": "v0.12.852",
+    "peeledCommit": "4b55db9ed1994575a695160ffc6cfd0bfc866211"
+  },
+  "method": "Actual detectFurniture and its actual line/geometry/script dependencies from each source were bundled in an isolated temporary directory. Identical generated PdfChar geometry was passed to each; no grouping stubs and no vendor edits.",
+  "scope": "Algorithm-stage comparison; not a full official v0.12.852 conversion or package integration claim.",
+  "sources": [
+    {
+      "path": "packages/pdf2docx/src/analyze/furniture.ts",
+      "officialSha256": "ac834a56328375a660f14f68ce4e0f1f3ebd5ea8deb18397cdb354833af4f7c0",
+      "currentVendorSha256": "46faaaa77e3282c62014492e2227b0ec5e135d23bcc08820c50fe34fe197eb3d"
+    },
+    {
+      "path": "packages/pdf2docx/src/analyze/lines.ts",
+      "officialSha256": "61dc45ff34e65544c7bf6501be98e0c31a4f2f78cf879990c3fee158497dc171",
+      "currentVendorSha256": "61dc45ff34e65544c7bf6501be98e0c31a4f2f78cf879990c3fee158497dc171"
+    },
+    {
+      "path": "packages/pdf2docx/src/geometry.ts",
+      "officialSha256": "0508665d72af18f47590efc5a8203be2731d4c0ef9671fb11f04664b24cdcf5e",
+      "currentVendorSha256": "b3175a82c30580a98f17e8d9e9a21d9e344337f7ede8c1136f1c8f56f0e9cb06"
+    },
+    {
+      "path": "packages/pdf2docx/src/script.ts",
+      "officialSha256": "4d66fddac6af2fc331a1bdf1708bc7fd1e0a31e22ae8a5fbdab16487201be6cb",
+      "currentVendorSha256": "4d66fddac6af2fc331a1bdf1708bc7fd1e0a31e22ae8a5fbdab16487201be6cb"
+    }
+  ],
+  "results": [
+    {
+      "fixture": "distinctSecondaryNumbers",
+      "titles": [
+        "FRIDAY MULTIPAGE PAGE 1 MARKER 1429",
+        "FRIDAY MULTIPAGE PAGE 2 MARKER 1430",
+        "FRIDAY MULTIPAGE PAGE 3 MARKER 1431"
+      ],
+      "outcomes": {
+        "currentVendor": {
+          "droppedLines": 3,
+          "droppedCharsPerPage": [
+            35,
+            35,
+            35
+          ],
+          "headers": [
+            {
+              "band": "top",
+              "fontSizePt": 16,
+              "fontFamily": "Helvetica",
+              "bold": false,
+              "italic": false,
+              "color": "000000",
+              "x0": 64,
+              "x1": 344,
+              "edgeDistPt": 70,
+              "coversFirstPage": true,
+              "text": "FRIDAY MULTIPAGE PAGE <PAGE> MARKER 1429",
+              "pageNo": true
+            }
+          ]
+        },
+        "officialV012852": {
+          "droppedLines": 3,
+          "droppedCharsPerPage": [
+            35,
+            35,
+            35
+          ],
+          "headers": [
+            {
+              "band": "top",
+              "fontSizePt": 16,
+              "fontFamily": "Helvetica",
+              "bold": false,
+              "italic": false,
+              "color": "000000",
+              "x0": 64,
+              "x1": 344,
+              "edgeDistPt": 70,
+              "coversFirstPage": true,
+              "text": "FRIDAY MULTIPAGE PAGE <PAGE> MARKER 1429",
+              "pageNo": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": "twoPhysicalPageRuns",
+      "titles": [
+        "FRIDAY PAGE 1 SECOND PAGE 1",
+        "FRIDAY PAGE 2 SECOND PAGE 2",
+        "FRIDAY PAGE 3 SECOND PAGE 3"
+      ],
+      "outcomes": {
+        "currentVendor": {
+          "droppedLines": 3,
+          "droppedCharsPerPage": [
+            27,
+            27,
+            27
+          ],
+          "headers": [
+            {
+              "band": "top",
+              "fontSizePt": 16,
+              "fontFamily": "Helvetica",
+              "bold": false,
+              "italic": false,
+              "color": "000000",
+              "x0": 64,
+              "x1": 280,
+              "edgeDistPt": 70,
+              "coversFirstPage": true,
+              "text": "FRIDAY PAGE <PAGE> SECOND PAGE 1",
+              "pageNo": true
+            }
+          ]
+        },
+        "officialV012852": {
+          "droppedLines": 3,
+          "droppedCharsPerPage": [
+            27,
+            27,
+            27
+          ],
+          "headers": [
+            {
+              "band": "top",
+              "fontSizePt": 16,
+              "fontFamily": "Helvetica",
+              "bold": false,
+              "italic": false,
+              "color": "000000",
+              "x0": 64,
+              "x1": 280,
+              "edgeDistPt": 70,
+              "coversFirstPage": true,
+              "text": "FRIDAY PAGE <PAGE> SECOND PAGE <PAGE>",
+              "pageNo": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": "noPhysicalPageRun",
+      "titles": [
+        "FRIDAY FORM 1429",
+        "FRIDAY FORM 1430",
+        "FRIDAY FORM 1431"
+      ],
+      "outcomes": {
+        "currentVendor": {
+          "droppedLines": 0,
+          "droppedCharsPerPage": [
+            0,
+            0,
+            0
+          ],
+          "headers": []
+        },
+        "officialV012852": {
+          "droppedLines": 0,
+          "droppedCharsPerPage": [
+            0,
+            0,
+            0
+          ],
+          "headers": []
+        }
+      }
+    }
+  ],
+  "conclusion": {
+    "upstreamFixConfirmed": "v0.12.852 replaces every physically page-tracking digit run, where current vendor replaces only the first. The twoPhysicalPageRuns control demonstrates that difference.",
+    "matrixIssueFixedByTarget": false,
+    "matrixIssue": "Both current vendor and v0.12.852 drop all three distinctSecondaryNumbers lines and emit one header with <PAGE> plus frozen MARKER 1429. Distinct 1430/1431 values are lost at furniture classification.",
+    "upgradeImplication": "Do not mark the preview.35 multipage failure resolved merely by adopting v0.12.852. Preserve the fixture and require an upstream fix or explicit integration decision and regression evidence."
+  }
+}

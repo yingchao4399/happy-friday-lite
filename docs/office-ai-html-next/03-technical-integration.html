@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>技术对接与拆解</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:#f4f6f7;color:#222e36;font:16px/1.85 'Microsoft YaHei','PingFang SC',system-ui,sans-serif}
+a{color:#145f78;text-underline-offset:3px}a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #ba7517;outline-offset:3px}
+header{background:#fff;border-bottom:1px solid #d7e0e2}.bar{max-width:1420px;margin:auto;padding:15px 25px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-weight:700;margin-right:auto}.nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}.nav [aria-current=page]{font-weight:700;color:#173f4a}
+.layout{max-width:1420px;margin:25px auto 60px;padding:0 22px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:22px;align-items:start}
+.toc{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:16px;font-size:13px}
+.toc summary{font-size:15px;font-weight:700;cursor:pointer}.toc a{display:block;padding:5px 0;text-decoration:none;line-height:1.5}.toc a.sub{padding-left:12px}
+main{min-width:0;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:34px 40px}.landing{max-width:1100px;margin:28px auto 60px}
+.note{background:#fff7e5;border-left:4px solid #c58b28;padding:12px 16px;margin-bottom:24px;font-size:14px}
+h1{font-size:29px;line-height:1.5;margin:0 0 20px}h2{font-size:22px;line-height:1.5;margin:40px 0 16px;padding-top:14px;border-top:1px solid #d7e0e2}h3{font-size:18px;margin:25px 0 10px}
+p,li,td,th{overflow-wrap:anywhere}p{margin:12px 0}li{margin:6px 0}.table-scroll{overflow-x:auto;border:1px solid #d7e0e2;border-radius:4px;margin:18px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;line-height:1.75}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-right:1px solid #d7e0e2;border-bottom:1px solid #d7e0e2}th{background:#eaf2f1}tr:last-child td{border-bottom:0}
+pre{background:#f1f4f4;border:1px solid #d7e0e2;padding:16px;overflow:auto;font:13px/1.7 Consolas,monospace}code{font-family:Consolas,monospace;background:#eff3f3;padding:1px 3px;overflow-wrap:anywhere}pre code{padding:0;background:none}
+footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#586870;font-size:13px}.docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.item{border:1px solid #d7e0e2;border-radius:6px;padding:20px}.item h2{border:0;margin:0 0 10px;padding:0;font-size:19px}.item p{font-size:14px}
+@media(max-width:800px){.layout{display:block;padding:0 12px;margin-top:14px}.toc{position:static;max-height:270px;margin-bottom:14px}main,.landing{padding:22px 18px}.landing{margin:14px 12px}.docs{grid-template-columns:1fr}.bar{padding:13px 16px}h1{font-size:24px}h2{font-size:20px}}
+@media print{body{background:white;font-size:10pt}header,.toc{display:none}.layout{display:block;margin:0;padding:0}main,.landing{border:0;padding:0;margin:0}table{min-width:0;font-size:8pt}th,td{padding:5pt;border:1px solid #aaa}.table-scroll{overflow:visible;border:0}pre{white-space:pre-wrap}h2,h3{break-after:avoid}@page{size:A4;margin:16mm}}
+</style></head><body><header><div class="bar"><span class="brand">Friday Office · AI HTML 规划</span><nav class="nav" aria-label="文档导航"><a href="index.html">文档导航</a><a href="01-integration-plan.html">融合研究与实施方案</a><a href="02-prd.html">产品需求 PRD</a><a href="03-technical-integration.html" aria-current="page">技术对接与拆解</a><a href="04-implementation-and-validation.html">实施与验收记录</a><a href="05-ai-service-contract-audit.html">AI 服务合同审计</a></nav></div></header><div class="layout"><aside class="toc"><details open><summary>本篇目录</summary><a class="" href="#section-2">1. 技术目标与事实边界</a><a class="sub" href="#section-3">1.1 已有代码证据</a><a class="" href="#section-4">2. 架构与责任边界（拟议）</a><a class="" href="#section-5">3. 版本冻结、构建与注册</a><a class="sub" href="#section-6">3.1 上游获取和差异审计</a><a class="sub" href="#section-7">3.2 构建产物和 manifest</a><a class="sub" href="#section-8">3.3 main / preload / renderer 与注册时序</a><a class="sub" href="#section-9">3.4 路由、菜单、生命周期</a><a class="" href="#section-10">4. 文档权威状态与编辑协议</a><a class="sub" href="#section-11">4.1 单一权威、版本和快照</a><a class="sub" href="#section-12">4.2 建议内部消息（不是现有 API）</a><a class="sub" href="#section-13">4.3 状态机与 Stop</a><a class="" href="#section-14">5. AI 模型、工具和 provider</a><a class="sub" href="#section-15">5.1 两类入口</a><a class="sub" href="#section-16">5.2 工具、附件与服务合同</a><a class="sub" href="#section-17">5.3 模型兼容与取消</a><a class="" href="#section-18">6. 资源、预览、演示和导出</a><a class="sub" href="#section-19">6.1 资源和存储</a><a class="sub" href="#section-20">6.2 预览及演示</a><a class="sub" href="#section-21">6.3 保存、打印和导出</a><a class="sub" href="#section-22">6.4 CLI / headless</a><a class="" href="#section-23">7. 安全和多窗口模型</a><a class="" href="#section-24">8. 开发任务与依赖（待实施）</a><a class="" href="#section-25">9. 测试矩阵与交付证据</a><a class="" href="#section-26">10. 依赖与难点</a><a class="" href="#section-27">11. 发布、回滚和未决事项</a></details></aside><main><div class="note"><strong>阅读提示：</strong>前三篇为下一版规划；第 04 篇记录实际实施与验收。源代码接入、编译、运行、完整对等和发布分别核验，不以局部通过代替整体完成。</div><h1 id="section-1">GenOffice AI HTML 融合技术对接设计</h1>
+<p>日期：2026-11-06。状态：<strong>研究及设计，尚未实施、尚未验收</strong>。本文件只规定下一版本的技术方案，不表示已启用 HTML，也不替代此前 Office 总体规划或 PDF 专项。</p>
+<h2 id="section-2">1. 技术目标与事实边界</h2>
+<p>目标是把经过批准的 GenOffice AI HTML <strong>完整应用</strong>接入 Friday Office：文件、可视编辑、源码、实时预览、AI 面板及其工具、资源、演示、导入导出和运行时配套均需逐项对齐；不能只做一个聊天面板、把 HTML 当普通文本打开、或者仅点亮 registry。用户同时要求便于未来持续跟随上游，故优先复用上游应用与格式逻辑，通过版本化 adapter 承接 Friday 宿主差异。</p>
+<p><strong>来源固定但未批准</strong>：当前 Friday 的 <code>office-upstream.lock.json:4-24</code> 记录 vendor HEAD <code>8ed0c8d099c3c3d87b1a998d9189da3d120ff820</code>、<code>v0.10.639-27-g8ed0c8d0</code>，工作区有未提交变更；所记录官方观察候选为 <code>v0.12.852</code>、commit <code>4b55db9ed1994575a695160ffc6cfd0bfc866211</code>。<code>approvedTarget</code>、<code>vendorBaseSha</code>、<code>integrationCommit</code> 均为空。候选是研究样本，不宣称最新、已批准或已融合；开工前需在线复核 tag、提交身份、许可证与维护策略。正式对等基准必须在 G0 批准固定 commit，并冻结其工具和功能矩阵。</p>
+<p><strong>如何复核候选源码</strong>：本机只读研究库为工作区根 <code>research_sources/genoffice-v0.12.852.git</code>，使用 <code>git --git-dir=&lt;该绝对路径&gt; show 4b55db9ed1994575a695160ffc6cfd0bfc866211:apps/html/src/renderer/ai/tools.ts</code>，其他候选引用同样替换冒号后的路径。该库为浅历史，不足以证明 fork 的完整历史或 merge-base。公开对象可查 <a href="https://github.com/genspark-ai/genoffice/tree/4b55db9ed1994575a695160ffc6cfd0bfc866211/apps/html">固定提交</a>。当前 vendor 路径是工作区文件，不应伪称与该候选完全相同。</p>
+<h3 id="section-3">1.1 已有代码证据</h3>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>事实</th>
+<th>可核对位置</th>
+<th>对接影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTML 被登记但关闭，<code>.html/.htm</code> 未进入已启用映射</td>
+<td><code>src-electron/office/editor-registry.js:6-18</code></td>
+<td>功能完成并验收后方可启用；不能仅改 enabled</td>
+</tr>
+<tr>
+<td>文件类型、Vue 工作区、Tab 和路由还有独立四类型枚举</td>
+<td><code>src-electron/office/office-files.js:7-20</code>，<code>src/views/office/OfficeWorkspace.vue:54</code>，<code>src/components/layout/TabBar.vue:257</code>，<code>src/router/index.js:60</code></td>
+<td>必须统一来源或加一致性测试，否则出现可打开但无法导航等半接入</td>
+</tr>
+<tr>
+<td>宿主按编辑器懒加载并校验 bundle；runtime、IPC 和 view 分支仅覆盖四类，<code>createTypeView</code> 最后回落 PDF</td>
+<td><code>src-electron/office/office-host.js:118-140,160-232,309-333,1056-1082</code></td>
+<td>需显式 HTML 分支；未知类型必须拒绝，不可误建 PDF</td>
+</tr>
+<tr>
+<td>构建由已启用 registry 驱动，上游 renderer/preload 和 main entry 分别构建</td>
+<td><code>scripts/build-office.mjs:20-38,98-110,215,263-264</code></td>
+<td>增加 HTML entry、资源、构建依赖和完整 manifest；不要手改 <code>resources/office/</code></td>
+</tr>
+<tr>
+<td>Office AI 桥复用 Friday 模型；搜索/图片通道仍有空结果或不支持实现</td>
+<td><code>src-electron/office/office-ai-bridge.js:18-20,320-371</code></td>
+<td>必须对接真实 provider 并准确投影不可用原因，空数组不能冒充搜索成功</td>
+</tr>
+<tr>
+<td>共用 operation catalog 和交付当前只有 PDF→DOCX、内容→DOCX；目标扩展名硬编码 <code>.docx</code></td>
+<td><code>src-electron/office/operation-catalog.js:1-3</code>，<code>src-electron/office/artifact-delivery.js:103-104,185</code></td>
+<td>复用任务/授权/交付设计时须扩展格式化合同；不能把 DOCX 验证器用于 HTML</td>
+</tr>
+<tr>
+<td>上游当前 vendor 有 HTML 源码和自身独立生命周期，但 Friday 未加载</td>
+<td><code>vendor/happyoffice/apps/html/src/main/html-main.ts:774,797-816,925-1045,1223</code></td>
+<td>以批准目标版本真实 exports 为准，不要求暴露上游本来私有的 IPC 函数</td>
+</tr>
+<tr>
+<td>上游现有预览可执行脚本、联网、表单和弹窗，iframe 不设 <code>allow-same-origin</code></td>
+<td><code>vendor/happyoffice/apps/html/src/renderer/preview/PreviewFrame.tsx:23-27,43-49,60</code>；固定候选同路径须再次逐项核对</td>
+<td>需建立威胁模型和可验证隔离；不可宣称预览已禁用 JS/网络</td>
+</tr>
+</tbody></table></div>
+<p>候选 <code>apps/html/src/renderer/ai/tools.ts</code> 的 <code>AGENT_TOOLS</code> 包括 <code>get_outline</code>、<code>read_source</code>、<code>apply_ops</code>、<code>ask_clarification</code>、<code>plan_page</code>、<code>write_document</code>、<code>search_images</code>、<code>generate_image</code>；<code>apps/html/src/renderer/document/ops.ts</code> 已见 <code>str_replace</code>、<code>replace_element</code>、<code>set_inner_html</code>、<code>set_text</code>、<code>insert_html</code>、<code>set_attr</code>、<code>set_style</code>、<code>set_tag</code>、<code>set_text_node</code>、<code>wrap_text</code> 等。这里是研究清单而非完整对等证明：G0 必须按批准 commit 扫描全部工具、参数、依赖与返回，并以测试冻结，不能据局部列表裁剪功能。</p>
+<h2 id="section-4">2. 架构与责任边界（拟议）</h2>
+<pre><code class="language-text">Friday 窗口 / 工作区 / 主助手                 上游 HTML 应用
+  route / tabs / open / save / approval  -&gt;  main + preload + renderer
+            |                              |   source document / ops / AI panel
+            v                              |   preview / inspector / present
+   Office capability + task service &lt;------ HTML adapter / hooks
+            |                              |
+  artifact / file grants / audit            AI transport -&gt; Friday model bridge
+            |                              |              -&gt; provider adapters
+  versioned bundle + manifest  &lt;------------ build pipeline + pinned vendor
+</code></pre>
+<ol>
+<li><strong>上游拥有文档语义</strong>：HTML buffer、解析映射、原子编辑、预览/演示及其上游 UI 的功能，优先维持批准版本的行为，避免另造互不兼容的 HTML 编辑器。</li>
+<li><strong>Friday 拥有宿主边界</strong>：用户身份、可信文档 identity、路径授权、AI 写操作审批、任务、交付、脱敏日志、模型和 provider 凭据管理、窗口与路由。</li>
+<li><strong>adapter 只转换合同</strong>：显式转换能力发现、上下文、操作、事件和错误；任何私有 hook 必须列在差异台账，注明测试、责任人及上游等价实现出现后的删除条件。</li>
+<li><strong>preview 是不可信内容</strong>：它不应获得 Friday preload、凭据、主进程权限或用户未授权的本地文件。预览可执行性与上游对等需通过隔离和明确网络选择实现，而非假设页面安全。</li>
+<li><strong>同一能力，多入口共用</strong>：HTML 面板与主助手可以保留不同交互，但读写同一文档权威状态与相同授权/版本校验，不得由主助手另起一份隐形 HTML 副本。</li>
+</ol>
+<h2 id="section-5">3. 版本冻结、构建与注册</h2>
+<h3 id="section-6">3.1 上游获取和差异审计</h3>
+<ul>
+<li>在隔离 worktree 按批准 tag 和 peeled SHA 获取完整历史、依赖及许可证；记录官方、当前 fork、可能旧基线三方身份及 merge-base。不得将候选 bare 的浅历史结论当作完整审计。</li>
+<li>列出 HTML app、共用 packages、shell、CLI、构建配置、资源、依赖和锁文件的变更；对所有 Friday vendor 私有补丁逐项作保留、替代、冲突或删除结论，附责任人、证据及测试。当前 <code>office-vendor-patches.json</code> 只是差异入口，不是已完成审计。</li>
+<li>评估“整体升级 vendor”和“把目标 HTML 及其闭包移植到现有 vendor”两条路线：前者回归范围大但维护一条上游基线；后者容易引入跨版本 package/API 断裂和后续重复移植。默认优先完整目标基线与宿主 adapter；若依赖、许可证或既有功能阻断，先完成对比实验及书面决策，不得以裁减 HTML 功能冒充对等。</li>
+<li><code>scripts/office/upstream-lock.mjs:127-156</code> 的正式集成检查拒绝缺失身份或缺映射的 cherry-pick/three-way 声明；须补齐可审计逐提交/逐文件映射与证据摘要机制后才能采用这些方式。锁文件中的候选不得直接升为 integrated。</li>
+</ul>
+<h3 id="section-7">3.2 构建产物和 manifest</h3>
+<p>拟新增 <code>scripts/office/entries/html.ts</code>，以目标源码的实际 public exports 构造 bundle；构建 <code>html-main.cjs</code>、<code>html/preload/index.js</code>、<code>html/renderer/index.html</code>、其动态 chunk/字体/worker/协议资源，及真实所需共用包。<code>integration-manifest.json</code> 登记 HTML 版本、协议、source SHA、adapter、main/preload/renderer、依赖和每项资源摘要。阶段目录先完整构建校验再整组发布；禁止混用旧 renderer 和新 main。</p>
+<p>现有 bundle 合同在 <code>src-electron/office/bundle-contract.js:82-117</code> 对 protocol、资源、目标平台及 clean 进行核查。扩展时验证真实 <code>require/import</code> 导出，不只信任 manifest 自报；缺资源、版本不兼容、preload 不匹配均返回明确不可用状态。发布必须 clean clone、锁定工具链和 lockfile、fresh 构建、比对包内资源及 hash；保留构建日志/命令/平台与输入 SHA。</p>
+<h3 id="section-8">3.3 main / preload / renderer 与注册时序</h3>
+<ol>
+<li>Electron ready 前按目标代码要求注册 <code>genoffice-app://</code> 和 HTML 自有特权 scheme；ready 后安装协议处理，先验证 scheme 注册次数、session 和资源所有权，再创建 HTML view。</li>
+<li><code>ensureEditor(&#39;html&#39;)</code> 懒加载经过合同验证的 bundle；先 configure runtime 路径、文件/资源/导出回调和 shell hooks；以目标源码真实顺序安装 IPC。候选 <code>apps/html/src/main/html-main.ts:1315</code> 的 <code>registerHtmlIpc</code> 为私有函数、<code>:2004</code> 的 <code>createHtmlView</code> 内触发；<strong>不要凭空要求它是公开 export</strong>。必须用真实加载和重复创建测试其效果及注册幂等。</li>
+<li>Friday 当前 <code>office-host.js:143-156,208-232</code> 用全局替换重名 IPC 并在编辑器注册后覆盖 <code>ai:*</code>。全局 <code>removeHandler</code> 可能影响其他模块：设计阶段先列所有通道和注册方，改为受控统一分发/明确 owner；确保后加载 HTML 不覆盖已有 PDF/Docs，也不让旧模块覆盖 Friday bridge。对 <code>ipcMain.on</code> 与 <code>handle</code> 分别检查重复监听和清理。</li>
+<li>renderer 只通过经过审查的 HTML preload API；禁止把任意 IPC、Node API、文件路径能力或主助手 context 直接透传到不可信预览。<code>contextIsolation</code>、sandbox、nodeIntegration 设置以真实打包运行时测量，并审计 shared process、session 和协议响应头。</li>
+<li>关闭编辑 Tab 或 renderer 崩溃时移除该 view 的授权、等待器、preview、流和 present 引用；不得注销影响其他 view 的进程级 handler。</li>
+</ol>
+<h3 id="section-9">3.4 路由、菜单、生命周期</h3>
+<p>从共用 registry 派生扩展名、类型、Tab 路由和用户入口；若前后端无法安全直接共享，则生成静态合同并设一致性测试。明确新增、新建未命名文件、打开/拖放、最近文件、重命名、另存为、未保存关闭、恢复、多窗口和相同路径重复打开策略。HTML 专属保存、撤销/重做、查找、打印、导出、预览与演示命令映射到目标应用实际通道；不能假设 <code>menu:command</code> 是通用合同。菜单禁用态和提示应反映当前 active view，而不是仅看类型。</p>
+<p>上游当前文件跟踪（<code>html-main.ts:797-816,937-1045</code>）分别维护 per-webContents 路径、dirty、预览和保存 waiter。宿主需要绑定 <code>viewId → webContentsId → documentId → actor/space</code>，在保存/路径变化时同步 Tab、最近文件和授权；保存取消、目标占用、renderer 退出及另一个 view 同路径竞争均要按真实结果反馈。禁止在用户未确认时覆盖已有用户文件。</p>
+<h2 id="section-10">4. 文档权威状态与编辑协议</h2>
+<h3 id="section-11">4.1 单一权威、版本和快照</h3>
+<p>提议 HTML renderer 的上游文档模型为当前打开文档的唯一可编辑权威；主进程持有 identity、权限、revision 和快照摘要，不另维护可独立修改的第二份源码。预览是带 instrument 的派生内容，不可拿它作为保存源或 AI 编辑源；上游 <code>html-main.ts:1041-1045</code> 已明确区分预览和保存序列化。</p>
+<p>每次用户编辑、撤销、重做和 AI 成功提交都推进单调 <code>revision</code>；<code>documentId</code> 在标签生命周期稳定，<code>viewId</code> 和 sender 由宿主签发，文件 rename 不改变文档身份。基于快照开展长操作时带 <code>{documentId, revision, sha256}</code>；应用前核对当前 revision。上游已有 version 机制需在 G0 比对并映射，不能未经验证假设已满足跨进程合同。编辑期间文件被外部更改应提示冲突并可另存，不能静默覆盖。</p>
+<h3 id="section-12">4.2 建议内部消息（不是现有 API）</h3>
+<pre><code class="language-json">{&quot;protocol&quot;:&quot;friday.office.html/1.0&quot;,&quot;requestId&quot;:&quot;uuid&quot;,&quot;operation&quot;:&quot;html.applyOps&quot;,&quot;documentId&quot;:&quot;opaque-id&quot;,&quot;expectedRevision&quot;:12,&quot;ops&quot;:[{&quot;kind&quot;:&quot;上游已批准操作类型&quot;,&quot;payload&quot;:{}}]}
+</code></pre>
+<pre><code class="language-json">{&quot;requestId&quot;:&quot;uuid&quot;,&quot;status&quot;:&quot;applied&quot;,&quot;documentId&quot;:&quot;opaque-id&quot;,&quot;previousRevision&quot;:12,&quot;revision&quot;:13,&quot;changedRanges&quot;:[{&quot;start&quot;:0,&quot;end&quot;:10}]}
+</code></pre>
+<p>操作 shape 必须在 G0 根据真实上游 schema 生成适配及负向测试；上面只是 envelope，<code>kind/payload</code> 不是承诺的上游语法。接收时通过 sender 查文档授权，绝不相信 renderer 自报 actor、space、path 或 owner。按 <code>requestId + owner + documentId</code> 去重；参数不一致返回冲突而不是复用旧结果。</p>
+<p><code>applyOps</code> 先依据同一 revision 完整解析与验证全部操作、选择器/定位结果、范围重叠和大小限制，在内存生成事务补丁，再一次性提交并更新撤销栈；任何一项无效时整组不写入。若用户在模型生成期间编辑，返回 <code>REVISION_CONFLICT</code> 并提供重新读取/用户确认的安全重试，不盲目对新文档重放。AI 生成中的 draft 不能抢先成为已保存文件；只在成功提交后报告“已应用”，只有完成保存和回读后才能报告“已保存”。</p>
+<h3 id="section-13">4.3 状态机与 Stop</h3>
+<pre><code class="language-text">requested -&gt; authorized -&gt; context_ready -&gt; streaming -&gt; proposal_ready
+          -&gt; applying -&gt; applied_dirty -&gt; saving -&gt; persisted -&gt; opened/ready
+                    \-&gt; conflict / failed
+任何可取消阶段 -&gt; cancelling -&gt; cancelled（若此前已提交则保留真实提交状态）
+</code></pre>
+<p>每个阶段应以 <code>requestId</code>、owner、documentId、revision 和明确终态关联；取消禁止未来 delta、tool-call、迟到 ack 再写入；提交后的取消不能假装没有写入或删除已交付文件。页面关闭、模型超时、断网、进程崩溃也应取消或按已提交事实恢复。<code>src-electron/office/office-ai-bridge.js:270,312,341-342</code> 当前流表按 requestId 索引，取消 handler 未在此处检查 sender；实施时需以 sender/owner/requestId 绑定、拒绝跨视图取消、处理重复 ID 和销毁清理，并用真实多视图验证。</p>
+<h2 id="section-14">5. AI 模型、工具和 provider</h2>
+<h3 id="section-15">5.1 两类入口</h3>
+<p>HTML 面板保留上游系统提示、工具定义、澄清卡、队列、附件、流式响应和文档操作体验；Friday 的模型桥负责配置、传输、能力查询和错误归一化。主助手若执行 HTML 操作，则通过注册的领域能力查询、获得用户批准后调用同一 HTML adapter，不能绕过上游的 revision/原子操作，也不能声称所有上游工具自动出现在主助手中。主助手不依赖 HTML 面板先打开；无活动 HTML、多候选或无授权时明确询问或报可恢复错误。</p>
+<p>当前 <code>officeOperations.js:5-13</code> 的可信上下文与写操作审批是 PDF/DOCX 现有模式；<code>operation-tasks.js:24-30,53-79</code> 的 actor/space 与幂等可复用，但 HTML schema、资源授权、任务恢复需新增合同和测试。交互式用户直接点击保存与 AI 写入的授权语义要分别定义，不可用一次批准授权后续所有文件和网络访问。</p>
+<h3 id="section-16">5.2 工具、附件与服务合同</h3>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>必须实现/验证</th>
+<th>边界与失败</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>内容与操作</td>
+<td>按批准 commit 对照 <code>get_outline/read_source/apply_ops/plan_page/write_document</code> 等完整工具、参数和结果；选区/文档版本绑定</td>
+<td>超长、定位歧义、空内容、冲突、部分失败都用结构化错误；模型不得将错误当成功</td>
+</tr>
+<tr>
+<td>澄清/队列</td>
+<td>保留上游 <code>ask_clarification</code>、计划与操作队列、人类选择以及取消/重试</td>
+<td>不强制接受模型建议；卡片关闭不等同批准写入</td>
+</tr>
+<tr>
+<td>上下文与脱敏</td>
+<td>文本、选区、图像、附件按实际模型能力发送；明确大小、截断和保留语义</td>
+<td>记录发送前授权/范围；密码和密钥不进 prompt 或日志；脱敏后定位映射须回归</td>
+</tr>
+<tr>
+<td>搜索</td>
+<td>实现真实 web/image search adapter，记录 provider、超时、权限、结果 URL/归属</td>
+<td>禁用、无配置、认证失败、空结果、超时分别返回，不能用 <code>[]</code> 混同</td>
+</tr>
+<tr>
+<td>图片/媒体</td>
+<td>完整接入目标版本支持的图像搜索、抓取、生成和分析能力</td>
+<td>provider key 仅主进程使用；按 URL、体积、类型、私网/重定向策略校验；失败明确且可重试</td>
+</tr>
+<tr>
+<td>附件/资源</td>
+<td>文件选择或已授权文档；解析器按格式、大小、权限、生命周期执行；本地资源 copy/reference 策略对等</td>
+<td>禁止 AI 任意路径读取；临时缓存、删除/撤销、移动文档与 Save As 的资源引用必须一致</td>
+</tr>
+<tr>
+<td>会话/偏好</td>
+<td>核对上游会话、模型、面板偏好及持久化/重开语义；Friday 映射到用户空间</td>
+<td>不以 renderer 自报 owner 查历史；区分文档保存和聊天记录保存</td>
+</tr>
+</tbody></table></div>
+<p>拟统一服务错误 envelope：</p>
+<pre><code class="language-json">{&quot;ok&quot;:false,&quot;error&quot;:{&quot;code&quot;:&quot;PROVIDER_NOT_CONFIGURED&quot;,&quot;message&quot;:&quot;图片服务尚未配置&quot;,&quot;retryable&quot;:false,&quot;details&quot;:{&quot;capability&quot;:&quot;image.generate&quot;}},&quot;requestId&quot;:&quot;uuid&quot;}
+</code></pre>
+<p>这是 Friday adapter 内部建议形状，不是对上游现有协议的断言；边界转换必须逐通道适配目标源码期望的错误类型。调试日志只存 code、阶段、耗时和脱敏 requestId；不得保存 HTML 正文、选区、附件内容、token、模型密钥和 provider 原始敏感响应。API key 管理遵循项目 <code>AGENTS.md</code>，不在渲染进程可读的持久化文件或文档里保存。</p>
+<h3 id="section-17">5.3 模型兼容与取消</h3>
+<p>为 OpenAI 兼容模型逐项验证流 delta、分片 tool-call 参数合并、并行调用、工具结果回传、reasoning、token 上限、超时/重试和多模态。真实 provider 若不支持某项应在发现阶段标记，避免面板展示必然失败的功能。网络请求可限次重试，但非幂等图片生成或写操作不得自动重复；Stop 传播到 provider、工具和编辑提交。使用模拟服务覆盖所有错误，并用用户配置的真实模型跑端到端，不得将 mock 结果称作真实模型验收。</p>
+<h2 id="section-18">6. 资源、预览、演示和导出</h2>
+<h3 id="section-19">6.1 资源和存储</h3>
+<p>批准版本的 <code>html-asset://</code>、<code>html-preview://</code>、相对路径、data URL、生成图和临时资产生命周期须逐项梳理。为每个 view 创建文档根目录或明确的文件授权集合，解析并规范化路径；阻断 <code>..</code>、盘符绕过、链接/junction/硬链接导致的越权和文件被替换竞态。远程资源加载/本地导入、Save As、重命名、文档移动、孤儿清理和丢失资源必须有明确策略。支持上游单文件导出和可携带资源输出，以真实输出回读与重新打开验证，不能只看对话框成功。</p>
+<h3 id="section-20">6.2 预览及演示</h3>
+<p>上游 preview 和 inspector 的编辑消息必须先经过安全设计和攻击验证，不能仅按现有协议原样接入。当前 vendor 的 <code>inspector-protocol.ts:128</code> 仅判断消息对象的 <code>type</code> 以 <code>gx:</code> 开头；<code>PreviewFrame.tsx</code> 再检查 <code>event.source</code> 和版本，<code>App.tsx:646,656</code> 将文本和 HTML 提交交给 <code>runManual</code>。相同 iframe 中的页面脚本与 inspector 共用执行环境，页面脚本可以向父窗口发送同类型消息；opaque origin 为 <code>null</code>，也不能用 origin 区分二者。因此 source、版本、schema、长度和可被同一页面读到的 token 只能作为过滤、关联或重放防护，<strong>不能证明消息来自可信 inspector，也不能单独授权修改源码</strong>。候选目标版本需按固定 SHA 重新核对与实测；以上是当前 vendor 的代码证据，风险后果目前限定为可能影响文档完整性，其他影响需验证。</p>
+<p>实施前完成可运行安全 PoC，比较并经评审确定以下设计，而不是预设任何一种已经安全：</p>
+<ol>
+<li>将允许执行用户脚本的浏览预览与编辑预览分离。编辑预览使用不执行用户脚本的受控派生文档，隔离用户代码和 inspector；外部脚本、事件属性、可执行 URL、嵌套 frame 等处理不得改写保存源，并须覆盖 CSS、SVG 和资源带来的执行路径。动态内容展示留给受隔离的浏览模式，两种模式的差异及切换须对用户明确。</li>
+<li>如需动态网页与可视编辑同时工作，设计具备独立隔离边界的可信控制组件；明确其如何获取节点定位、如何防止页面脚本篡改 DOM 或冒充用户操作，并以攻击 PoC 证明。若无法证明可信来源，则 iframe 发出的编辑内容只是<strong>不可信候选</strong>，需由宿主依据真实文档 revision、源映射、允许的操作及可信用户交互生成和确认变更；页面自报的 <code>isTrusted</code>、选择状态或确认结果不能作为证据。</li>
+<li>编辑提交经宿主控制面检查当前 view、documentId、revision、活动编辑会话、操作类型与范围，验证源映射、事务和冲突；跨导航或 reload 使旧会话失效。需要显式确认时，在宿主可信 UI 展示可读变更及目标后由用户确认。常规编辑的交互成本应通过原型评估，不能以确认弹窗替代隔离的证明。</li>
+<li>如未找到同时满足安全和目标上游交互的方案，保留安全差异及未完成状态，禁止以“已完全对等”发布；由评审决定风险处置和可用模式。隔离方案必须经 Electron 打包环境及支持平台复核，不能仅凭浏览器开发模式的表现下结论。</li>
+</ol>
+<p>预览产生的脚本、导航、下载、表单、剪贴板、弹窗与媒体权限在隔离 session 中逐类处理；演示窗口仅引用拥有者的 preview，owner 关闭时销毁，演示窗口不能获得编辑器或宿主权限。</p>
+<p>网络策略须兼顾上游动态页面兼容：默认的离线/联网模式、可信来源、远端请求及表单提交授权、重定向及私网访问策略，须在方案评审明确并与用户可见反馈一致；并非声明要永久关闭上游联网能力。若某种上游网页需要放宽策略，应以显式、可撤销的用户选择和隔离边界解决。严格 CSP 或权限拦截可能破坏上游行为，必须以 CDN、脚本和离线样例记录差异，不得静默降级后宣称对等。</p>
+<h3 id="section-21">6.3 保存、打印和导出</h3>
+<p>保留上游原生 HTML 保存/另存为、打印、导出 HTML/PDF/DOCX 等批准版本实际支持的路径及其限制。PDF/DOCX 使用目标应用真实导出实现，不绕过现有资源授权；先提交并回读，再触发打开；打开失败不删除已交付文件。单文件 HTML 与多资源工程需分别定义资产打包、路径重写、目标覆盖和回滚事务。</p>
+<p>现有 <code>artifact-delivery.js</code> 是 DOCX 专用，提出分离<strong>格式无关</strong>的路径授权/原子提交/日志恢复与<strong>格式专用</strong>验证器：HTML 检查目标文件字节、编码、引用和回读，PDF/DOCX 各用各自验证器。完成迁移前不得复用 <code>.docx</code> 强约束作为 HTML 交付。注意任意 HTML 的安全预览与源文件本身可执行内容是不同问题；不能为了打开安全而无提示破坏用户源码。</p>
+<h3 id="section-22">6.4 CLI / headless</h3>
+<p>批准目标需核实 HTML 在上游 CLI、headless、系统文件关联、命令行参数、无窗口 PDF/DOCX 导出中的真实支持范围；逐项记录可观察行为与依赖。Friday 当前 <code>office-headless.js</code> 覆盖四编辑器，不能假设 HTML 自动可用。若上游支持则在无交互、路径授权、exit code、stdout/stderr、超时、清理与资源可达方面实现同等合同；目标版本不支持的能力标注不适用，不凭空承诺。安装包中执行无源码验证。</p>
+<h2 id="section-23">7. 安全和多窗口模型</h2>
+<ol>
+<li><strong>信任分层</strong>：Friday 主进程/经认证宿主控制面 &gt; HTML 编辑器 renderer &gt; 不可信 HTML 预览及网络资源。原始 HTML、附件、模型返回、网页和文件名都视为不可信输入；AI 提示词也不授予额外权限。</li>
+<li><strong>owner 校验</strong>：每个 IPC 在主进程从 <code>event.sender</code> 查注册表并核对窗口、documentId、actor、space、当前授权和生命周期。拒绝跨标签读取/修改、伪造 documentId、被销毁 sender、失效授权和旧请求；preload API 最小暴露。主窗口/编辑窗口/预览 iframe 不能互相冒用身份。</li>
+<li><strong>文件与网络</strong>：本地访问使用显式授权和真实路径校验；网络 provider 使用独立可配置权限及 DNS/重定向/私网防护，考虑 DNS rebinding、压缩炸弹、巨大文件与 MIME 伪装。隔离方案必须明确跨平台兼容策略并测试；不要把脚本沙箱当作网络防火墙。</li>
+<li><strong>导航与协议</strong>：预览不得顶层导航 Friday，不得获得宿主 preload；外链通过受控 handler 和用户操作打开，拒绝危险 scheme。<code>postMessage</code> 的 sender、token、消息类型、大小和版本检查用于过滤及关联，不能证明同一 iframe 中的可信 inspector 身份；编辑授权必须满足第 6.2 节的独立隔离或宿主可信控制方案。严格验证自定义协议解析、响应内容、CSP 和路径绑定。</li>
+<li><strong>日志与结果</strong>：不记录明文源码、用户内容、附件和秘密；安全错误不泄露其他文档是否存在。保存后被外部更改应与任务完成状态分开报告。搜索/图像能力可用性与模型工具声明同步。</li>
+</ol>
+<p>威胁验证至少覆盖恶意 HTML <code>&lt;script&gt;</code>、表单上传、跨域 fetch、iframe 伪造消息、<code>window.open</code>、<code>file:</code>/自定义协议越权、SVG/资源内容伪装、外链重定向、提示注入、两窗口跨 sender 取消及请求 ID 冲突。消息攻击测试包括：在相同 iframe 伪造 <code>gx:textEditCommit</code>、<code>gx:htmlEditCommit</code>、<code>gx:keyCommand</code>、移动与缩放消息；读取或重放可观察 token 和 version；在导航、重载、切换文档、关闭视图之后重放旧消息；伪造选区与节点标识、注入超大和错误类型 payload，以及运行时篡改节点。断言未经对应宿主可信操作时源文档、保存文件、撤销栈和其他标签均无未授权变化，并验证正常编辑、撤销及浏览模式仍按冻结矩阵工作。每项记录攻击样本、前置授权、预期及实际结果、系统和 Electron 版本；安全措施对上游功能的影响单列。</p>
+<h2 id="section-24">8. 开发任务与依赖（待实施）</h2>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>任务</th>
+<th>依赖</th>
+<th>退出证据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>T00</td>
+<td>批准固定上游 SHA、真实功能/工具/语言矩阵及三方差异、许可证</td>
+<td>无</td>
+<td>可重做源码清单与评审记录；dirty 改动归档而非覆盖</td>
+</tr>
+<tr>
+<td>T01</td>
+<td>依赖、Electron/Vite/原生模块和构建兼容 PoC</td>
+<td>T00</td>
+<td>锁文件、安装、构建、启动与现有 Office 回归报告</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>HTML main entry、renderer/preload、资源与 manifest</td>
+<td>T01</td>
+<td>fresh 构建、bundle 导入及缺失/版本不匹配负向</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>Host runtime、scheme、注册时序、路由、Tab 和菜单</td>
+<td>T02</td>
+<td>多窗口实际打开/新建/关闭及注册冲突回归</td>
+</tr>
+<tr>
+<td>T04</td>
+<td>文档 identity、快照、revision、原子操作与保存</td>
+<td>T03</td>
+<td>跨入口同源、并发/取消/冲突/崩溃测试</td>
+</tr>
+<tr>
+<td>T05</td>
+<td>HTML 面板 transport、模型工具、澄清/队列</td>
+<td>T04</td>
+<td>按批准工具矩阵逐项回放及真实模型测试</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>搜索、图像/媒体、附件和相应 provider</td>
+<td>T05</td>
+<td>实服务、故障与授权记录；功能矩阵无占位假成功</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>资源、preview/inspector、演示、打印/导出、CLI/headless</td>
+<td>T03-T06</td>
+<td>可执行网页、离线/联网及真实文件回读对等报告</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>主助手能力映射、审批、任务与交付</td>
+<td>T04-T07</td>
+<td>主助手自然语言完整流程，权限与版本冲突证明</td>
+</tr>
+<tr>
+<td>T09</td>
+<td>安全、性能、回归、打包/安装/升级/回滚</td>
+<td>T02-T08</td>
+<td>见第 9 节，全部绑定最终 commit 与构建 hash</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>最终批准启用 registry，来源/差异账本与发布归档</td>
+<td>T09</td>
+<td>所有阻断项关闭、可追溯构建及验收签收</td>
+</tr>
+</tbody></table></div>
+<p>T05/T06 可并行研发，但统一合同及 T04 版本控制必须先冻结。某 provider 不可得时仅能在内部测试标注待接入；用户要求的完整对等功能未通过前，不得把整体标记为完成或公开宣称已对等。</p>
+<h2 id="section-25">9. 测试矩阵与交付证据</h2>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>层次</th>
+<th>样本与断言</th>
+<th>证据与关闭方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>来源/构建</td>
+<td>干净 clone、批准 SHA、锁文件、许可证、源变更；main/preload/renderer 缺失、混版</td>
+<td>构建 manifest、hash、日志、真实加载及失败报告</td>
+</tr>
+<tr>
+<td>上游对等</td>
+<td>逐项 UI、快捷键、源码/可视编辑、撤销、预览、演示、文件和所有 AI 工具/provider</td>
+<td>批准目标同平台对照录像/结果、版本矩阵及差异关闭记录</td>
+</tr>
+<tr>
+<td>文档一致性</td>
+<td>手工编辑并发 AI、revision 变化、多 Tab 同一路径、撤销/重做、迟到 ack</td>
+<td>操作前后源码摘要、版本、撤销栈与 UI；无部分写入</td>
+</tr>
+<tr>
+<td>文件生命周期</td>
+<td>新建、打开、另存为、占用、只读、外部变更、硬链接/junction、崩溃/恢复</td>
+<td>原文件 hash、最终文件内容、journal、提示和恢复结果</td>
+</tr>
+<tr>
+<td>AI/服务</td>
+<td>真实模型工具调用、停止、超时、空结果、provider 失败、附件、多模态/搜索/图像</td>
+<td>对照模型、工具、输入权限、脱敏 trace 与用户可见结果</td>
+</tr>
+<tr>
+<td>隔离/安全</td>
+<td>恶意 HTML/消息/网络/文件路径、跨窗口 sender、密钥与日志扫描</td>
+<td>每项测试用例、平台、预期与实际、未修风险和签收</td>
+</tr>
+<tr>
+<td>导出/资源</td>
+<td>单文件、引用资源、中文路径、移动、离线、DOCX/PDF 回读及打印</td>
+<td>文件大小/hash、实际内容与二次打开结果</td>
+</tr>
+<tr>
+<td>性能/可用性</td>
+<td>大 HTML、海量节点和图片、长流、并发 view、取消</td>
+<td>启动/首交互、内存、CPU、卡顿和停止时间；预算由 T01 实测后批准</td>
+</tr>
+<tr>
+<td>安装/回归</td>
+<td>无源码干净安装、旧版升级、用户数据、回滚、现有 PDF/DOCX/XLSX/PPTX</td>
+<td>安装包 hash、版本、步骤、结果、日志和恢复证明</td>
+</tr>
+</tbody></table></div>
+<p>每条结果关联 <code>Friday commit</code>、vendor commit、批准上游 SHA、manifest digest、构建/安装包 hash、测试命令、机器/系统、时间、样本与报告位置。单元测试、隔离 harness、真实 UI、真实模型与安装验收分层记录，不能互相冒充。未执行记录为待验证，不填通过。</p>
+<h2 id="section-26">10. 依赖与难点</h2>
+<ul>
+<li>候选 package 声明的 Electron、Vite 与 Friday 现有版本不同，具体依赖闭包、native ABI、协议行为和 bundle 格式需在 T01 实测；不可仅以 <code>npm install</code> 成功判断兼容。若必须升级宿主工具链，应评估所有现有模块、许可与安装器影响。</li>
+<li>HTML 是可执行文档：既要保留上游脚本和 CDN 内容，又要保护本地文件、凭据和宿主 IPC。需在隔离 session、协议、网络授权和攻击测试共同证明，单独的 iframe sandbox 并不能覆盖所有威胁。</li>
+<li>模型长流与手工编辑并发：必须将生成、应用、保存拆开，以 revision、原子 op 和取消 token 处理，不能以“最后一条消息”判断文件已更新。</li>
+<li>上游版本更迭可能改变 HTML main exports、私有 IPC、provider 工具和资源路径。通过固定来源、能力清单、adapter、合同测试和可追溯差异台账发现变化，而不是硬编码上游私有调用永远不变。</li>
+<li>引入远端搜索和图片服务涉及凭据、供应商协议、网络连通、隐私与成本；实现必须真实可配置、失败准确，不以假结果替代，也不把不支持说成完整对等。</li>
+</ul>
+<h2 id="section-27">11. 发布、回滚和未决事项</h2>
+<p>发布前固定 Friday 源码 commit、vendor commit、上游批准 SHA、patch set、依赖锁、资源 manifest、安装包 hash；整组构建并进行安装与更新验证。回滚以匹配的应用、Office bundle 和 manifest 为单位，并验证旧版可读用户文件、任务/偏好数据以及失败中断恢复；不能只替换单个 HTML renderer。此处是交付设计，不授权现在构建或发布。</p>
+<p>以下必须在实施前评审并写入基准，而不是自行降低范围：最终上游批准版本与三方集成方式；HTML 文件/项目目录及附件可携带语义；预览默认网络和授权交互；实际可用的搜索、图片与媒体服务；跨应用主助手要暴露的具体领域操作；上游 CLI/headless 清单；性能预算和可支持平台。若发现上游行为与 Friday 安全或用户设置冲突，保留差异、给出替代方案和验收，不得静默屏蔽。</p>
+<footer>本页面为离线阅读版。<a href="03-technical-integration.md">Markdown 源稿</a> · <a href="index.html">返回文档导航</a></footer></main></div></body></html>

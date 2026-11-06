@@ -43,6 +43,8 @@ registerTool({
         approvalGranted: true
       })
       if (typeof createOutput === 'string' && /^(?:错误[:：]|工具执行失败[:：]|操作失败[:：])/.test(createOutput.trim())) throw new Error(createOutput)
+      const delivery = typeof createOutput === 'string' ? (() => { try { return JSON.parse(createOutput) } catch { return null } })() : createOutput
+      if (delivery?.ok === false || delivery?.error || !['succeeded', 'completed'].includes(delivery?.status) || delivery?.data?.artifact?.persisted !== true || delivery?.data?.artifact?.validation?.valid !== true) throw new Error('Office 创建任务没有返回已验证的 Word 文件交付结果')
       const created = await fs.stat(out).catch(() => null)
       if (!created?.isFile() || created.size <= 0) throw new Error('Word 文件未生成或文件为空')
       const sha256 = createHash('sha256').update(await fs.readFile(out)).digest('hex')
@@ -52,7 +54,7 @@ registerTool({
         fromVersion: String(note.revision || note.updatedAt || ''), toVersion: new Date().toISOString()
       })
       return JSON.stringify({
-        success: true, noteId: note.id, title, out, sourceUri, targetUri, createOutput,
+        ok: true, success: true, status: 'succeeded', data: { artifact: delivery.data.artifact }, noteId: note.id, title, out, sourceUri, targetUri, createOutput,
         undoAction: { type: 'delete-created-file', path: out, sha256, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() }
       })
     } finally {

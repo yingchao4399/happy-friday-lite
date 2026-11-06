@@ -1,5 +1,17 @@
 # Happy Friday Lite
 
+## Next preview: shared Office operations (in development)
+
+- PDF-to-DOCX conversion and DOCX creation from HTML content now use one Office operation service. A real Electron fixture verifies the PDF renderer conversion/creation APIs, menu IPC and Friday assistant registry against saved DOCX content, hashes and editor-open results. Remote-model tool selection, full AI Core conversations and installer acceptance remain in progress.
+- Tasks record the source snapshot, conversion quality, saved artifact and editor-open result separately. Image-only or mixed PDF pages are reported explicitly; reopening a saved result does not run the conversion again.
+- AI-generated files keep the existing `SANDBOX` output and approval rules. A successful result requires a valid DOCX package, durable delivery and read-back verification.
+- GenOffice remains the editor and conversion-engine source. A shared editor registry, required hooks and a generated resource manifest support future upstream updates; packaging checks the release label, actual source identity and resource hashes. Full AI Markdown/AI HTML parity remains tracked for a later integration.
+- Preview.36 adds a machine-readable upstream source lock, private-change ledger and three-way audit tool. Normal builds check both host/vendor dependency locks and actual sources; the upstream release gate requires pinned official refs, an integration commit and reviewed patches. Candidate `v0.12.852` is not integrated; the vendor remains `v0.10.639-27-g8ed0c8d0`.
+- Windows update metadata is now measured from the final installer and blockmap, written atomically and read back. Technical version `3.0.8-preview.36` sorts above the older preview technical version `3.0.7`; the displayed version is `3.0.7.01-preview.36`. Acceptance probes can load actual packaged modules and resources for the three Office entry points and Core. Deterministic probes, real-model behavior and manual interactions remain separate evidence.
+- Preview.35 artifacts and historical evidence are retained. See the [implementation and validation ledger](docs/office-ai-capability-2026-11-05/05-implementation-and-validation.md) for preview.36 build, quality, installation/upgrade/rollback and GitHub status, and the [upstream integration contract](docs/office-ai-capability-2026-11-05/04-upstream-integration-contract.md) for future updates.
+
+AI HTML integration has started against a separate, pinned official source tree so its newer shared dependencies do not replace the four existing editors. Development builds use `node scripts/sync-office-html-upstream.mjs` followed by `npm run office:build -- --experimental-html`. HTML resources carry a separate source identity in the manifest; loading also requires the explicit `FRIDAY_OFFICE_EXPERIMENTAL_HTML=1` host switch. Default file associations and public availability remain gated while AI, resource isolation, exports and installation parity are being verified. See the [AI HTML implementation documents](docs/office-ai-html-next/index.html).
+
 ## 3.0.7.01-preview.33
 
 - Fixed missing Simplified Chinese labels in the Notes toolbar Insert menu, including video, audio, attachment, note, note reference, knowledge base and knowledge reference.
@@ -270,6 +282,8 @@ npm run electron:build:arm64
 ```
 
 Build artifacts are written to `release/`.
+
+Office resources are generated with `npm run office:build`; do not edit `resources/office/` manually. The package scripts rebuild Office and run `npm run office:verify` before packaging. `office:verify` checks the current checkout against the generated manifest, so source changes require another Office build. A clean release candidate additionally uses `npm run office:build:release` and `npm run office:verify:release`. These checks establish a matching source/resource combination; runtime and installer acceptance remain separate.
 
 > Configure Python under **Settings -> General -> Python Environment**:
 > 1. Use **Auto Detect** to find an installed interpreter, or select its executable manually.

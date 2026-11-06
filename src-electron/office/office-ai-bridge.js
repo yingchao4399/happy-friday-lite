@@ -1,10 +1,22 @@
 import fs from 'fs'
 import path from 'path'
+import { randomUUID } from 'node:crypto'
 import { app, ipcMain, net, webContents } from 'electron'
 import { buildChatCompletionsUrl } from '../openaiUrl.js'
 import { NETWORK_ERROR_CLASSIFICATIONS, annotateNetworkError, classifyNetworkError, fetchWithFiniteRetry, safeNetworkErrorSummary } from '../ai-core/network-policy.js'
 import { executeCapability } from '../agent/tools/registry.js'
+import { getSkillDir, listSkills } from '../agent/skills.js'
 import { createAiChatCapabilityInvoker } from './ai-inference-adapter.js'
+import { createOfficeAiRequestRegistry } from './ai-request-registry.js'
+import { createOfficeAiServices } from './ai-services.js'
+import { readOfficeAiServiceSettings, writeOfficeAiServiceSettings } from './ai-service-settings-store.js'
+import {
+  normalizeAiSettingsSnapshot,
+  normalizeGskStatus,
+  normalizeSkillText,
+  normalizeSkillsList,
+  normalizeSuggestedFileName,
+} from './ai-service-contract.js'
 import { toOpenAiMessages } from './canonical-transcript.js'
 import {
   OFFICE_DEFAULT_MAX_OUTPUT_TOKENS,
@@ -29,8 +41,52 @@ import {
 
 const state = {
   model: null, // { baseUrl, apiKey, modelName, provider }
-  streams: new Map(), // requestId -> AbortController
+  resolveOwner: null,
+  isModelSettingsSender: null,
   bridgeRegistered: false,
+  openSettings: null,
+  ensureServices: null,
+}
+
+const requests = createOfficeAiRequestRegistry({ resolveOwner: sender => state.resolveOwner?.(sender) })
+const bridgeFault = code => Object.assign(new Error(code), { code })
+const officeServices = createOfficeAiServices({
+  readConfig: readOfficeAiServiceSettings,
+  writeConfig: writeOfficeAiServiceSettings,
+  // 统一转换为 HTML 保存与 DOCX 导出都支持的真实图片格式。
+  async normalizeImage(image) {
+    if (!(image?.bytes instanceof Uint8Array) || image.bytes.byteLength > 50 * 1024 * 1024) throw bridgeFault('OFFICE_AI_IMAGE_INVALID')
+    const { default: sharp } = await import('sharp')
+    const source = sharp(Buffer.from(image.bytes), { limitInputPixels: 50_000_000 })
+    const metadata = await source.metadata()
+    if (['png', 'jpeg', 'gif'].includes(metadata.format)) return { bytes: image.bytes, mime: `image/${metadata.format}` }
+    if (!['webp', 'avif', 'heif'].includes(metadata.format)) throw bridgeFault('OFFICE_AI_IMAGE_INVALID')
+    return { bytes: new Uint8Array(await source.png().toBuffer()), mime: 'image/png' }
+  },
+})
+
+function assertSender(event, { modelSettings = false } = {}) {
+  const sender = event?.sender
+  if (!sender || sender.isDestroyed?.() !== false ||
+    ('senderFrame' in event && (!event.senderFrame || event.senderFrame !== sender.mainFrame))) {
+    throw bridgeFault('OFFICE_AI_SENDER_INVALID')
+  }
+  if (modelSettings) {
+    if (state.isModelSettingsSender?.(sender) !== true) throw bridgeFault('OFFICE_AI_SENDER_INVALID')
+  } else {
+    const owner = state.resolveOwner?.(sender)
+    if (!owner || typeof owner.documentId !== 'string' || !owner.documentId ||
+      typeof owner.viewId !== 'string' || !owner.viewId) throw bridgeFault('OFFICE_AI_OWNER_UNAVAILABLE')
+  }
+  return sender
+}
+
+function notifyAiSettingsChanged() {
+  for (const sender of webContents.getAllWebContents()) {
+    try {
+      if (!sender.isDestroyed() && state.resolveOwner?.(sender)) sender.send('ai:settings-changed')
+    } catch { /* a view can close while settings change */ }
+  }
 }
 
 /** 主窗口侧推送当前模型配置（OfficeWorkspace 挂载/模型切换时调用） */
@@ -43,6 +99,7 @@ export function setOfficeAiModel(model) {
       hasModelName: Boolean(model?.modelName),
       hasBaseUrl: Boolean(baseUrl),
     })
+    notifyAiSettingsChanged()
     return
   }
   state.model = {
@@ -53,26 +110,103 @@ export function setOfficeAiModel(model) {
     thinking: model.thinking === 'enabled' && model.reasoningRoundTrip === true ? 'enabled' : 'disabled',
   }
   console.info('[Office AI] model selected:', state.model.provider || 'custom', state.model.modelName, state.model.baseUrl)
+  notifyAiSettingsChanged()
 }
 
-/** 编辑器 renderer 读取的 AI 设置：锁定为 Friday 托管形态（provider: genspark + 已登录态） */
+/** 编辑器 renderer 读取的 AI 设置：只返回 Friday 当前真实生效的公开快照。 */
 function fridaySettings() {
-  return {
-    provider: 'genspark',
-    providers: {
-      genspark: { apiKey: 'friday-managed', model: 'Friday' },
+  const configured = Boolean(state.model)
+  const provider = configured ? String(state.model.provider || 'custom') : null
+  return normalizeAiSettingsSnapshot({
+    provider,
+    model: configured ? state.model.modelName : null,
+    configured,
+    providers: configured ? {
+      [provider]: { configured: true, model: state.model.modelName, enabled: true },
+    } : {},
+    capabilities: {
+      chat: configured,
+      naming: configured,
+      skills: true,
+      ...officeServices.capabilities(),
     },
-    gskToolsEnabled: true,
-    maxOutputTokens: 8192,
+    // Friday does not prove a Genspark media session merely because chat is configured.
+    gskToolsEnabled: false,
+    maxOutputTokens: configured && Number.isSafeInteger(Number(state.model.maxOutputTokens))
+      ? Number(state.model.maxOutputTokens)
+      : 8192,
+    updatedAt: Date.now(),
+  })
+}
+
+function handle(channel, listener, options) {
+  try { ipcMain.removeHandler(channel) } catch { /* not registered yet */ }
+  ipcMain.handle(channel, (event, ...args) => {
+    assertSender(event, options)
+    return listener(event, ...args)
+  })
+}
+
+function skillFileForName(name) {
+  if (typeof name !== 'string' || !name.trim()) return null
+  const skills = listSkills()
+  const matches = skills.filter(skill => skill.name === name.trim())
+  if (matches.length !== 1 || typeof matches[0].fileName !== 'string') return null
+  const root = path.resolve(getSkillDir())
+  const file = path.resolve(root, matches[0].fileName)
+  const relative = path.relative(root, file)
+  if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) return null
+  return file
+}
+
+function extractSuggestedName(content) {
+  const first = String(content || '')
+    .split(/\r?\n/)
+    .map(line => line.replace(/^```[a-z]*|```$/gi, '').replace(/^[-*#\d.)\s]+/, '').trim())
+    .find(Boolean) || ''
+  return first.replace(/^['"“”]+|['"“”]+$/g, '').trim()
+}
+
+async function suggestOfficeFileName(input, invocation) {
+  const content = typeof input?.content === 'string' ? input.content.trim() : ''
+  if (!content) return { ok: false, reason: 'empty-content' }
+  if (!state.model) return { ok: false, reason: 'unavailable' }
+  try {
+    const { content: answer } = await invokeAiChat(
+      toOpenAiMessages(
+        'You name files. Return only one concise filename stem, without extension or explanation.',
+        [{ role: 'user', text: content.slice(0, 4000) }],
+      ),
+      [],
+      { ...invocation, actor: 'office-ai-naming', stream: true },
+    )
+    return normalizeSuggestedFileName({ ok: true, name: extractSuggestedName(answer) })
+  } catch {
+    return { ok: false, reason: 'unavailable' }
   }
 }
 
-const MEDIA_UNSUPPORTED = '图片/媒体能力暂不可用：Friday 接管模式下请在设置中配置媒体 API（或联系管理员）'
-const SEARCH_UNSUPPORTED = '联网搜索暂不可用：Friday 接管模式下未配置搜索后端'
-
-function handle(channel, listener) {
-  try { ipcMain.removeHandler(channel) } catch { /* not registered yet */ }
-  ipcMain.handle(channel, listener)
+async function invokeForEditor(event, kind, parameters, invoke) {
+  const requestId = `office-${kind}:${randomUUID()}`
+  const { lease } = requests.begin({ sender: event.sender, requestId, parameters })
+  const timeout = new AbortController()
+  const timer = setTimeout(() => timeout.abort(bridgeFault('OFFICE_AI_SERVICE_TIMEOUT')), kind === 'generate-image' ? 180000 : kind === 'analyze-media' ? 300000 : 45000)
+  const signal = AbortSignal.any([lease.signal, timeout.signal])
+  let aborted
+  try {
+    const cancelled = new Promise((_resolve, reject) => {
+      aborted = () => reject(signal.reason || bridgeFault('OFFICE_AI_REQUEST_CANCELLED'))
+      signal.addEventListener('abort', aborted, { once: true })
+      if (signal.aborted) aborted()
+    })
+    const result = await Promise.race([invoke({ requestId, signal }), cancelled])
+    if (!lease.finish('completed')) throw bridgeFault('OFFICE_AI_OWNER_CHANGED')
+    return result
+  } finally {
+    clearTimeout(timer)
+    if (aborted) signal.removeEventListener('abort', aborted)
+    lease.finish('failed')
+  }
 }
 
 export { toOpenAiMessages } from './canonical-transcript.js'
@@ -93,7 +227,7 @@ function toOpenAiTools(tools = []) {
 
 const NORMALIZE_STOP = { tool_calls: 'tool_calls', length: 'max_tokens', max_tokens: 'max_tokens', stop: 'stop' }
 
-export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta, onReasoning, requestId }) {
+export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta, onReasoning, onUsage, requestId, maxTokens }) {
   const model = state.model
   const url = buildChatCompletionsUrl(model.baseUrl)
   const body = {
@@ -102,8 +236,8 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
     // The renderer advertises an 8192-token Office budget, but the old bridge
     // silently dropped it. On long PDF reads the provider could spend the
     // default completion budget and cut a tool JSON object in half.
-    max_tokens: Number.isFinite(Number(model.maxOutputTokens))
-      ? Math.max(256, Math.min(32768, Number(model.maxOutputTokens)))
+    max_tokens: Number.isFinite(Number(maxTokens ?? model.maxOutputTokens))
+      ? Math.max(256, Math.min(32768, Number(maxTokens ?? model.maxOutputTokens)))
       : OFFICE_DEFAULT_MAX_OUTPUT_TOKENS,
     stream: true,
     stream_options: { include_usage: true },
@@ -179,6 +313,12 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
         provider: model.provider, requestId, phase: 'stream',
         classification: NETWORK_ERROR_CLASSIFICATIONS.MODEL_REQUEST,
       })
+      if (parsed.usage && typeof parsed.usage === 'object') {
+        const usage = {}
+        if (Number.isSafeInteger(parsed.usage.prompt_tokens) && parsed.usage.prompt_tokens >= 0) usage.inputTokens = parsed.usage.prompt_tokens
+        if (Number.isSafeInteger(parsed.usage.completion_tokens) && parsed.usage.completion_tokens >= 0) usage.outputTokens = parsed.usage.completion_tokens
+        if (Object.keys(usage).length) onUsage?.(usage)
+      }
       const choice = parsed.choices?.[0]
       const delta = choice?.delta
       if (delta?.reasoning_content) onReasoning?.(delta.reasoning_content)
@@ -247,12 +387,13 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
 const invokeAiChat = createAiChatCapabilityInvoker(executeCapability, fridayStreamRequest)
 
 async function runFridayStream(request, send) {
-  const { requestId, system, messages, tools } = request
-  const sendSafe = (chunk) => {
-    try {
-      if (!send.sender.isDestroyed()) send.sender.send('ai:stream-chunk', chunk)
-    } catch { /* sender gone */ }
-  }
+  if (!request || typeof request !== 'object' || Array.isArray(request)) throw bridgeFault('OFFICE_AI_PARAMETERS_INVALID')
+  const { requestId, sessionId, system, messages, tools, maxTokens } = request
+  if (sessionId !== undefined && (typeof sessionId !== 'string' || !sessionId || sessionId.length > 200)) throw bridgeFault('OFFICE_AI_PARAMETERS_INVALID')
+  if (maxTokens !== undefined && (!Number.isSafeInteger(maxTokens) || maxTokens < 1 || maxTokens > 32768)) throw bridgeFault('OFFICE_AI_PARAMETERS_INVALID')
+  const { lease, reused } = requests.begin({ sender: send.sender, requestId, parameters: request })
+  if (reused) return
+  const sendSafe = chunk => lease.emit(chunk)
   if (!state.model) {
     sendSafe({
       requestId,
@@ -266,10 +407,10 @@ async function runFridayStream(request, send) {
     })
     return
   }
-  const controller = new AbortController()
-  state.streams.set(requestId, controller)
   const t0 = Date.now()
   const ping = setInterval(() => sendSafe({ requestId, type: 'ping' }), 5000)
+  const stopPing = () => clearInterval(ping)
+  lease.signal.addEventListener('abort', stopPing, { once: true })
   try {
     const { content, toolCalls, stopReason } = await invokeAiChat(
       toOpenAiMessages(system, messages, { thinking: state.model?.thinking }),
@@ -277,11 +418,13 @@ async function runFridayStream(request, send) {
       {
         actor: 'office-ai',
         requestId,
-        threadId: requestId,
+        threadId: sessionId || requestId,
+        maxTokens,
         stream: true,
-        signal: controller.signal,
+        signal: lease.signal,
         onDelta: (text) => sendSafe({ requestId, type: 'delta', text }),
         onReasoning: (text) => sendSafe({ requestId, type: 'reasoning', text }),
+        onUsage: usage => sendSafe({ requestId, type: 'usage', usage }),
       },
     )
     // 透传工具调用：renderer 执行后以 {role:'tool', results} 回传续跑 agent 循环
@@ -294,9 +437,7 @@ async function runFridayStream(request, send) {
       sendSafe({ requestId, type: 'done', stopReason: stopReason || 'stop' })
     }
   } catch (err) {
-    if (controller.signal.aborted) {
-      sendSafe({ requestId, type: 'done' })
-    } else {
+    if (!lease.signal.aborted) {
       const classification = err?.classification || classifyNetworkError(err)
       console.warn('[Office AI] stream error:', classification, `(${Date.now() - t0}ms)`)
       const errorCode = err?.code === 'TRANSCRIPT_INVALID' ? 'transcript'
@@ -309,7 +450,8 @@ async function runFridayStream(request, send) {
     }
   } finally {
     clearInterval(ping)
-    state.streams.delete(requestId)
+    lease.signal.removeEventListener('abort', stopPing)
+    lease.finish('completed')
   }
 }
 
@@ -320,17 +462,48 @@ async function runFridayStream(request, send) {
  * `office-set-ai-model` 需要在 Office Host 初始化阶段先可用。编辑器 bundle
  * 加载后会再次以 force 模式注册，让 Friday 覆盖上游同名 ai:* 通道。
  */
-export function registerOfficeAiBridge({ force = false } = {}) {
+export function registerOfficeAiBridge({ force = false, resolveOwner, isModelSettingsSender, services, openSettings, ensureServices } = {}) {
+  if (ensureServices !== undefined) state.ensureServices = ensureServices
+  if (openSettings !== undefined) state.openSettings = openSettings
+  if (services !== undefined) officeServices.configure(services)
+  if (resolveOwner !== undefined) {
+    if (typeof resolveOwner !== 'function') throw new TypeError('Office AI owner resolver must be a function')
+    state.resolveOwner = resolveOwner
+  }
+  if (isModelSettingsSender !== undefined) {
+    if (typeof isModelSettingsSender !== 'function') throw new TypeError('Office AI model settings sender resolver must be a function')
+    state.isModelSettingsSender = isModelSettingsSender
+  }
   if (state.bridgeRegistered && !force) return
 
   handle('office-set-ai-model', (_e, model) => {
     setOfficeAiModel(model)
     return { success: true }
-  })
+  }, { modelSettings: true })
+
+  handle('office-ai-services-get', async () => { await state.ensureServices?.(); return officeServices.getSettings() }, { modelSettings: true })
+  handle('office-ai-services-save', (_event, patch) => {
+    const result = officeServices.saveSettings(patch)
+    notifyAiSettingsChanged()
+    return result
+  }, { modelSettings: true })
+  handle('office-ai-services-test', async (_event, input) => {
+    await state.ensureServices?.()
+    if (input?.kind === 'all') return officeServices.testSettings(input.patch, { signal: AbortSignal.timeout(45000) })
+    if (input?.kind !== 'search') return { ok: false, error: 'OFFICE_AI_TEST_KIND_INVALID' }
+    const result = await officeServices.search('web', 'GenOffice', 1)
+    return result.method === 'error' ? { ok: false, error: result.error } : { ok: true, method: result.method, count: result.results.length }
+  }, { modelSettings: true })
 
   handle('ai:get-settings', () => fridaySettings())
-  handle('ai:set-settings', (_e, settings) => settings ?? fridaySettings())
-  handle('ai:gsk-status', () => ({ loggedIn: true, email: 'friday@local' }))
+  // Model credentials are owned by Friday's settings surface and are never
+  // accepted from an editor renderer. Return the post-commit snapshot so the
+  // caller cannot mistake an echo for a persisted setting.
+  handle('ai:set-settings', () => fridaySettings())
+  handle('ai:open-model-settings', () => state.openSettings?.('model'))
+  handle('ai:open-skills-settings', () => state.openSettings?.('skills'))
+  // A configured Friday model is not evidence of a Genspark login session.
+  handle('ai:gsk-status', () => normalizeGskStatus({ loggedIn: false, reason: 'friday-managed-provider' }))
   handle('ai:gsk-login', () => ({}))
   handle('ai:codex-models', () => ({
     models: [state.model?.modelName || 'Friday'],
@@ -338,38 +511,75 @@ export function registerOfficeAiBridge({ force = false } = {}) {
   }))
 
   handle('ai:stream', (event, request) => runFridayStream(request, event))
-  handle('ai:stream-cancel', (_e, requestId) => {
-    state.streams.get(String(requestId))?.abort()
-  })
+  handle('ai:stream-cancel', (event, requestId) => requests.cancel({ sender: event.sender, requestId }))
+  handle('ai:services-cancel', event => requests.cancelServices(event.sender))
 
-  handle('ai:chat', async (_e, request) => {
+  handle('ai:chat', (event, request) => invokeForEditor(event, 'chat', request, async invocation => {
     const { system, user } = request ?? {}
     if (!state.model) return { ok: false, error: 'Friday 模型未配置，请在本项目设置中添加模型' }
     try {
-      const requestId = `office-chat:${Date.now()}`
       const { content } = await invokeAiChat(
         toOpenAiMessages(system, [{ role: 'user', text: String(user ?? '') }], { thinking: state.model?.thinking }),
         [],
-        { actor: 'office-ai', requestId, threadId: requestId, stream: true },
+        { ...invocation, actor: 'office-ai', stream: true },
       )
       return { ok: true, content }
     } catch (err) {
       return { ok: false, error: err.message }
     }
-  })
+  }))
 
-  // —— 优雅降级：Friday 接管模式下未提供的云能力 ——
-  handle('ai:web-search', () => [])
-  handle('ai:image-search', () => [])
-  handle('ai:fetch-image', () => null)
-  handle('ai:search-test', () => ({ ok: false, error: SEARCH_UNSUPPORTED }))
-  handle('ai:media-test', () => ({ ok: false, error: MEDIA_UNSUPPORTED }))
-
-  const imageGenChannels = ['ai:generate-image', 'docs:ai-generate-image', 'sheets:ai-generate-image']
-  for (const ch of imageGenChannels) {
-    handle(ch, () => ({ error: MEDIA_UNSUPPORTED }))
+  // 搜索、媒体和图片下载共用宿主 owner lease，结果只交回原文档。
+  handle('ai:web-search', (event, query, maxResults) => invokeForEditor(event, 'web-search', { query, maxResults },
+    invocation => officeServices.search('web', query, maxResults, invocation)))
+  handle('ai:image-search', (event, query, maxResults) => invokeForEditor(event, 'image-search', { query, maxResults },
+    invocation => officeServices.search('image', query, maxResults, invocation)))
+  for (const channel of ['ai:fetch-image', 'html:fetch-image']) {
+    handle(channel, (event, url) => invokeForEditor(event, 'fetch-image', { url },
+      invocation => officeServices.fetchImage(url, state.resolveOwner(event.sender), invocation)))
   }
-  handle('ai:analyze-media', () => ({ error: MEDIA_UNSUPPORTED }))
+  handle('ai:search-test', (event) => invokeForEditor(event, 'search-test', {}, async invocation => {
+    const result = await officeServices.search('web', 'GenOffice', 1, invocation)
+    return result.method === 'error' ? { ok: false, error: result.error } : { ok: true, method: result.method }
+  }))
+  handle('ai:media-test', event => invokeForEditor(event, 'media-test', {}, async invocation => {
+    await state.ensureServices?.()
+    return officeServices.testSettings({}, invocation)
+  }))
+
+  const imageGenChannels = ['ai:generate-image', 'html:ai-generate-image', 'docs:ai-generate-image', 'sheets:ai-generate-image']
+  for (const ch of imageGenChannels) {
+    handle(ch, (event, input) => invokeForEditor(event, 'generate-image', input, async invocation => {
+      try { return await officeServices.generateImage(input, state.resolveOwner(event.sender), invocation) }
+      catch (error) {
+        if (invocation.signal.aborted) throw error
+        return { error: String(error?.code || '').startsWith('OFFICE_AI_') ? error.message : '图片生成服务请求失败，请检查模型设置、额度与网络' }
+      }
+    }))
+  }
+  handle('ai:analyze-media', (event, input) => invokeForEditor(event, 'analyze-media', input, async invocation => {
+    try { return await officeServices.analyzeMedia(input, state.resolveOwner(event.sender), { ...invocation, senderId: event.sender.id }) }
+    catch (error) {
+      if (invocation.signal.aborted) throw error
+      return { error: String(error?.code || '').startsWith('OFFICE_AI_') ? error.code : 'OFFICE_AI_MEDIA_REQUEST_FAILED' }
+    }
+  }))
+
+  // HTML shell compatibility channels. Skills are read from Friday's own
+  // managed inventory and never from a renderer-supplied arbitrary path.
+  handle('ai:skills-list', () => normalizeSkillsList(listSkills()))
+  handle('ai:skill-text', (_event, name) => {
+    const file = skillFileForName(name)
+    if (!file) throw Object.assign(new Error('OFFICE_AI_SKILL_NOT_FOUND'), { code: 'OFFICE_AI_SKILL_NOT_FOUND' })
+    let stat
+    try { stat = fs.statSync(file) } catch { throw Object.assign(new Error('OFFICE_AI_SKILL_NOT_FOUND'), { code: 'OFFICE_AI_SKILL_NOT_FOUND' }) }
+    if (!stat.isFile() || stat.size > 2 * 1024 * 1024) {
+      throw Object.assign(new Error('OFFICE_AI_SKILL_TOO_LARGE'), { code: 'OFFICE_AI_SKILL_TOO_LARGE' })
+    }
+    return normalizeSkillText(fs.readFileSync(file, 'utf8'))
+  })
+  handle('ai:suggest-file-name', (event, input) => invokeForEditor(event, 'naming', input,
+    invocation => suggestOfficeFileName(input, invocation)))
 
   // —— AI 面板偏好（左侧/右侧等）：上游由 shell 主进程注册，这里由 Friday 接管 ——
   registerAiPanelPrefsIpc()
@@ -440,7 +650,7 @@ function registerAiPanelPrefsIpc() {
     }
     // 同步所有打开的编辑器视图
     for (const wc of webContents.getAllWebContents()) {
-      try { wc.send('app:ai-panel-prefs-changed', next) } catch { /* ignore */ }
+      try { if (!wc.isDestroyed() && state.resolveOwner?.(wc)) wc.send('app:ai-panel-prefs-changed', next) } catch { /* ignore */ }
     }
     return next
   })

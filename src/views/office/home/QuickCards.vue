@@ -34,20 +34,23 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Folder } from 'lucide-vue-next';
 import { badgeMeta } from './fileMeta';
+import { OFFICE_TYPE_EXTENSIONS } from '../officeTypes';
 
 defineEmits(['new', 'open-local']);
+const props = defineProps({ editorTypes: { type: Array, default: () => ['docs', 'sheets', 'slides', 'pdf'] } });
 
 const { t } = useI18n();
 
-// 本产品内置编辑器仅支持 docs/sheets/slides/pdf（上游的 Markdown/HTML 卡片不提供）
+// 入口由宿主真实能力决定，候选应用默认不显示。
 const cards = computed(() => [
   { type: 'docs', ext: 'docx', title: t('office.aiDocs'), color: badgeMeta('docs').color },
   { type: 'sheets', ext: 'xlsx', title: t('office.aiSheets'), color: badgeMeta('sheets').color },
   { type: 'slides', ext: 'pptx', title: t('office.aiSlides'), color: badgeMeta('slides').color },
   { type: 'pdf', ext: 'pdf', title: t('office.aiPdf'), color: badgeMeta('pdf').color },
-]);
+  { type: 'html', ext: 'html', title: t('office.aiHtml'), color: badgeMeta('html').color },
+].filter(card => props.editorTypes.includes(card.type)));
 
-const openExts = '.docx / .xlsx / .csv / .pptx / .pdf';
+const openExts = computed(() => props.editorTypes.flatMap(type => OFFICE_TYPE_EXTENSIONS[type] || []).map(ext => `.${ext}`).join(' / '));
 </script>
 
 <style scoped lang="scss">

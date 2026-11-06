@@ -7,13 +7,20 @@
 
     <!-- 首页 Tab（/office）：Office 入口（复刻上游 happyoffice 首页布局） -->
     <div v-else-if="isHomeRoute" class="office-home-wrap">
+      <p v-if="actionError" class="office-action-error" role="alert">{{ actionError }}</p>
       <OfficeHome
         ref="homeRef"
+        :editor-types="availableEditorTypes"
         @new-doc="handleNewDoc"
         @open-local="handleOpenLocal"
         @open-recent="handleOpenRecent"
       />
       <NewDocNameDialog :type="namingType" @confirm="confirmNewDoc" @cancel="namingType = null" />
+    </div>
+
+    <div v-else-if="!editorCapabilities[routeEditor]?.available" class="office-unavailable" role="status">
+      <p>{{ capabilitiesLoading ? t('office.checkingEditor') : t('office.editorUnavailable') }}</p>
+      <button type="button" @click="router.push('/office')">{{ t('office.backHome') }}</button>
     </div>
 
     <!-- 编辑器 Tab（/office/:editor/:instId）：原生编辑器视图占位区（由主进程全区域摆放，关闭 Tab 时自动保存） -->
@@ -43,15 +50,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, onActivated, onDeactivated, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, onActivated, onDeactivated, nextTick, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useFridayStore, useTabStore } from '@/store';
 import { loadModelConfig } from '@/views/friday/composables/useModelCatalog';
 import OfficeHome from './home/OfficeHome.vue';
 import NewDocNameDialog from './home/NewDocNameDialog.vue';
-
-const EDITOR_TYPES = ['docs', 'sheets', 'slides', 'pdf'];
+import { OFFICE_EDITOR_TYPES, isOfficeEditorType, officeEditorPath, defaultOfficeEditorCapabilities, normalizeOfficeEditorCapabilities } from './officeTypes';
 
 const api = window.electronAPI;
 const fridayStore = useFridayStore();
@@ -63,7 +69,7 @@ const { t } = useI18n();
 // 实例角色由路由决定且在实例生命周期内恒定（不同路由是不同 keep-alive 实例）：
 // /office 为首页 Tab；/office/<type>/<instId> 为对应编辑器视图的独立 Tab，
 // instId 与主进程 office-host 的 viewId（<type>-<instId>）一一对应
-const routeEditor = EDITOR_TYPES.includes(route.params.editor) ? route.params.editor : null;
+const routeEditor = isOfficeEditorType(route.params.editor) ? route.params.editor : null;
 const isHomeRoute = !routeEditor;
 const viewId = routeEditor ? `${routeEditor}-${route.params.instId}` : null;
 const editorTabId = viewId ? `office-${viewId}` : null;
@@ -71,6 +77,27 @@ const editorTabId = viewId ? `office-${viewId}` : null;
 const rootRef = ref(null);
 const homeRef = ref(null);
 const available = ref(true);
+const editorCapabilities = ref(defaultOfficeEditorCapabilities());
+const availableEditorTypes = computed(() => OFFICE_EDITOR_TYPES.filter(type => editorCapabilities.value[type]?.available));
+const capabilitiesLoading = ref(false);
+const actionError = ref('');
+let capabilitiesRequest = null;
+
+function refreshEditorCapabilities() {
+  if (capabilitiesRequest) return capabilitiesRequest;
+  capabilitiesLoading.value = true;
+  capabilitiesRequest = (async () => {
+    try {
+      editorCapabilities.value = normalizeOfficeEditorCapabilities(await api.invoke('office-get-editor-capabilities'));
+    } catch {
+      editorCapabilities.value = defaultOfficeEditorCapabilities();
+    } finally {
+      capabilitiesLoading.value = false;
+      capabilitiesRequest = null;
+    }
+  })();
+  return capabilitiesRequest;
+}
 // 防止打开/新建动作重入（编辑器 Tab 无内置工具栏 UI）
 const busy = ref(false);
 const currentFile = ref(null);
@@ -83,11 +110,6 @@ const ownPath = route.path;
 
 function baseName(p) {
   return p.split('/').pop().split('\\').pop();
-}
-
-/** viewId（docs-3）→ 编辑器路由（/office/docs/3） */
-function officeEditorPath(vid) {
-  return `/office/${String(vid).replace('-', '/')}`;
 }
 
 function refreshHome() {
@@ -105,18 +127,27 @@ function setTabFile(filePath) {
 // ---- 首页 Tab：打开/新建（先建视图拿到 viewId，再跳转对应编辑器 Tab） -------
 
 async function openEditorTab(type, filePath = null, name = '') {
-  if (!api || busy.value || !EDITOR_TYPES.includes(type)) return;
+  if (!api || busy.value || !isOfficeEditorType(type)) return;
   busy.value = true;
+  actionError.value = '';
   try {
+    await refreshEditorCapabilities();
+    if (!editorCapabilities.value[type]?.available) {
+      actionError.value = t('office.editorUnavailable');
+      return;
+    }
     const res = filePath
       ? await api.invoke('office-open-file', { filePath })
       : await api.invoke('office-new', { type, name });
-    if (res && res.success && res.viewId) {
-      await router.push(officeEditorPath(res.viewId));
+    const editorPath = officeEditorPath(res?.viewId);
+    if (res?.success && editorPath) {
+      await router.push(editorPath);
     } else {
+      actionError.value = t('office.openFailed');
       refreshHome();
     }
   } catch {
+    actionError.value = t('office.openFailed');
     refreshHome();
   } finally {
     busy.value = false;
@@ -127,6 +158,7 @@ async function openEditorTab(type, filePath = null, name = '') {
 const namingType = ref(null);
 
 function handleNewDoc(type) {
+  if (!editorCapabilities.value[type]?.available) return;
   namingType.value = type;
 }
 
@@ -141,11 +173,13 @@ function handleOpenRecent(entry) {
 
 async function handleOpenLocal() {
   if (!api) return;
+  actionError.value = '';
   try {
     // 对话框选择后在主进程直接建视图，结果携带 viewId
     const res = await api.invoke('office-open-dialog');
-    if (res && res.success && res.viewId) {
-      await router.push(officeEditorPath(res.viewId));
+    const editorPath = officeEditorPath(res?.viewId);
+    if (res?.success && editorPath) {
+      await router.push(editorPath);
     } else {
       refreshHome();
     }
@@ -274,8 +308,12 @@ async function showOpenEditor() {
   }
   if (!st.open) return false;
   currentFile.value = st.filePath;
+  if (st.presentation === true && editorTabId) {
+    tabStore.updateTab(editorTabId, { officePresentation: true });
+    if (st.title) setTabTitle(st.title);
+  }
   // 命名新建/从首页打开的文件：激活时同步 Tab 标题与文件路径（openFileInEditor 之外的路径不会设置）
-  if (st.filePath) {
+  if (st.filePath && st.presentation !== true) {
     setTabTitle(baseName(st.filePath));
     setTabFile(st.filePath);
   }
@@ -287,6 +325,9 @@ async function showOpenEditor() {
 /** 编辑器 Tab 激活入口：恢复显示视图；视图丢失（重启/崩溃）则按原文件重开或新建空白 */
 async function activateEditor() {
   if (!api || busy.value) return;
+  await refreshEditorCapabilities();
+  if (route.path !== ownPath) return;
+  if (!editorCapabilities.value[routeEditor]?.available) return;
   if (await showOpenEditor()) return;
   const tab = tabStore.openedTabs.find(tb => tb.id === editorTabId);
   if (tab?.officeFilePath) {
@@ -307,6 +348,7 @@ function pushAiModel() {
 
 let initialActivated = false;
 let unwatchSaved = null;
+let unwatchProvisionalTitle = null;
 let unwatchClosed = null;
 let unwatchOpening = null;
 let unwatchModel = null;
@@ -334,7 +376,7 @@ function startSelectionPolling() {
   selectionPollTimer = setInterval(pollOfficeSelection, 750);
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!api) { available.value = false; return; }
   onResize = () => { scheduleSyncBounds(); };
   window.addEventListener('resize', onResize);
@@ -359,13 +401,26 @@ onMounted(() => {
       setTabTitle(baseName(filePath));
       setTabFile(filePath);
     });
-    unwatchClosed = api.on('office-view-closed', ({ viewId: closedViewId }) => {
+    unwatchProvisionalTitle = api.on('office-provisional-title', ({ viewId: titledViewId, title }) => {
+      if (titledViewId === viewId && typeof title === 'string' && title.trim()) setTabTitle(title.trim());
+    });
+    unwatchClosed = api.on('office-view-closed', ({ viewId: closedViewId, presentation }) => {
       if (!viewId || closedViewId !== viewId) return;
+      const tab = tabStore.openedTabs.find(item => item.id === editorTabId);
+      if (presentation === true || tab?.officePresentation === true) {
+        tabStore.removeTab(editorTabId);
+        if (route.path === ownPath) {
+          const activeTab = tabStore.openedTabs.find(item => item.id === tabStore.activeTabId);
+          if (activeTab) void router.replace(activeTab.fullPath);
+        }
+        return;
+      }
       // 视图被主进程关闭（崩溃等）；Tab 激活时会按原文件恢复或新建空白
       currentFile.value = null;
       setTabTitle('');
     });
   }
+  await refreshEditorCapabilities();
   if (routeEditor) {
     void refreshOpeningState();
     // 首次进入编辑器 Tab：恢复显示/按原文件重开/新建空白
@@ -382,6 +437,7 @@ onActivated(() => {
   if (!api) return;
   pushAiModel();
   if (isHomeRoute) {
+    void refreshEditorCapabilities();
     refreshHome();
     return;
   }
@@ -392,7 +448,7 @@ onActivated(() => {
 
 /** 切换目标是否为另一个编辑器 Tab（/office/<type>/<instId>，由其 office-show 自行管理视图可见性） */
 function targetIsEditorTab() {
-  return EDITOR_TYPES.includes(route.path.split('/')[2]);
+  return isOfficeEditorType(route.path.split('/')[2]);
 }
 
 onDeactivated(() => {
@@ -415,6 +471,7 @@ onBeforeUnmount(() => {
   if (onResize) window.removeEventListener('resize', onResize);
   if (resizeObserver) resizeObserver.disconnect();
   if (unwatchSaved) unwatchSaved();
+  if (unwatchProvisionalTitle) unwatchProvisionalTitle();
   if (unwatchClosed) unwatchClosed();
   if (unwatchOpening) unwatchOpening();
   if (unwatchModel) unwatchModel();
@@ -437,6 +494,11 @@ onBeforeUnmount(() => {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+}
+
+.office-action-error {
+  margin: 12px 36px 0;
+  color: var(--text-error, #b42318);
 }
 
 .office-home-wrap > :deep(.office-home) {

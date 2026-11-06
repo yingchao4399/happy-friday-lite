@@ -23,7 +23,7 @@ import { execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { app } from 'electron'
 import { z } from 'zod'
-import { registerTool, isValidRiskAssessment, riskAssessmentSchema } from '../agent/tools/registry.js'
+import { registerTool, executeCapability, isValidRiskAssessment, riskAssessmentSchema } from '../agent/tools/registry.js'
 import { waitForApproval } from '../agent/humanInTheLoop.js'
 import { openOfficeFile, getOfficeState, getOfficeDocumentSelection, isOfficeAvailable } from './office-host.js'
 
@@ -135,6 +135,27 @@ function resolveType(filePath) {
   return type
 }
 
+async function invokeUnifiedOffice(name, args, ctx) {
+  return executeCapability(name, args, ctx, {
+    actor: ctx.actor || 'user:local',
+    scopes: ctx.capabilityPolicy?.scopes || ctx.scopes,
+    requireApproval: true,
+    // The legacy handler has just completed its existing per-invocation approval.
+    approvalGranted: true
+  })
+}
+
+async function docxSourceHtml(sourcePath) {
+  if (!sourcePath) return '<p></p>'
+  const stat = await fs.promises.stat(sourcePath)
+  if (!stat.isFile() || stat.size > 8 * 1024 * 1024) throw new Error('DOCX 正文源文件无效或超过 8MB 限制')
+  const text = await fs.promises.readFile(sourcePath, 'utf8')
+  const extension = path.extname(sourcePath).toLowerCase()
+  if (['.html', '.htm'].includes(extension)) return text
+  if (['.md', '.markdown'].includes(extension)) return (await import('marked')).marked.parse(text)
+  throw new Error('DOCX 创建正文仅支持 Markdown 或 HTML 文件')
+}
+
 // ---- office_open ------------------------------------------------------------
 
 registerTool({
@@ -222,9 +243,16 @@ registerTool({
     if (args.header) cliArgs.push('--header')
     const rejected = await requireApproval(ctx, 'office_create', args, `新建 ${args.type} 文件: ${args.out}`)
     if (rejected) return rejected
+    if (args.type === 'docx') {
+      return invokeUnifiedOffice('office_document_create', {
+        content: { kind: 'html-fragment', value: await docxSourceHtml(args.from) },
+        target: { format: 'docx', out: args.out, title: path.basename(args.out, path.extname(args.out)) },
+        options: { openAfterSave: false }
+      }, ctx)
+    }
     return runCli([...cliArgs, '--json'])
   },
-  meta: { requireApproval: false },
+  meta: { requireApproval: false, capabilityType: 'write', requiredScopes: ['write'] },
 })
 
 // ---- office_edit_active ------------------------------------------------------
@@ -270,7 +298,7 @@ registerTool({
 registerTool({
   name: 'office_export',
   description:
-    '导出/转换 Office 文件：convert 支持 pdf/docx/xlsx/pptx/md/html/csv 互转；' +
+    '导出/转换 Office 文件：PDF→DOCX 使用统一 Office 转换能力；其他格式按底层 CLI 实际支持路线执行，不保证任意格式互转；' +
     'render 将文件每页渲染为 PNG（可 --grid 拼接整册）。写操作，需用户审批。',
   schema: z.object({
     filePath: z.string().describe('源文件绝对路径'),
@@ -300,9 +328,15 @@ registerTool({
     }
     const rejected = await requireApproval(ctx, 'office_export', args, `导出文件: ${args.filePath} → ${args.out}`)
     if (rejected) return rejected
+    if (args.mode !== 'render' && path.extname(args.filePath).toLowerCase() === '.pdf' && String(args.to).toLowerCase() === 'docx') {
+      return invokeUnifiedOffice('office_document_convert', {
+        source: { filePath: args.filePath }, target: { format: 'docx', out: args.out, title: path.basename(args.out, path.extname(args.out)) },
+        options: { openAfterSave: false }
+      }, ctx)
+    }
     return runCli([...cliArgs, '--json'])
   },
-  meta: { requireApproval: false },
+  meta: { requireApproval: false, capabilityType: 'write', requiredScopes: ['write'] },
 })
 
 // ---- office_batch ------------------------------------------------------------
