@@ -252,6 +252,8 @@ export function normalizeAiSettingsSnapshot(input = {}) {
   }
   return Object.freeze({
     contractVersion: OFFICE_AI_SERVICE_CONTRACT_VERSION,
+    ...(input.hostMode === 'friday-managed' ? { hostMode: 'friday-managed' } : {}),
+    ...(input.streamProtocolVersion === '1.1' ? { streamProtocolVersion: '1.1' } : {}),
     provider: optionalText(input.provider, 120) || null,
     model: optionalText(input.model, 200) || null,
     providers: Object.freeze(providers),

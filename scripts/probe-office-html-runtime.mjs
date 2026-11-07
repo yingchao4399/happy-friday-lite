@@ -102,6 +102,65 @@ if (!process.versions.electron) {
       assert.deepEqual(isolated, { require: 'undefined', process: 'undefined' })
       record({ name: '实际 renderer 源码回读与 Node 隔离', viewId: opened.viewId, sourceHash, bufferHash: hash(buffer), isolated })
 
+      // 验证用户实际看到的品牌和历史入口，并经生产 preload/IPC 切换会话。
+      // 只种入固定聊天数据，不调用付费模型，也不替代历史服务实现。
+      const historyFixture = await evaluate(wc, `(async () => {
+        const scope = { filePath: ${JSON.stringify(source)} };
+        const ids = await window.projectApi.resolveChat(scope);
+        await window.projectApi.appendChat({ ...ids, role: 'user', text: 'FRIDAY_HISTORY_QUESTION_8197' });
+        await window.projectApi.appendChat({ ...ids, role: 'assistant', text: 'FRIDAY_HISTORY_ANSWER_8197' });
+        await window.projectApi.updateChatForFile({ ...scope, chatId: ids.chatId, patch: { title: 'FRIDAY_HISTORY_SESSION_8197' } });
+        const ribbon = [...document.querySelectorAll('.rb-big.ai-entry')].find(node => node.textContent.trim() === 'Friday');
+        if (!ribbon) throw Error('FRIDAY_HTML_RIBBON_BRAND_MISSING');
+        if (!document.querySelector('.ai-panel-title')) ribbon.click();
+        return ids;
+      })()`)
+      for (let attempt = 0; ; attempt++) {
+        if (await evaluate(wc, `Boolean(document.querySelector('.ai-history-button:not(:disabled)'))`)) break
+        assert.ok(attempt < 150, 'HTML 品牌/历史面板未就绪')
+        await pause(100)
+      }
+      const brand = await evaluate(wc, `({ title: document.querySelector('.ai-panel-title')?.textContent.trim(), icon: document.querySelector('.ai-panel-title img')?.src, historyLabel: document.querySelector('.ai-history-button')?.getAttribute('aria-label') })`)
+      assert.equal(brand.title, 'Friday')
+      assert.match(brand.icon, /friday-icon-/)
+      assert.ok(brand.historyLabel)
+      await evaluate(wc, `document.querySelector('.ai-history-button').click()`)
+      for (let attempt = 0; ; attempt++) {
+        if (await evaluate(wc, `Boolean(document.querySelector('.ai-history-new:not(:disabled)')) && document.querySelector('.ai-history-popover')?.textContent.includes('FRIDAY_HISTORY_SESSION_8197')`)) break
+        assert.ok(attempt < 100, 'HTML 历史弹层未列出持久化会话')
+        await pause(100)
+      }
+      const historyScreenshot = path.join(path.dirname(reportFile), 'office-html-friday-history-preview39.png')
+      win.showInactive()
+      await pause(300)
+      const renderedBrand = await evaluate(wc, `({ iconReady: Boolean(document.querySelector('.ai-panel-title img')?.naturalWidth), historyVisible: Boolean(document.querySelector('.ai-history-popover')?.getBoundingClientRect().width) })`)
+      assert.equal(renderedBrand.iconReady, true, 'Friday 图标资源未实际加载')
+      assert.equal(renderedBrand.historyVisible, true, '历史弹层未实际显示')
+      fs.writeFileSync(historyScreenshot, (await wc.capturePage()).toPNG())
+      await evaluate(wc, `document.querySelector('.ai-history-new').click()`)
+      let newHistoryIds
+      for (let attempt = 0; ; attempt++) {
+        newHistoryIds = await evaluate(wc, `window.projectApi.resolveChat({ filePath: ${JSON.stringify(source)} })`)
+        const ready = await evaluate(wc, `Boolean(document.querySelector('.ai-history-button:not(:disabled)')) && !document.querySelector('.copilot')?.textContent.includes('FRIDAY_HISTORY_ANSWER_8197')`)
+        if (newHistoryIds.chatId !== historyFixture.chatId && ready) break
+        assert.ok(attempt < 100, 'HTML 新对话未创建独立会话')
+        await pause(100)
+      }
+      await evaluate(wc, `document.querySelector('.ai-history-button').click()`)
+      for (let attempt = 0; ; attempt++) {
+        if (await evaluate(wc, `(() => { const node = [...document.querySelectorAll('.ai-history-session-main')].find(item => item.textContent.includes('FRIDAY_HISTORY_SESSION_8197')); if (!node || node.disabled) return false; node.click(); return true })()`)) break
+        assert.ok(attempt < 100, 'HTML 历史会话不可选择')
+        await pause(100)
+      }
+      for (let attempt = 0; ; attempt++) {
+        if (await evaluate(wc, `Boolean(document.querySelector('.ai-history-button:not(:disabled)')) && document.querySelector('.copilot')?.textContent.includes('FRIDAY_HISTORY_ANSWER_8197')`)) break
+        assert.ok(attempt < 100, 'HTML 历史会话切换后未恢复原消息')
+        await pause(100)
+      }
+      const restoredIds = await evaluate(wc, `window.projectApi.resolveChat({ filePath: ${JSON.stringify(source)} })`)
+      assert.equal(restoredIds.chatId, historyFixture.chatId)
+      record({ name: 'Friday 真实标题和图标、共享历史入口、新对话独立身份及旧消息切换恢复', brand, firstChatId: historyFixture.chatId, newChatId: newHistoryIds.chatId, restoredChatId: restoredIds.chatId, screenshot: historyScreenshot })
+
       let preview
       for (let attempt = 0; ; attempt++) {
         const frame = wc.mainFrame.frames.find(candidate => candidate.url.startsWith('html-preview://'))

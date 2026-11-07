@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>preview.38 Office AI 问题根因研究</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:#f4f6f7;color:#222e36;font:16px/1.85 'Microsoft YaHei','PingFang SC',system-ui,sans-serif}
+a{color:#145f78;text-underline-offset:3px}a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #ba7517;outline-offset:3px}
+header{background:#fff;border-bottom:1px solid #d7e0e2}.bar{max-width:1420px;margin:auto;padding:15px 25px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-weight:700;margin-right:auto}.nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}.nav [aria-current=page]{font-weight:700;color:#173f4a}
+.layout{max-width:1420px;margin:25px auto 60px;padding:0 22px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:22px;align-items:start}
+.toc{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:16px;font-size:13px}
+.toc summary{font-size:15px;font-weight:700;cursor:pointer}.toc a{display:block;padding:5px 0;text-decoration:none;line-height:1.5}.toc a.sub{padding-left:12px}
+main{min-width:0;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:34px 40px}.landing{max-width:1100px;margin:28px auto 60px}
+.note{background:#fff7e5;border-left:4px solid #c58b28;padding:12px 16px;margin-bottom:24px;font-size:14px}
+h1{font-size:29px;line-height:1.5;margin:0 0 20px}h2{font-size:22px;line-height:1.5;margin:40px 0 16px;padding-top:14px;border-top:1px solid #d7e0e2}h3{font-size:18px;margin:25px 0 10px}
+p,li,td,th{overflow-wrap:anywhere}p{margin:12px 0}li{margin:6px 0}.table-scroll{overflow-x:auto;border:1px solid #d7e0e2;border-radius:4px;margin:18px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;line-height:1.75}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-right:1px solid #d7e0e2;border-bottom:1px solid #d7e0e2}th{background:#eaf2f1}tr:last-child td{border-bottom:0}
+pre{background:#f1f4f4;border:1px solid #d7e0e2;padding:16px;overflow:auto;font:13px/1.7 Consolas,monospace}code{font-family:Consolas,monospace;background:#eff3f3;padding:1px 3px;overflow-wrap:anywhere}pre code{padding:0;background:none}
+footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#586870;font-size:13px}.docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.item{border:1px solid #d7e0e2;border-radius:6px;padding:20px}.item h2{border:0;margin:0 0 10px;padding:0;font-size:19px}.item p{font-size:14px}
+@media(max-width:800px){.layout{display:block;padding:0 12px;margin-top:14px}.toc{position:static;max-height:270px;margin-bottom:14px}main,.landing{padding:22px 18px}.landing{margin:14px 12px}.docs{grid-template-columns:1fr}.bar{padding:13px 16px}h1{font-size:24px}h2{font-size:20px}}
+@media print{body{background:white;font-size:10pt}header,.toc{display:none}.layout{display:block;margin:0;padding:0}main,.landing{border:0;padding:0;margin:0}table{min-width:0;font-size:8pt}th,td{padding:5pt;border:1px solid #aaa}.table-scroll{overflow:visible;border:0}pre{white-space:pre-wrap}h2,h3{break-after:avoid}@page{size:A4;margin:16mm}}
+</style></head><body><header><div class="bar"><span class="brand">Friday Office · AI HTML 规划</span><nav class="nav" aria-label="文档导航"><a href="index.html">文档导航</a><a href="01-integration-plan.html">融合研究与实施方案</a><a href="02-prd.html">产品需求 PRD</a><a href="03-technical-integration.html">技术对接与拆解</a><a href="04-implementation-and-validation.html">实施与验收记录</a><a href="05-ai-service-contract-audit.html">AI 服务合同审计</a><a href="06-preview37-progress-2026-11-07.html">preview.37 进度与交付结果</a><a href="07-preview38-progress-2026-11-07.html">preview.38 进度与下一版门槛</a><a href="08-preview38-ai-ui-root-cause-2026-11-07.html" aria-current="page">preview.38 Office AI 问题根因研究</a><a href="09-preview39-repair-and-validation.html">preview.39 修复与验证</a></nav></div></header><div class="layout"><aside class="toc"><details open><summary>本篇目录</summary><a class="" href="#section-2">1. 结论和影响范围</a><a class="" href="#section-3">2. 当前安装与双来源架构</a><a class="" href="#section-4">3. HTML 参数错误：正常增量被误当作重复快照</a><a class="sub" href="#section-5">3.1 用户请求的实际日志</a><a class="sub" href="#section-6">3.2 真正损坏参数的代码</a><a class="sub" href="#section-7">3.3 不用 API 的真实函数复现</a><a class="" href="#section-8">4. 四类旧 Office 的未知错误与错误登录提示</a><a class="sub" href="#section-9">4.1 宿主与旧 transport 不同版本</a><a class="sub" href="#section-10">4.2 为什么又出现“登录 Friday”</a><a class="sub" href="#section-11">4.3 结构化错误为什么没到面板</a><a class="" href="#section-12">5. HTML 品牌残留与会话历史</a><a class="sub" href="#section-13">5.1 品牌改造未覆盖独立 HTML 树</a><a class="sub" href="#section-14">5.2 已有单会话持久化，缺少历史管理</a><a class="sub" href="#section-15">5.3 “新聊天”仅清空屏幕，聊天 ID 没变</a><a class="" href="#section-16">6. 为什么原测试通过仍漏掉</a><a class="" href="#section-17">7. 根本修复拆解及顺序</a><a class="sub" href="#section-18">R1：工具参数保真，先修共享传输</a><a class="sub" href="#section-19">R2：统一旧四编辑器与 HTML 的事件、终态和错误合同</a><a class="sub" href="#section-20">R3：统一错误恢复，去掉错误登录动作</a><a class="sub" href="#section-21">R4：补齐 HTML 产品身份与会话管理</a><a class="sub" href="#section-22">R5：面向后续 GenOffice 更新的发布门槛</a><a class="" href="#section-23">8. 验收清单与当前未完成项</a></details></aside><main><div class="note"><strong>阅读提示：</strong>前三篇为下一版规划；第 04 篇记录实际实施与验收。源代码接入、编译、运行、完整对等和发布分别核验，不以局部通过代替整体完成。</div><h1 id="section-1">preview.38 Office AI 品牌、会话与运行错误根因研究</h1>
+<p>日期：2026-11-07，北京时间。研究对象：用户已安装的 Happy Friday Lite <code>3.0.7.01-preview.38</code>（技术版本 <code>3.0.10-preview.38</code>）。本报告基于三张用户截图、已安装代码、源码、发布构建目录、脱敏日志及确定性离线重放。</p>
+<p><strong>本轮状态：根因研究已完成，运行时代码尚未修复，没有生成新的修复安装包。</strong> 新增报告和复现材料，保留原总体升级、PDF 专项及 HTML 三份原始规划。此前的资源/启动/转换探针通过，只能证明其实际覆盖的路径，不代表这些 AI 用户流程已经通过验收。</p>
+<h2 id="section-2">1. 结论和影响范围</h2>
+<p>这些问题属于 Friday 与两套 Office 源码之间的协议及产品适配缺口，不能解释成用户没装好、找错入口或 AI 天生无法调用。当前安装版确实含 HTML；问题发生在已集成的运行链路中。</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>用户现象</th>
+<th>确认的代码原因</th>
+<th>范围</th>
+<th>优先级与证据强度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTML Ribbon、面板显示 Genspark AI / Genspark 及其图标</td>
+<td>独立固定 HTML 源保留硬编码产品身份，构建适配遗漏 Friday 标题、图标与折叠入口</td>
+<td>HTML</td>
+<td>P2；源码、构建适配结果和安装 bundle 均确认</td>
+</tr>
+<tr>
+<td>HTML 没有其他组件的会话历史按钮</td>
+<td>未迁入 Friday 旧分支的历史组件与 list/create/select/update 合同</td>
+<td>HTML</td>
+<td>P1；静态合同确认；已有单会话保存并不等于多会话管理</td>
+</tr>
+<tr>
+<td>HTML 生成页面时三次 Tool input was unusable</td>
+<td>Friday 的工具参数合并函数会吞正常增量分片；实际日志三次 ask_clarification JSON 解析失败</td>
+<td>所有经过共享桥接的 Office 工具调用</td>
+<td>P0；合并函数错误及静默改值已确定性复现；当次原始 SSE 未保留，不能精确还原用户请求的每个字节</td>
+</tr>
+<tr>
+<td>其他 Office 已有回答，末尾突然“未知错误”</td>
+<td>宿主发送 usage，旧共享 transport 将所有未识别事件当 error，并提前终止订阅</td>
+<td>Docs / Sheets / Slides / PDF</td>
+<td>P1；真实 transport 离线重放得到相同症状，安装版四类 renderer 均含该逻辑</td>
+</tr>
+<tr>
+<td>Docs 出错后显示“登录 Friday”</td>
+<td>任意错误都检查 Genspark 登录状态；Friday API 模式返回未登录，被 UI 当作需登录；按钮宿主实现为空</td>
+<td>Docs / Sheets / Slides</td>
+<td>P1；完整条件链确认；PDF 无此登录分支</td>
+</tr>
+</tbody></table></div>
+<p>其中 P0 的理由是：该函数不仅可能产生错误 JSON，还会把合法参数静默改成另一个合法值。已复现 <code>11 → 1</code>、<code>好好 → 好</code>。这不证明用户已有文档发生了这种修改，但说明仅检查 JSON 能解析或 schema 合法不足以保证参数保真。</p>
+<h2 id="section-3">2. 当前安装与双来源架构</h2>
+<p>HTML 固定来源为 GenOffice <code>v0.12.852</code> / <code>4b55db9ed1994575a695160ffc6cfd0bfc866211</code>，从 <code>vendor/genoffice-html</code> 构建。Docs、Sheets、Slides、PDF 从 <code>vendor/happyoffice</code> 的 <code>e4160be053612108bfa041efd75402dc985f133a</code> 构建。固定 tag 是本次集成目标，不是最新版本声明。</p>
+<p>来源选择在 <code>scripts/build-office.mjs:31-32、146、316</code>。HTML 编译使用 <code>scripts/office/html.electron-vite.config.mjs:16-17</code> 中的宿主及预览安全适配器。两套源码最终都使用 Friday 的 <code>ai:*</code> 主进程桥。</p>
+<p>这种组合允许保留旧版四编辑器修复，同时引入新的 HTML，但必须显式补齐两类差异：一是新 HTML 需要继承 Friday 的品牌、历史等产品增强；二是旧编辑器必须理解新版宿主的事件与错误合同。本次两个方向都存在遗漏。</p>
+<p>安装目录为 <code>C:/Users/Administrator/AppData/Local/Programs/Happy Friday Lite</code>，已读取其 package.json 确认 preview.38。安装版与 <code>win-unpacked</code> 的 HTML renderer 中都能检出 <code>Genspark AI</code>。源码、unpacked、安装目录三份 <code>office-ai-stream.js</code> 的 SHA-256 均为：</p>
+<pre><code class="language-text">d4e7481f9ca8d5663f79ec2090a143a6b60dd3f47217358e0ff1877b3f3b8587
+</code></pre>
+<p>因此这些已复现的缺陷存在于当前安装代码，不能用“源码修了但用户装的是旧版”解释。</p>
+<h2 id="section-4">3. HTML 参数错误：正常增量被误当作重复快照</h2>
+<h3 id="section-5">3.1 用户请求的实际日志</h3>
+<p>只摘录技术信号，不包含 API Key、授权头、用户正文或原始工具参数。当前本机 main.log 第 21654–21656 行记录如下（已从 UTC 换算为北京时间）：</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>北京时间</th>
+<th>工具</th>
+<th>合并后参数长度</th>
+<th>truncated</th>
+<th>stopReason</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2026-11-07 17:15:38.601</td>
+<td>ask_clarification</td>
+<td>515</td>
+<td>false</td>
+<td>tool_calls</td>
+</tr>
+<tr>
+<td>2026-11-07 17:15:41.496</td>
+<td>ask_clarification</td>
+<td>484</td>
+<td>false</td>
+<td>tool_calls</td>
+</tr>
+<tr>
+<td>2026-11-07 17:15:44.571</td>
+<td>ask_clarification</td>
+<td>502</td>
+<td>false</td>
+<td>tool_calls</td>
+</tr>
+</tbody></table></div>
+<p><code>office-ai-bridge.js:359-368</code> 只在 <code>inputError || truncated</code> 时记录该告警。三次均非 truncated，证明是合并后参数无法 JSON.parse。失败发生在澄清需求阶段，还没到大段 HTML 的生成或导出阶段。这一请求没有输出长度截断证据，不能首先用加大 max_tokens 或更换生图 API 来处理。</p>
+<h3 id="section-6">3.2 真正损坏参数的代码</h3>
+<p><code>src-electron/office/office-ai-stream.js:20-29</code> 同时猜测“本次是增量”与“本次是累计快照”：</p>
+<pre><code class="language-js">if (next === previous || next.startsWith(previous)) return next
+if (previous.startsWith(next) || previous.endsWith(next)) return previous
+return previous + next
+</code></pre>
+<p>对于任意文本，仅凭内容前后重叠无法确定语义。新来的 <code>{</code> 可能是嵌套对象的必要字符；重复的 <code>1</code> 可能是数字 11 的第二位；重复的“好”可能是原文的一部分。这些都被当前去重逻辑误删。</p>
+<p><code>office-ai-bridge.js:332</code> 使用该函数组装所有工具 arguments；<code>office-ai-stream.js:49</code> 到末尾才 JSON.parse。真实固定 HTML 上游的 OpenAI 实现则在 <code>vendor/genoffice-html/packages/ai-provider/src/protocols/openai-compatible.ts:374</code> 直接追加增量。Friday 接管 <code>ai:*</code> 后走自己的合并逻辑，绕过了这段上游处理。</p>
+<h3 id="section-7">3.3 不用 API 的真实函数复现</h3>
+<p>合成参数符合固定 HTML <code>tools.ts:345-374</code> 的 ask_clarification schema：</p>
+<pre><code class="language-json">{&quot;questions&quot;:[{&quot;id&quot;:&quot;audience&quot;,&quot;label&quot;:&quot;Audience?&quot;,&quot;options&quot;:[&quot;Consumer&quot;,&quot;Business&quot;]}]}
+</code></pre>
+<p>拆为六个合法增量后，第二片 <code>{</code> 被吞，合并结果成为：</p>
+<pre><code class="language-text">{&quot;questions&quot;:[&quot;id&quot;:&quot;audience&quot;,&quot;label&quot;:&quot;Audience?&quot;,&quot;options&quot;:[&quot;Consumer&quot;,&quot;Business&quot;]}]}
+</code></pre>
+<p>真实 JSON.parse 报 <code>Expected &#39;,&#39; or &#39;]&#39; after array element ... position 18</code>。另两个合成输入仍能通过 JSON.parse，但值不正确：</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>完整原文</th>
+<th>当前函数的实际值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>{&quot;value&quot;:11}</code></td>
+<td><code>{&quot;value&quot;:1}</code></td>
+</tr>
+<tr>
+<td><code>{&quot;label&quot;:&quot;好好&quot;}</code></td>
+<td><code>{&quot;label&quot;:&quot;好&quot;}</code></td>
+</tr>
+</tbody></table></div>
+<p>截图的三次停止提示来自固定 HTML <code>packages/agent-core/src/loop.ts:1180-1199、1291-1295</code>。这是无效工具输入的重试保护；增加重试次数会重复消耗，不能解决原始参数损坏。</p>
+<p><strong>证据边界：</strong> 当前日志未保留原始 SSE 分片，不能证明当次具体被吞的字符就是本例的 <code>{</code>。可以确定安装版存在该共享缺陷、实际三次澄清调用在 JSON 解析处失败，且两者高度吻合。修复后仍需用相同模型重试原始页面生成任务确认。</p>
+<h2 id="section-8">4. 四类旧 Office 的未知错误与错误登录提示</h2>
+<h3 id="section-9">4.1 宿主与旧 transport 不同版本</h3>
+<p>Friday 主桥读取 provider 用量后，会发 <code>{type:&#39;usage&#39;, usage}</code>：<code>office-ai-bridge.js:318-325、427</code>。旧 <code>vendor/happyoffice/packages/agent-core/src/electron-transport.ts:18</code> 的类型及 <code>:99-128</code> 的分支只认识 ping、delta、reasoning、tool-call、done，末尾直接用 else 处理所有其他事件为 error。</p>
+<p>usage 没有 error 字段，所以得到本地化兜底“未知错误”；transport 执行 settle 并取消订阅，随后的正常 done 不再交付。用户已看到的正文保留，末尾却被标错。这也可能让依赖 onDone 的收尾或历史保存路径不执行，具体消息落盘需要另验，不能仅凭屏幕有文字推断完成。</p>
+<p>直接运行真实 TypeScript transport，只以本地 fixture 发送事件：</p>
+<pre><code class="language-text">输入：delta(&quot;reply before usage&quot;) → usage(12,5) → done
+预期：delta → done，不产生 error
+实际：[[&quot;delta&quot;,&quot;reply before usage&quot;],[&quot;error&quot;,&quot;未知错误&quot;]]
+</code></pre>
+<p>四类编辑器的 <code>src/renderer/ai/transport.ts</code> 都引用同一共享实现。已安装四份 renderer 均含此错误兜底，所以不能只修 Docs 一个组件。</p>
+<h3 id="section-10">4.2 为什么又出现“登录 Friday”</h3>
+<p>Docs <code>AiPanel.tsx:844-874</code>、Sheets <code>App.tsx:1297-1336</code>、Slides <code>AiPanel.tsx:1488-1519</code> 在任意 onError 后查询 GskStatus。Friday 主桥 <code>office-ai-bridge.js:506</code> 返回 <code>{loggedIn:false, reason:&#39;friday-managed-provider&#39;}</code>，语义是没有 Genspark 登录会话，但当前实际使用 Friday 配置的 API 模型。</p>
+<p>面板忽略 reason 和实际 provider，只看到 false，便将 <code>loginRequired</code> 设为 true。此前品牌文案改成了 Friday，因此上游 Genspark 登录按钮显示成“登录 Friday”；点击则调用 <code>aiGskLogin()</code>，而主桥 <code>:507</code> 返回空对象，没有恢复动作。</p>
+<p>这不能用把 loggedIn 伪造为 true 解决。需要让错误类型和恢复动作匹配：只有真实的该提供商认证失败且有可用登录流程，才显示登录；API Key 模式应指向 Friday 模型设置，额度、限流、参数、网络错误各自提供对应处理。</p>
+<h3 id="section-11">4.3 结构化错误为什么没到面板</h3>
+<p>宿主已有 errorCode 和脱敏 diagnostic（<code>office-ai-bridge.js:443-449</code>），旧 transport 却只向 AgentLoop 传递 string。旧合同还缺少新宿主的 auth、provider、transcript 等代码。面板无法按结构化原因选择恢复动作，只能调用 GskStatus 猜测，形成第二层误导。</p>
+<p>本次日志没有为截图中这条“未知错误”绑定到具体 requestId 的 usage 原文；离线真实代码已稳定重现同样症状。仍需最终包带 requestId 的顺序事件验收，完成请求级关联。</p>
+<h2 id="section-12">5. HTML 品牌残留与会话历史</h2>
+<h3 id="section-13">5.1 品牌改造未覆盖独立 HTML 树</h3>
+<p>固定 HTML：面板 <code>AiPanel.tsx:1232-1233</code>、Ribbon <code>components/Ribbon.tsx:281-283</code> 硬编码 Genspark 标题；<code>AiPanel.tsx:1865</code> 是原 Genspark SVG；折叠入口 <code>App.tsx:1731-1735</code> 也使用它。</p>
+<p>旧 Friday Docs 的 <code>components/icons.tsx:1748-1751</code> 虽然函数仍叫 GensparkMark，内部已使用 Friday 图片。复制上游新 HTML 不会自动继承旧分支的产品改造。现有 <code>html-host-adapter.mjs</code> 与 <code>html-renderer-adapter.mjs</code> 没有品牌转换，因此源文件干净、编译通过的同时，界面仍保留上游产品身份。</p>
+<p>修复应统一 Ribbon、面板标题、图标、折叠入口、tooltip、无障碍名称和中英文资源；上游来源、许可及第三方版权声明继续准确保留，不能对所有 Genspark 字符串做全局替换。</p>
+<h3 id="section-14">5.2 已有单会话持久化，缺少历史管理</h3>
+<p>HTML 现有 <code>AiPanel.tsx:588-620</code> appendChat、<code>:869-925</code> resolveChat/loadChat、<code>:931-943</code> 首次保存 rebindChat。Friday <code>office-host.js</code> 通过共享 Docs 项目服务提供对应 IPC。由此不能说 HTML 完全没有保存聊天。</p>
+<p>真正缺失的是 Friday 旧分支增强的多会话能力：</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>层</th>
+<th>其他 Friday Docs 已有</th>
+<th>HTML 当前缺口</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UI</td>
+<td>AiPanel:1319-1327 AiHistoryButton</td>
+<td>没导入/渲染；固定 HTML 的共享 UI 包也没有该组件</td>
+</tr>
+<tr>
+<td>操作</td>
+<td>AiPanel:1104/1126/1133 切换、更新、新建</td>
+<td>没有对应完整流程</td>
+</tr>
+<tr>
+<td>preload</td>
+<td>index.ts:230-233 list/create/select/update</td>
+<td>HTML 仅 resolve/append/load/rebind 四项</td>
+</tr>
+<tr>
+<td>主服务</td>
+<td>docs-main.ts:3267/3272/3277/3289</td>
+<td>服务已存在，但没有完整接到 HTML 和其权限合同</td>
+</tr>
+<tr>
+<td>store</td>
+<td>store.ts:293/318/335/355</td>
+<td>存储层可复用，需保留文档归属和已有数据</td>
+</tr>
+</tbody></table></div>
+<p>因此历史按钮不能只当图标补上。它需要 UI、preload、主服务、文档归属和会话状态一同接通。</p>
+<h3 id="section-15">5.3 “新聊天”仅清空屏幕，聊天 ID 没变</h3>
+<p>HTML <code>AiPanel.tsx:1241-1254</code> 清空队列、loop、可见聊天和附件，但未改变 chatIdsRef，也不调用 createChat。旧 store <code>store.ts:508</code> 使用追加 JSONL，所以正常情况下是后续消息继续追加到同一 chatId，重开可能混合恢复；这不等于覆盖删除旧记录。</p>
+<p>不能承诺用户当前每条消息均已落盘：现有读写失败会被 catch 吞掉；首条用户消息在首个 assistant 回复前也可能仅在内存。后续应验证磁盘与会话状态，并提供明确持久化错误反馈。</p>
+<p>新增 list/create/select/update 时，还必须扩展 <code>src-electron/office/html-project-boundary.js:16-39</code>：当前只对 resolve/rebind/load/append 明确检查文档和会话归属。应校验当前文档作用域，维护新建/选择后的合法 projectId+chatId 授权对，并处理切换竞态。直接扩大 preload 方法而不补权限边界会引入跨文档历史访问问题。</p>
+<h2 id="section-16">6. 为什么原测试通过仍漏掉</h2>
+<p>此前资源校验覆盖 bundle/export/hook、hash、来源及构建；HTML runtime 探针覆盖文件、源码编辑、保存、隔离、导出、关闭及 PDF 回归。它们本身有价值，但不执行真实 AI 规划、澄清和多轮工具循环，也不检查品牌、历史列表或旧版 renderer 对新版 usage 的理解。</p>
+<p><code>scripts/tests/office-ai-stream.test.mjs</code> 当前两项仍能通过，因为主要覆盖累计快照和部分工具名称合并，没有检验正常嵌套增量、重复字符/数字及完整字节保真。主进程事件发送正确也不足以证明旧 renderer 能接收。</p>
+<p>本轮新增的离线检查共九项，当前全部为红灯，约一秒即可重跑。这些是有针对性的缺陷信号，不应为取得绿色结果删除断言。修复后再用同一组输入验证：</p>
+<pre><code class="language-powershell">node docs/office-ai-html-next/research/preview38-ai-ui-repro.mjs
+</code></pre>
+<p>脚本直接调用真实参数合并函数和旧共享 transport，只使用合成消息；品牌/历史项读取实际 HTML 构建适配后的源码。输出结果为 <a href="research/preview38-ai-ui-repro.json">preview38-ai-ui-repro.json</a>。当前正确诊断结果是 <code>ok:false</code>、exit 1，说明缺陷仍在，不是研究执行失败。Node 24 可直接加载此处只含可剥离类型的 TS transport。</p>
+<p>静态 UI 检查不是 GUI e2e；合成重放不是用户原始 SSE 回放；模块 hash 相同只证明这些模块相同，不代替整个安装目录逐资源复验。</p>
+<h2 id="section-17">7. 根本修复拆解及顺序</h2>
+<h3 id="section-18">R1：工具参数保真，先修共享传输</h3>
+<ol>
+<li>对标准 OpenAI/DeepSeek 增量 arguments 按顺序追加，保留每个字符。</li>
+<li>工具名和参数使用独立策略；累计快照兼容必须由明确的 provider/endpoint adapter 模式声明，不能以 overlap 内容猜测。</li>
+<li>每个 tool index/id 独立缓存；验证多工具交错、Unicode、引号/反斜杠、嵌套、空分片和结束原因。</li>
+<li>除 JSON/schema，还断言重建文本和值与完整原响应一致；连续数字/文字必须保留。</li>
+<li>继续保留截断与三次错误保护，错误文案按真实阶段本地化；不靠提高重试次数掩盖失败。</li>
+</ol>
+<h3 id="section-19">R2：统一旧四编辑器与 HTML 的事件、终态和错误合同</h3>
+<ol>
+<li>统一版本化 stream envelope：requestId、事件类型、usage、stopReason、结构化错误、可重试性和恢复动作。</li>
+<li>共享 transport 明确处理 usage，只有 type=error 才进入错误路径；新增可选元数据不能自动变成终止错误。</li>
+<li>验证 delta→usage→done、tool-call→usage→done、无 usage、取消、超时、重复终态，保证一个请求最多一个终态。</li>
+<li>逐应用对照旧/新 renderer 合同，保证四类旧编辑器和 HTML 都有实测；不能只修改主桥或只测试一个组件。</li>
+<li>保留脱敏诊断 code，不在日志或报告加入密钥、完整正文和 authorization。</li>
+</ol>
+<h3 id="section-20">R3：统一错误恢复，去掉错误登录动作</h3>
+<ol>
+<li>将 provider/auth/config/network/rate-limit/transcript/tool-input 等原因传至面板，避免再次退化成一条字符串。</li>
+<li>API Key 模式的配置或认证问题链接 Friday 模型设置；真实上游登录仅在该模式下可用时显示。</li>
+<li>“登录 Friday”空操作不再作为通用失败恢复；不通过伪造 Genspark loggedIn 状态压制错误。</li>
+<li>保留已收到正文、重试上下文和用户输入；落盘/错误/取消结果有明确区分。</li>
+</ol>
+<h3 id="section-21">R4：补齐 HTML 产品身份与会话管理</h3>
+<ol>
+<li>固定上游保持可校验，通过受测的产品适配层注入 Friday 品牌与历史能力。</li>
+<li>从 Friday 现有历史实现提取可复用 UI/合同，保持按钮位置、样式、交互与其他 Office 一致。</li>
+<li>补 list/create/select/update 的 preload 与主服务连接，维护新旧 chat pair 与当前文档归属。</li>
+<li>新聊天创建新持久化 ID；切换时停止在途请求、保存当前会话、装载目标、拒绝旧结果串入新会话。</li>
+<li>首次保存、另存、重命名、未命名文档、多标签同名不同路径及重启恢复均验证。迁移保留原 JSONL，不擅自将混在同一个历史内的消息猜测拆开或删除。</li>
+</ol>
+<h3 id="section-22">R5：面向后续 GenOffice 更新的发布门槛</h3>
+<p>每次来源更新都记录双树版本、共享合同版本、Friday 产品增强映射；新增 upstream chunk/tool/IPC 均有兼容性检查。发布门禁除资源来源外，还必须覆盖真实 renderer 事件消费、参数保真、历史新建/切换、品牌 UI 和正确恢复动作。</p>
+<p>不需要为每个按钮单独模拟点击。将修改集中在共享传输合同、产品身份/会话适配和文档作用域服务层，再让各编辑器使用这些合同；后续跟随 GenOffice 时只审核显式差异及受影响矩阵。</p>
+<h2 id="section-23">8. 验收清单与当前未完成项</h2>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>验收</th>
+<th>通过标准</th>
+<th>当前状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>合法工具参数</td>
+<td>本报告三组原文/分片值完全一致，所有边界/并行用例通过</td>
+<td>缺陷已复现，待修复</td>
+</tr>
+<tr>
+<td>usage 顺序兼容</td>
+<td>四类旧编辑器与 HTML 正常回复/工具调用后均 done，无误报错误</td>
+<td>缺陷已复现，待修复</td>
+</tr>
+<tr>
+<td>恢复动作</td>
+<td>API Key 模式不出现空登录；真实错误给出正确设置/重试动作</td>
+<td>条件链已确认，待修复</td>
+</tr>
+<tr>
+<td>产品身份</td>
+<td>HTML Ribbon、面板、折叠入口、图标、tooltip 中英符合 Friday</td>
+<td>遗漏已确认，待修复</td>
+</tr>
+<tr>
+<td>历史</td>
+<td>新建、列表、选择、改名/更新、首存重绑、重启恢复且无跨文档访问</td>
+<td>缺口已确认，待实现与验证</td>
+</tr>
+<tr>
+<td>数据保留</td>
+<td>原聊天文件保留；保存失败明确；旧会话不会被新会话清空或错误覆盖</td>
+<td>待迁移与恢复验证</td>
+</tr>
+<tr>
+<td>真实 AI 页面生成</td>
+<td>同一 DeepSeek 模型完成需求→澄清→计划→write_document→可见页面→保存→重开</td>
+<td>待修复后实测；本轮未调用远程 API</td>
+</tr>
+<tr>
+<td>最终安装包</td>
+<td>新资源/源码身份一致，四类 Office、PDF→Word、HTML 回归通过；安装升级保留数据</td>
+<td>本轮未构建修复版</td>
+</tr>
+</tbody></table></div>
+<p>本轮研究使用本地源码和合成输入即可确定多个缺陷，不需要用户再次提交 API Key，也不应要求用户通过反复重装来试错。修复后的真实模型与最终包验收仍必须完成，才能把这些问题标为解决。</p>
+<footer>本页面为离线阅读版。<a href="08-preview38-ai-ui-root-cause-2026-11-07.md">Markdown 源稿</a> · <a href="index.html">返回文档导航</a></footer></main></div></body></html>

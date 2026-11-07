@@ -490,6 +490,7 @@ const api = {
   aiStreamCancel: (requestId) => electron.ipcRenderer.invoke("ai:stream-cancel", requestId),
   aiGskStatus: (withEmail) => electron.ipcRenderer.invoke("ai:gsk-status", withEmail),
   aiGskLogin: () => electron.ipcRenderer.invoke("ai:gsk-login"),
+  aiOpenModelSettings: () => electron.ipcRenderer.invoke("ai:open-model-settings"),
   webSearch: (query, maxResults) => electron.ipcRenderer.invoke("ai:web-search", query, maxResults),
   imageSearch: (query, maxResults) => electron.ipcRenderer.invoke("ai:image-search", query, maxResults),
   fetchImage: (url) => electron.ipcRenderer.invoke("ai:fetch-image", url),

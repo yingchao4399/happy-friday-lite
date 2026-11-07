@@ -4,7 +4,30 @@
 import { randomBytes } from "crypto";
 import { mkdirSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "fs";
 import { join } from "path";
-import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { app as app2, BrowserWindow, dialog, ipcMain, shell } from "electron";
+
+// src-electron/default-save-dir.js
+import fs from "node:fs";
+import path from "node:path";
+import { app } from "electron";
+var settingsPath = () => path.join(app.getPath("userData"), "app-settings.json");
+function readSettings() {
+  try {
+    const value = JSON.parse(fs.readFileSync(settingsPath(), "utf8"));
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch {
+    return {};
+  }
+}
+function getDefaultSaveDir() {
+  const dir = readSettings().defaultSaveDir;
+  if (typeof dir !== "string" || !path.isAbsolute(dir)) return null;
+  try {
+    return fs.statSync(dir).isDirectory() ? dir : null;
+  } catch {
+    return null;
+  }
+}
 
 // src/features/typewriter/nocturne-core/app/nocturne/channels.ts
 var ARCHIVE_CHANNELS = {
@@ -446,7 +469,7 @@ function sanitizeFolio(raw) {
 // src/features/typewriter/nocturne-core/app/nocturne/archive-store.ts
 var MAX_FOLIOS = 500;
 var MAX_IMAGE_BYTES = 24 * 1024 * 1024;
-var archiveDir = () => join(app.getPath("userData"), "typewriter", "archive");
+var archiveDir = () => join(app2.getPath("userData"), "typewriter", "archive");
 function readAll() {
   let names = [];
   try {
@@ -534,7 +557,7 @@ async function exportImage(sender, raw) {
   }
   const owner = BrowserWindow.fromWebContents(sender);
   const options = {
-    defaultPath: join(app.getPath("documents"), safeFileName(value.name)),
+    defaultPath: join(getDefaultSaveDir() || app2.getPath("documents"), safeFileName(value.name)),
     filters: [{ name: "PNG image", extensions: ["png"] }]
   };
   const result = owner ? await dialog.showSaveDialog(owner, options) : await dialog.showSaveDialog(options);

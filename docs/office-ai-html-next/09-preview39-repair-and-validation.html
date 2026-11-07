@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>preview.39 修复与验证</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:#f4f6f7;color:#222e36;font:16px/1.85 'Microsoft YaHei','PingFang SC',system-ui,sans-serif}
+a{color:#145f78;text-underline-offset:3px}a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px solid #ba7517;outline-offset:3px}
+header{background:#fff;border-bottom:1px solid #d7e0e2}.bar{max-width:1420px;margin:auto;padding:15px 25px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-weight:700;margin-right:auto}.nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}.nav [aria-current=page]{font-weight:700;color:#173f4a}
+.layout{max-width:1420px;margin:25px auto 60px;padding:0 22px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:22px;align-items:start}
+.toc{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:16px;font-size:13px}
+.toc summary{font-size:15px;font-weight:700;cursor:pointer}.toc a{display:block;padding:5px 0;text-decoration:none;line-height:1.5}.toc a.sub{padding-left:12px}
+main{min-width:0;background:#fff;border:1px solid #d7e0e2;border-radius:6px;padding:34px 40px}.landing{max-width:1100px;margin:28px auto 60px}
+.note{background:#fff7e5;border-left:4px solid #c58b28;padding:12px 16px;margin-bottom:24px;font-size:14px}
+h1{font-size:29px;line-height:1.5;margin:0 0 20px}h2{font-size:22px;line-height:1.5;margin:40px 0 16px;padding-top:14px;border-top:1px solid #d7e0e2}h3{font-size:18px;margin:25px 0 10px}
+p,li,td,th{overflow-wrap:anywhere}p{margin:12px 0}li{margin:6px 0}.table-scroll{overflow-x:auto;border:1px solid #d7e0e2;border-radius:4px;margin:18px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;line-height:1.75}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-right:1px solid #d7e0e2;border-bottom:1px solid #d7e0e2}th{background:#eaf2f1}tr:last-child td{border-bottom:0}
+pre{background:#f1f4f4;border:1px solid #d7e0e2;padding:16px;overflow:auto;font:13px/1.7 Consolas,monospace}code{font-family:Consolas,monospace;background:#eff3f3;padding:1px 3px;overflow-wrap:anywhere}pre code{padding:0;background:none}
+footer{margin-top:38px;padding-top:18px;border-top:1px solid #d7e0e2;color:#586870;font-size:13px}.docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.item{border:1px solid #d7e0e2;border-radius:6px;padding:20px}.item h2{border:0;margin:0 0 10px;padding:0;font-size:19px}.item p{font-size:14px}
+@media(max-width:800px){.layout{display:block;padding:0 12px;margin-top:14px}.toc{position:static;max-height:270px;margin-bottom:14px}main,.landing{padding:22px 18px}.landing{margin:14px 12px}.docs{grid-template-columns:1fr}.bar{padding:13px 16px}h1{font-size:24px}h2{font-size:20px}}
+@media print{body{background:white;font-size:10pt}header,.toc{display:none}.layout{display:block;margin:0;padding:0}main,.landing{border:0;padding:0;margin:0}table{min-width:0;font-size:8pt}th,td{padding:5pt;border:1px solid #aaa}.table-scroll{overflow:visible;border:0}pre{white-space:pre-wrap}h2,h3{break-after:avoid}@page{size:A4;margin:16mm}}
+</style></head><body><header><div class="bar"><span class="brand">Friday Office · AI HTML 规划</span><nav class="nav" aria-label="文档导航"><a href="index.html">文档导航</a><a href="01-integration-plan.html">融合研究与实施方案</a><a href="02-prd.html">产品需求 PRD</a><a href="03-technical-integration.html">技术对接与拆解</a><a href="04-implementation-and-validation.html">实施与验收记录</a><a href="05-ai-service-contract-audit.html">AI 服务合同审计</a><a href="06-preview37-progress-2026-11-07.html">preview.37 进度与交付结果</a><a href="07-preview38-progress-2026-11-07.html">preview.38 进度与下一版门槛</a><a href="08-preview38-ai-ui-root-cause-2026-11-07.html">preview.38 Office AI 问题根因研究</a><a href="09-preview39-repair-and-validation.html" aria-current="page">preview.39 修复与验证</a></nav></div></header><div class="layout"><aside class="toc"><details open><summary>本篇目录</summary><a class="" href="#section-2">1. 当前交付状态</a><a class="" href="#section-3">2. 用户现象及根因</a><a class="sub" href="#section-4">2.1 AI HTML 仍显示 Genspark</a><a class="sub" href="#section-5">2.2 其他 Office 已输出内容却报“未知错误”</a><a class="sub" href="#section-6">2.3 AI HTML 工具参数反复不可用</a><a class="" href="#section-7">3. HTML 历史实现与数据保留</a><a class="" href="#section-8">4. 构建链路及附带发现</a><a class="" href="#section-9">5. 最终安装包门槛</a><a class="" href="#section-10">6. 与后续上游更新的关系</a></details></aside><main><div class="note"><strong>阅读提示：</strong>前三篇为下一版规划；第 04 篇记录实际实施与验收。源代码接入、编译、运行、完整对等和发布分别核验，不以局部通过代替整体完成。</div><h1 id="section-1">preview.39 Office AI 修复与验证记录</h1>
+<p>日期：2026-11-07。展示版本：<code>3.0.7.01-preview.39</code>；技术版本：<code>3.0.11-preview.39</code>。</p>
+<p>本篇记录 preview.38 三张用户截图所涉及问题的实际修复。第 08 篇保留为修复前的根因研究快照；原总体升级方案、PDF 专项三份文档和 AI HTML 原规划继续保留。本轮不表示所有 Office 编辑器已升级至官方新版本，也不表示完整上游功能对等已验收。</p>
+<h2 id="section-2">1. 当前交付状态</h2>
+<p>代码修复、主应用编译和专项验证已完成；最终 Office 全量资源重建正在执行。修复安装包、包内验证及 GitHub 发布尚未完成。下表按证据区分阶段，不把单项测试通过当成整个版本已交付。</p>
+<div class="table-scroll" role="region" aria-label="可横向滚动的表格" tabindex="0"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>当前结果</th>
+<th>证据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>共享 AI 流式协议与错误恢复修复</td>
+<td>已实现并通过回归</td>
+<td><code>scripts/tests/office-ai-stream.test.mjs</code>、<code>office-transport-protocol.test.mjs</code>、<code>office-ai-service-contract.test.mjs</code></td>
+</tr>
+<tr>
+<td>Friday 品牌与 HTML 多会话历史</td>
+<td>已实现，实际 renderer 验证通过</td>
+<td><code>artifacts/office-html-runtime-preview39.json</code>；首次实际运行 11 个步骤全部通过</td>
+</tr>
+<tr>
+<td>提示词身份、生图设置指引与三类会话时序修复</td>
+<td>已实现，最终专项 38/38 通过</td>
+<td>product/history/store/boundary 四组测试</td>
+</tr>
+<tr>
+<td>全仓测试</td>
+<td>本轮 623/623 通过，0 跳过；随后新增的历史边界另经专项验证</td>
+<td><code>artifacts/preview39-tests.log</code></td>
+</tr>
+<tr>
+<td>打包与原生模块相关测试</td>
+<td>22/22 通过</td>
+<td><code>artifacts/preview39-cjs-tests.log</code></td>
+</tr>
+<tr>
+<td>主应用前端构建</td>
+<td>通过</td>
+<td><code>artifacts/preview39-app-build.log</code></td>
+</tr>
+<tr>
+<td>CLI Word 读取构建错误</td>
+<td>已修复，真实 CJS 回归 1/1；功能命令 8/8</td>
+<td><code>artifacts/cli-audit-preview39/after-fix-report.json</code></td>
+</tr>
+<tr>
+<td>完整 Office 资源重建</td>
+<td>执行中；之前使用缓存 CLI 的候选组合校验通过，但不是最终交付</td>
+<td><code>artifacts/office-preview39-final-build.log</code></td>
+</tr>
+<tr>
+<td>修复安装包与包内冒烟</td>
+<td>未完成</td>
+<td>必须针对最终资源组合生成新包后验证</td>
+</tr>
+<tr>
+<td>GitHub 发布</td>
+<td>未完成</td>
+<td>当前已有 preview.38 发布不能代表 preview.39 修复已发布</td>
+</tr>
+</tbody></table></div>
+<h2 id="section-3">2. 用户现象及根因</h2>
+<h3 id="section-4">2.1 AI HTML 仍显示 Genspark</h3>
+<p>HTML 使用独立固定的官方源码树，原有四编辑器则使用 Friday 的既有分支。新增 HTML 时，构建适配遗漏了 Friday 的标题、图标和历史增强，造成同一产品里两套身份。这是 preview.38 的真实集成缺陷，不能归因于用户没安装好。</p>
+<p>当前构建适配已精确替换 Ribbon、面板标题、折叠入口及图标，并补齐四处系统提示中的产品身份。生图不可用时改为引导用户前往 Friday 设置 → AI 工具 → 生图、媒体与搜索，避免错误要求 Genspark 登录。</p>
+<p><code>genspark</code> provider ID、<code>X-Genspark-Token-Pass</code>、<code>genoffice:brief</code> 文档元数据及真实提供商名称保持协议含义。不能全局删除所有 Genspark/GenOffice 字符串：这会破坏上游兼容，且不能证明界面修好。验证重点是实际用户入口、渲染图标、托管模型列表和真实 prompt builders。</p>
+<h3 id="section-5">2.2 其他 Office 已输出内容却报“未知错误”</h3>
+<p>宿主发送正常 <code>usage</code> 事件，旧 transport 把未识别事件当作错误，提前终止订阅。修复后四编辑器只把显式错误当失败，正常用量和新增元数据不会覆盖成功终态。取消后立即释放订阅；迟到 token 不再进入界面。</p>
+<p>API 模式下的认证错误应引导 Friday 模型设置；不能因上游登录状态为空而要求“登录 Friday”。真正的上游认证错误才使用相应上游恢复动作。回归覆盖显式错误、正常正文、工具调用、用量、取消和错误恢复，且执行真实 AgentLoop/transport 路径。</p>
+<h3 id="section-6">2.3 AI HTML 工具参数反复不可用</h3>
+<p>原工具流合并逻辑对正常增量作重叠去重，会吞掉重复字符、数字或 JSON 分隔符；合法值也可能被静默改写，例如 <code>11</code> 变成 <code>1</code>。修复采用明确的增量合同逐片拼接；累计快照只在模型配置显式声明时启用，工具名与参数分别处理。</p>
+<p>真实本地 HTTP/SSE → Electron AI bridge 探针验证了重复文字/数字、Unicode、嵌套 JSON、交错工具、正常 usage、401、422、截断与中断。本地确定性验证不等于对所有远端模型提供商逐一认证。</p>
+<h2 id="section-7">3. HTML 历史实现与数据保留</h2>
+<p>HTML 复用其他 Office 的 <code>AiHistoryButton</code> 和共享项目聊天存储，具备文档作用域内的新建、列表、选择、改名、置顶、归档和回收站操作。新聊天创建新持久化 ID；切换聊天从存储恢复内容和模型上下文，不能只清空界面数组。</p>
+<p>宿主核对当前 HTML 视图、文档路径和已授权会话，阻止跨文档伪造 ID。未命名文档使用隔离的临时作用域；首次保存迁移完整会话组，另存复制会话组并保留源记录。保存到已有历史的目标时保留目标原记录，避免覆盖。写入失败有明确提示和重试，不伪装成保存成功。</p>
+<p>本轮进一步修复三处实际复现的时序缺陷：</p>
+<ol>
+<li>写入队列刚完成、锁尚未释放时新增消息，原实现可能提前返回成功却留在内存。现在追加调用会等待其消息真正写入后再完成。</li>
+<li>消息已经持久写入期间，同一视图恰好首次保存或另存，原宿主可能拒绝已落盘回执，重试导致重复。现在只对同一视图 entry 的已授权追加接受路径变化；替换视图、跨会话访问和旧路径读取仍被拒绝。</li>
+<li>初始化 resolve/load 尚未结束就首次保存，原会话管理器会永久保留未保存路径，重试无法恢复。现在记录最新宿主路径，放弃过期作用域后重新解析；未就绪时继续禁止发送，旧加载结果不能覆盖新文档。</li>
+</ol>
+<p>测试包括消息延迟、失败重试、不同文档、未保存文档隔离、首次保存、重命名、另存、已有目标历史、元数据、切换/删除当前聊天以及初始化的 resolve/load 两阶段。真实 renderer 探针又验证了历史按钮、弹层、新建独立会话和切回旧消息。</p>
+<h2 id="section-8">4. 构建链路及附带发现</h2>
+<p>源码修复通过构建适配进入 renderer/preload/main bundle；修改源码不会更新已经发布或安装的 preview.38。必须统一重建五个编辑器，核对源码身份、来源锁、资源摘要与展示版本，再生成安装器。</p>
+<p>第一次完整构建遇到 CLI 依赖目录清理 <code>EPERM</code>。独立 CLI 构建与依赖收集均未再现。运行记录中曾有两个全量 Office 构建进程并行，存在清理竞争的可能，但未取得足以认定根因的确定性证据，因此没有推测性修改 <code>collect-deps.mjs</code>。最终构建由主线程串行执行。</p>
+<p>CLI 深入验收另发现可稳定复现的错误：独立 esbuild 不处理 Word 语言包中的 Vite <code>import.meta.glob</code>，导致 DOCX 新建成功但 read/check 失败。修复在 CLI 构建阶段生成等价的延迟 import 映射，保留全部语言；源码合同变化时明确失败。</p>
+<p>CLI 验证先使用真实 CJS 读取测试复现红灯，再修复并转绿。八条真实命令覆盖 Word 新建、读取、检查、编辑、再次读取、导出 Markdown、PDF 转 Word及读取转换正文。依赖闭包审计确认原缓存与原新编 CLI 完全一致、1951 个文件没有缺失，说明该错误来自构建语义而非缓存缺件。</p>
+<h2 id="section-9">5. 最终安装包门槛</h2>
+<p>最终 Office 全量重建必须成功，manifest 的 renderer、CLI、native 均为 fresh，集成校验无源码/上游/版本组合不一致。此前 <code>--skip-cli</code> 组合仅供诊断，不能替代本轮最终全量构建。</p>
+<p>安装器生成后，至少执行：包内 Office 资源和原生模块校验、Electron 启动冒烟、从包内实际模块运行 HTML 品牌/历史与导出探针，以及 PDF renderer 的创建/转换和菜单交付探针。验证应回读 DOCX 正文与摘要，并确认源 PDF 未被改写。包存在与安装升级完成是不同事实。</p>
+<p>生图、视频与搜索使用用户 API 的远端最终验收，按照用户此前决定在安装包交付后由用户填写配置并测试；文档必须保留这一边界，不把未配置提供商写成已实测通过。本轮也不宣称所有 GenOffice 新功能已全面融合。</p>
+<h2 id="section-10">6. 与后续上游更新的关系</h2>
+<p>HTML 继续固定官方 <code>v0.12.852</code> / <code>4b55db9ed1994575a695160ffc6cfd0bfc866211</code>，官方树不直接修改。产品身份、历史及宿主能力在 Friday 的明确适配层完成；精确锚点变化会阻止构建，提示重新审计。</p>
+<p>旧四编辑器继续使用 Friday 的 <code>vendor/happyoffice</code> 分支。本轮协议、历史存储和 CLI 修复属于应登记和回放的私有差异，后续升级需通过三方审计与合同测试迁移；不能仅复制新 renderer 或覆盖整个 vendor。原总体研究与升级合同继续作为后续规划依据。</p>
+<footer>本页面为离线阅读版。<a href="09-preview39-repair-and-validation.md">Markdown 源稿</a> · <a href="index.html">返回文档导航</a></footer></main></div></body></html>

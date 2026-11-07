@@ -1,5 +1,10 @@
 {
   "htmlEditPreviewNotice": "编辑静态源码；脚本交互请进入演示",
+  "htmlHistory": {
+    "failed": "会话历史操作失败，当前消息已保留，请重试。",
+    "retry": "重试",
+    "loading": "正在加载会话历史…"
+  },
   "services": {
     "sharedCredentials": "同一服务商的密钥与 API 地址在生图、图片解析和视频解析之间共用，只需填写一次。",
     "localSearch": "本机文件搜索",

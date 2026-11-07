@@ -6,6 +6,7 @@ import { importNoteResource } from './note-resources.js'
 import TurndownService from 'turndown'
 import { CancellationTokens } from './cancellation.js'
 import { loadConfig, saveConfig, getDataDir } from './config.js'
+import { getDefaultSaveDir, setDefaultSaveDir, defaultSavePath } from './default-save-dir.js'
 import { syncOfficeUiLanguage } from './office/office-host.js'
 import * as db from './db.js'
 import { saveNoteImage, getNoteImagePath, IMAGE_RELATIVE_PREFIX } from './note-images.js'
@@ -335,6 +336,22 @@ export function registerCommands(mainWindow) {
     return loadConfig()
   })
 
+  ipcMain.handle('default-save-dir-get', () => getDefaultSaveDir())
+  ipcMain.handle('default-save-dir-select', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: '选择文件默认保存位置',
+      defaultPath: getDefaultSaveDir() || app.getPath('documents'),
+      properties: ['openDirectory', 'createDirectory']
+    })
+    if (result.canceled || !result.filePaths[0]) return { success: false, canceled: true }
+    try { return { success: true, path: setDefaultSaveDir(result.filePaths[0]) } }
+    catch (error) { return { success: false, error: error.message } }
+  })
+  ipcMain.handle('default-save-dir-reset', () => {
+    setDefaultSaveDir(null)
+    return { success: true }
+  })
+
   ipcMain.handle('module-order-save', (_event, args) => {
     const allowed = new Set(['typewriter', 'clipboard', 'recitation', 'note', 'drawing', 'knowledge', 'office', 'schedule', 'automation', 'harness'])
     if (!Array.isArray(args?.ids) || args.ids.some(id => !allowed.has(id))) throw new Error('模块排序参数无效')
@@ -456,10 +473,28 @@ export function registerCommands(mainWindow) {
 
   ipcMain.handle('save-file-dialog', async (_event, options) => {
     const result = await dialog.showSaveDialog(mainWindow, {
-      defaultPath: options?.defaultPath,
+      defaultPath: defaultSavePath(options?.defaultPath),
       filters: options?.filters || []
     })
     return result.filePath || null
+  })
+
+  ipcMain.handle('drawing-export-file', async (_event, args) => {
+    const extensions = { png: 'image/png', svg: 'image/svg+xml', json: 'application/json' }
+    const format = args?.format
+    if (!Object.hasOwn(extensions, format)) throw new Error('Unsupported drawing export format')
+    const bytes = args?.bytes
+    if (!(bytes instanceof Uint8Array) || bytes.byteLength === 0 || bytes.byteLength > 100 * 1024 * 1024) {
+      throw new Error('Invalid drawing export data')
+    }
+    const name = `${path.basename(String(args?.name || 'canvas')).replace(/[<>:"/\\|?*\x00-\x1f]/g, '_') || 'canvas'}.${format}`
+    const selected = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: defaultSavePath(name),
+      filters: [{ name: format.toUpperCase(), extensions: [format] }]
+    })
+    if (selected.canceled || !selected.filePath) return { success: false, canceled: true }
+    await fs.promises.writeFile(selected.filePath, bytes)
+    return { success: true, path: selected.filePath }
   })
 
   ipcMain.handle('open-file-dialog', async (_event, options) => {
@@ -1173,6 +1208,7 @@ export function registerCommands(mainWindow) {
   ipcMain.handle('export_all_notes', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
       title: '选择笔记导出目录',
+      defaultPath: getDefaultSaveDir() || app.getPath('documents'),
       properties: ['openDirectory', 'createDirectory']
     })
     if (result.canceled || !result.filePaths[0]) return { success: false, canceled: true }
@@ -1834,7 +1870,7 @@ export function registerCommands(mainWindow) {
     const defaultName = `friday-backup-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.zip`
 
     const result = await dialog.showSaveDialog(mainWindow, {
-      defaultPath: defaultName,
+      defaultPath: defaultSavePath(defaultName),
       filters: [{ name: 'ZIP 压缩包', extensions: ['zip'] }]
     })
     if (result.canceled || !result.filePath) {

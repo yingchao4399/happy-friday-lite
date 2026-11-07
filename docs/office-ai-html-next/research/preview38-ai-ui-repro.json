@@ -1,0 +1,98 @@
+{
+  "checkedAt": "2026-11-07T11:27:19.672Z",
+  "node": "v24.19.0",
+  "ok": true,
+  "checks": [
+    {
+      "name": "合法嵌套澄清参数的分片保真",
+      "pass": true,
+      "validOriginal": true,
+      "expected": {
+        "questions": [
+          {
+            "id": "audience",
+            "label": "Audience?",
+            "options": [
+              "Consumer",
+              "Business"
+            ]
+          }
+        ]
+      },
+      "merged": "{\"questions\":[{\"id\":\"audience\",\"label\":\"Audience?\",\"options\":[\"Consumer\",\"Business\"]}]}",
+      "inputError": null,
+      "truncated": false
+    },
+    {
+      "name": "连续数字分片保真",
+      "pass": true,
+      "expected": {
+        "value": 11
+      },
+      "actual": {
+        "value": 11
+      }
+    },
+    {
+      "name": "连续文字分片保真",
+      "pass": true,
+      "expected": {
+        "label": "好好"
+      },
+      "actual": {
+        "label": "好好"
+      }
+    },
+    {
+      "name": "正文和用量事件后正常结束",
+      "pass": true,
+      "events": [
+        [
+          "delta",
+          "reply before usage"
+        ],
+        [
+          "done"
+        ]
+      ]
+    },
+    {
+      "name": "HTML 面板已移除上游产品标题",
+      "pass": true
+    },
+    {
+      "name": "HTML Ribbon 已移除上游产品标题",
+      "pass": true
+    },
+    {
+      "name": "HTML 提供会话历史入口",
+      "pass": true
+    },
+    {
+      "name": "HTML preload 提供会话列表合同",
+      "pass": true
+    },
+    {
+      "name": "HTML 新聊天创建持久化会话",
+      "pass": true
+    }
+  ],
+  "identity": [
+    {
+      "file": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\src-electron\\office\\office-ai-stream.js",
+      "sha256": "5bcd028fa5ec5d8e38e407bc5b9a7e04fc7caadccea9a9d9d7f8946551ff30b6"
+    },
+    {
+      "file": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app\\src-electron\\office\\office-ai-stream.js",
+      "sha256": "d4e7481f9ca8d5663f79ec2090a143a6b60dd3f47217358e0ff1877b3f3b8587"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Happy Friday Lite\\resources\\app\\src-electron\\office\\office-ai-stream.js",
+      "sha256": "d4e7481f9ca8d5663f79ec2090a143a6b60dd3f47217358e0ff1877b3f3b8587"
+    }
+  ],
+  "limitations": [
+    "真实函数与源码合同的离线复现，不等于用户当次 SSE 字节回放或 GUI 全链验收。",
+    "品牌/历史检查为静态合同红灯，不能证明消息已丢失。"
+  ]
+}

@@ -118,6 +118,8 @@ function fridaySettings() {
   const configured = Boolean(state.model)
   const provider = configured ? String(state.model.provider || 'custom') : null
   return normalizeAiSettingsSnapshot({
+    hostMode: 'friday-managed',
+    streamProtocolVersion: '1.1',
     provider,
     model: configured ? state.model.modelName : null,
     configured,
@@ -328,8 +330,9 @@ export async function fridayStreamRequest(chatMessages, tools, { signal, onDelta
           const index = Number.isInteger(tc.index) ? tc.index : 0
           const current = pendingCalls.get(index) || { id: '', name: '', args: '' }
           if (tc.id) current.id = tc.id
-          if (tc.function?.name) current.name = mergeToolName(current.name, tc.function.name)
-          if (tc.function?.arguments) current.args = mergeOfficeToolDelta(current.args, tc.function.arguments)
+          // 标准接口按增量追加；特殊累计协议必须由模型适配配置显式声明。
+          if (tc.function?.name) current.name = mergeToolName(current.name, tc.function.name, { mode: model.toolStreamMode?.names || 'delta' })
+          if (tc.function?.arguments) current.args = mergeOfficeToolDelta(current.args, tc.function.arguments, { mode: model.toolStreamMode?.arguments || 'delta' })
           pendingCalls.set(index, current)
         }
       }
@@ -393,7 +396,7 @@ async function runFridayStream(request, send) {
   if (maxTokens !== undefined && (!Number.isSafeInteger(maxTokens) || maxTokens < 1 || maxTokens > 32768)) throw bridgeFault('OFFICE_AI_PARAMETERS_INVALID')
   const { lease, reused } = requests.begin({ sender: send.sender, requestId, parameters: request })
   if (reused) return
-  const sendSafe = chunk => lease.emit(chunk)
+  const sendSafe = chunk => lease.emit({ ...chunk, protocolVersion: '1.1', hostMode: 'friday-managed', provider: state.model?.provider || 'custom' })
   if (!state.model) {
     sendSafe({
       requestId,
@@ -404,6 +407,7 @@ async function runFridayStream(request, send) {
       // actual transport failure and otherwise hides the selected model
       // problem (especially when Office opens before settings are synced).
       errorCode: 'provider',
+      recovery: 'model-settings',
     })
     return
   }
@@ -446,7 +450,8 @@ async function runFridayStream(request, send) {
         : classification === NETWORK_ERROR_CLASSIFICATIONS.TIMEOUT ? 'timeout'
         : [NETWORK_ERROR_CLASSIFICATIONS.DNS_CONNECTION, NETWORK_ERROR_CLASSIFICATIONS.PROXY, NETWORK_ERROR_CLASSIFICATIONS.TLS].includes(classification) ? 'network'
           : [NETWORK_ERROR_CLASSIFICATIONS.RATE_LIMIT, NETWORK_ERROR_CLASSIFICATIONS.SERVER].includes(classification) ? 'overloaded' : undefined
-      sendSafe({ requestId, type: 'error', error: safeNetworkErrorSummary(err), errorCode, diagnostic: err?.diagnostic || undefined })
+      sendSafe({ requestId, type: 'error', error: safeNetworkErrorSummary(err), errorCode,
+        recovery: ['auth', 'provider'].includes(errorCode) ? 'model-settings' : 'retry', diagnostic: err?.diagnostic || undefined })
     }
   } finally {
     clearInterval(ping)

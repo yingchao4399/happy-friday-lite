@@ -1,5 +1,5 @@
   <template>
-<section class="workspace-settings"><router-link class="back-link" to="/settings">← {{ t('settings.title') }}</router-link><h1>{{ t('workspace.shortcuts.title') }}</h1>
+<section class="workspace-settings"><SettingsBackButton /><h1>{{ t('workspace.shortcuts.title') }}</h1>
     <div class="workspace-actions"><input v-model="query" :placeholder="t('workspace.commands.search')" /><button @click="exportKeys">{{ t('workspace.shortcuts.export') }}</button><button @click="file?.click()">{{ t('workspace.shortcuts.import') }}</button><input ref="file" hidden type="file" accept="application/json" @change="importKeys" /><button @click="resetAll">{{ t('workspace.shortcuts.reset') }}</button></div>
     <p>{{ t('workspace.shortcuts.hint') }} <button @click="systemKeys=true">{{ t('workspace.shortcuts.system') }}</button></p><p>{{ t('workspace.shortcuts.migrated') }}</p><p v-if="notice" role="status">{{ notice }}</p>
     <article v-for="command in filtered" :key="command.id" class="shortcut-row"><div><strong>{{ commandTitle(command) }}</strong><small>{{ t('workspace.categories.'+command.category) }} · {{ command.source }} · {{ command.contexts.join(', ') }}</small></div><kbd v-for="key in bindingsFor(command)" :key="key">{{ key.replaceAll('Mod',mac?'⌘':'Ctrl') }}</kbd><button @click="start(command)">{{ recording===command.id?t('workspace.shortcuts.recording'):t('workspace.shortcuts.change') }}</button><button @click="set(command,[])">{{ t('workspace.shortcuts.clear') }}</button><button @click="reset(command)">{{ t('workspace.shortcuts.default') }}</button></article>
@@ -12,6 +12,7 @@ import {useI18n} from 'vue-i18n'
 import {commands,commandState,commandTitle,bindingsFor,bindingConflicts,saveBindings} from '@/features/commands/registry'
 import {bindingFromEvent} from '@/features/shortcuts/keymap'
 import ClipboardSettings from '@/views/clipboard/ClipboardSettings.vue'
+import SettingsBackButton from '@/components/settings/SettingsBackButton.vue'
 const systemKeys=ref(false)
 const {t}=useI18n(),query=ref(''),notice=ref(''),file=ref(),recording=ref(''),draft=ref(''),mac=window.electronAPI?.platform==='darwin'
 const filtered=computed(()=>[...commands.values()].filter(c=>(commandTitle(c)+' '+c.id+' '+c.source).toLocaleLowerCase().includes(query.value.toLocaleLowerCase())))

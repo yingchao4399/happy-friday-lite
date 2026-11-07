@@ -1,5 +1,6 @@
 /* 应用级面板共用通用设置的字体、720px 内容宽度与灰色分组；Nocturne 自有界面保持原作。 */
-.workspace-settings,.plugin-settings{width:100%;max-width:800px;padding:32px 40px 48px;margin:0 auto;color:var(--text-primary);font-family:var(--font-family-ui);font-size:14px;line-height:1.5}
+.workspace-settings,.plugin-settings{width:100%;padding:32px 40px 48px;margin:0 auto;position:relative;display:flex;flex-direction:column;align-items:center;color:var(--text-primary);font-family:var(--font-family-ui);font-size:14px;line-height:1.5}
+.workspace-settings>*:not(.back-btn),.plugin-settings>*:not(.back-btn){width:100%;max-width:800px}
 .workspace-settings>.back-link,.plugin-settings>.back-link{display:inline-flex;align-items:center;min-height:34px;margin:0 0 18px;padding:6px 10px 6px 4px;border-radius:7px;color:var(--text-secondary);font-size:13px;text-decoration:none;transition:background-color .15s ease,color .15s ease}
 .workspace-settings>.back-link:hover,.plugin-settings>.back-link:hover{background:var(--bg-hover);color:var(--text-primary)}
 .workspace-settings>.back-link:focus-visible,.plugin-settings>.back-link:focus-visible{outline:2px solid var(--accent-color);outline-offset:2px}

@@ -1,9 +1,9 @@
-version: 3.0.10-preview.38
+version: 3.0.12-preview.40
 files:
-  - url: Happy-Friday-Lite-3.0.7.01-preview.38-win-x64-setup.exe
-    sha512: nlbobFTDlVMpNEYg6oLjWC8Hq7/tSE524Cl69VZC2Kvi/EC/k7wfK9F8M/COoKd70+5dugMlHgmHdKCa6WvK1g==
-    size: 269985368
-path: Happy-Friday-Lite-3.0.7.01-preview.38-win-x64-setup.exe
-sha512: nlbobFTDlVMpNEYg6oLjWC8Hq7/tSE524Cl69VZC2Kvi/EC/k7wfK9F8M/COoKd70+5dugMlHgmHdKCa6WvK1g==
-releaseDate: '2026-11-06T23:15:55.633Z'
-releaseVersion: 3.0.7.01-preview.38
+  - url: Happy-Friday-Lite-3.0.7.01-preview.40-win-x64-setup.exe
+    sha512: XrO2OdKfWCAd/X16IP1gyYIe089BAItBLOHw76Q0FsYtVPW9p3pNd9eKPL1eYWUp99jKWaRXfHX9JKcnMNrmSQ==
+    size: 359325338
+path: Happy-Friday-Lite-3.0.7.01-preview.40-win-x64-setup.exe
+sha512: XrO2OdKfWCAd/X16IP1gyYIe089BAItBLOHw76Q0FsYtVPW9p3pNd9eKPL1eYWUp99jKWaRXfHX9JKcnMNrmSQ==
+releaseDate: '2026-11-07T19:12:23.715Z'
+releaseVersion: 3.0.7.01-preview.40

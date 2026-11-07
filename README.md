@@ -1,5 +1,15 @@
 # Happy Friday Lite
 
+## 3.0.7.01-preview.40
+
+- Settings now controls the default location for new Office files, Office Save As, note exports, drawing exports, and backups. The internal notes database remains in the app data directory.
+- Shortcuts and Plugins settings use the same top-left back button; the note toolbar no longer overlaps the Friday assistant button in narrow windows.
+- DeepSeek Harness is updated to official `0.2.2-rc.1`, with Electron 44.7.0 and a verified in-app DSH startup.
+
+## Preview.39 Office AI repair candidate
+
+Repairs streamed tool arguments, usage events incorrectly ending successful replies, and API-mode login guidance. AI HTML adds Friday branding and shared conversation history with first-save/save-as preservation. The CLI Word language-pack build is also repaired. See the [repair and validation record](docs/office-ai-html-next/09-preview39-repair-and-validation.html) for separate source, test, bundle, installer and publication status.
+
 ## Next preview: shared Office operations (in development)
 
 - PDF-to-DOCX conversion and DOCX creation from HTML content now use one Office operation service. A real Electron fixture verifies the PDF renderer conversion/creation APIs, menu IPC and Friday assistant registry against saved DOCX content, hashes and editor-open results. Remote-model tool selection, full AI Core conversations and installer acceptance remain in progress.

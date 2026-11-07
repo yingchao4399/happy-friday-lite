@@ -330,6 +330,20 @@
       <div class="settings-group">
         <div class="group-title">{{ t('settings.dataStorage') }}</div>
         <div class="group-content">
+          <div class="setting-item clickable" @click="selectDefaultSaveDir">
+            <div class="item-label-group">
+              <span class="item-label">{{ t('settings.defaultSaveDir') }}</span>
+              <span class="item-hint">{{ t('settings.defaultSaveDirHint') }}</span>
+            </div>
+            <span class="item-link" :title="defaultSaveDir || ''">
+              {{ defaultSaveDir ? shortenPath(defaultSaveDir) : t('settings.systemDefaultSaveDir') }}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </span>
+          </div>
+          <div v-if="defaultSaveDir" class="setting-item">
+            <span class="item-label">{{ t('settings.resetDefaultSaveDir') }}</span>
+            <button class="text-btn" @click="resetDefaultSaveDir">{{ t('settings.resetToDefault') }}</button>
+          </div>
           <div class="setting-item clickable" @click="selectDataDir">
             <div class="item-label-group">
               <span class="item-label">{{ t('settings.userDataDir') }}</span>
@@ -808,6 +822,28 @@ const sidebarModuleCount = sidebarModuleConfig.length;
 
 const runtimeLogsEnabled = ref(true);
 const noteExporting = ref(false);
+const defaultSaveDir = ref('');
+
+const selectDefaultSaveDir = async () => {
+  try {
+    const result = await electronService.invoke('default-save-dir-select');
+    if (result?.canceled) return;
+    if (!result?.success) throw new Error(result?.error || t('settings.defaultSaveDirFailed'));
+    defaultSaveDir.value = result.path;
+  } catch (error) {
+    await notifyError(t('settings.defaultSaveDirFailed') + ': ' + error.message);
+  }
+};
+
+const resetDefaultSaveDir = async () => {
+  try {
+    const result = await electronService.request('default-save-dir-reset');
+    if (!result?.success) throw new Error(t('settings.defaultSaveDirFailed'));
+    defaultSaveDir.value = '';
+  } catch (error) {
+    await notifyError(t('settings.defaultSaveDirFailed') + ': ' + error.message);
+  }
+};
 
 // ========== 通用提示弹窗（替代原生 alert/confirm） ==========
 const dialog = reactive({
@@ -1617,6 +1653,7 @@ onMounted(() => {
   unsubGlobalAgentDockConfig = electronService.listen('config-changed', ({ payload }) => applyGlobalAgentDockConfig(payload));
   loadBackupConfig();
   loadDataDirInfo();
+  electronService.invoke('default-save-dir-get').then(dir => { defaultSaveDir.value = dir || ''; });
   loadHistoryConfig();
   loadRagStats();
   loadPythonStatus();

@@ -1,10 +1,11 @@
 // 固定上游源码保持干净；所有 Friday 宿主适配作为受测的构建输入登记。
+import { transformHtmlIdentityHistorySource } from './html-identity-history-adapter.mjs'
 const replaceOnce = (source, needle, replacement, id) => {
   if (!source.includes(needle) || source.indexOf(needle) !== source.lastIndexOf(needle)) throw new Error(`OFFICE_HTML_ADAPTER_DRIFT: ${id}`)
   return source.replace(needle, replacement)
 }
 
-export function transformHtmlHostSource(source, id) {
+function transformHtmlServiceSource(source, id) {
   const file = id.split('?')[0].replaceAll('\\', '/')
   if (file.endsWith('/apps/html/src/renderer/ai/AiPanel.tsx')) {
     source = replaceOnce(source, '  const stop = (): void => {', `  const stop = (): void => {
@@ -110,6 +111,12 @@ contextBridge.exposeInMainWorld('fridayHtmlHost', {
   const aiDeps: HtmlAiDeps = {`, file)
   }
   return null
+}
+
+export function transformHtmlHostSource(source, id) {
+  const services = transformHtmlServiceSource(source, id) ?? source
+  const product = transformHtmlIdentityHistorySource(services, id) ?? services
+  return product === source ? null : product
 }
 
 export function htmlHostAdapterPlugin() {

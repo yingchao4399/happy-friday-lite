@@ -10,6 +10,7 @@ import {join} from 'path';
 
 import {app, BrowserWindow, dialog, ipcMain, shell} from 'electron';
 import type {WebContents} from 'electron';
+import {getDefaultSaveDir} from '../../../../../../src-electron/default-save-dir.js';
 
 // Friday 独立档案目录；其余校验、文件结构和原作一致。
 
@@ -118,7 +119,7 @@ async function exportImage(sender: WebContents, raw: unknown): Promise<boolean> 
   }
   const owner = BrowserWindow.fromWebContents(sender);
   const options = {
-    defaultPath: join(app.getPath('documents'), safeFileName(value.name)),
+    defaultPath: join(getDefaultSaveDir() || app.getPath('documents'), safeFileName(value.name)),
     filters: [{name: 'PNG image', extensions: ['png']}]
   };
   const result = owner ? await dialog.showSaveDialog(owner, options) : await dialog.showSaveDialog(options);

@@ -3,6 +3,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 import { htmlHostAdapterPlugin } from './html-host-adapter.mjs'
 import { htmlPreviewSecurityPlugin } from './html-renderer-adapter.mjs'
+import { fridayHtmlProductPlugin } from './html-identity-history-adapter.mjs'
+import { htmlErrorAdapterPlugin } from './html-error-adapter.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const require = createRequire(path.join(root, 'vendor/genoffice-html/package.json'))
@@ -11,5 +13,5 @@ const { default: react } = await import(pathToFileURL(require.resolve('@vitejs/p
 export default defineConfig({
   main: { plugins: [externalizeDepsPlugin({ exclude: ['@genoffice/i18n', '@genoffice/electron-utils'] })] },
   preload: { plugins: [htmlHostAdapterPlugin(), externalizeDepsPlugin({ exclude: ['@genoffice/i18n', '@genoffice/electron-utils'] })] },
-  renderer: { plugins: [htmlHostAdapterPlugin(), htmlPreviewSecurityPlugin(), react()] },
+  renderer: { resolve: { dedupe: ['react', 'react-dom'] }, plugins: [fridayHtmlProductPlugin(), htmlHostAdapterPlugin(), htmlErrorAdapterPlugin(), htmlPreviewSecurityPlugin(), react()] },
 })

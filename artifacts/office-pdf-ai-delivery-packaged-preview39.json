@@ -1,0 +1,356 @@
+{
+  "ok": true,
+  "checkedAt": "2026-11-07T13:27:32.425Z",
+  "runtime": {
+    "mode": "isolated-packaged-modules",
+    "moduleRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\app",
+    "releaseVersion": "3.0.7.01-preview.39",
+    "electronRuntime": "42.2.0",
+    "officeRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\release\\win-unpacked\\resources\\office",
+    "manifestSha256": "4598432e65d99454558e57100150887eb0f18987a5f0b5952566b51b292f5f9a",
+    "identityDigest": "5b0b420f27c579c565efe99ea9cdcf860a8ba7aa71c8a99237d153be30ca73fb",
+    "resourcesDigest": "e14eca1496a6bda6c039b95fc08b62b1048272a4a7dca42acc4030fe2c0470e8",
+    "limitation": "确定性隔离驱动；不代替安装器、真实主窗口交互或远端模型工具选择验收"
+  },
+  "steps": [
+    {
+      "name": "native approval requested",
+      "approved": true
+    },
+    {
+      "name": "PDF renderer → create_document → Friday host",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "eab40090-fdc8-4f5a-9911-a2a21ec6d171",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\knowledge\\agent\\SANDBOX\\PDF AI 创建验收-eab40090.docx",
+          "artifact": {
+            "id": "c033cf0a-5601-4e59-945c-e48dc136d31a",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\knowledge\\agent\\SANDBOX\\PDF AI 创建验收-eab40090.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "6bef979e08764193c3be4ee6619c626abd2fe23afc49a0263a6cb1eca794b8cb",
+            "bytes": 3079,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-07T13:28:15.962Z",
+              "textCharacters": 42,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": null,
+            "quality": {
+              "level": "editable",
+              "nodeCount": 2,
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "native approval requested",
+      "approved": true
+    },
+    {
+      "name": "PDF renderer → convert_document → worker → verified DOCX",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "03741568-95b1-4b7c-aa48-9e88734bc523",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\knowledge\\agent\\SANDBOX\\PDF AI conversion-03741568.docx",
+          "artifact": {
+            "id": "560a00c0-1969-4909-b6aa-90066c2327bf",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\knowledge\\agent\\SANDBOX\\PDF AI conversion-03741568.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "388c12ddae5954fb06b8def1be4dea5f7e96855b3106e87e1bc89bcdb0af877a",
+            "bytes": 3120,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-07T13:28:19.259Z",
+              "textCharacters": 29,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": {
+              "resourceId": "pdf-1",
+              "revision": "7f2ed690e269765525dc01945fdfae5ada09578174a0ab667b71ff79c2c7ae88",
+              "sha256": "7f2ed690e269765525dc01945fdfae5ada09578174a0ab667b71ff79c2c7ae88"
+            },
+            "quality": {
+              "level": "editable",
+              "pages": 1,
+              "pageResults": [
+                {
+                  "page": 1,
+                  "status": "ok",
+                  "confidence": 1
+                }
+              ],
+              "imagePages": [],
+              "editablePages": [
+                1
+              ],
+              "ocr": "not-needed",
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-3"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "PDF menu → shared service → verified DOCX",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "61188240-b15b-4564-9a0a-792ebfaa9ac5",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\menu-result.docx",
+          "artifact": {
+            "id": "8cc6606a-5628-4af3-ab02-e2940f146929",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\menu-result.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "1ab8df834f3131acf4f0657236b7a956b4c9c8971410d10b344c90dd8044b159",
+            "bytes": 3120,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-07T13:28:20.474Z",
+              "textCharacters": 29,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": {
+              "resourceId": "pdf-1",
+              "revision": "7f2ed690e269765525dc01945fdfae5ada09578174a0ab667b71ff79c2c7ae88",
+              "sha256": "7f2ed690e269765525dc01945fdfae5ada09578174a0ab667b71ff79c2c7ae88"
+            },
+            "quality": {
+              "level": "editable",
+              "pages": 1,
+              "pageResults": [
+                {
+                  "page": 1,
+                  "status": "ok",
+                  "confidence": 1
+                }
+              ],
+              "imagePages": [],
+              "editablePages": [
+                1
+              ],
+              "ocr": "not-needed",
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-4"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "native approval requested",
+      "approved": true
+    },
+    {
+      "name": "Friday assistant registry → shared service → verified DOCX",
+      "result": {
+        "ok": true,
+        "status": "succeeded",
+        "taskId": "968474d5-a701-40e4-9e18-580bdb13c10c",
+        "data": {
+          "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\knowledge\\agent\\SANDBOX\\Friday main assistant-968474d5.docx",
+          "artifact": {
+            "id": "dbe7e2bd-c9ca-447b-b516-a21163b91800",
+            "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\friday-pdf-ai-delivery-kEiUz5\\knowledge\\agent\\SANDBOX\\Friday main assistant-968474d5.docx",
+            "format": "docx",
+            "persisted": true,
+            "sha256": "1ab8df834f3131acf4f0657236b7a956b4c9c8971410d10b344c90dd8044b159",
+            "bytes": 3120,
+            "validation": {
+              "valid": true,
+              "checkedAt": "2026-11-07T13:28:21.572Z",
+              "textCharacters": 29,
+              "drawings": 0,
+              "partCount": 9
+            },
+            "source": {
+              "resourceId": "pdf-1",
+              "revision": "7f2ed690e269765525dc01945fdfae5ada09578174a0ab667b71ff79c2c7ae88",
+              "sha256": "7f2ed690e269765525dc01945fdfae5ada09578174a0ab667b71ff79c2c7ae88"
+            },
+            "quality": {
+              "level": "editable",
+              "pages": 1,
+              "pageResults": [
+                {
+                  "page": 1,
+                  "status": "ok",
+                  "confidence": 1
+                }
+              ],
+              "imagePages": [],
+              "editablePages": [
+                1
+              ],
+              "ocr": "not-needed",
+              "warnings": []
+            },
+            "open": {
+              "status": "opened",
+              "viewId": "docs-5"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "installed capability projection declares the actual DOCX route",
+      "capabilities": [
+        {
+          "operationId": "office.html.create",
+          "capabilityName": "office_html_create",
+          "sourceType": "content",
+          "targetFormats": [
+            "html"
+          ],
+          "protocolVersion": "1.0",
+          "requiredEditors": [
+            "html"
+          ],
+          "available": false,
+          "reasonCode": "OFFICE_EDITOR_NOT_INTEGRATED"
+        },
+        {
+          "operationId": "office.html.apply",
+          "capabilityName": "office_html_apply",
+          "sourceType": "html",
+          "targetFormats": [
+            "html"
+          ],
+          "protocolVersion": "1.0",
+          "requiredEditors": [
+            "html"
+          ],
+          "available": false,
+          "reasonCode": "OFFICE_EDITOR_NOT_INTEGRATED"
+        },
+        {
+          "operationId": "office.html.export",
+          "capabilityName": "office_html_export",
+          "sourceType": "html",
+          "targetFormats": [
+            "pdf",
+            "docx",
+            "html"
+          ],
+          "protocolVersion": "1.0",
+          "requiredEditors": [
+            "html"
+          ],
+          "available": false,
+          "reasonCode": "OFFICE_EDITOR_NOT_INTEGRATED"
+        },
+        {
+          "operationId": "office.document.convert",
+          "capabilityName": "office_document_convert",
+          "sourceType": "pdf",
+          "targetFormats": [
+            "docx"
+          ],
+          "protocolVersion": "1.0",
+          "requiredEditors": [
+            "pdf",
+            "docs"
+          ],
+          "requiredService": "pdf-converter",
+          "available": true
+        },
+        {
+          "operationId": "office.document.create",
+          "capabilityName": "office_document_create",
+          "sourceType": "content",
+          "targetFormats": [
+            "docx"
+          ],
+          "protocolVersion": "1.0",
+          "requiredEditors": [
+            "docs"
+          ],
+          "available": true
+        }
+      ]
+    },
+    {
+      "name": "unsupported xlsx conversion is rejected",
+      "result": {
+        "ok": false,
+        "status": "failed",
+        "code": "OFFICE_OPERATION_UNSUPPORTED",
+        "error": "OFFICE_OPERATION_UNSUPPORTED"
+      }
+    },
+    {
+      "name": "unsupported pptx conversion is rejected",
+      "result": {
+        "ok": false,
+        "status": "failed",
+        "code": "OFFICE_OPERATION_UNSUPPORTED",
+        "error": "OFFICE_OPERATION_UNSUPPORTED"
+      }
+    },
+    {
+      "name": "unsupported invalid conversion is rejected",
+      "result": {
+        "ok": false,
+        "code": "INVALID_REQUEST",
+        "error": "Invalid conversion request"
+      }
+    },
+    {
+      "name": "empty content cannot create a success artifact",
+      "result": {
+        "ok": false,
+        "error": "pdf: invalid create-document request"
+      }
+    },
+    {
+      "name": "native approval requested",
+      "approved": true
+    },
+    {
+      "name": "active-only HTML cannot create a success artifact",
+      "result": {
+        "ok": false,
+        "status": "failed",
+        "taskId": "eaeed11a-4c7d-499e-b01b-1e38bc1bf6cc",
+        "code": "OFFICE_CONTENT_EMPTY",
+        "error": "OFFICE_CONTENT_EMPTY"
+      }
+    },
+    {
+      "name": "save dialog cancellation produces no final file",
+      "result": {
+        "ok": false,
+        "status": "cancelled",
+        "taskId": "2d99e230-8a86-4250-8b0f-34ddd630e821",
+        "code": "OFFICE_OPERATION_CANCELLED",
+        "error": "OFFICE_OPERATION_CANCELLED"
+      },
+      "finalFileAbsent": true
+    }
+  ]
+}

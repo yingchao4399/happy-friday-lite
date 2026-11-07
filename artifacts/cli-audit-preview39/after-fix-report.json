@@ -1,0 +1,288 @@
+{
+  "ok": true,
+  "cli": "vendor\\happyoffice\\packages\\cli\\dist\\genoffice.cjs",
+  "cliSha256": "d87015c36c104f8a9e5f23e19d107bcfd1f3223b19228d3715408ab615ec6e8c",
+  "runs": [
+    {
+      "args": [
+        "create",
+        "--type",
+        "docx",
+        "--from",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\source.md",
+        "--out",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "--force",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "create",
+        "summary": "created fixed.docx",
+        "output_path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "detail": {
+          "source": "markdown"
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "args": [
+        "docs",
+        "read",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "--full",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "docs",
+        "summary": "fixed.docx: 4 blocks",
+        "detail": {
+          "blocks": 4,
+          "range": "0-3",
+          "items": [
+            {
+              "index": 0,
+              "type": "heading",
+              "level": 1,
+              "text": "Friday CLI audit"
+            },
+            {
+              "index": 1,
+              "type": "paragraph",
+              "text": "AI Office audit content 2026-11-07."
+            },
+            {
+              "index": 2,
+              "type": "table",
+              "table": {
+                "rows": 2,
+                "cols": 2
+              },
+              "text": "ItemResultDependenciesComplete"
+            },
+            {
+              "index": 3,
+              "type": "paragraph",
+              "text": ""
+            }
+          ],
+          "units": "block indexes are 0-based positions in the body; ops target them",
+          "tableStyles": []
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "args": [
+        "docs",
+        "check",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "docs",
+        "summary": "fixed.docx: no issues found (10 checks)",
+        "detail": {
+          "issues": [],
+          "counts": {
+            "error": 0,
+            "warning": 0,
+            "info": 0
+          },
+          "checks": [
+            "field_not_evaluated",
+            "broken_ref",
+            "toc_stale",
+            "missing_image",
+            "chart_empty",
+            "empty_heading",
+            "heading_skip",
+            "placeholder_left",
+            "pending_revisions",
+            "unresolved_comments"
+          ]
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "args": [
+        "docs",
+        "apply",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "--ops",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\edit-ops.json",
+        "--force",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "docs",
+        "summary": "applied 1 of 1 ops to fixed.docx",
+        "output_path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "detail": {
+          "results": [
+            {
+              "index": 0,
+              "op": "findReplace",
+              "output": "Replaced 1 occurrence(s) across 1 block(s)"
+            }
+          ],
+          "blocks": 4,
+          "batch": {
+            "total": 1,
+            "applied": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "args": [
+        "docs",
+        "read",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "--full",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "docs",
+        "summary": "fixed.docx: 4 blocks",
+        "detail": {
+          "blocks": 4,
+          "range": "0-3",
+          "items": [
+            {
+              "index": 0,
+              "type": "heading",
+              "level": 1,
+              "text": "Friday CLI audit"
+            },
+            {
+              "index": 1,
+              "type": "paragraph",
+              "text": "AI Office verified content 2026-11-07."
+            },
+            {
+              "index": 2,
+              "type": "table",
+              "table": {
+                "rows": 2,
+                "cols": 2
+              },
+              "text": "ItemResultDependenciesComplete"
+            },
+            {
+              "index": 3,
+              "type": "paragraph",
+              "text": ""
+            }
+          ],
+          "units": "block indexes are 0-based positions in the body; ops target them",
+          "tableStyles": []
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "args": [
+        "convert",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fixed.docx",
+        "--to",
+        "md",
+        "--out",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\roundtrip.md",
+        "--force",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "convert",
+        "summary": "converted fixed.docx → roundtrip.md",
+        "output_path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\roundtrip.md",
+        "detail": {
+          "blocks": 4,
+          "skipped": {
+            "images": 0,
+            "fields": 0
+          },
+          "formulas_as_text": 0
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "args": [
+        "convert",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\one-page.pdf",
+        "--to",
+        "docx",
+        "--out",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\from-pdf.docx",
+        "--force",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "convert",
+        "summary": "converted one-page.pdf → from-pdf.docx",
+        "output_path": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\from-pdf.docx",
+        "detail": {
+          "pages": 1,
+          "warnings": []
+        }
+      },
+      "stderr": "page 1/1\n"
+    },
+    {
+      "args": [
+        "docs",
+        "read",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\from-pdf.docx",
+        "--full",
+        "--json"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "ok",
+        "command": "docs",
+        "summary": "from-pdf.docx: 1 blocks",
+        "detail": {
+          "blocks": 1,
+          "range": "0-0",
+          "items": [
+            {
+              "index": 0,
+              "type": "paragraph",
+              "text": "PDF conversion after CLI build fix"
+            }
+          ],
+          "units": "block indexes are 0-based positions in the body; ops target them"
+        }
+      },
+      "stderr": ""
+    }
+  ],
+  "checks": {
+    "create": true,
+    "read": true,
+    "check": true,
+    "edit": true,
+    "roundtripMarkdown": true,
+    "pdfToWord": true,
+    "pdfWordRead": true
+  }
+}

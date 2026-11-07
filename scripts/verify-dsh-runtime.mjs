@@ -7,11 +7,12 @@ import { verifyDeepseekImports } from './afterpack.cjs'
 const root = path.resolve(process.argv[2] || 'node_modules')
 const entries = [
   '@deepseek-ai/dsh/lib/bin.js',
-  'typebox/build/system/memory/index.mjs'
+  '@deepseek-ai/dsh-base/lib/index.js',
+  '@deepseek-ai/dsh-web-app/lib/index.js'
 ]
 const missing = []
 try { verifyDeepseekImports(root) } catch (error) { missing.push({ entry: 'dsh-plugin-tree', reason: 'unresolved_imports', message: error.message }) }
-entries.push('@deepseek-ai/dsh-llm-pi-ai/lib/index.js', '@deepseek-ai/dsh-mcp-client/lib/index.js', '@deepseek-ai/dsh-acp/lib/index.js')
+entries.push('@deepseek-ai/dsh-llm-pi-ai/lib/index.js', '@deepseek-ai/dsh-mcp-client/lib/index.js')
 for (const entry of entries) {
   const file = path.join(root, entry)
   if (!fs.existsSync(file)) {

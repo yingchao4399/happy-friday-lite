@@ -1,11 +1,4 @@
-/**
- * Pure helpers for the Office OpenAI-compatible streaming bridge.
- *
- * Providers are supposed to send tool arguments as fragments, but several
- * OpenAI-compatible gateways resend the complete/growing name or argument
- * string on every delta. Treating those deltas as append-only corrupts an
- * otherwise valid JSON tool call and makes the renderer retry three times.
- */
+// Office 流式桥的纯函数；参数分片按提供商明确声明的协议重建。
 
 export const OFFICE_DEFAULT_MAX_OUTPUT_TOKENS = 8192
 
@@ -16,21 +9,33 @@ export const normalizeOfficeStopReason = (reason) => {
   return reason || undefined
 }
 
-/** Merge a provider delta that may be a fragment or a growing full value. */
-export function mergeOfficeToolDelta(existing = '', fragment = '') {
-  const previous = String(existing || '')
-  const next = String(fragment || '')
-  if (!next) return previous
-  if (!previous) return next
-  // Some gateways resend the accumulated value rather than a fragment.
-  if (next === previous || next.startsWith(previous)) return next
-  // A duplicate/shorter resend must not be appended.
-  if (previous.startsWith(next) || previous.endsWith(next)) return previous
-  return previous + next
+function streamFault(code) {
+  return Object.assign(new Error(code), { code })
 }
 
-export function mergeToolName(existing = '', fragment = '') {
-  return mergeOfficeToolDelta(existing, fragment)
+// 显式累计快照必须单调扩展；旧快照可忽略，冲突快照不能静默拼接。
+function mergeCumulativeValue(previous, next, field) {
+  if (!next || previous.startsWith(next)) return previous
+  if (next.startsWith(previous)) return next
+  throw streamFault(`OFFICE_AI_${field}_SNAPSHOT_INVALID`)
+}
+
+/** 默认是标准 OpenAI 增量参数，任何重叠、重复字符都具有语义。 */
+export function mergeOfficeToolDelta(existing = '', fragment = '', { mode = 'delta' } = {}) {
+  const previous = String(existing || '')
+  const next = String(fragment || '')
+  if (mode === 'delta') return previous + next
+  if (mode === 'cumulative') return mergeCumulativeValue(previous, next, 'ARGUMENT')
+  throw streamFault('OFFICE_AI_ARGUMENT_MODE_INVALID')
+}
+
+// 名称与 JSON 参数独立声明模式，不再复用参数的内容猜测逻辑。
+export function mergeToolName(existing = '', fragment = '', { mode = 'delta' } = {}) {
+  const previous = String(existing || '')
+  const next = String(fragment || '')
+  if (mode === 'delta') return previous + next
+  if (mode === 'cumulative') return mergeCumulativeValue(previous, next, 'NAME')
+  throw streamFault('OFFICE_AI_NAME_MODE_INVALID')
 }
 
 /**

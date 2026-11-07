@@ -1,5 +1,15 @@
 # Happy Friday Lite
 
+## 3.0.7.01-preview.40
+
+- 设置中可选择文件默认保存位置，供 Office 新建与另存、笔记导出、绘图导出和备份使用；应用内笔记数据库仍保存在原数据目录。
+- 快捷键与扩展设置页使用统一的左上角返回按钮；修复笔记编辑器窄窗口下工具栏与 Friday 助理按钮重叠。
+- DeepSeek Harness 升级到官方 `0.2.2-rc.1`，Electron 升级到 44.7.0，并验证应用内 DSH 启动。
+
+## preview.39 Office AI 修复候选
+
+修复 Office 工具参数流失真、正常回复被用量事件误判错误和 API 模式错误登录指引；AI HTML 补齐 Friday 品牌、共享历史和首次保存/另存时的数据保留。另修复 CLI 读取 Word 时的语言包构建错误。源码、测试、资源、安装包和发布状态分别记录于[修复与验证记录](docs/office-ai-html-next/09-preview39-repair-and-validation.html)，不以候选代码代表已安装生效。
+
 ## 下一预览版：Office 共用业务操作（开发中）
 
 - PDF 转 DOCX、从 HTML 正文创建 DOCX 已接入同一 Office 业务服务。真实 Electron fixture 已验证 PDF renderer 转换/创建 API、菜单 IPC 与主助手 registry 的 DOCX 正文、摘要和打开结果；远端模型工具选择、Core 完整对话和安装验收仍在进行。

@@ -5,7 +5,6 @@
   "@deepseek-ai/dsh-fs",
   "@deepseek-ai/dsh-sandbox",
   "@deepseek-ai/dsh-bash-local",
-  "@deepseek-ai/dsh-code-runtime",
   "@deepseek-ai/dsh-compaction",
   "@deepseek-ai/dsh-anonymous-user-id",
   "@deepseek-ai/dsh-hook-protocol",
@@ -17,6 +16,5 @@
   "@deepseek-ai/dsh-session-title-llm",
   "@deepseek-ai/dsh-settings",
   "@deepseek-ai/dsh-spill",
-  "@deepseek-ai/dsh-subagent-in-process-driver",
   "@deepseek-ai/dsh-workflow"
 ]

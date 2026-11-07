@@ -9,6 +9,7 @@ import { createHtmlDocumentBridge } from './html-document-bridge.js'
 import { createHtmlArtifact } from './html-artifact.js'
 import { createHtmlProjectBoundary } from './html-project-boundary.js'
 import { getDataDir } from '../config.js'
+import { defaultSavePath, getDefaultSaveDir } from '../default-save-dir.js'
 import { loadConfig } from '../config.js'
 import { OFFICE_EDITOR_REGISTRY, getBuildOfficeEditors } from './editor-registry.js'
 import { isExperimentalHtmlEnabled, resolveEditorType } from './office-files.js'
@@ -1106,7 +1107,7 @@ async function ensureOfficeOperationService() {
       const title = validTitle(request.target.title || path.basename(source?.filePath || 'document', '.pdf'))
       if (context.sourceEntry === 'pdf-menu') {
         const selected = await dialog.showSaveDialog(state.mainWindow, {
-          defaultPath: path.join(source?.filePath ? path.dirname(source.filePath) : app.getPath('documents'), title + '.docx'),
+          defaultPath: source?.filePath ? path.join(path.dirname(source.filePath), title + '.docx') : defaultSavePath(title + '.docx'),
           filters: [{ name: officeText('word'), extensions: ['docx'] }],
         })
         if (selected.canceled || !selected.filePath) return null
@@ -1291,7 +1292,7 @@ export async function initOfficeHost(mainWindow) {
       pdf.setPdfSaveAsInFlight(wc, true)
       let targetPath
       try {
-        const selected = await dialog.showSaveDialog(state.mainWindow, { defaultPath: entry.filePath || 'document.pdf', filters: [{ name: 'PDF', extensions: ['pdf'] }] })
+        const selected = await dialog.showSaveDialog(state.mainWindow, { defaultPath: entry.filePath || defaultSavePath('document.pdf'), filters: [{ name: 'PDF', extensions: ['pdf'] }] })
         if (selected.canceled || !selected.filePath) return { ok: false, cancelled: true }
         targetPath = selected.filePath
         if (entry.filePath && path.resolve(targetPath).toLocaleLowerCase() === path.resolve(entry.filePath).toLocaleLowerCase()) return { ok: false, error: { code: 'OFFICE_EXPORT_SOURCE_OVERWRITE', path: targetPath, recoverable: true } }
@@ -1427,15 +1428,7 @@ function createTypeView(type, filePath) {
 /** 新建空白文档的默认保存目录：优先 app-settings.json 的 defaultSaveDir，
  *  回退 {dataDir}/happyOffice（跟随用户数据目录） */
 export function officeDefaultSaveDir() {
-  try {
-    const settingsPath = path.join(app.getPath('userData'), 'app-settings.json')
-    const raw = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
-    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-      const dir = raw.defaultSaveDir
-      if (typeof dir === 'string' && path.isAbsolute(dir)) return dir
-    }
-  } catch { /* ignore */ }
-  return path.join(getDataDir() || app.getPath('userData'), 'happyOffice')
+  return getDefaultSaveDir() || path.join(getDataDir() || app.getPath('userData'), 'happyOffice')
 }
 
 /** 生成空白 xlsx 工作簿文件并返回路径（单空 Sheet1，复用上游 uniquePathIn 去重命名） */

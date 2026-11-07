@@ -1,0 +1,102 @@
+{
+  "freshHash": "19b9c11b863ce10bfbe406e121be3c00e2a36d404cf90c837813ca76755ef0fe",
+  "cachedHash": "19b9c11b863ce10bfbe406e121be3c00e2a36d404cf90c837813ca76755ef0fe",
+  "freshDependencyFiles": 1951,
+  "cachedDependencyFiles": 1951,
+  "missing": [],
+  "extra": [],
+  "changed": [],
+  "runs": [
+    {
+      "name": "cached",
+      "cli": "resources\\office\\cli\\happyfriday-office.cjs",
+      "args": [
+        "create",
+        "--type",
+        "docx",
+        "--from",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\source.md",
+        "--out",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\cached.docx",
+        "--force",
+        "--json"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"status\":\"ok\",\"command\":\"create\",\"summary\":\"created cached.docx\",\"output_path\":\"D:\\\\机械革命使用\\\\codex新建使用\\\\项目练习\\\\doc\\\\Happy Friday Lite 脑洞\\\\Friday-3.0.6-preview.1-source\\\\artifacts\\\\cli-audit-preview39\\\\cached.docx\",\"detail\":{\"source\":\"markdown\"}}\n",
+      "stderr": ""
+    },
+    {
+      "name": "cached",
+      "cli": "resources\\office\\cli\\happyfriday-office.cjs",
+      "args": [
+        "docs",
+        "read",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\cached.docx",
+        "--full",
+        "--json"
+      ],
+      "exitCode": 3,
+      "stdout": "{\"status\":\"error\",\"command\":\"docs\",\"code\":3,\"error\":\"conversion_failed\",\"message\":\"import_meta.glob is not a function\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "cached",
+      "cli": "resources\\office\\cli\\happyfriday-office.cjs",
+      "args": [
+        "docs",
+        "check",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\cached.docx",
+        "--json"
+      ],
+      "exitCode": 3,
+      "stdout": "{\"status\":\"error\",\"command\":\"docs\",\"code\":3,\"error\":\"conversion_failed\",\"message\":\"import_meta.glob is not a function\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "fresh",
+      "cli": "vendor\\happyoffice\\packages\\cli\\dist\\genoffice.cjs",
+      "args": [
+        "create",
+        "--type",
+        "docx",
+        "--from",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\source.md",
+        "--out",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fresh.docx",
+        "--force",
+        "--json"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"status\":\"ok\",\"command\":\"create\",\"summary\":\"created fresh.docx\",\"output_path\":\"D:\\\\机械革命使用\\\\codex新建使用\\\\项目练习\\\\doc\\\\Happy Friday Lite 脑洞\\\\Friday-3.0.6-preview.1-source\\\\artifacts\\\\cli-audit-preview39\\\\fresh.docx\",\"detail\":{\"source\":\"markdown\"}}\n",
+      "stderr": ""
+    },
+    {
+      "name": "fresh",
+      "cli": "vendor\\happyoffice\\packages\\cli\\dist\\genoffice.cjs",
+      "args": [
+        "docs",
+        "read",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fresh.docx",
+        "--full",
+        "--json"
+      ],
+      "exitCode": 3,
+      "stdout": "{\"status\":\"error\",\"command\":\"docs\",\"code\":3,\"error\":\"conversion_failed\",\"message\":\"import_meta.glob is not a function\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "fresh",
+      "cli": "vendor\\happyoffice\\packages\\cli\\dist\\genoffice.cjs",
+      "args": [
+        "docs",
+        "check",
+        "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\cli-audit-preview39\\fresh.docx",
+        "--json"
+      ],
+      "exitCode": 3,
+      "stdout": "{\"status\":\"error\",\"command\":\"docs\",\"code\":3,\"error\":\"conversion_failed\",\"message\":\"import_meta.glob is not a function\"}\n",
+      "stderr": ""
+    }
+  ],
+  "cacheMatchesFresh": true
+}

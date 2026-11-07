@@ -72,7 +72,8 @@
     "export": "Export",
     "exportPng": "Export PNG",
     "exportSvg": "Export SVG",
-    "exportJson": "Export JSON"
+    "exportJson": "Export JSON",
+    "exportFailed": "Could not export the drawing. Please retry."
   },
   "props": {
     "title": "Style",

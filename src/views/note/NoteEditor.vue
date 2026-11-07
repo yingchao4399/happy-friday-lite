@@ -1597,8 +1597,9 @@ const applyToolbarOverflowColor = (color) => {
 const updateToolbarLayout = () => {
   toolbarLayoutFrame = null;
   const toolbar = toolbarRef.value;
+  const leftGroup = toolbarLeftRef.value;
   const rightGroup = toolbarRightRef.value;
-  if (!toolbar || !rightGroup) return;
+  if (!toolbar || !leftGroup || !rightGroup) return;
 
   toolbarSectionOrder.forEach((section) => {
     const width = toolbarSectionRefs[section].value?.getBoundingClientRect().width;
@@ -1606,16 +1607,9 @@ const updateToolbarLayout = () => {
   });
   if (toolbarSectionWidths.size !== toolbarSectionOrder.length) return;
 
-  const toolbarStyle = window.getComputedStyle(toolbar);
-  const rightStyle = window.getComputedStyle(rightGroup);
-  const gap = Number.parseFloat(toolbarStyle.gap) || 0;
-  const availableWidth = toolbar.getBoundingClientRect().width
-    - (Number.parseFloat(toolbarStyle.paddingLeft) || 0)
-    - (Number.parseFloat(toolbarStyle.paddingRight) || 0)
-    - rightGroup.getBoundingClientRect().width
-    - (Number.parseFloat(rightStyle.marginLeft) || 0)
-    - gap;
-  const sectionGap = 2;
+  // 使用 flex 分配给左侧的实际宽度；右侧按钮显隐或文案变化时会改变这个值。
+  const availableWidth = leftGroup.getBoundingClientRect().width;
+  const sectionGap = Number.parseFloat(window.getComputedStyle(leftGroup).gap) || 0;
   const allSectionsWidth = toolbarSectionOrder.reduce(
     (total, section) => total + toolbarSectionWidths.get(section),
     0,
@@ -4489,6 +4483,7 @@ onMounted(() => {
     scheduleToolbarLayout();
     toolbarResizeObserver = new ResizeObserver(scheduleToolbarLayout);
     toolbarResizeObserver.observe(toolbarRef.value);
+    toolbarResizeObserver.observe(toolbarRightRef.value);
     tableScrollTarget = editorContentRef.value?.$el || editorContentRef.value;
     tableScrollTarget?.addEventListener('scroll', hideTableContextMenu, { passive: true });
     window.addEventListener('resize', hideTableContextMenu, { passive: true });
@@ -6288,6 +6283,10 @@ const fixEmptyTableCells = (html) => {
   gap: 2px;
   flex-shrink: 0;
   margin-left: 10px;
+}
+
+.toolbar-right-group > * {
+  flex-shrink: 0;
 }
 
 .more-menu {

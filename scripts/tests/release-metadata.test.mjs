@@ -234,6 +234,7 @@ test('technical application version increases from preview.35 and supports later
   assert.equal(semver.gt(packageJson.version, installedPreview35Version), true, `${packageJson.version} must upgrade ${installedPreview35Version}`)
   assert.equal(semver.gt('3.0.8-preview.37', '3.0.8-preview.36'), true)
   assert.equal(semver.gt('3.0.7-preview.36', installedPreview35Version), false)
-  assert.equal(packageJson.releaseVersion, '3.0.7.01-preview.38')
+  assert.match(packageJson.releaseVersion, /^3\.0\.7\.01-preview\.\d+$/)
+  assert.equal(packageJson.releaseVersion.match(/preview\.\d+$/)?.[0], packageJson.version.match(/preview\.\d+$/)?.[0])
   assert.equal(semver.gt(packageJson.version, '3.0.8-preview.36'), true)
 })

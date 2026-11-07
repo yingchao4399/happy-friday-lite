@@ -61,6 +61,7 @@
 import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from '@/utils/theme'
+import { electronService } from '@/services/electron'
 import { applyCellAnimation } from '../shapes/animation.js'
 import { getCanvasTheme } from '../shapes/theme.js'
 import {
@@ -70,7 +71,6 @@ import {
   captureDrawingSvg,
   connectSelected,
   createDrawingGraph,
-  downloadFile,
   duplicateDrawingCells,
   exportDrawingSVG,
   getViewportCenter,
@@ -497,21 +497,26 @@ const onMenuAction = (action) => {
   closeMenu()
 }
 
-const exportCanvas = (type) => {
+const exportCanvas = async (type) => {
   if (!graph.value) return
   const name = canvasName.value || 'canvas'
-  if (type === 'json') {
-    downloadFile(JSON.stringify({ title: name, graphJSON: graph.value.toJSON() }, null, 2), `${name}.json`)
-    return
-  }
-  const padding = 24
-  const backgroundColor = getCanvasTheme().dark ? '#1a1a1c' : '#ffffff'
-  if (type === 'png') {
-    // X6 uses `ratio` (not `scale`) to control export resolution.
-    graph.value.exportPNG(`${name}.png`, { padding, backgroundColor, ratio: 3 })
-  }
-  if (type === 'svg') {
-    exportDrawingSVG(graph.value, `${name}.svg`)
+  try {
+    let bytes
+    if (type === 'json') {
+      bytes = new TextEncoder().encode(JSON.stringify({ title: name, graphJSON: graph.value.toJSON() }, null, 2))
+    } else if (type === 'png') {
+      const backgroundColor = getCanvasTheme().dark ? '#1a1a1c' : '#ffffff'
+      // X6 uses `ratio` (not `scale`) to control export resolution.
+      const dataUrl = await graph.value.toPNGAsync({ padding: 24, backgroundColor, ratio: 3 })
+      bytes = new Uint8Array(await (await fetch(dataUrl)).arrayBuffer())
+    } else if (type === 'svg') {
+      bytes = new TextEncoder().encode(await exportDrawingSVG(graph.value))
+    } else return
+    const result = await electronService.request('drawing-export-file', { format: type, name, bytes })
+    if (!result.success && !result.canceled) throw new Error(result.error || 'DRAWING_EXPORT_FAILED')
+  } catch (error) {
+    console.error('[Drawing] Export failed:', error)
+    window.alert(t('drawing.toolbar.exportFailed'))
   }
 }
 

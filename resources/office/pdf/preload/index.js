@@ -220,6 +220,7 @@ const api = {
   },
   getAiSettings: () => electron.ipcRenderer.invoke(AI_CHANNELS.getSettings),
   gskStatus: () => electron.ipcRenderer.invoke(AI_CHANNELS.gskStatus),
+  aiOpenModelSettings: () => electron.ipcRenderer.invoke("ai:open-model-settings"),
   aiStream: (request) => electron.ipcRenderer.invoke(AI_CHANNELS.stream, request),
   aiStreamCancel: (requestId) => electron.ipcRenderer.invoke(AI_CHANNELS.streamCancel, requestId),
   onAiStream: (handler) => {

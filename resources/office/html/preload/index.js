@@ -226,7 +226,12 @@ const projectApi = {
   resolveChat: (args) => electron.ipcRenderer.invoke("project:resolveChat", args),
   appendChat: (args) => electron.ipcRenderer.invoke("project:appendChat", args),
   loadChat: (args) => electron.ipcRenderer.invoke("project:loadChat", args),
-  rebindChat: (args) => electron.ipcRenderer.invoke("project:rebindChat", args)
+  rebindChat: (args) => electron.ipcRenderer.invoke("project:rebindChat", args),
+  listChatsForFile: (args) => electron.ipcRenderer.invoke("project:listChatsForFile", args),
+  createChat: (args) => electron.ipcRenderer.invoke("project:createChat", args),
+  selectChatForFile: (args) => electron.ipcRenderer.invoke("project:selectChatForFile", args),
+  updateChatForFile: (args) => electron.ipcRenderer.invoke("project:updateChatForFile", args),
+  copyChatsToFile: (args) => electron.ipcRenderer.invoke("project:copyChatsToFile", args)
 };
 const aiNamingApi = {
   suggestFileName: (input) => electron.ipcRenderer.invoke("ai:suggest-file-name", input)

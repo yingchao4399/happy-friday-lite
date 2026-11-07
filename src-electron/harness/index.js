@@ -28,7 +28,8 @@ const HARNESS_CREDENTIAL = 'HAPPY_FRIDAY_HARNESS_API_KEY'
 const MCP_SERVER_NAME = 'happy-friday'
 // Generous enough for a first boot on slow hardware (e.g. ARM boards): the
 // initial boot also initializes the DSH profile before the web URL is printed.
-const START_TIMEOUT_MS = 90_000
+// The 0.2.x Web profile composes a much larger plugin tree on its first launch.
+const START_TIMEOUT_MS = 240_000
 
 let mainWindow = null
 let sidecar = null

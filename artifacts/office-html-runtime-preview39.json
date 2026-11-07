@@ -1,0 +1,136 @@
+{
+  "ok": true,
+  "checkedAt": "2026-11-07T11:44:51.133Z",
+  "runtime": {
+    "mode": "source-modules",
+    "moduleRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\",
+    "releaseVersion": "3.0.7.01-preview.39",
+    "electronRuntime": "42.2.0",
+    "officeRoot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\resources\\office",
+    "manifestSha256": "34b3d875ab7e25bf001dcf3ec8f2ce53282c5ed5aa6c9805b744d6997bd9428b",
+    "identityDigest": "cedd045dc76b3d154cf2b8291d4d656dd403e8669ff42ad6e1fc54514ed73038",
+    "resourcesDigest": "052a0a35304b5318542dfc7fd6bc48d15974bb53c7a884e23718a08d0e53f64d",
+    "limitation": "确定性隔离驱动；不代替安装器、真实主窗口交互或远端模型工具选择验收"
+  },
+  "memory": {
+    "total": 16905457664,
+    "free": 4661743616
+  },
+  "steps": [
+    {
+      "name": "真实 HTML bundle 通过准入，预览版 HTML 入口已启用",
+      "capability": {
+        "id": "html",
+        "enabled": true,
+        "available": true,
+        "reasonCode": null
+      }
+    },
+    {
+      "name": "实际 renderer 源码回读与 Node 隔离",
+      "viewId": "html-1",
+      "sourceHash": "d0af25670b1216bcd7c4a67f046cb1b641879da2fc7cb119a04583b60dd446db",
+      "bufferHash": "d0af25670b1216bcd7c4a67f046cb1b641879da2fc7cb119a04583b60dd446db",
+      "isolated": {
+        "require": "undefined",
+        "process": "undefined"
+      }
+    },
+    {
+      "name": "Friday 真实标题和图标、共享历史入口、新对话独立身份及旧消息切换恢复",
+      "brand": {
+        "title": "Friday",
+        "icon": "genoffice-app://html/assets/friday-icon-BFIKjAd_.png",
+        "historyLabel": "历史"
+      },
+      "firstChatId": "9823d23086038501",
+      "newChatId": "chat-f82e5d80-d987-4a13-b3a3-d7b0224739ac",
+      "restoredChatId": "9823d23086038501",
+      "screenshot": "D:\\机械革命使用\\codex新建使用\\项目练习\\doc\\Happy Friday Lite 脑洞\\Friday-3.0.6-preview.1-source\\artifacts\\office-html-friday-history-preview39.png"
+    },
+    {
+      "name": "编辑预览隔离作者脚本，本地图片加载且不暴露 preload",
+      "preview": {
+        "api": "undefined",
+        "image": 1,
+        "process": "undefined",
+        "require": "undefined",
+        "text": "FRIDAY_HTML_RUNTIME_8197"
+      }
+    },
+    {
+      "name": "主助手读取权威源码、拒绝过期 revision、精确版本修改保留未保存状态",
+      "beforeRevision": 0,
+      "afterRevision": 1,
+      "taskId": "6b24a72c-5912-4497-89fb-c3f6e55eb7be"
+    },
+    {
+      "name": "切换可见源码模式并聚焦 CodeMirror",
+      "sourceFocus": {
+        "focused": true,
+        "width": 810.0499877929688,
+        "height": 661.6000366210938
+      }
+    },
+    {
+      "name": "未保存编辑可回读，真实保存持久化且脏状态清除",
+      "beforeSha256": "d0af25670b1216bcd7c4a67f046cb1b641879da2fc7cb119a04583b60dd446db",
+      "afterSha256": "4a6674c31404d97d6fd21010f6ec061569a7bb92338f288cb5bfb7db836423b4",
+      "saved": {
+        "success": true,
+        "saved": true,
+        "viewId": "html-1",
+        "type": "html",
+        "stage": "complete",
+        "saveMs": 682,
+        "saveDurableMs": 682
+      }
+    },
+    {
+      "name": "HTML 单文件图片内联、PDF 可解析、DOCX 原生文字回读",
+      "exports": [
+        {
+          "format": "html",
+          "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-runtime-4nI7vG\\runtime-export.html",
+          "bytes": 485,
+          "sha256": "6dccd01a4bc221537c857a599a958824c3d77c02737d9e316a47d3bef794f87c"
+        },
+        {
+          "format": "pdf",
+          "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-runtime-4nI7vG\\runtime-export.pdf",
+          "bytes": 19021,
+          "sha256": "b24b66818cb644581a2474abe2ca697bde50ef65e64dfeaeeb0e14bd2ed0a8eb"
+        },
+        {
+          "format": "docx",
+          "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-runtime-4nI7vG\\runtime-export.docx",
+          "bytes": 10151,
+          "sha256": "106718317642dd5508a1c231d4531e0a0409837d1e3a7adb45c246c9550765de"
+        }
+      ],
+      "sourceUnchanged": true
+    },
+    {
+      "name": "取消关闭保留标签；放弃关闭不保存源文件",
+      "sourceHashUnchanged": true
+    },
+    {
+      "name": "新建 HTML 真实落盘",
+      "filePath": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\friday-html-runtime-4nI7vG\\happyOffice\\HTML runtime new.html",
+      "sha256": "c9cc3dc15bf3ba38082625a3717b7c4cd2367237fc45903f0c942d1bdc71e52c"
+    },
+    {
+      "name": "HTML 后仍可加载原 PDF 引擎",
+      "viewId": "pdf-5",
+      "loadedEditors": [
+        "html",
+        "pdf",
+        "docs"
+      ]
+    }
+  ],
+  "limitations": [
+    "真实 renderer/preload 与宿主的基础接入、预览和导出探针；不覆盖完整 AI、搜索/图片服务、可视编辑信任边界、复杂导出保真、真实主窗口或安装验收。",
+    "输入使用真实 CodeMirror 接受的键盘/文本事件；保存和导出对话框选择由测试驱动。"
+  ]
+}

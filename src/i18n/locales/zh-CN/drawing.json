@@ -72,7 +72,8 @@
     "export": "导出",
     "exportPng": "导出 PNG",
     "exportSvg": "导出 SVG",
-    "exportJson": "导出 JSON"
+    "exportJson": "导出 JSON",
+    "exportFailed": "导出绘图失败，请重试"
   },
   "props": {
     "title": "样式",

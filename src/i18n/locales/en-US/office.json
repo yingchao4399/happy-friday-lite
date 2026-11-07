@@ -1,5 +1,10 @@
 {
   "htmlEditPreviewNotice": "Edit static source; use Present for scripts and interaction",
+  "htmlHistory": {
+    "failed": "Conversation history could not be updated. Current messages were kept. Retry to continue.",
+    "retry": "Retry",
+    "loading": "Loading conversation history…"
+  },
   "services": {
     "sharedCredentials": "A provider's key and API URL are shared across image generation, image analysis and video analysis. Enter them once.",
     "localSearch": "Local file search",

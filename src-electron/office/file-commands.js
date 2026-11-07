@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import { app, dialog, ipcMain, nativeTheme, shell } from 'electron'
+import { defaultSavePath } from '../default-save-dir.js'
 import { exportDocument, documentExportFormats } from './export-document.js'
 import { exportSelectionText } from './export-selection.js'
 
@@ -23,7 +24,7 @@ export function registerOfficeFileCommands({ findEntry, snapshot, openDocument, 
       if (typeof request?.text !== 'string' || !request.text.trim() || request.text.length > 4 * 1024 * 1024) return failure('OFFICE_SELECTION_INVALID')
       const name = path.basename(entry.filePath || 'document').replace(/\.[^.]+$/, '')
       const selected = await dialog.showSaveDialog(mainWindow(), {
-        defaultPath: path.join(entry.filePath ? path.dirname(entry.filePath) : app.getPath('documents'), `${name}-selection.txt`),
+        defaultPath: entry.filePath ? path.join(path.dirname(entry.filePath), `${name}-selection.txt`) : defaultSavePath(`${name}-selection.txt`),
         filters: [{ name: 'TXT', extensions: ['txt'] }],
       })
       if (selected.canceled || !selected.filePath) return { ok: false, cancelled: true, error: null, warnings: [], affectedResources: [], undo: null }
@@ -56,7 +57,7 @@ export function registerOfficeFileCommands({ findEntry, snapshot, openDocument, 
       const format = request.format
       const name = path.basename(entry.filePath || 'document').replace(/\.[^.]+$/, '')
       const selected = await dialog.showSaveDialog(mainWindow(), {
-        defaultPath: path.join(entry.filePath ? path.dirname(entry.filePath) : app.getPath('documents'), `${name}.${format}`),
+        defaultPath: entry.filePath ? path.join(path.dirname(entry.filePath), `${name}.${format}`) : defaultSavePath(`${name}.${format}`),
         filters: [{ name: format.toUpperCase(), extensions: [format.split('.').at(-1)] }],
       })
       if (selected.canceled || !selected.filePath) return { ok: false, cancelled: true, error: null, warnings: [], affectedResources: [], undo: null }

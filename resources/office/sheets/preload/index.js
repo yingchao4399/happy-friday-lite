@@ -441,6 +441,7 @@ const desktopApi = {
   async aiGskLogin() {
     await electron.ipcRenderer.invoke(IPC_CHANNELS.aiGskLogin);
   },
+  aiOpenModelSettings: () => electron.ipcRenderer.invoke("ai:open-model-settings"),
   async webSearch(query, maxResults) {
     if (typeof query !== "string" || !query.trim() || query.length > 512) {
       throw new Error("Invalid search query.");

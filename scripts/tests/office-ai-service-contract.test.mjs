@@ -79,6 +79,17 @@ test('settings and login status do not invent availability or expose secrets', (
   })
 })
 
+test('托管模型快照保留传输合同身份，不把登录状态当模型凭据', () => {
+  const value = normalizeAiSettingsSnapshot({ hostMode: 'friday-managed', streamProtocolVersion: '1.1', provider: 'deepseek', configured: true, apiKey: 'private-model-key' })
+  assert.equal(value.hostMode, 'friday-managed')
+  assert.equal(value.streamProtocolVersion, '1.1')
+  assert.equal(value.provider, 'deepseek')
+  assert.equal(JSON.stringify(value).includes('private-model-key'), false)
+  const status = normalizeGskStatus({ loggedIn: false, reason: 'friday-managed-provider' })
+  assert.equal(status.loggedIn, false)
+  assert.equal(status.reason, 'friday-managed-provider')
+})
+
 test('generic service envelopes and placeholder guard are explicit', () => {
   assert.deepEqual(createServiceResult({ data: { ok: 1 }, requestId: 'r' }), {
     contractVersion: 'friday.office-ai.v1', ok: true, data: { ok: 1 }, requestId: 'r',

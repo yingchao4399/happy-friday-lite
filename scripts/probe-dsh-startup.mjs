@@ -5,6 +5,7 @@ import path from 'node:path'
 import { setDataDir } from '../src-electron/config.js'
 import * as db from '../src-electron/db.js'
 import { removePathNoFollowSync } from '../src-electron/fs-safe.js'
+import * as harness from '../src-electron/harness/index.js'
 
 const originalConfig = process.argv.find(arg => arg.startsWith('--config='))?.slice(9) || path.join(process.env.APPDATA || '', 'happy-friday-lite', 'config.json')
 const isolated = fs.mkdtempSync(path.join(os.tmpdir(), 'friday-dsh-startup-'))
@@ -15,7 +16,6 @@ async function main() {
   let window
   let stopHarnessSidecar = async () => {}
   try {
-    const harness = await import('../src-electron/harness/index.js')
     const { registerHarnessCommands, startHarnessSidecar } = harness
     stopHarnessSidecar = harness.stopHarnessSidecar
     const config = JSON.parse(fs.readFileSync(originalConfig, 'utf8'))

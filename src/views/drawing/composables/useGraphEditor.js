@@ -544,8 +544,8 @@ export async function captureDrawingSvg(graph) {
   }
 }
 
-export function exportDrawingSVG(graph, filename) {
-  graph.exportSVG(filename, {
+export function exportDrawingSVG(graph) {
+  return graph.toSVGAsync({
     viewBox: getDrawingExportViewBox(graph),
     preserveDimensions: true,
     copyStyles: true,
